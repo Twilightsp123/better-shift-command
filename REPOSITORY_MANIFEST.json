@@ -1,0 +1,9 @@
+{
+  "product": "Better Shift Command",
+  "version": "1.0.0",
+  "controller": "P2B-HF5 / 0.2.5",
+  "bridge": "0.5.0-attack-native-token",
+  "status": "runtime-validated baseline",
+  "files": 103,
+  "authoritative_start": "docs/00_CURRENT_STATUS.md"
+}
