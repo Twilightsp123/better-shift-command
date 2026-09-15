@@ -60,7 +60,7 @@ int main(){lua_State L;CK(luaopen_wh3_native_bridge(&L)==1);auto module=L.stack.
  };
  int pass=0,fail=0;auto test=[&](const char* label,auto fn){try{fn();++pass;std::cout<<"PASS "<<label<<"\n";}catch(const std::exception& e){++fail;std::cout<<"FAIL "<<label<<": "<<e.what()<<"\n";}};
  test("actual Lua export creates full method table",[&]{CK(module->fields.size()==14);for(auto& x:module->fields)CK(x.second.tag==6&&x.second.fn);});
- test("version differs from installed baseline",[&]{auto r=call("version");CK(r.size()==1&&r[0].text=="0.5.0-attack-native-token");});
+ test("version differs from installed baseline",[&]{auto r=call("version");CK(r.size()==1&&r[0].text=="0.5.1-per-kind-calibration");});
  test("float32 ABI number return values",[&]{auto r=call("number_abi_probe");CK(r.size()==2&&r[0].tag==3&&r[0].number==16777215.0f&&r[1].number==1.5f);});
  test("full u32 and float boundary IDs stay strings",[&]{auto r=call("exact_id_probe");CK(r[0].tag==4&&r[0].text=="4294967295"&&r[1].text=="16777217");});
  test("compiled core is not claimed connected",[&]{auto t=call("capabilities")[0].table;CK(t->fields.at("identity_core_compiled").boolean);for(auto key:{"verified_issue","exact_source","native_identity_adapter_connected","observer_hooks_installed"})CK(!t->fields.at(key).boolean);});

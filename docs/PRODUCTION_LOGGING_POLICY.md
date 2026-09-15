@@ -1,47 +1,35 @@
-# Production Logging Policy
+# Production Logging Policy — v1.0.1
 
 ## Decision
 
-The research build's high-frequency telemetry is **not suitable as the default Workshop build**. It was required to prove geometry, engagement timing, physical separation and cancellation, but it adds repeated string formatting and log I/O during battle.
+Production uses `DEBUG_TELEMETRY=false`. High-frequency success telemetry is not the Workshop default.
 
-## Production default
+## Production retains
 
-`release/production/queue_probe.lua` sets:
+- startup/version and Bridge ABI/version success;
+- native component WRITE + byte verification when an embedded DLL actually changes/must be materialized;
+- Controller fatal failure and Bridge gate/native errors;
+- refusal/degradation warnings needed to diagnose incompatible builds/CA updates;
+- session-end diagnostics.
 
-```lua
-local DEBUG_TELEMETRY = false
-```
+## Production suppresses (debug-only)
 
-Production retains low-frequency operational events such as:
+- normal `NATIVE_EMBED_KEEP`;
+- per-order `DISPATCH_MOVE` / `DISPATCH_ATTACK`;
+- per-order `OWN_MOVE_ACK` / `OWN_ATTACK_ACK`;
+- `PLAN_ACTIVATED` / ordinary `GEN_CANCEL` success flow;
+- `ATTACK_HOLD_BEGIN/SUSPEND/DONE` success flow;
+- heartbeat, Journal ORDER/action capture, transition/post-Attack samples, physical exit observations;
+- `OWN_MOVE_CANONICALIZED` geometry diagnostic unless debug telemetry is enabled.
 
-- startup/version/Bridge status;
-- Controller failure and Bridge gate fault;
-- verified command dispatch and native ACK;
-- generation cancellation;
-- Attack hold begin/suspend/done;
-- invalid target/API failure;
-- long-approach warning at low frequency;
-- session end.
+## Error boundary
 
-Production suppresses or avoids creating high-frequency diagnostics including:
+`OWN_MOVE_PAYLOAD_MISMATCH` was removed as a release-fatal rule because exact XYZ equality is not the proven identity authority after CA rebuilds a native Move. Non-finite accepted coordinates still produce `OWN_MOVE_PAYLOAD_INVALID` and fail closed.
 
-- heartbeat;
-- every Journal ORDER/action capture;
-- every engagement interval `ATTACK_TARGET_OBSERVED`;
-- every Attack transition wait sample;
-- 250ms post-Attack samples;
-- 1s physical exit observations;
-- cold-idle diagnostic chatter;
-- test-only pass/readiness markers.
+## Debug procedure
 
-Where possible the release derivative also skips the position/target-speed calculations that existed solely to format those diagnostics.
+For a user report, create/use a debug build with `DEBUG_TELEMETRY=true`, reproduce once, collect the log, and return to production logging afterward.
 
-## Debug build
+## Evidence integrity
 
-`release/debug/` has the same derived Controller with `DEBUG_TELEMETRY=true`. Use it only to reproduce a defect, then return to Production.
-
-## Baseline integrity
-
-The exact runtime-validated HF5 source/pack are stored unchanged under `runtime_validated/`. Production logging is a release derivative and must not rewrite the evidence baseline.
-
-Before public release the production derivative needs one battle smoke test because any code derivative, even a telemetry-only one, deserves a final game load/behavior check.
+Historical HF5 debug evidence and v1.0.1 release validation are preserved as separate milestones. Do not rewrite old evidence to match new production logging behavior.

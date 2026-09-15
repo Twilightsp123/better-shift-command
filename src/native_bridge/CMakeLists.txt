@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(wh3_bridge_host VERSION 0.5.0 LANGUAGES CXX)
+project(wh3_bridge_host VERSION 0.5.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

@@ -32,7 +32,7 @@ Error BridgeHost::end(Id e){std::lock_guard<std::recursive_mutex> l(mutex_);
  auto r=gate_.end_battle(e);if(r==Error::Ok){recording_=armed_=false;tracker_.clear();readers_.clear();pending_.reset();}return r;}
 bool BridgeHost::adapter_ready()const noexcept{return recording_&&adapter_connected_&&move_seen_&&attack_seen_&&!tracker_.faulted()&&errors_.load()==0;}
 bool BridgeHost::handler_calibration_ready()const noexcept{return recording_&&adapter_connected_&&handler_move_seen_&&handler_attack_seen_&&errors_.load()==0;}
-bool BridgeHost::experimental_calibration_ready()const noexcept{return allow_unvalidated_issue_&&recording_&&adapter_connected_&&handler_seen_>0&&accepted_move_seen_&&accepted_attack_seen_&&errors_.load()==0&&gate_.fault()==Error::Ok;}
+bool BridgeHost::experimental_calibration_ready()const noexcept{return allow_unvalidated_issue_&&recording_&&adapter_connected_&&handler_seen_>0&&(accepted_move_seen_||accepted_attack_seen_)&&errors_.load()==0&&gate_.fault()==Error::Ok;}
 bool BridgeHost::issue_ready()const noexcept{return allow_unvalidated_issue_?experimental_calibration_ready():adapter_ready();}
 HostStatus BridgeHost::status()const{std::lock_guard<std::recursive_mutex> l(mutex_);HostStatus s;
  s.epoch=epoch_;s.recording=recording_;s.capture_errors=errors_.load();s.gate_fault=gate_.fault();
@@ -144,7 +144,7 @@ std::uint32_t BridgeHost::order(Kind k,void* u,std::uint32_t a,void* payload,std
  }
  original();
  if(n.accepted){if(k==Kind::Move)accepted_move_seen_=true;else if(k==Kind::Attack)accepted_attack_seen_=true;
-  if(experimental_calibration_ready()&&!armed_)adapter_error_="ACCEPTED_CALIBRATION_READY_EXPERIMENTAL_ONLY";}
+  if(experimental_calibration_ready()&&!armed_)adapter_error_="ACCEPTED_KIND_CALIBRATION_READY_EXPERIMENTAL_ONLY";}
  try{
   if(!o.recipient.lifetime){Id uid=0;if(!get(f.root,0x3ea0,&uid,4)){disarm("EXTERNAL_UID_UNREADABLE");return result;}o.recipient=track(uid,f.root);o.kind=k;o.queued=q!=0;}
   auto e=complete?gate_.observe_external(o,n):gate_.observe_external_partial(o,n);
@@ -166,9 +166,14 @@ const char* BridgeHost::arm(bool ack){std::lock_guard<std::recursive_mutex> l(mu
  if(!ack){armed_=false;gate_.set_issue_enabled(false);return nullptr;}
  if(!allow_unvalidated_issue_){if(!adapter_ready())return "ADAPTER_NOT_READY";return "NATIVE_RELEASE_NOT_APPROVED";}
  if(!experimental_calibration_ready())return "EXPERIMENTAL_CALIBRATION_NOT_READY";
- if(gate_.set_issue_enabled(true)!=Error::Ok)return "GATE_FAULT";armed_=true;adapter_error_="ARMED_EXPERIMENTAL_ACCEPTED_CALIBRATION";return nullptr;}
+ if(gate_.set_issue_enabled(true)!=Error::Ok)return "GATE_FAULT";armed_=true;adapter_error_="ARMED_EXPERIMENTAL_PER_KIND_CALIBRATION";return nullptr;}
 IssueResult BridgeHost::begin_issue(Kind k,bool q,Id uid,Id rev,void* L){std::lock_guard<std::recursive_mutex> l(mutex_);
- if(!armed_||!issue_ready())return {0,"ADAPTER_NOT_READY"};if(control_.active||pending_)return {0,"ISSUE_ALREADY_PENDING"};
+ if(!armed_||!issue_ready())return {0,"ADAPTER_NOT_READY"};
+ if(allow_unvalidated_issue_){
+  if(k==Kind::Move&&!accepted_move_seen_)return {0,"MOVE_CALIBRATION_NOT_READY"};
+  if(k==Kind::Attack&&!accepted_attack_seen_)return {0,"ATTACK_CALIBRATION_NOT_READY"};
+ }
+ if(control_.active||pending_)return {0,"ISSUE_ALREADY_PENDING"};
  auto it=units_.find(uid);if(it==units_.end())return {0,"UNIT_NOT_OBSERVED"};auto s=gate_.snapshot(it->second.first);
  if(!s||s.value.revision!=rev)return {0,"REJECTED_STALE"};auto issue=gate_.make_issue(k,q,{s.value});if(!issue)return {0,name(issue.error)};
  control_={};control_.active=true;control_.thread=std::this_thread::get_id();control_.lua_state=L;control_.issue=issue.value;
@@ -310,7 +315,7 @@ void BridgeHost::packet_handler(Kind k,void* reader,void* context){
     // proof and is compiled out of release-approved builds.
     packet=pending_;++handler_token_bindings_;last_path_stage_=k==Kind::Move?"MOVE_HANDLER_PENDING_TOKEN":"ATTACK_HANDLER_PENDING_TOKEN";
    } else {++handler_missed_;last_path_stage_="HANDLER_EXACT_MISS";}
-   if(allow_unvalidated_issue_&&experimental_calibration_ready()&&!armed_)adapter_error_="ACCEPTED_CALIBRATION_READY_EXPERIMENTAL_ONLY";
+   if(allow_unvalidated_issue_&&experimental_calibration_ready()&&!armed_)adapter_error_="ACCEPTED_KIND_CALIBRATION_READY_EXPERIMENTAL_ONLY";
   }
  }
  HandlerScope scope{this,handler_current_,k,packet};handler_current_=&scope;

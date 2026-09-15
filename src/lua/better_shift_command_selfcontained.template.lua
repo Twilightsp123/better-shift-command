@@ -406,8 +406,8 @@ local function ingest(r,now)
                     " actual_x="..string.format("%.6f",r.dest_x).." actual_y="..string.format("%.6f",r.dest_y).." actual_z="..string.format("%.6f",r.dest_z)..
                     " dx="..string.format("%.6f",dx).." dy="..string.format("%.6f",dy).." dz="..string.format("%.6f",dz).." distance="..string.format("%.6f",delta))
             end
-            -- The native accepted command is authoritative after strong issue/source/revision identity closes.
-            -- CA may canonicalize the destination when rebuilding a nonqueued Move from a queued waypoint.
+            -- Strong issue/source/revision identity is authoritative. CA is allowed to canonicalize
+            -- the rebuilt nonqueued Move destination, so continue from the accepted native value.
             q.x,q.y,q.z=r.dest_x,r.dest_y,r.dest_z
         end
         st.revision=r.unit_revision; st.idx=p.idx; st.origin=p.origin; st.owned=true
@@ -959,6 +959,67 @@ local function start()
     for _,st in pairs(S.states) do observe_cold_idle(st,now) end
     dlog("INPUT_READY run="..RUN_ID.." route=SHIFT_MOVE_CHAIN_ATTACK_SHIFT_MOVE_CONTINUOUS_APPEND")
 end
+-- Steam Workshop self-contained native payload bootstrap.
+-- This changes deployment only. Controller state-machine behavior below is unchanged.
+local EMBEDDED_NATIVE = {
+    {
+        disk_path = ".\\minhook.x64.dll",
+        virtual_path = "/script/better_shift_command/bin/minhook_Windows_NT-x64.lua",
+        size = 115712,
+        sha256 = "e9c9fa622f5220b4dd5162b817b9295c53a7978a7bd0b656eac0d29a1106e8ea"
+    },
+    {
+        disk_path = ".\\wh3_native_bridge.dll",
+        virtual_path = "/script/better_shift_command/bin/bridge_Windows_NT-x64.lua",
+        size = @@BRIDGE_SIZE@@,
+        sha256 = "@@BRIDGE_SHA256@@"
+    }
+}
+local function native_read_all(path)
+    local f=io.open(path,"rb")
+    if not f then return nil end
+    local d=f:read("*a")
+    f:close()
+    return d
+end
+local function native_write_all(path,data)
+    local f,err=io.open(path,"wb")
+    if not f then return nil,err end
+    local ok,werr=pcall(function() f:write(data) end)
+    f:close()
+    if not ok then return nil,werr end
+    return true
+end
+local function native_payload(spec)
+    if type(loadfile)~="function" then error("EMBED_LOADFILE_UNAVAILABLE") end
+    local chunk,err=loadfile(spec.virtual_path)
+    if type(chunk)~="function" then error("EMBED_PAYLOAD_OPEN "..clean(err or spec.virtual_path)) end
+    local ok,data=pcall(chunk)
+    if not ok or type(data)~="string" then error("EMBED_PAYLOAD_DECODE "..clean(data)) end
+    if #data~=spec.size then error("EMBED_PAYLOAD_SIZE "..spec.disk_path.." got="..tostring(#data).." expected="..tostring(spec.size)) end
+    return data
+end
+local function native_ensure_one(spec)
+    local payload=native_payload(spec)
+    local existing=native_read_all(spec.disk_path)
+    if existing==payload then
+        dlog("NATIVE_EMBED_KEEP file="..spec.disk_path.." size="..tostring(#payload).." sha256="..spec.sha256)
+        return true
+    end
+    log("NATIVE_EMBED_WRITE file="..spec.disk_path.." size="..tostring(#payload).." sha256="..spec.sha256)
+    local ok,err=native_write_all(spec.disk_path,payload)
+    if not ok then error("EMBED_WRITE "..spec.disk_path.." "..clean(err)) end
+    local verify=native_read_all(spec.disk_path)
+    if verify~=payload then error("EMBED_VERIFY_EXACT_BYTES "..spec.disk_path) end
+    log("NATIVE_EMBED_OK file="..spec.disk_path.." exact_bytes=true sha256="..spec.sha256)
+    return true
+end
+local function ensure_embedded_native()
+    if type(io)~="table" or type(io.open)~="function" then error("EMBED_IO_UNAVAILABLE") end
+    -- MinHook must be materialized before Bridge because Bridge resolves it dynamically.
+    for i=1,#EMBEDDED_NATIVE do native_ensure_one(EMBEDDED_NATIVE[i]) end
+end
+
 local function boot()
     if TEST_PROFILE~="JOINT" and TEST_PROFILE~="ROUTE_ONLY" then error("INVALID_TEST_PROFILE") end
     if CONTROLLER_PHASE~="P1E" and CONTROLLER_PHASE~="P2B" then error("INVALID_CONTROLLER_PHASE") end
@@ -968,6 +1029,7 @@ local function boot()
     if not ok or not b then error("BATTLE_MANAGER_UNAVAILABLE") end
     bmgr=b; dlog("BATTLE_MANAGER_OK")
     if type(package)~="table" or type(package.loadlib)~="function" then error("LOADLIB_UNAVAILABLE") end
+    ensure_embedded_native()
     local lok,loader,le=pcall(package.loadlib,".\\wh3_native_bridge.dll","luaopen_wh3_native_bridge")
     if not lok or type(loader)~="function" then error("DLL_LOAD "..clean(le or loader)) end
     local bok,module,be=pcall(loader)

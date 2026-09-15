@@ -4,3 +4,4 @@ build/
 *.obj
 *.ilk
 .DS_Store
+tools/release_v1.0.1/output/

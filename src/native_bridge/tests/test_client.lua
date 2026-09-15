@@ -33,7 +33,7 @@ local function fixture(opts)
     function b:get_current_phase_name() if opts.phase_error then error('INJECT_PHASE_ERROR') end;return f.current end
     f.b=b
     local bridge={}
-    function bridge.version() if opts.version_error then error('VERSION_THROW') end;return opts.version or '0.5.0-attack-native-token' end
+    function bridge.version() if opts.version_error then error('VERSION_THROW') end;return opts.version or '0.5.1-per-kind-calibration' end
     function bridge.number_abi_probe() return opts.bad_number and 0 or 16777215,1.5 end
     function bridge.exact_id_probe() if opts.numeric_ids then return 4294967295,16777217 end;return '4294967295','16777217' end
     function bridge.capabilities()

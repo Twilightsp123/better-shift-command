@@ -80,7 +80,20 @@ int main(){int pass=0,fail=0;auto test=[&](const char* name,auto fn){try{fn();++
  test("two exact physical path witnesses arm only after explicit acknowledgement",[]{Fixture f;f.publish_external(Kind::Move);f.consume();CK(!f.host.status().physical_path_witnesses_ready);f.publish_external(Kind::Attack);f.consume(true);CK(f.host.status().physical_path_witnesses_ready&&!f.host.status().verified_issue);CK(f.host.arm(true)==nullptr);});
  test("default production policy cannot be armed by path samples alone",[]{Fixture f(false);f.publish_external(Kind::Move);f.consume();f.publish_external(Kind::Attack);f.consume();CK(std::string(f.host.arm(true))=="NATIVE_RELEASE_NOT_APPROVED");CK(!f.host.status().verified_issue&&!f.host.status().exact_source);});
  test("experimental accepted calibration arms with both accepted kinds plus any handler",[]{Fixture f;f.calibrate_runtime_shape();auto st=f.host.status();CK(st.experimental_issue_armed&&st.experimental_calibration_ready&&!st.physical_path_witnesses_ready&&!st.handler_calibration_ready&&st.handler_move_seen==2&&st.handler_attack_seen==0);});
- test("accepted Move alone cannot arm experimental gate",[]{Fixture f;f.detached_handler(Kind::Move);auto st=f.host.status();CK(st.accepted_move_seen&&!st.accepted_attack_seen&&!st.experimental_calibration_ready);CK(std::string(f.host.arm(true))=="EXPERIMENTAL_CALIBRATION_NOT_READY");});
+ test("accepted Move alone arms Move but not Attack",[]{
+  Fixture f;f.detached_handler(Kind::Move);auto st=f.host.status();
+  CK(st.accepted_move_seen&&!st.accepted_attack_seen&&st.experimental_calibration_ready);CK(f.host.arm(true)==nullptr);
+  auto snap=f.host.unit_snapshot(1002);CK(snap);
+  auto a=f.host.begin_issue(Kind::Attack,false,1002,snap.value.revision,L);CK(!a&&std::string(a.error)=="ATTACK_CALIBRATION_NOT_READY");
+  CK(f.issue(Kind::Move));
+ });
+ test("accepted Attack alone arms Attack but not Move",[]{
+  Fixture f;f.detached_handler(Kind::Attack);auto st=f.host.status();
+  CK(!st.accepted_move_seen&&st.accepted_attack_seen&&st.experimental_calibration_ready);CK(f.host.arm(true)==nullptr);
+  auto snap=f.host.unit_snapshot(1002);CK(snap);
+  auto m=f.host.begin_issue(Kind::Move,false,1002,snap.value.revision,L);CK(!m&&std::string(m.error)=="MOVE_CALIBRATION_NOT_READY");
+  CK(f.issue(Kind::Attack));
+ });
  test("accepted Move and Attack without any handler cannot arm",[]{Fixture f;f.direct_external(Kind::Move);f.direct_external(Kind::Attack);auto st=f.host.status();CK(st.accepted_move_seen&&st.accepted_attack_seen&&st.handler_seen==0&&!st.experimental_calibration_ready);CK(std::string(f.host.arm(true))=="EXPERIMENTAL_CALIBRATION_NOT_READY");});
  test("callback-scope publish succeeds experimentally without Lua binding hook",[]{Fixture f;f.calibrate_runtime_shape();auto i=f.issue_publish_only();CK(i);auto st=f.host.status();CK(st.last_issue_bindings==0&&st.last_issue_published==1&&st.last_issue_depth==0);f.consume(false,false,false,false,true);auto e=f.events().events.back();CK(e.source==Source::OurController&&e.script_issue_id==i.id);});
  test("callback-scope still rejects a second native publish",[]{Fixture f;f.calibrate_runtime_shape();current=Kind::Move;queued=false;descriptor();set(B+0x5000,Id(0));auto s=f.host.unit_snapshot(1002);CK(s);auto b=f.host.begin_issue(Kind::Move,false,1002,s.value.revision,L);CK(b);CK(f.host.publish(Kind::Move,nullptr,reinterpret_cast<void*>(C))!=0);CK(f.host.publish(Kind::Move,nullptr,reinterpret_cast<void*>(C))==0);auto fin=f.host.finish_issue(true);CK(!fin&&std::string(fin.error)=="PUBLISH_METADATA_MISMATCH");});

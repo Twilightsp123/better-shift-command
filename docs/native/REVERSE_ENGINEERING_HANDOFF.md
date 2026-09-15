@@ -143,3 +143,12 @@ v0.5.0 has real-game evidence sufficient for this Controller, but its global fla
 3. Keep the HF5 shadow timeline/generation rules.
 4. If CA updates the executable, relocate the documented native roles using `ADDRESS_RELOCATION_PLAYBOOK.md` and re-run the narrow Bridge gate.
 5. Only reopen broad reverse engineering when a specific frozen contract is contradicted.
+---
+
+## 2026-09-15 release-layer update (v1.0.1)
+
+The reverse-engineered hook/address contract remains the v0.5.0-era guarded contract. v0.5.1 did **not** redo the native address map. It changes issue calibration policy only: MOVE and ATTACK require their own natural accepted-kind evidence instead of forcing both kinds before every scripted issue.
+
+Controller 0.2.6 also stops using 0.05 m exact destination equality as a second source/provenance authority after Bridge issue/source/revision identity has already matched. CA's accepted finite native Move destination is treated as canonical for tracking.
+
+For deployment/build details see `../deployment/STEAM_SELF_CONTAINED.md` and `../../tools/release_v1.0.1/`.

@@ -28,3 +28,6 @@
 ## History
 - `history/FAILED_APPROACHES.md`
 - `history/VERSION_HISTORY.md`
+
+- `deployment/STEAM_SELF_CONTAINED.md` — v1.0.1 embedded native deployment/update model.
+- `validation/V1.0.1_RUNTIME_VALIDATION.md` — v1.0.1 release-fix real-game validation.

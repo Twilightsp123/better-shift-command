@@ -4,7 +4,7 @@ import hashlib, json, os, re, shutil, struct, tempfile, zipfile
 from pathlib import Path
 from binary_utils import PE, FormatError, file_hash, pack, unpack, require_exports
 ROOT=Path(__file__).resolve().parents[1]
-VERSION='0.5.0-attack-native-token'
+VERSION='0.5.1-per-kind-calibration'
 BASELINE_HASHES={
  'wh3_native_bridge.dll':'685e460901602e29806acf986add1c3b44bae45f4f5ec668f32f6882ed2f18a4',
  'minhook.x64.dll':'e9c9fa622f5220b4dd5162b817b9295c53a7978a7bd0b656eac0d29a1106e8ea',

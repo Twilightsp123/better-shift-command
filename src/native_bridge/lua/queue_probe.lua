@@ -104,7 +104,7 @@ for _, name in ipairs({"version", "number_abi_probe", "exact_id_probe", "capabil
 end
 
 local ok, version = pcall(bridge.version)
-if not ok or version ~= "0.5.0-attack-native-token" then
+if not ok or version ~= "0.5.1-per-kind-calibration" then
     log("FAIL VERSION " .. clean(version)); return
 end
 local number_ok, a, c = pcall(bridge.number_abi_probe)

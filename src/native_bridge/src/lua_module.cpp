@@ -26,7 +26,7 @@ static Result<Id> read_id(lua_State* L,int i){
     if(A.type(L,i)!=4)return {{},Error::Invalid};std::size_t n=0;const char* s=A.tolstring(L,i,&n);
     if(!s||n>10)return {{},Error::Invalid};return parse_id(std::string(s,n));
 }
-static int version(lua_State* L){str(L,"0.5.0-attack-native-token");return 1;}
+static int version(lua_State* L){str(L,"0.5.1-per-kind-calibration");return 1;}
 static int capabilities(lua_State* L){auto s=host().status();A.createtable(L,0,18);
     fld(L,"host_lua_number","float32");num(L,"host_lua_number_bytes",4);
     bit(L,"observer_hooks_installed",platform_hooks_installed());
@@ -42,7 +42,7 @@ static int capabilities(lua_State* L){auto s=host().status();A.createtable(L,0,1
 static int numbers(lua_State* L){A.pushnumber(L,16777215.0f);A.pushnumber(L,1.5f);return 2;}
 static int ids(lua_State* L){str(L,"4294967295");str(L,"16777217");return 2;}
 static int status(lua_State* L){auto s=host().status();A.createtable(L,0,8);
-    fld(L,"version","0.5.0-attack-native-token");fld(L,"epoch",format_id(s.epoch));bit(L,"recording",s.recording);
+    fld(L,"version","0.5.1-per-kind-calibration");fld(L,"epoch",format_id(s.epoch));bit(L,"recording",s.recording);
     fld(L,"capture_errors",std::to_string(s.capture_errors));fld(L,"gate_fault",name(s.gate_fault));
     fld(L,"native_error",platform_last_error());fld(L,"adapter_error",s.adapter_error);
     bit(L,"move_path_observed",s.move_path_observed);bit(L,"attack_path_observed",s.attack_path_observed);

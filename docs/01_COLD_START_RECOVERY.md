@@ -1,120 +1,114 @@
-# Cold-Start Recovery — Return to Real-Game Testing Without Re-Reversing
+# Cold-Start Recovery — v1.0.1
 
-Purpose: somebody who has not touched the project for months should be able to resume battle testing from this document alone.
+Purpose: resume real-game testing after months away without repeating reverse engineering.
 
-## A. Identify the authoritative artifacts
-
-Use:
+## A. Authoritative components
 
 ```text
-Controller: P2B-HF5 / 0.2.5
-queue_probe.lua SHA256:
-94b503ba1d64b9d97b9c667d1639dacdfd93342db35658474db4583230782d15
-
-zzz_queue_probe.pack SHA256:
-3d393fc37172b86aa6fc208f7df6ade89ecb308c55a347c2ad38aa4e93c434dd
-
-Bridge: 0.5.0-attack-native-token
-Bridge runtime archive:
-WH3_Native_Bridge_v0_5_0_Runtime_Validated_Archive.zip
+Controller: 0.2.6 (P2B-HF5 derivative)
+Bridge:     0.5.1-per-kind-calibration
+Steam:      self-contained Windows x64 PFH5
+Builder:    tools/release_v1.0.1/BUILD_RELEASE_V1.0.1.ps1
 ```
 
-Do not start from v6.6, v7.1.0, P1C, P1D or intermediate P2A/HF3/HF4 sources unless reproducing history.
+Keep the original HF5/v1.0.0 validation files as historical evidence; do not replace them with v1.0.1 release traces.
 
 ## B. First decision: did CA change the executable contract?
 
-Run the Bridge's existing EXE/byte-guard preflight against the installed `Warhammer3.exe`.
+Run the Bridge's existing EXE/byte-guard preflight against installed `Warhammer3.exe`.
 
-- **All 16 guards match:** do not reverse engineer anything. Use the frozen DLL/Bridge path and go to section C.
-- **Any guard fails:** stop before game injection/command issue. Follow `ADDRESS_RELOCATION_PLAYBOOK.md`.
+- **All 16 guards match:** do not reverse engineer. Use current Bridge source/build path.
+- **Any guard fails:** stop before unsafe issue and follow `native/ADDRESS_RELOCATION_PLAYBOOK.md`.
 
-The historical validated executable SHA256 was:
+A different whole-file executable hash alone does not prove every guarded entry changed.
+
+## C. Build contract
+
+Build v1.0.1 using VS2019/v142, or VS2022 with the v142 toolset. The release script intentionally refuses v143-only builds because TESTFIX A introduced a runtime `MH_CreateHook` failure while TESTFIX B on v142 restored success.
+
+Do not change compiler family and native hook logic in the same recovery step.
+
+## D. Minimal battle smoke tests
+
+### Case 0 — pure Move first, no Attack calibration
+
+Fresh battle. Do **not** attack first.
 
 ```text
-b7315fa718fd84e2e018e2c4df06600e9df0076156b474f148d9d558c939aa55
+Shift P1 -> Shift P2 -> Shift P3 -> several more Move points
 ```
 
-A different whole-file hash does not by itself prove every address changed; the guarded native entry points are the operational criterion. Never bypass a mismatched guard just to make the DLL load.
-
-## C. Minimal battle smoke test
-
-Use one ground melee unit and one valid enemy target. Run at 1x for diagnosis.
-
-### Case 1 — Move-first full chain
+Expected in debug telemetry:
 
 ```text
-Shift P1
-→ Shift P2
-→ Shift Attack T
-→ Shift pN
+BRIDGE_ARMED kind=MOVE ... accepted_move=true accepted_attack=false
+DISPATCH_MOVE
+OWN_MOVE_ACK
 ```
 
-Expected behavior:
+This is the v1.0.1-specific regression test.
 
-- Move handoffs occur before full stop where geometry allows;
+### Case 1 — long Move route
+
+Draw 10-20 points including sharp turns.
+
+Expected:
+
+- repeated Move dispatch/ACK continues;
+- CA destination canonicalization may produce `OWN_MOVE_CANONICALIZED` in debug mode;
+- no `CONTROLLER_FAIL reason=OWN_MOVE_PAYLOAD_MISMATCH`.
+
+### Case 2 — Move -> Attack -> Move
+
+```text
+Shift P1 -> Shift P2 -> Shift Attack T -> Shift pN
+```
+
+Expected:
+
 - Attack is not skipped;
-- eligible melee with T accumulates ~3000 model ms;
-- Controller issues one pN Move;
-- pN native command receives matching ACK;
-- unit begins separating from T.
+- eligible melee with T accumulates about 3000 model ms;
+- one pN Move is issued after hold completion.
 
-### Case 2 — Attack-first
+### Case 3 — Attack-first
 
 ```text
-ordinary right-click Attack T
-→ Shift pN
+ordinary Attack T -> Shift pN
 ```
 
 Expected:
 
-- native player Attack is **adopted, not reissued**;
+- player Attack is adopted, not reissued;
 - engagement history starts immediately;
-- after eligible hold, one pN Move is dispatched.
+- pN is dispatched after eligible hold.
 
-### Case 3 — player override safety
+### Case 4 — player override
 
-During `ATTACK_APPROACH` or `ATTACK_HOLD`, issue an ordinary non-Shift RMB to D.
+During Attack approach/hold or Controller movement, issue an ordinary non-Shift replacement order.
 
-Expected:
+Expected: old generation dies and never revives.
 
-- old generation cancels immediately;
-- no later Lua dispatch from that generation;
-- old pN never revives.
+## E. Self-contained deployment troubleshooting
 
-## D. Debugging mode
-
-Production build suppresses high-frequency telemetry. If any case fails, replace only the active pack with `release/debug/zzz_queue_probe.pack` and reproduce once.
-
-Useful debug markers include:
+At first battle after a new embedded Bridge version:
 
 ```text
-ORDER
-ACTION_CAPTURE
-PLAN_APPENDED
-ATTACK_TARGET_OBSERVED
-ATTACK_TRANSITION_WAIT
-ATTACK_POST_SAMPLE
-P2_EXIT_OBSERVED
-HEARTBEAT
+NATIVE_EMBED_WRITE wh3_native_bridge.dll
+NATIVE_EMBED_OK ... exact_bytes=true
+BRIDGE_OK version=...
 ```
 
-Do not permanently ship Debug mode.
+When files already match, the release build normally suppresses `NATIVE_EMBED_KEEP`; debug builds may show it.
 
-## E. Do not reinterpret these facts
+The native component is materialized and loaded in that same battle. There is no "install on first battle, work on second battle" requirement.
 
-- `ATTACK` is a hard **execution barrier**, not a generation terminator.
-- queued Shift input may arrive in the Journal later than the player's physical input; the shadow timeline therefore remains appendable.
-- engagement time is sampled unit-level `is_in_melee + current_target`, not exact first-hit timing.
-- ordinary RMB is replacement authority; it must kill stale Lua work.
-- accepted Move proves command acceptance, not by itself physical disengagement.
+## F. When to reverse engineer again
 
-## F. When to call for native reverse engineering
+Only when:
 
-Only when one of these occurs:
+1. native byte guard(s) fail after a CA update;
+2. a frozen runtime fact is contradicted by a controlled trace;
+3. required queued/source/recipient/revision facts disappear from the Bridge Journal;
+4. the current native entry/packet contract is no longer recoverable with the documented relocation clues.
 
-1. Bridge byte guard(s) fail after a CA update;
-2. a frozen Bridge runtime fact is contradicted by a controlled trace;
-3. public engagement APIs are visibly contradicted by physical contact and repeatable telemetry;
-4. a required provenance/queued/recipient fact is no longer obtainable from the current Bridge Journal.
-
-Otherwise treat bugs as Controller/release-layer bugs first.
+Otherwise treat defects as Controller, deployment, build-toolchain, or release-layer issues first.

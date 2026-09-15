@@ -1,3 +1,12 @@
+# v0.5.1 — Per-Kind Calibration — 2026-09-15
+
+- Experimental/global readiness now accepts either natural accepted MOVE or ATTACK evidence plus handler/fault guards, rather than requiring both kinds before any issue can arm.
+- `begin_issue(MOVE)` still refuses until `accepted_move_seen`; `begin_issue(ATTACK)` still refuses until `accepted_attack_seen`.
+- Lua module version is `0.5.1-per-kind-calibration`.
+- Real-game TESTFIX B built with the validated v142-family toolchain passed hook installation and MOVE arming with `accepted_attack=false`.
+- TESTFIX A built with a v143 toolchain loaded but failed runtime Hook creation (`OBSERVER_MINHOOK_CREATE_FAILED`); v1.0.1 release tooling therefore freezes v142-family builds rather than silently switching compiler families.
+- No hook RVA/guard-table redesign was introduced by v0.5.1.
+
 # v0.5.0 Runtime Closeout — 2026-09-13
 
 - Real-game one-shot validation passed every required marker: calibration, experimental arm, verified Move ownership, stale revision rejection, player RMB external attribution, verified Attack ownership, and final VALIDATION_PASS.
