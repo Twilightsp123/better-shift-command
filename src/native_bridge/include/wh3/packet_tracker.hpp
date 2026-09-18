@@ -1,6 +1,7 @@
 #pragma once
 #include "wh3/identity_gate.hpp"
 #include <cstdint>
+#include <array>
 #include <memory>
 #include <vector>
 #include <utility>
@@ -19,6 +20,7 @@ struct TrackedPacket {
     Unit unit{};
     std::uintptr_t root=0;
     Id expected_revision=0;
+    std::optional<std::array<float,3>> move_destination;
     bool attack_target_valid=false;
     std::uintptr_t attack_target_root=0;
     Id attack_target_uid=0;

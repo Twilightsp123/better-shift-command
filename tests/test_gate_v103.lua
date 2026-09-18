@@ -1,0 +1,90 @@
+-- FEG3 synthetic unit observations; no inferred WH3 entity contact.
+local G=assert(loadfile(assert(arg[1])))()
+local pass,fail=0,0
+local function T(n,fn)local ok,e=pcall(fn);if ok then pass=pass+1;print('PASS '..n)else fail=fail+1;print('FAIL '..n..' :: '..tostring(e))end end
+local function s(t,d)
+ return {now=t,ax=-d,az=0,tx=0,tz=0,melee=false,target_match=true,target_known=true,target_alive=true,bbox_distance=0}
+end
+local function run(g,a,b,mutate,step)
+ local r;for t=a,b,step or 100 do local z=s(t,10);if mutate then mutate(z,t)end;r=G.update(g,z)end;return r
+end
+T('matched target with melee false requires warmup plus 1500ms geometry dwell',function()
+ local g=G.new(0,40,40);assert(not run(g,0,2000).allow)
+ local r=run(g,2100,2100);assert(r.allow and r.just_opened and r.reason=='GEOMETRY_CONTACT_CONFIRMED' and r.evidence=='GEOMETRY_PROXY')
+end)
+T('nil target after a verified intended match can qualify',function()
+ local g=G.new(0);G.update(g,s(0,10))
+ local r=run(g,100,3000,function(z)z.target_match=false;z.target_known=false end)
+ assert(r.allow and r.evidence=='GEOMETRY_PROXY')
+end)
+T('nil target with no prior intended match cannot invent a contact',function()
+ local g=G.new(0);assert(not run(g,0,20000,function(z)z.target_match=false;z.target_known=false end).allow)
+end)
+T('explicitly different target never qualifies even with overlapping boxes',function()
+ local g=G.new(0);G.update(g,s(0,10))
+ assert(not run(g,100,10000,function(z)z.target_match=false;z.target_known=true end).allow)
+end)
+T('a different target revokes matching evidence for later nil samples',function()
+ local g=G.new(0);G.update(g,s(0,10));local z=s(100,10);z.target_match=false;G.update(g,z)
+ assert(not run(g,200,10000,function(v)v.target_match=false;v.target_known=false end).allow)
+end)
+T('close centers with non-touching boxes never qualify fallback',function()
+ local g=G.new(0);assert(not run(g,0,10000,function(z)z.bbox_distance=4 end).allow)
+end)
+T('overlapping boxes with a distant main position never qualify fallback',function()
+ local g=G.new(0);assert(not run(g,0,10000,function(z)z.ax=-80 end).allow)
+end)
+T('unknown bbox cannot be treated as zero',function()
+ local g=G.new(0);assert(not run(g,0,10000,function(z)z.bbox_distance=nil end).allow)
+end)
+T('negative and NaN bbox are rejected',function()
+ for _,d in ipairs({-1,0/0})do local g=G.new(0);assert(not run(g,0,10000,function(z)z.bbox_distance=d end).allow)end
+end)
+T('dead or unknown alive state never qualifies fallback',function()
+ for _,kind in ipairs({'dead','unknown'})do local g=G.new(0);assert(not run(g,0,10000,function(z)if kind=='dead' then z.target_alive=false else z.target_alive=nil end end).allow)end
+end)
+T('brief near passage never meets contact dwell',function()
+ local g=G.new(0);run(g,0,1000,function(z)z.ax=-50 end)
+ for t=1100,2000,100 do assert(not G.update(g,s(t,10)).allow)end
+ assert(not run(g,2100,6000,function(z)z.ax=-50 end).allow)
+end)
+T('short near-band crossing cannot complete geometry dwell',function()
+ local g=G.new(0)
+ for t=0,2000,100 do local z=s(t,20-t/100);assert(not G.update(g,z).allow)end
+end)
+T('moving actor and target together may qualify without being stationary',function()
+ local g=G.new(0);local r=run(g,0,3000,function(z,t)z.ax=t*0.008;z.tx=z.ax+10 end)
+ assert(r.allow and r.actor_speed>7 and r.relative_speed<0.01)
+end)
+T('sample gaps cannot backfill geometry dwell',function()
+ local g=G.new(0);run(g,0,1400);assert(not G.update(g,s(5000,10)).allow)
+ assert(not run(g,5100,7000).allow);assert(run(g,7100,7100).allow)
+end)
+T('input backlog resets geometry confirmation',function()
+ local g=G.new(0);run(g,0,1800);local z=s(1900,10);z.input_gap=true;assert(not G.update(g,z).allow)
+ assert(not run(g,2000,3900).allow);assert(run(g,4000,4000).allow)
+end)
+T('pause does not count as elapsed contact time',function()
+ local g=G.new(0);run(g,0,1800);local before=g.geometry_ms
+ for i=1,100 do assert(not G.update(g,s(1800,10)).allow)end;assert(g.geometry_ms==before)
+end)
+T('touching box loss suspends open geometry path immediately',function()
+ local g=G.new(0);assert(run(g,0,2500).allow)
+ local z=s(2600,10);z.bbox_distance=3;local r=G.update(g,z);assert(not r.allow and g.opened)
+ assert(not run(g,2700,4000).allow);assert(run(g,4100,4300).allow)
+end)
+T('separation relocks fallback and old credit',function()
+ local g=G.new(0);run(g,0,2500);local reset=false
+ for t=2600,6600,100 do local z=s(t,10+(t-2500)/100);local r=G.update(g,z);reset=reset or r.reset_hold end
+ assert(reset and not g.opened and g.episode==2)
+end)
+T('new Attack creates fresh fallback evidence',function()
+ local g=G.new(0);assert(run(g,0,2500).allow)
+ local h=G.new(2600);assert(not G.update(h,s(2600,10)).allow and h.geometry_ms==0)
+end)
+T('500ms and 1000ms model cadences obey full dwell',function()
+ for _,step in ipairs({500,1000})do local g=G.new(0);local first
+ for t=0,5000,step do local r=G.update(g,s(t,10));if r.just_opened then first=t end end
+ assert(first and first>=2100)end
+end)
+print('ACTUAL_INTERPRETER='.._VERSION);print('TOTAL '..pass..' PASS '..fail..' FAIL');os.exit(fail==0 and 0 or 1)

@@ -1,7 +1,27 @@
+# Local builds / generated output
+build_win/
 build/
-*.log
-*.pdb
+output/
+validation_v120/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+
+# Compiler/linker artifacts
 *.obj
+*.pdb
 *.ilk
-.DS_Store
-tools/release_v1.0.1/output/
+*.exp
+*.lib
+*.exe
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local logs / receipts
+*.log
+script_log_*.txt
+*_receipt*.json

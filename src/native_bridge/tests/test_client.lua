@@ -33,7 +33,7 @@ local function fixture(opts)
     function b:get_current_phase_name() if opts.phase_error then error('INJECT_PHASE_ERROR') end;return f.current end
     f.b=b
     local bridge={}
-    function bridge.version() if opts.version_error then error('VERSION_THROW') end;return opts.version or '0.5.1-per-kind-calibration' end
+    function bridge.version() if opts.version_error then error('VERSION_THROW') end;return opts.version or '1.0.14-r1-evidence-v2-dual-root' end
     function bridge.number_abi_probe() return opts.bad_number and 0 or 16777215,1.5 end
     function bridge.exact_id_probe() if opts.numeric_ids then return 4294967295,16777217 end;return '4294967295','16777217' end
     function bridge.capabilities()
@@ -43,6 +43,11 @@ local function fixture(opts)
           complete_command_batch=false,observer_hooks_installed=f.installed and not opts.inactive_caps,
           queued_from_native_entry=f.installed and not opts.inactive_caps}
     end
+    function bridge.r1_evidence_capabilities_v2() return {schema=2,game_build_verified=false,execution_identity=false,entity_snapshot=false,combat_groups=false,fresh_engagement=false,build_id='TEST_UNAVAILABLE'} end
+    function bridge.bind_evidence_unit_v2(uid,unit) return true,'900000' end
+    function bridge.read_active_order_identity_v2(uid) return nil,'ORDER_IDENTITY_UNAVAILABLE' end
+    function bridge.read_entity_snapshot_v2(uid,now) return {schema=2,complete=false,probe_reason='TEST_UNAVAILABLE',model_ms=now} end
+    function bridge.read_combat_groups_v2(uid) return {schema=2,complete=false,probe_reason='TEST_UNAVAILABLE'} end
     function bridge.start_observer(ack)
         f.calls.start=f.calls.start+1;eq(ack,true)
         if opts.start_throw then error('START_THROW') end

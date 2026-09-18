@@ -1,1 +1,0 @@
-This distribution includes MinHook (TsudaKageyu/MinHook), licensed under the BSD 2-Clause license. See MINHOOK_LICENSE.txt.

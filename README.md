@@ -1,58 +1,122 @@
-# Better Shift Command
+# Better Shift Command v1.2.0
 
-Smooth queued movement, predictive Move->Attack handoffs, and timed disengagement for Total War: WARHAMMER III.
+Better Shift Command is a Windows x64 battle-control mod for **Total War: WARHAMMER III** that improves Shift-queued movement and Attack→Move transitions without replacing the game's locomotion system.
 
-**Current release baseline:** v1.0.1 / Controller P2B-HF5 derivative 0.2.6 / Native Bridge 0.5.1-per-kind-calibration.
+## What v1.2.0 changes
 
-## Players
+The release consolidates the tested movement work into one production branch:
 
-**Windows x64 only.** The Steam Workshop build is now self-contained: subscribe and enable the mod. On battle load, the `.pack` verifies/materializes the embedded `wh3_native_bridge.dll` and `minhook.x64.dll` next to `Warhammer3.exe`. If an older Bridge is present, the new pack replaces it when the embedded bytes differ, so Workshop updates can carry Native Bridge updates as well.
+- **Steering-aware Move→Move handoff** — intermediate waypoints can hand off before vanilla arrival braking turns every point into a visible stop.
+- **Early predictive cornering** — safe corners may transition earlier while remaining bounded by the current and next route legs.
+- **Soft route debt** — an earlier waypoint obligation can remain tracked in the background when the successor path still crosses its corridor; deviations remain hard-blocked.
+- **Bounded stall escape** — when a unit begins braking just outside an otherwise valid turn corridor, a tightly limited escape prevents the unit from waiting until speed reaches zero.
+- **Attack→Move Exit recovery** — if the Exit MOVE was accepted but the unit is still physically stuck in real enemy contact with little progress, the controller can reassert the same Exit MOVE within a bounded recovery budget.
+- **Sticky melee state is not treated as physical contact** — `melee=true` alone never authorizes Exit reassert.
 
-The GitHub repository remains the technical/source-of-truth archive. Standalone release packages may still be published for manual installation or troubleshooting, but Steam users no longer need a separate Native Bridge download for the self-contained build.
+## Release logging / performance
 
-## What v1.0.1 fixed
+`DEBUG_TELEMETRY` defaults to **false** in v1.2.0.
 
-- **Per-command-kind calibration:** MOVE can arm after a natural accepted MOVE without first requiring ATTACK calibration. ATTACK still requires its own accepted ATTACK evidence before scripted ATTACK issue.
-- **Native Move canonicalization tolerance:** after strong issue/source/unit/revision identity closes, a small CA rewrite of the accepted destination no longer kills the whole Controller with `OWN_MOVE_PAYLOAD_MISMATCH`; the accepted native destination becomes authoritative. Non-finite payloads still fail closed.
-- **Validated v142-family build requirement:** the release builder refuses a silent v143-only toolchain. A v143 TESTFIX A build loaded but failed `MH_CreateHook`; TESTFIX B built with the original validated v142 family restored real-game Hook installation.
-- **Self-contained Steam deployment:** Bridge + validated MinHook are embedded in the PFH5 pack and materialized only when missing or byte-different.
-- **Production logging cleanup:** per-order dispatch/ACK, plan, cancel and hold-success traces are debug-only; fatal/refusal/deployment-update diagnostics remain.
+High-frequency ORDER/ACTION/FEG/contact/scheduler/heartbeat diagnostics are gated **before string formatting**, so the production build avoids both file-output cost and most debug-string construction cost. Pure test-only generation observers are also disabled when telemetry is off.
 
-## Developers / future maintainers
+The following remain enabled because they are runtime logic, not logging:
 
-- **Returning after months?** Read [`docs/00_CURRENT_STATUS.md`](docs/00_CURRENT_STATUS.md), then [`docs/01_COLD_START_RECOVERY.md`](docs/01_COLD_START_RECOVERY.md).
-- **CA update broke native guards?** Read [`docs/native/ADDRESS_RELOCATION_PLAYBOOK.md`](docs/native/ADDRESS_RELOCATION_PLAYBOOK.md) and [`docs/native/HOOK_AND_GUARD_TABLE.md`](docs/native/HOOK_AND_GUARD_TABLE.md).
-- **Need the v1.0.1 Steam deployment model?** Read [`docs/deployment/STEAM_SELF_CONTAINED.md`](docs/deployment/STEAM_SELF_CONTAINED.md).
-- **Want to understand what was reverse engineered and why public Lua was insufficient?** Read [`docs/native/REVERSE_ENGINEERING_HANDOFF.md`](docs/native/REVERSE_ENGINEERING_HANDOFF.md).
-- **Do not repeat disproved approaches.** Read [`docs/history/FAILED_APPROACHES.md`](docs/history/FAILED_APPROACHES.md).
+- Native order observation and command identity tracking;
+- ContactPair tracking and evidence sampling;
+- the controller's 100 ms decision poll;
+- route-safety / waypoint-debt checks;
+- steering, stall escape, FEG and Exit recovery.
 
-## Architecture
+Sparse startup and true fault/recovery logs are retained so real failures can still be diagnosed.
 
-CA public Lua -> reverse-engineered native semantics -> guarded Native Bridge -> appendable HF5-derived Lua Controller.
+## Version identity
 
-The Native Bridge exists because the public battle Lua surface does not reliably expose queued-vs-replace semantics, exact revision/self provenance, or the durable mixed command chronology required after scripted takeover. Public Lua is still used for engagement state where it is appropriate.
+- Controller: `1.2.0`
+- Run ID: `V1_2_0`
+- Build marker: `BETTER_SHIFT_COMMAND_V1.2.0`
+- Native Bridge ABI: `1.0.15-r4-evidence-v3-validated-userdata-root`
+- Platform: Windows x64
 
-The v1.0.1 Controller does **not** replace WH3 pathfinding or locomotion. It chooses when to hand the next Move/Attack back to CA's native systems.
+The Native ABI intentionally remains on the validated R4 value because the v1.2.0 release cleanup changed controller identity/logging only; it did not change Native Bridge behavior.
 
-## Repository map
+## Repository layout
 
 ```text
-src/lua/                   production Controller source + self-contained template
-src/native_bridge/         Bridge C++ source + tests/tools
-scripts/docs               (none; documentation is under docs/)
-docs/                      authoritative recovery / RE / controller / deployment contracts
-release/v1.0.0/            historical v1.0.0 Workshop pack
-release_assets_for_upload/ historical v1.0.0 GitHub/Nexus upload assets
-tools/release_v1.0.1/      reproducible v1.0.1 self-contained Steam builder
-third_party/               third-party license notices
+baseline/            Frozen MinHook runtime, license and self-contained bootstrap
+controller_tools/    Deterministic pack helpers and analysis/install test helpers
+maintenance_tools/   v1.2.0 release check, build, verify and regression runner
+source/               Authoritative Lua controller sources
+src/                  Synchronized controller copy + Native Bridge source/tests
+steering_tests/       v1.2.0 mutation gate
+tests/               Release regression suites
+ tools/               Windows PE/toolchain verifier + read-only PE inventory helper
+ docs/                One consolidated development/maintenance history
 ```
 
-## Safety / compatibility
+Historical SC1–SC5 build instructions, intermediate diffs, one-off package-check files and reverse/research notes are intentionally **not** kept as loose public files. Their durable conclusions are consolidated in `docs/DEVELOPMENT_HISTORY.md`.
 
-Windows x64 only. Native hooks are byte-guarded. On an incompatible CA update, the Bridge is designed to refuse unsafe activation rather than blindly use stale addresses.
+## Build v1.2.0 on Windows
 
-The self-contained loader compares exact bytes before writing native components. Normal battle loads keep identical files; an updated Workshop pack can replace an older embedded Bridge when the payload changes.
+Requirements already expected by this project:
 
-## License
+- Visual Studio 2019 Build Tools
+- MSVC v142 x64
+- MASM / `ml64`
+- CMake
+- Python 3
 
-Project license is intentionally not selected in this archive. Choose it before granting general reuse rights. MinHook retains its own BSD license under `third_party/`.
+No extra runtime DLL is manually installed into the game directory; the final `.pack` embeds the Bridge and frozen MinHook payload.
+
+```bat
+python maintenance_tools\check_release_v120.py
+cmake -S src\native_bridge -B build_win -G "Visual Studio 16 2019" -A x64 -T v142
+cmake --build build_win --config Release
+ctest --test-dir build_win -C Release --output-on-failure
+python tools\verify_pe_toolchain.py build_win\Release\wh3_native_bridge.dll
+python maintenance_tools\build_release_v120.py build_win\Release\wh3_native_bridge.dll output\better_shift_command_v1.2.0.pack
+python maintenance_tools\verify_release_v120.py output\better_shift_command_v1.2.0.pack build_win\Release\wh3_native_bridge.dll
+```
+
+The Native build must assemble/link `contact_pair_hook_x64.asm` and pass the Windows CTest suite before the pack is considered a release build.
+
+## Run the release regression gate
+
+From the repository root:
+
+```bat
+python maintenance_tools\run_checks_v120.py
+```
+
+The frozen v1.2.0 source gate is expected to cover controller identity/quiet logging, FEG gates, Evidence V3 handoff/recovery/contact behavior, second-charge behavior, route/block regressions, tooling, PE inventory and the SC5-derived mutation suite.
+
+## Install the built pack
+
+After all build and verification steps pass, copy only:
+
+```text
+output\better_shift_command_v1.2.0.pack
+```
+
+to the WH3 data directory as:
+
+```text
+zzz_better_shift_command_steam.pack
+```
+
+Do **not** copy `wh3_native_bridge.dll` or `minhook.x64.dll` separately into the game directory; the pack is self-contained.
+
+## v1.2.0 release notes
+
+v1.2.0 is the production consolidation of the tested SC1–SC5 movement line. The release itself adds no new gameplay algorithm beyond the validated SC5 behavior. Its final cleanup:
+
+- renames controller/release identity to v1.2.0;
+- disables high-frequency telemetry by default;
+- short-circuits debug log construction when telemetry is disabled;
+- disables pure test-only generation observation in release mode;
+- retains the validated Native Bridge / ContactPair / MASM implementation and ABI.
+
+For the reasoning behind the architecture and the development path from Evidence V3 through SC1–SC5, see [`docs/DEVELOPMENT_HISTORY.md`](docs/DEVELOPMENT_HISTORY.md).
+
+## Third-party component
+
+The self-contained release uses a frozen x64 MinHook runtime. Its license is preserved in `baseline/MINHOOK_LICENSE.txt` and embedded into the generated pack.

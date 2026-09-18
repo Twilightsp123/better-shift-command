@@ -44,6 +44,13 @@ struct PacketKey {
     }
     bool operator<(const PacketKey& b) const noexcept;
 };
+// Diagnostic metadata only. Never used in identity matching or queued decisions.
+// Captured at native order entry, NOT at mouse-button message generation.
+struct InputSnapshot {
+    bool sampled=false,foreground=false,shift=false,left_shift=false,right_shift=false,ctrl=false,alt=false;
+    std::uint64_t tick_ms=0;
+    std::uint32_t thread_id=0;
+};
 struct Order {
     Unit recipient;
     Kind kind=Kind::Move;
@@ -53,6 +60,7 @@ struct Order {
     std::optional<std::uint64_t> target_root; // opaque; never a float/Lua number
     std::optional<std::uint8_t> raw70,raw71,raw72,raw78;
     std::optional<Id> halt_flags;
+    InputSnapshot input{};
 };
 struct NativeOutcome {
     bool accepted=false;
@@ -164,9 +172,11 @@ public:
     // suppress or issue anything. A reentrant notification latches a fault;
     // an already-called native operation is then INDETERMINATE, not rolled back.
     Result<Event> observe_external(const Order&, NativeOutcome);
-    // Already-executed native input whose optional payload could not be read.
-    // Records only observed fields, advances accepted revision, and DISARMS own
-    // issuing. Not a substitute for a verified native adapter.
+    // Already-executed EXTERNAL native input whose optional payload could not
+    // be read. Records observed fields and advances accepted revision without
+    // latching a permanent gate fault. BridgeHost separately reports the lossy
+    // capture so the Lua consumer yields/resynchronizes before issuing again.
+    // Never use this for owned/controller commands.
     Result<Event> observe_external_partial(const Order&, NativeOutcome);
     // Preferred external entry wrapper: includes original mutation in the same
     // serialization region. Never rejects native input; even inactive/faulted

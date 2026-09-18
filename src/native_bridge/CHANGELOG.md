@@ -1,11 +1,33 @@
-# v0.5.1 — Per-Kind Calibration — 2026-09-15
+# v1.0.14-r1-evidence-v2
 
-- Experimental/global readiness now accepts either natural accepted MOVE or ATTACK evidence plus handler/fault guards, rather than requiring both kinds before any issue can arm.
-- `begin_issue(MOVE)` still refuses until `accepted_move_seen`; `begin_issue(ATTACK)` still refuses until `accepted_attack_seen`.
-- Lua module version is `0.5.1-per-kind-calibration`.
-- Real-game TESTFIX B built with the validated v142-family toolchain passed hook installation and MOVE arming with `accepted_attack=false`.
-- TESTFIX A built with a v143 toolchain loaded but failed runtime Hook creation (`OBSERVER_MINHOOK_CREATE_FAILED`); v1.0.1 release tooling therefore freezes v142-family builds rather than silently switching compiler families.
-- No hook RVA/guard-table redesign was introduced by v0.5.1.
+- Controller-side second-charge semantic hotfix release; Native dual-root ABI retained with version lock bump.
+
+# v1.0.13-r1-evidence-v2
+
+- Evidence V2 exposes raw order/entity/combat facts; Lua owns R1 semantic verdicts.
+- Entity liveness uses the engine Entity::is_alive virtual method.
+- MovementCollisionController provenance is Entity+0x18; +0x74 local state and +0x8B0 movement state are sampled separately.
+- Post-exit Attacks use fresh Entity lock episodes tied to exact native order identity and intended CombatGroup target.
+- Ordinary first Attacks keep the mature FEG path and do not globally depend on Entity V2 availability.
+
+# v1.0.11-r1-evidence
+
+- Version lock for Better Shift Command v1.0.11; native hook mechanics unchanged from v1.0.7.
+
+# v1.0.7-blocks
+
+- Version lock for Better Shift Command v1.0.7.
+- Keeps all v1.0.5 command/identity semantics.
+- Native observer startup now reports exact MinHook hook/index/RVA/status instead of a generic `MINHOOK_CREATE_FAILED`.
+- One bounded 50ms retry is allowed only for transient allocation/protection or null-trampoline anomalies; structural hook failures remain fail-closed.
+
+# v1.0.3-contact-input
+
+- Read-only modifier-key metadata captured at Windows native order entry.
+- Foreground validity, left/right Shift, Ctrl/Alt and exact uint64 sample timestamp exported to Lua.
+- Queued flags, identity matching, native trampoline signatures and existing hook guards unchanged.
+- Portable tests cover metadata transport/export and preservation of queue/source semantics.
+- Windows v142 build and game runtime remain separate required checks.
 
 # v0.5.0 Runtime Closeout — 2026-09-13
 
@@ -111,3 +133,23 @@
 - Integrated Native Host + IdentityGate + PacketTracker and 14 guarded Windows hooks.
 - Added controlled Lua callback issue path, packet lifecycle tracking, Journal metadata, Windows PE checks, transactional candidate install/rollback, and baseline regression suite.
 - Production issuing remains compile-time locked by default.
+
+
+## 0.5.4-pending-recipient-guard / 2026-09-16
+
+- Treat handler-level pending fallback as speculative until exact native recipient root and queued bit match.
+- An unrelated same-kind native handler no longer causes `OWNED_RECIPIENT_NOT_VERIFIED` and global disarm.
+- Exact physical-lineage owned packets remain fail-closed on recipient/payload mismatch.
+- Hook RVAs, guards, command field offsets, and single-pending provenance model are unchanged.
+
+## 0.5.3-recoverable-partial / 2026-09-16
+- Splits Bridge observer/capture anomalies into recoverable telemetry vs fatal safety faults.
+- `IdentityGate::observe_external_partial()` now advances accepted external revision and publishes observed fields without latching a permanent gate fault solely because optional external payload was unavailable.
+- Recoverable anomalies preserve issuing only when IdentityGate/PacketTracker are healthy and no owned command is in flight.
+- Exposes `fatal_errors`, `last_recoverable_error`, `last_recoverable_uid`, and `last_fatal_error` to Lua.
+- Owned provenance/recipient/kind/outcome failures, native exceptions, gate faults, and tracker faults remain fail-closed.
+- This change does not modify native hook RVAs, byte guards, command offsets, or the v142 build requirement.
+
+## 1.0.3-contact-input / RC6 candidate
+
+Four pending recipients maximum, one per UID; callback production remains same-thread and non-reentrant. Fallback selection occurs at native entry by recipient/root/epoch/kind/queued; Attack binds target, Move binds caller-provided finite xyz. Physical lineage takes precedence. Added native pipeline and float32 C API cases. Hook guards/IdentityGate core unchanged. Windows and real-game approval remain unperformed here.

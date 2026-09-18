@@ -29,7 +29,7 @@ std::uint32_t execute(void* u,std::uint32_t a,void* p,std::uint8_t q){
   void* s=h->allocate(c,mode==4?std::uint32_t(q)^1:q);CK(s==reinterpret_cast<void*>(root+0x288));
   if(mode==2)h->allocate(c,q);
   auto vt=base+(kind==Kind::Move?0x37b31c8:0x37b2540);if(mode==3)++vt;
-  wr(0x288+0x18,std::uint64_t(vt));wr(0x288+0x20,seq);
+  wr(0x288+0x18,std::uint64_t(vt));wr(0x288+0x20,seq);wr(0x2f88,std::uint32_t(1));wr(0x2f8c,std::uint32_t(0));
   if(kind==Kind::Move){wr(0x288+0x58,mode==7?std::numeric_limits<float>::quiet_NaN():12.5f);wr(0x288+0x5c,2.0f);wr(0x288+0x60,-5.0f);}
   else{wr(0x288+0x58,std::uint64_t(mode==6?0xdeadbeef:target));unit[0x288+0x70]=1;unit[0x288+0x71]=2;unit[0x288+0x72]=3;unit[0x288+0x78]=4;}
  }
@@ -53,10 +53,12 @@ int main(){int passed=0,failed=0;auto test=[&](const char* n,auto f){try{f();++p
  test("append/replace preserved without source invention",[]{Fixture f;f.send(true);seq=62;f.send(false);auto p=f.page();CK(p.events.size()==2&&*p.events[0].order.queued&&!*p.events[1].order.queued);CK(p.events[1].revision==2&&p.events[0].source==Source::Unknown);});
  test("attack pointer uid raw flags decoded",[]{Fixture f;kind=Kind::Attack;seq=1450;f.send(true);auto e=f.page().events.at(0);CK(e.order.target_uid==1008&&e.order.target_root==target&&e.order.raw78==4&&e.order.raw71==2);});
  test("native failure preserves return and has no phantom seq",[]{Fixture f;ret=0;CK(f.send()==0);auto e=f.page().events.at(0);CK(e.status==Status::NativeRejected&&!e.engine_seq&&e.revision==0);});
- test("accepted no slot explicit, advances revision",[]{Fixture f;mode=1;f.send();auto e=f.page().events.at(0);CK(e.status==Status::AcceptedNoSlot&&!e.engine_seq&&!e.order.x&&e.revision==1);CK(f.host.status().capture_errors==1);});
+ test("accepted no slot explicit, advances revision",[]{Fixture f;mode=1;f.send();auto e=f.page().events.at(0);CK(e.status==Status::AcceptedNoSlot&&!e.engine_seq&&!e.order.x&&e.revision==1);CK(f.host.status().capture_errors==1&&f.host.status().fatal_errors==0&&f.host.status().gate_fault==Error::Ok);});
  for(int bad:{2,3,4,5})test(("invalid slot evidence mode "+std::to_string(bad)).c_str(),[bad]{Fixture f;mode=bad;f.send();auto e=f.page().events.at(0);CK(!e.engine_seq&&e.status==Status::AcceptedNoSlot&&calls==1);});
- test("unreadable target cannot be guessed",[]{Fixture f;mode=6;kind=Kind::Attack;f.send();auto e=f.page().events.at(0);CK(!e.order.target_uid&&!e.order.target_root&&e.engine_seq);CK(f.host.status().capture_errors==1);});
+ test("unreadable target cannot be guessed",[]{Fixture f;mode=6;kind=Kind::Attack;f.send();auto e=f.page().events.at(0);CK(!e.order.target_uid&&!e.order.target_root&&e.engine_seq);CK(f.host.status().capture_errors==1&&f.host.status().fatal_errors==0&&f.host.status().gate_fault==Error::Ok);});
  test("NaN geometry not published as coordinates",[]{Fixture f;mode=7;f.send();auto e=f.page().events.at(0);CK(!e.order.x&&e.engine_seq);});
+ test("R1 active order identity resolves exact accepted journal receipt",[]{Fixture f;seq=77;f.send();auto e=f.host.execution_identity(1002);CK(e&&e.value.complete&&e.value.known);CK(e.value.active_engine_seq==77&&e.value.accepted_serial==1&&e.value.kind==Kind::Move);CK(e.value.dest_x&&*e.value.dest_x==12.5f&&e.value.dest_z&&*e.value.dest_z==-5.0f);});
+ test("R1 duplicate target attacks stay distinct by native order id",[]{Fixture f;kind=Kind::Attack;seq=90;f.send(true);seq=91;f.send(true);auto e=f.host.execution_identity(1002);CK(e&&e.value.known&&e.value.active_engine_seq==91&&e.value.accepted_serial==2&&e.value.target_uid&&*e.value.target_uid==1008);});
  test("Halt no sequence or queued bit fabricated",[]{Fixture f;f.host.halt(reinterpret_cast<void*>(root),0xa5);auto e=f.page().events.at(0);CK(calls==1&&argument==0xa5&&e.order.kind==Kind::Halt&&!e.engine_seq&&!e.order.queued&&e.revision==1);});
  test("stopped session still forwards native command",[]{Fixture f;CK(f.host.end(f.epoch)==Error::Ok);f.send();CK(calls==1&&f.page().events.empty());});
  test("exception is not retried, allocator scope restored",[]{Fixture f;throwing=true;try{f.send();CK(false);}catch(const std::runtime_error&){}CK(calls==1);throwing=false;f.send();CK(calls==2&&f.page().events.size()==1);});
@@ -66,8 +68,29 @@ int main(){int passed=0,failed=0;auto test=[&](const char* n,auto f){try{f();++p
  test("actual host own API rejects without calling native",[]{Fixture f;CK(!f.host.begin_issue(Kind::Move,false,1002,0,nullptr));CK(calls==0&&!f.host.status().verified_issue);});
  test("AL zero with nonzero high EAX is still native rejection",[]{Fixture f;ret=0x12345600;f.send();CK(f.page().events.at(0).status==Status::NativeRejected);});
  test("second battle does not reuse epoch",[]{Fixture f;f.send();f.host.end(f.epoch);auto e=f.host.begin("second");CK(e&&e.value!=f.epoch);CK(!f.host.read(f.epoch,0,64));});
- test("reentrant command cannot lend inner slot to parent",[]{Fixture f;mode=9;f.send();auto p=f.page();CK(calls==2&&p.events.size()==2&&p.events[0].engine_seq&&!p.events[1].engine_seq);CK(f.host.status().capture_errors==1);});
+ test("reentrant command cannot lend inner slot to parent",[]{Fixture f;mode=9;f.send();auto p=f.page();CK(calls==2&&p.events.size()==2&&p.events[0].engine_seq&&!p.events[1].engine_seq);CK(f.host.status().capture_errors>=1&&f.host.status().fatal_errors==0&&f.host.status().gate_fault==Error::Ok);});
  test("trampolines immutable after first native call",[]{Fixture f;f.send();CK(!f.host.set_native_functions({execute,execute,alloc,stop}));});
  test("empty and overlong session rejected",[]{BridgeHost x(memory);CK(!x.begin(""));CK(!x.begin(std::string(65,'x')));});
+ test("v1.0.3 input is captured per order without changing queued false",[]{Fixture f;
+  InputSnapshot input{};input.sampled=true;input.foreground=true;input.shift=true;input.left_shift=true;input.tick_ms=9007199254740993ULL;input.thread_id=77;
+  f.host.order(Kind::Move,reinterpret_cast<void*>(root),17,nullptr,0,input);
+  const auto e=f.page().events.at(0);CK(e.order.input.sampled&&e.order.input.shift&&e.order.input.left_shift);
+  CK(e.order.input.tick_ms==9007199254740993ULL&&e.order.input.thread_id==77);
+  CK(e.order.queued&&!*e.order.queued&&queue==0&&e.source==Source::Unknown&&e.script_issue_id==0);
+ });
+ test("v1.0.3 unavailable input is not fabricated as a sampled key-up",[]{Fixture f;f.send();CK(!f.page().events.at(0).order.input.sampled);});
+ test("v1.0.3 input metadata remains attached to the correct journal event",[]{Fixture f;
+  InputSnapshot down{};down.sampled=true;down.foreground=true;down.shift=true;down.right_shift=true;down.tick_ms=42;
+  auto up=down;up.shift=false;up.right_shift=false;up.tick_ms=51;
+  f.host.order(Kind::Move,reinterpret_cast<void*>(root),0,nullptr,1,down);seq=2;
+  f.host.order(Kind::Move,reinterpret_cast<void*>(root),0,nullptr,0,up);
+  auto p=f.page();CK(p.events.size()==2&&p.events[0].order.input.shift&&!p.events[1].order.input.shift);
+  CK(*p.events[0].order.queued&&!*p.events[1].order.queued&&p.events[0].order.input.tick_ms==42&&p.events[1].order.input.tick_ms==51);
+ });
+ test("v1.0.3 nested orders cannot borrow outer input telemetry",[]{Fixture f;mode=9;
+  InputSnapshot input{};input.sampled=true;input.foreground=true;input.shift=true;
+  f.host.order(Kind::Move,reinterpret_cast<void*>(root),0,nullptr,0,input);
+  const auto p=f.page();CK(p.events.size()==2&&!p.events[0].order.input.sampled&&p.events[1].order.input.shift);
+ });
  std::cout<<"TOTAL "<<passed<<" PASS "<<failed<<" FAIL (synthetic native callbacks, not WH3)\n";return failed?1:0;
 }

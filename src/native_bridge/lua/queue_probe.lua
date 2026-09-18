@@ -1,6 +1,6 @@
 out("[BRIDGE_OBSERVER_V041] ENTER")
 
--- Client for the byte-locked v0.5.0 integrated candidate.
+-- Client for the version-locked v0.6.0 integrated candidate.
 -- Observes by default. NEVER arms or issues a native command automatically.
 -- Exact uint32 values remain decimal STRINGS, including epoch and cursor.
 local TAG = "[BRIDGE_OBSERVER_V041] "
@@ -104,7 +104,7 @@ for _, name in ipairs({"version", "number_abi_probe", "exact_id_probe", "capabil
 end
 
 local ok, version = pcall(bridge.version)
-if not ok or version ~= "0.5.1-per-kind-calibration" then
+if not ok or version ~= "1.0.14-r1-evidence-v2-dual-root" then
     log("FAIL VERSION " .. clean(version)); return
 end
 local number_ok, a, c = pcall(bridge.number_abi_probe)

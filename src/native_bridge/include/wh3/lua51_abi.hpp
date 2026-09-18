@@ -14,6 +14,7 @@ struct Api {
     const char* (*tolstring)(lua_State*,int,std::size_t*)=nullptr;
     Number (*tonumber)(lua_State*,int)=nullptr;
     int (*toboolean)(lua_State*,int)=nullptr;
+    void* (*touserdata)(lua_State*,int)=nullptr;
     void (*pushnil)(lua_State*)=nullptr;
     void (*pushnumber)(lua_State*,Number)=nullptr;
     void (*pushlstring)(lua_State*,const char*,std::size_t)=nullptr;

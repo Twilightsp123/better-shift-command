@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "project": "Better Shift Command",
+  "release": "v1.2.0",
+  "controller_version": "1.2.0",
+  "run_id": "V1_2_0",
+  "build_marker": "BETTER_SHIFT_COMMAND_V1.2.0",
+  "platform": "Windows x64",
+  "native_abi": "1.0.15-r4-evidence-v3-validated-userdata-root",
+  "release_behavior_baseline": "SC5 Exit Reassert",
+  "release_cleanup_behavior_change": false,
+  "debug_telemetry_default": false,
+  "windows_release_toolchain": "VS2019 / MSVC v142 x64 / MASM",
+  "public_tree_policy": "Current source/build/tests plus one consolidated development history; raw intermediate SC/R3/R4 artifacts omitted.",
+  "expected_offline_validation": {
+    "release_jobs": "17/17 PASS",
+    "mutations": "37/37 CAUGHT",
+    "portable_native_ctest": "10/10 PASS"
+  },
+  "clean_tree_validation": {
+    "release_jobs": "17/17 PASS",
+    "mutations": "37/37 CAUGHT",
+    "portable_native_ctest": "10/10 PASS",
+    "validated_on": "2026-09-18"
+  }
+}

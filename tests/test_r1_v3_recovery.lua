@@ -1,0 +1,17 @@
+local R=assert(loadfile(assert(arg[1])))()
+local pass,fail=0,0
+local function T(name,fn)local ok,e=pcall(fn);if ok then pass=pass+1;print("PASS "..name)else fail=fail+1;print("FAIL "..name.." :: "..tostring(e))end end
+T("all recovery paths share one total budget",function()
+ local b=R.new(3,"E4",4,3);assert(R.consume(b,"EXIT_REASSERT",100));assert(R.consume(b,"NATIVE_ROLLBACK",200));local ok,why,left=R.consume(b,"ACK_RECOVERY",300);assert(ok and why=="CONSUMED_LAST" and left==0 and b.used==3)
+ local no,why2=R.consume(b,"EXIT_REASSERT",400);assert(not no and why2=="EXHAUSTED" and b.by_reason.EXIT_REASSERT==1 and b.by_reason.NATIVE_ROLLBACK==1 and b.by_reason.ACK_RECOVERY==1)
+end)
+T("switching recovery reason cannot reset budget",function()
+ local b=R.new(3,"E4",4,2);assert(R.consume(b,"A",10));assert(R.consume(b,"B",20));local ok=R.consume(b,"C",30);assert(not ok and b.used==2)
+end)
+T("zero budget is immediately exhausted",function()local b=R.new(1,"E1",1,0);local ok,why,left=R.consume(b,"ROLLBACK",0);assert(not ok and why=="EXHAUSTED" and left==0)end)
+T("scope identity is generation block and Exit action",function()local b=R.new(3,"E4",4,2);assert(R.matches(b,3,"E4",4));assert(not R.matches(b,4,"E4",4));assert(not R.matches(b,3,"E5",4));assert(not R.matches(b,3,"E4",5))end)
+T("closing budget prevents later recovery",function()local b=R.new(3,"E4",4,3);assert(R.consume(b,"EXIT_REASSERT",100));assert(R.close(b,150,"HANDOFF_COMPLETE"));local ok,why=R.consume(b,"ROLLBACK",200);assert(not ok and why=="CLOSED" and b.used==1)end)
+T("time reversal never consumes budget",function()local b=R.new(3,"E4",4,3);assert(R.consume(b,"A",100));local ok,why=R.consume(b,"B",99);assert(not ok and why=="TIME_REVERSAL" and b.used==1)end)
+T("remaining is monotonic",function()local b=R.new(3,"E4",4,3);assert(R.remaining(b)==3);R.consume(b,"A",1);assert(R.remaining(b)==2);R.consume(b,"A",2);assert(R.remaining(b)==1);R.consume(b,"A",3);assert(R.remaining(b)==0)end)
+print("TOTAL "..pass.." PASS "..fail.." FAIL")
+os.exit(fail==0 and 0 or 1)

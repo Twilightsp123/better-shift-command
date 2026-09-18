@@ -326,7 +326,12 @@ Result<Event> IdentityGate::observe_external(const Order& o,NativeOutcome n) {
 Result<Event> IdentityGate::observe_external_partial(const Order& o,NativeOutcome n) {
     auto& p=*p_; std::lock_guard<std::recursive_mutex> g(p.mu);
     if(!p.active)return {{},Error::Inactive};
-    p.latch(Error::NativeOutcomeInvalid); // Lost optional payload: never enable own issuing.
+    // External native input has already executed. Missing optional payload is an
+    // observer-quality loss, not an IdentityGate invariant failure. Preserve the
+    // accepted revision and publish the partial record so consumers can resync,
+    // but do NOT latch a permanent gate fault. Owned-command paths never call
+    // this function: BridgeHost escalates any partial capture while owned input
+    // is in flight before reaching here.
     auto u=p.unit(o.recipient); if(!u)return {{},Error::Missing};
     if(!valid_outcome(o.kind,n))return {{},Error::NativeOutcomeInvalid};
     auto c=p.next(p.command_counter); if(!c)return {{},Error::CounterExhausted};
