@@ -92,10 +92,13 @@ int main(){lua_State L;CK(luaopen_wh3_native_bridge(&L)==1);auto module=L.stack.
  test("R1 V3 capabilities expose contact-pair model without state74 melee claim",[&]{
   auto r=call("r1_evidence_capabilities_v3");CK(r.size()==1&&r[0].table);auto f=r[0].table->fields;CK(f.at("schema").number==3);CK(!f.at("state74_runtime_melee").boolean);CK(!f.at("game_build_verified").boolean);CK(f.at("evidence_method").text=="R1_RAW_EVIDENCE_V3_CONTACT_PAIR");
  });
- test("R1 V2 readers validate arguments without inventing evidence",[&]{
+ test("R1 V2 readers validate arguments and then fail explicitly retired",[&]{
   auto bad_order=call("read_active_order_identity_v2",{n(1001)});CK(bad_order.size()==2&&bad_order[0].tag==0&&bad_order[1].text=="UNIT_UID_DECIMAL_STRING_REQUIRED");
+  auto retired_order=call("read_active_order_identity_v2",{s("1001")});CK(retired_order.size()==2&&retired_order[0].tag==0&&retired_order[1].text=="V2_RETIRED_USE_V3");
   auto missing_ms=call("read_entity_snapshot_v2",{s("1001")});CK(missing_ms.size()==2&&missing_ms[0].tag==0&&missing_ms[1].text=="MODEL_MS_NUMBER_REQUIRED");
+  auto retired_entity=call("read_entity_snapshot_v2",{s("1001"),n(100)});CK(retired_entity.size()==2&&retired_entity[0].tag==0&&retired_entity[1].text=="V2_RETIRED_USE_V3");
   auto bad_combat=call("read_combat_groups_v2",{n(1001)});CK(bad_combat.size()==2&&bad_combat[0].tag==0&&bad_combat[1].text=="UNIT_UID_DECIMAL_STRING_REQUIRED");
+  auto retired_combat=call("read_combat_groups_v2",{s("1001")});CK(retired_combat.size()==2&&retired_combat[0].tag==0&&retired_combat[1].text=="V2_RETIRED_USE_V3");
   auto bad_contact=call("read_contact_events_v3",{n(0)});CK(bad_contact.size()==2&&bad_contact[0].tag==0&&bad_contact[1].text=="AFTER_SERIAL_DECIMAL_STRING_REQUIRED");
  });
  test("evidence root resolver follows Lua userdata -> CA wrapper -> BattleUnit +8",[&]{

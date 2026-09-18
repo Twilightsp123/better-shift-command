@@ -52,8 +52,11 @@ mutants=[
  ('route_debt_back_to_fixed_wallclock',controller,'local no_progress=now-(debt.last_progress_ms or debt.since or now)','local no_progress=now-(debt.last_progress_ms or debt.since or now)\n            if no_progress>=2000 then debt.stall_remaining=remaining;debt.stall_no_progress_ms=no_progress;return debt end','center_b2'),
  ('ordinary_attack_globally_depends_on_entity_v2',controller,'local eligible=r.allow -- ordinary Attack keeps mature FEG behavior.','local eligible=r.allow and R1.entity(st,now)~=nil -- mutant global dependency','v109'),
  ('permit_stale_entity_observation',controller,'evidence_max_age_ms=500','evidence_max_age_ms=100000000','v109'),
+ ('sc6_reconciliation_forced_back_to_v2',controller,'if v3.execution_identity==true then','if false and v3.execution_identity==true then','sc6'),
+ ('sc6_ignore_execution_sequence',controller,'if e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH" end','if false and e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH" end','sc6'),
+ ('sc6_allow_future_overrun_to_skip_intermediates',controller,'if future_index~=st.idx+1 or future.type~="ATTACK" then','if false and (future_index~=st.idx+1 or future.type~="ATTACK") then','sc6'),
 ]
-suite_map={'center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua','gate':'test_gate.lua','gate_compat':'test_gate_v103.lua','gate_v104':'test_gate_v104.lua'}
+suite_map={'center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua','gate':'test_gate.lua','gate_compat':'test_gate_v103.lua','gate_v104':'test_gate_v104.lua','sc6':'test_exec_identity_v3.lua'}
 for kind in sorted(set(x[4] for x in mutants)):
     args=LUA+[str(ROOT/'tests'/suite_map[kind]),str(ROOT/'source'/('fresh_engagement_gate.lua' if kind.startswith('gate') else 'better_shift_command.lua'))]
     if not kind.startswith('gate'):args.append(str(ROOT/'tests/fixture.lua'))
@@ -64,9 +67,9 @@ for name,src,before,after,kind in mutants:
     with tempfile.TemporaryDirectory() as temp:
         p=Path(temp)/'mutant.lua';p.write_text(src.replace(before,after,1))
         if kind in ('gate','gate_compat','gate_v104'):
-            script={'gate':'test_gate.lua','gate_compat':'test_gate_v103.lua','gate_v104':'test_gate_v104.lua'}[kind];args=LUA+[str(ROOT/'tests'/script),str(p)]
+            script={'gate':'test_gate.lua','gate_compat':'test_gate_v103.lua','gate_v104':'test_gate_v104.lua','sc6':'test_exec_identity_v3.lua'}[kind];args=LUA+[str(ROOT/'tests'/script),str(p)]
         else:
-            script={'center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua'}[kind]
+            script={'center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua','sc6':'test_exec_identity_v3.lua'}[kind]
             args=LUA+[str(ROOT/'tests'/script),str(p),str(ROOT/'tests/fixture.lua')]
         r=subprocess.run(args,capture_output=True,text=True,cwd=ROOT)
         if r.returncode==0:raise SystemExit('MUTANT SURVIVED: '+name)

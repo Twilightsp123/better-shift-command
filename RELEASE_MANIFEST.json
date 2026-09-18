@@ -1,26 +1,35 @@
 {
   "schema": 1,
   "project": "Better Shift Command",
-  "release": "v1.2.0",
-  "controller_version": "1.2.0",
-  "run_id": "V1_2_0",
-  "build_marker": "BETTER_SHIFT_COMMAND_V1.2.0",
+  "release": "v1.2.1",
+  "controller_version": "1.2.1",
+  "run_id": "V1_2_1",
+  "build_marker": "BETTER_SHIFT_COMMAND_V1.2.1",
   "platform": "Windows x64",
   "native_abi": "1.0.15-r4-evidence-v3-validated-userdata-root",
-  "release_behavior_baseline": "SC5 Exit Reassert",
-  "release_cleanup_behavior_change": false,
+  "release_behavior_baseline": "SC6 V3 Execution Identity Reconciliation",
+  "release_behavior_change": true,
   "debug_telemetry_default": false,
   "windows_release_toolchain": "VS2019 / MSVC v142 x64 / MASM",
-  "public_tree_policy": "Current source/build/tests plus one consolidated development history; raw intermediate SC/R3/R4 artifacts omitted.",
+  "public_tree_policy": "Current source/build/tests plus one consolidated development history; temporary RMB differential artifacts omitted.",
   "expected_offline_validation": {
-    "release_jobs": "17/17 PASS",
-    "mutations": "37/37 CAUGHT",
-    "portable_native_ctest": "10/10 PASS"
+    "release_jobs": "19/19 PASS",
+    "mutations": "40/40 CAUGHT",
+    "portable_native_ctest": "10/10 PASS",
+    "asan_ubsan_native_ctest": "10/10 PASS"
+  },
+  "field_validation": {
+    "log": "script_log_180926_2022.txt",
+    "result": "PASS",
+    "key_case": "future ATTACK appended during EXIT_ROUTE_PROTECT while current Native MOVE remained active until route completion",
+    "validated_on": "2026-09-18"
   },
   "clean_tree_validation": {
-    "release_jobs": "17/17 PASS",
-    "mutations": "37/37 CAUGHT",
+    "release_jobs": "19/19 PASS",
+    "mutations": "40/40 CAUGHT",
     "portable_native_ctest": "10/10 PASS",
+    "asan_ubsan_native_ctest": "10/10 PASS",
+    "deterministic_pack_verify": "PASS",
     "validated_on": "2026-09-18"
   }
 }

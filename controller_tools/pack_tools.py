@@ -43,7 +43,7 @@ def parse_pack(data: bytes) -> dict[str, bytes]:
     return out
 
 def encode_payload(label: str,data: bytes) -> bytes:
-    rows=[f'-- Better Shift Command v1.2.0 native payload bytes: {label}',f'-- sha256={sha(data)}',f'-- size={len(data)}','return table.concat({']
+    rows=[f'-- Better Shift Command v1.2.1 native payload bytes: {label}',f'-- sha256={sha(data)}',f'-- size={len(data)}','return table.concat({']
     for start in range(0,len(data),4096):
         rows.append('"'+''.join(f'\\{x:03d}' for x in data[start:start+4096])+'",')
     return ('\n'.join(rows)+ '\n})\n').encode('ascii')
@@ -85,4 +85,4 @@ def selfcontained(root: Path,controller: bytes,bridge: bytes,minhook: bytes) -> 
         (MINHOOK_PATH,encode_payload('minhook.x64.dll',minhook)),
         (r'script\better_shift_command\licenses\MINHOOK_LICENSE.txt',(root/'baseline/MINHOOK_LICENSE.txt').read_bytes()),
         (r'script\better_shift_command\licenses\THIRD_PARTY_NOTICES.txt',
-         b'Better Shift Command v1.2.0. Native Bridge ABI 1.0.15-r4-evidence-v3-validated-userdata-root; frozen MinHook runtime. See MINHOOK_LICENSE.txt.\n')])
+         b'Better Shift Command v1.2.1. Native Bridge ABI 1.0.15-r4-evidence-v3-validated-userdata-root; frozen MinHook runtime. See MINHOOK_LICENSE.txt.\n')])

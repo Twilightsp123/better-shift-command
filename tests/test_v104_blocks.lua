@@ -9,6 +9,12 @@ local function hascmd(f,n,kind,x)
  if x then assert(math.abs(c.draft.x-x)<0.01,'wrong destination')end
  return c
 end
+local function active_order_v3(f,u)
+ local r=f.evidence_record
+ if not r or r.unit_uid~=u then return nil,'NO_ORDER' end
+ return {schema=3,epoch='1',unit_uid=u,unit_lifetime=r.unit_lifetime,complete=true,active=true,known=true,
+  accepted_journal_serial=r.serial,active_engine_seq=r.engine_seq,kind=r.order_type,target_uid=r.target_uid,dest_x=r.dest_x,dest_z=r.dest_z}
+end
 local function attack_root(tail)
  local f=F({width=40,debug_source=true});f:start();f.enemy.x=0;f.enemy.z=0;f.unit.x=-8;f.unit.z=0;f.unit.melee=true;f.unit.target=f.enemy
  f:emit('ATTACK',false,nil,nil,'2001');if tail then f:emit('MOVE',true,-28,0)end;f:tick(100)
@@ -271,7 +277,7 @@ end)
 
 
 T('SC5 stale V3 Exit body evidence falls back to positive contact and reasserts the accepted Move',function()
- local f=F({width=40,debug_source=true,native_evidence_v3=true});f:start();f.enemy.x=0;f.enemy.z=0;f.unit.x=-8;f.unit.z=0;f.unit.melee=true;f.unit.target=f.enemy
+ local f=F({width=40,debug_source=true,native_evidence_v3=true,native_order_evidence_v3=active_order_v3});f:start();f.enemy.x=0;f.enemy.z=0;f.unit.x=-8;f.unit.z=0;f.unit.melee=true;f.unit.target=f.enemy
  function f.unit:unit_distance()return self.box_gap or 0 end;f.unit.box_gap=0
  f:emit('ATTACK',false,nil,nil,'2001');f:emit('MOVE',true,-28,0);f:tick(100)
  run_attack_hold(f,200,6000);assert(f.issued==1);hascmd(f,1,'MOVE',-28)
@@ -279,7 +285,7 @@ T('SC5 stale V3 Exit body evidence falls back to positive contact and reasserts 
  for t=6200,6900,100 do f:tick(t,-8,0)end
  assert(f.issued==1,'SC5 fallback must still wait for the bounded 900ms physical stall window')
  f:tick(7000,-8,0)
- assert(f.issued==2,'stale V3 EntitySnapshot plus positive contact and stalled Exit must reassert once')
+ assert(f.issued==2,'stale V3 EntitySnapshot plus positive contact and exact active Exit Move must reassert once')
  hascmd(f,2,'MOVE',-28)
  assert(f:has('evidence=V3_ENTITY_STALE_CONTACT_FALLBACK') and f:has('v3_reason=ENTITY_STALE'))
  healthy(f)

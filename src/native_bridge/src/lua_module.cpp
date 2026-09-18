@@ -55,6 +55,10 @@ static int evidence_caps(lua_State* L){const bool verified=platform_evidence_bui
  fld(L,"build_id",platform_evidence_build_id());fld(L,"evidence_method","R1_RAW_EVIDENCE_V3_CONTACT_PAIR");
  fld(L,"reason",verified?"OK":"BUILD_NOT_VERIFIED");return 1;}
 static int evidence_caps_v2_retired(lua_State* L){A.createtable(L,0,10);num(L,"schema",2);bit(L,"game_build_verified",false);bit(L,"execution_identity",false);bit(L,"entity_snapshot",false);bit(L,"combat_groups",false);bit(L,"fresh_engagement",false);fld(L,"build_id",platform_evidence_build_id());fld(L,"evidence_method","RETIRED_RE07_STATE74_INVALID");fld(L,"reason","V2_RETIRED_USE_V3");return 1;}
+static int bind_evidence_unit_v2_retired(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");if(A.type(L,2)!=7)return fail(L,"BATTLE_UNIT_USERDATA_REQUIRED");return fail(L,"V2_RETIRED_USE_V3");}
+static int order_identity_read_v2_retired(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");return fail(L,"V2_RETIRED_USE_V3");}
+static int entity_snapshot_read_v2_retired(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");if(A.gettop(L)<2||A.type(L,2)!=3)return fail(L,"MODEL_MS_NUMBER_REQUIRED");return fail(L,"V2_RETIRED_USE_V3");}
+static int combat_snapshot_read_v2_retired(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");return fail(L,"V2_RETIRED_USE_V3");}
 static int order_identity_read(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
  auto r=host().execution_identity(u.value);if(!r)return fail(L,name(r.error));const auto& e=r.value;
  A.createtable(L,0,16);num(L,"schema",3);fld(L,"epoch",format_id(host().status().epoch));fld(L,"unit_uid",format_id(e.unit.uid));
@@ -216,7 +220,7 @@ template<int(*F)(lua_State*)> int boundary(lua_State* L){try{return F(L);}catch(
 int open(lua_State* L){if(!bind())return 0;A.createtable(L,0,28);
 #define REG(k,f) A.pushcclosure(L,boundary<f>,0);A.setfield(L,-2,k)
  REG("r1_evidence_capabilities_v3",evidence_caps);REG("bind_evidence_unit_v3",bind_evidence_unit);REG("read_active_order_identity_v3",order_identity_read);REG("read_entity_snapshot_v3",entity_snapshot_read);REG("read_combat_groups_v3",combat_snapshot_read);REG("read_contact_events_v3",contact_events_read);REG("contact_owner_ready_v3",contact_owner_ready);
- REG("r1_evidence_capabilities_v2",evidence_caps_v2_retired);REG("bind_evidence_unit_v2",bind_evidence_unit);REG("read_active_order_identity_v2",order_identity_read);REG("read_entity_snapshot_v2",entity_snapshot_read);REG("read_combat_groups_v2",combat_snapshot_read);
+ REG("r1_evidence_capabilities_v2",evidence_caps_v2_retired);REG("bind_evidence_unit_v2",bind_evidence_unit_v2_retired);REG("read_active_order_identity_v2",order_identity_read_v2_retired);REG("read_entity_snapshot_v2",entity_snapshot_read_v2_retired);REG("read_combat_groups_v2",combat_snapshot_read_v2_retired);
  REG("version",version);REG("capabilities",capabilities);REG("number_abi_probe",numbers);
  REG("exact_id_probe",ids);REG("get_status",status);REG("start_observer",start);
  REG("begin_battle",begin);REG("end_battle",end);REG("get_battle_epoch",epoch);

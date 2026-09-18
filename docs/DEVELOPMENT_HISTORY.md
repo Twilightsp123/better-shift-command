@@ -1,25 +1,28 @@
 # Better Shift Command — 开发与维护总记录
 
-这份文档是 **v1.2.0 之后的长期工程记录**。它取代过去散落在根目录和 `docs/` 中的 R3/R4、SC1～SC5、诊断、BuildOnly、Package Check、Smoke Test 等阶段文档。
+这份文档是 **v1.2.1 之后的长期工程记录**。它取代过去散落在根目录和 `docs/` 中的 R3/R4、SC1～SC6、诊断、BuildOnly、Package Check、Smoke Test 等阶段文档。
 
 目标不是保存每一次实验输出，而是保存真正需要长期继承的内容：
 
 - 当前架构为什么这样设计；
 - 哪些结论已经被 WH3 实机证据证明；
 - 哪些方案试过并被否定；
-- SC1～SC5 每一刀到底解决了什么；
+- SC1～SC6 每一刀到底解决了什么；
 - 后续维护绝对不能随便破坏哪些不变量。
 
 ---
 
 ## 1. 当前正式基线
 
-- **Release:** Better Shift Command `v1.2.0`
-- **Controller:** `1.2.0`
-- **Run ID:** `V1_2_0`
-- **Build marker:** `BETTER_SHIFT_COMMAND_V1.2.0`
+- **Release:** Better Shift Command `v1.2.1`
+- **Controller:** `1.2.1`
+- **Run ID:** `V1_2_1`
+- **Build marker:** `BETTER_SHIFT_COMMAND_V1.2.1`
 - **Native Bridge ABI:** `1.0.15-r4-evidence-v3-validated-userdata-root`
 - **Platform:** Windows x64
+
+
+v1.2.1 在 v1.2.0 的 SC1～SC5 行为基线上增加 **SC6 V3 Execution Identity Reconciliation**：当 CA Native active order 提前跳到 future canonical action 时，控制器使用 V3 exact execution identity 决定 adopt / rollback，并要求 SC5 physical recovery 只在当前 Exit MOVE 仍是 exact Native active execution 时运行。Native ABI 字符串继续保持 `1.0.15-r4-evidence-v3-validated-userdata-root`；旧 V2 evidence reader 导出仅保留兼容名称并 fail closed。
 
 v1.2.0 的行为基线就是最后验证通过的 **SC5 EXIT REASSERT**。正式版收尾没有再改路线算法、接战算法或 Native 行为，只做了：
 
@@ -412,3 +415,87 @@ v1.2.0 公开树主动删除了：
 这些内容继续散落在 GitHub 只会让“当前正式版本到底该看什么”越来越不清楚。
 
 真正需要长期保留的技术结论已经全部汇总在本文件。若未来确实要追溯某次原始实验，应该通过旧 release archive / Git commit 历史查找，而不是继续把阶段性垃圾堆在正式仓库根目录。
+
+---
+
+## 16. SC6：Exit canonical cursor 与 Native active order 失配
+
+RMB differential 实机复现锁定了一个与 SC5 “MOVE 已 active 但身体尚未脱战”不同的问题。
+
+真实失败链（`uid=1002 gen=8`）：
+
+```text
+Attack 1040
+→ BSC Exit MOVE accepted / cursor=Exit
+→ 玩家继续 Shift 追加 future ATTACK 1040
+→ BSC canonical plan 仍认为 current=Exit MOVE、future=ATTACK
+→ CA Native active order 实际变成 future ATTACK
+→ UI/计划仍保留 Exit 线，但单位继续执行 ATTACK
+→ 手动普通 RMB 的 nonqueued MOVE 才真正替换 Native ATTACK
+```
+
+关键不是“RMB 有神秘 combat-cancel flag”，而是 **Lua canonical execution 与 Native exact active execution 已经分叉**。
+
+源码其实早已有 `reconcile_native_successor()`，设计上也已经定义：Native 如果提前执行 successor，handoff ready 时 adopt，否则 rollback current MOVE。但这层仍通过旧 `R1.evidence` 读取 V2 execution identity；生产运行时 V3 `execution_identity=true`，V2 已明确 retired。因此 reconciliation 无法获得 exact successor identity，只能降级到 `current_target()`，最终报：
+
+```text
+BLOCKED_EXECUTION_IDENTITY
+CURRENT_TARGET_IS_NOT_ACTION_ID
+```
+
+但不会执行本来已经设计好的 rollback。
+
+SC6 修复：
+
+- 新增唯一 authoritative `R1.read_active_execution()`：V3 优先；只有 V3 capability 真不可用时才允许 V2 compatibility fallback；
+- `R1.execution_matches_action()` 使用 exact execution identity：kind、engine sequence、journal receipt、unit lifetime，以及 ATTACK target / MOVE destination；
+- reconciliation 每轮只读取一次 Native active execution；
+- exact current action 匹配成功时保持当前；
+- exact immediate successor ATTACK：handoff ready 才 adopt，否则 rollback current MOVE；
+- exact later future canonical action：绝不跨越中间 action，记录 `NATIVE_FUTURE_OVERRUN` 并 rollback current MOVE；
+- exact noncanonical active order：fail closed，不盲目覆盖；
+- `current_target()` 只保留诊断用途，不再授权 transition / rollback；
+- SC5 physical-disengagement watchdog 只有在 exact current Exit MOVE 已经是 Native active execution 时才运行，避免 execution recovery 与 physical recovery 互相打架。
+
+Native 兼容面也同步硬化：旧 V2 read/bind API 名称继续存在以避免 ABI/API 表面断裂，但有效调用明确返回 `V2_RETIRED_USE_V3`，不再让旧名字静默读取 V3 schema。
+
+### SC6 回归与 mutation
+
+新增 V3 execution regression：
+
+- `V3_ONLY_SUCCESSOR_READY`；
+- `V3_ONLY_SUCCESSOR_EARLY_ROLLBACK`；
+- `V3_FUTURE_OVERRUN_ROLLBACK`；
+- `V3_IDENTITY_MISMATCH_NO_FALSE_ADOPT`；
+- `SC5_REASSERT_REQUIRES_CURRENT_EXECUTION`；
+- `NONCANONICAL_ACTIVE_ORDER`；
+- `V2_COMPAT_FALLBACK`。
+
+mutation gate 从 37 扩展到 **40/40 caught**，新增专门防止：
+
+1. reconciliation 偷偷退回 V2；
+2. 忽略 execution sequence 造成 semantic false-adopt；
+3. future overrun 直接跳过 canonical intermediate action。
+
+维护脚本 `audit_evidence_wiring.py` 额外保证 execution reconciliation 必须通过 V3-authoritative adapter，旧 V2 Entity/Combat 路径不得进入选定的 gameplay-critical 区域。
+
+---
+
+## 17. SC6 后的 Evidence wiring 审计结论
+
+本轮针对“已有新架构但 gameplay 仍接旧版 provider”的模式做了专项审计。
+
+发现的 behavior-critical 问题只有上述 execution reconciliation 一处：**V3 已是生产权威，但 reconciliation 仍读 V2**。
+
+其余 V2 残留分两类：
+
+- 旧 Entity/Combat physical helper：目前只在 legacy/debug telemetry 中使用，不参与当前 steering / FEG / Exit recovery 决策；
+- Native V2 API 名：为兼容保留导出，但 SC6 后 fail-closed 为 `V2_RETIRED_USE_V3`。
+
+维护原则因此补充：
+
+14. **同一 evidence domain 只能有一个 production-authoritative provider。** 新 schema/capability 上线以后，behavior-critical code 必须经过统一 adapter，禁止各模块直接挑 V2/V3 reader。
+15. **retired provider 必须 fail closed。** 不能仅靠 `capability=false` 阻止误用，同时让旧 API 名继续返回新 schema 数据。
+16. **Execution identity recovery 必须先于 physical recovery。** 若 Native active action 都不是当前 Exit MOVE，不能把问题当作“MOVE active 但脱战慢”交给 SC5。
+17. **semantic state 不能替代 execution identity。** `current_target()`、`melee`、UI command line、destination 等可用于诊断/physical evidence，但不能授权 canonical cursor 跳转。
+

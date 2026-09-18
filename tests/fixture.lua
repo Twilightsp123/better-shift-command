@@ -166,6 +166,7 @@ local function F(options)
   local o={} for k,v in pairs(e) do o[k]=v end;o.schema=3;return o
  end
  function B.r1_evidence_capabilities_v3()
+  if f.cfg.disable_v3_evidence then return {schema=3,game_build_verified=false,execution_identity=false,entity_snapshot=false,combat_groups=false,contact_pairs=false,target_specific_physical_contact=false,build_id="TEST_V3_DISABLED"} end
   local enabled=f.cfg.native_evidence_v3==true or f.cfg.native_evidence_v2==true
    or type(f.cfg.native_order_evidence_v3)=="function" or type(f.cfg.native_entity_evidence_v3)=="function" or type(f.cfg.native_contact_events_v3)=="function"
    or type(f.cfg.native_order_evidence)=="function" or type(f.cfg.native_entity_evidence)=="function" or type(f.cfg.native_combat_evidence)=="function"

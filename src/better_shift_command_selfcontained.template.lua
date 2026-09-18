@@ -1,16 +1,16 @@
--- Better Shift Command v1.2.0 production controller. SC1-SC5 movement/exit fixes retained.
+-- Better Shift Command v1.2.1 production controller. SC1-SC6 movement/exit/execution-identity fixes retained.
 -- Command identity/ACK remains native-authoritative. V3 EntitySnapshot/ContactPair evidence
 -- supports bounded exit recovery while route semantics remain controller-authoritative.
 -- Post-exit A2 uses route semantic completion + post-ACK fresh-mode FEG.
-local RUN_ID = "V1_2_0"
+local RUN_ID = "V1_2_1"
 local TEST_PROFILE = "ROUTE_ONLY" -- Compatibility label only; never changes motion.
 local CONTROLLER_PHASE = "P2B" -- Installer can select P1E for terminal-only regression.
-local CONTROLLER_VERSION = "1.2.0"
+local CONTROLLER_VERSION = "1.2.1"
 local TAG = "[BETTER_SHIFT_COMMAND] "
 -- Production default: high-frequency diagnostics are disabled. Tests may explicitly re-enable them.
 local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.2.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY))
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.2.1 debug_telemetry=" .. tostring(DEBUG_TELEMETRY))
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -938,26 +938,82 @@ local function array_set(t)
 end
 local function copy_set(t) local out={};for k,v in pairs(t or {}) do if v then out[k]=true end end;return out end
 local function count_set(t) local n=0;for _ in pairs(t or {}) do n=n+1 end;return n end
-function R1.order_evidence(st,a,now)
-    if not S.evidence_caps or not S.evidence_caps.execution_identity then return nil,"PROVIDER_UNAVAILABLE" end
-    if type(bridge.read_active_order_identity_v2)~="function" then return nil,"PROVIDER_UNAVAILABLE" end
-    local ok,e,provider_reason=pcall(bridge.read_active_order_identity_v2,st.uid)
-    if not ok then return nil,"PROVIDER_EXCEPTION" end
-    if type(e)~="table" then return nil,provider_reason or "ORDER_IDENTITY_INVALID" end
-    if e.schema~=2 or e.epoch~=S.epoch or e.unit_uid~=st.uid or e.complete~=true or e.active~=true or e.known~=true
-        or not id(e.active_engine_seq) or e.kind~=a.type then return nil,"ORDER_IDENTITY_UNAVAILABLE" end
-    local rt=a.runtime or {};local seq=rt.accepted_receipt and rt.accepted_seq or a.seq
-    if rt.accepted_receipt and rt.accepted_seq==nil then return nil,"ACCEPTED_WITHOUT_NATIVE_SEQUENCE" end
-    local receipt=rt.accepted_receipt or a.serial;local lifetime=rt.accepted_lifetime or a.unit_lifetime
-    if not id(e.accepted_journal_serial) or e.accepted_journal_serial~=receipt
-        or not id(e.unit_lifetime) or e.unit_lifetime~=lifetime then return nil,"EXECUTION_RECEIPT_OR_LIFETIME_MISMATCH" end
-    if not seq or seq~=e.active_engine_seq then return nil,"EXECUTION_SEQUENCE_MISMATCH" end
-    if a.type=="ATTACK" and e.target_uid~=a.target_uid then return nil,"EXECUTION_TARGET_MISMATCH" end
-    if a.type=="MOVE" and (not finite(e.dest_x) or not finite(e.dest_z)
-        or math.abs(e.dest_x-a.pos.x)>0.05 or math.abs(e.dest_z-a.pos.z)>0.05) then return nil,"EXECUTION_DESTINATION_MISMATCH" end
-    return e
+-- Authoritative execution identity adapter.
+-- V3 is the production source. V2 is a compatibility fallback only when V3
+-- execution identity is unavailable; a live V3 provider is never mixed with V2.
+local function action_execution_identity(a)
+    if not a then return nil,nil,nil end
+    local rt=a.runtime or {}
+    local seq=rt.accepted_receipt and rt.accepted_seq or a.seq
+    if rt.accepted_receipt and not rt.accepted_seq then return nil,nil,nil,"ACCEPTED_WITHOUT_NATIVE_SEQUENCE" end
+    local receipt=rt.accepted_receipt or a.serial
+    local lifetime=rt.accepted_lifetime or a.unit_lifetime
+    if not id(seq) or not id(receipt) or not id(lifetime) then return nil,nil,nil,"ACTION_IDENTITY_INCOMPLETE" end
+    return seq,receipt,lifetime,"OK"
 end
--- Backward internal name used by reconciliation code. This now means identity only.
+local function normalize_active_execution(st,e,provider,schema)
+    if type(e)~="table" or e.schema~=schema or e.epoch~=S.epoch or e.unit_uid~=st.uid or e.complete~=true then
+        return nil,provider.."_ORDER_IDENTITY_INVALID"
+    end
+    local x={provider=provider,schema=schema,active=e.active==true,known=e.known==true,
+        epoch=e.epoch,unit_uid=e.unit_uid,unit_lifetime=e.unit_lifetime,
+        active_engine_seq=e.active_engine_seq,accepted_journal_serial=e.accepted_journal_serial,
+        kind=e.kind,target_uid=e.target_uid,dest_x=e.dest_x,dest_z=e.dest_z,raw=e}
+    if not x.active then return x,"INACTIVE" end
+    if not id(x.active_engine_seq) or (x.kind~="MOVE" and x.kind~="ATTACK") then
+        return nil,provider.."_ACTIVE_IDENTITY_INVALID"
+    end
+    if x.known and (not id(x.accepted_journal_serial) or not id(x.unit_lifetime)) then
+        return nil,provider.."_KNOWN_IDENTITY_INVALID"
+    end
+    return x,"OK"
+end
+function R1.read_active_execution(st)
+    local v3=S.evidence_v3_caps or {}
+    if v3.execution_identity==true then
+        if type(bridge.read_active_order_identity_v3)~="function" then return nil,"V3_PROVIDER_UNAVAILABLE" end
+        local ok,e,reason=pcall(bridge.read_active_order_identity_v3,st.uid)
+        if not ok then return nil,"V3_PROVIDER_EXCEPTION" end
+        if type(e)~="table" then return nil,reason or "V3_ORDER_IDENTITY_UNAVAILABLE" end
+        return normalize_active_execution(st,e,"V3",3)
+    end
+    local v2=S.evidence_caps or {}
+    if v2.execution_identity==true then
+        if type(bridge.read_active_order_identity_v2)~="function" then return nil,"V2_PROVIDER_UNAVAILABLE" end
+        local ok,e,reason=pcall(bridge.read_active_order_identity_v2,st.uid)
+        if not ok then return nil,"V2_PROVIDER_EXCEPTION" end
+        if type(e)~="table" then return nil,reason or "V2_ORDER_IDENTITY_UNAVAILABLE" end
+        return normalize_active_execution(st,e,"V2",2)
+    end
+    return nil,"EXECUTION_IDENTITY_PROVIDER_UNAVAILABLE"
+end
+function R1.execution_matches_action(e,a)
+    if type(e)~="table" or e.active~=true then return false,"EXECUTION_INACTIVE" end
+    if e.known~=true then return false,"EXECUTION_NOT_MAPPED" end
+    if not a or (a.type~="MOVE" and a.type~="ATTACK") then return false,"ACTION_UNSUPPORTED" end
+    if e.kind~=a.type then return false,"EXECUTION_KIND_MISMATCH" end
+    local seq,receipt,lifetime,why=action_execution_identity(a)
+    if not seq then return false,why end
+    if e.accepted_journal_serial~=receipt or e.unit_lifetime~=lifetime then return false,"EXECUTION_RECEIPT_OR_LIFETIME_MISMATCH" end
+    if e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH" end
+    if a.type=="ATTACK" and e.target_uid~=a.target_uid then return false,"EXECUTION_TARGET_MISMATCH" end
+    if a.type=="MOVE" then
+        if not a.pos or not finite(e.dest_x) or not finite(e.dest_z)
+            or math.abs(e.dest_x-a.pos.x)>0.05 or math.abs(e.dest_z-a.pos.z)>0.05 then
+            return false,"EXECUTION_DESTINATION_MISMATCH"
+        end
+    end
+    return true,"OK"
+end
+function R1.order_evidence(st,a,now)
+    local e,why=R1.read_active_execution(st)
+    if not e then return nil,why end
+    local match,mwhy=R1.execution_matches_action(e,a)
+    if not match then return nil,mwhy end
+    return e,"OK"
+end
+-- Backward internal name retained for non-reconciliation callers/tests. It is now
+-- V3-first and can only fall back to V2 when V3 execution identity is unavailable.
 R1.evidence=R1.order_evidence
 
 function Core.valid_entity_snapshot(e,now)
@@ -1033,21 +1089,11 @@ function R1.v3_refresh_physical(st,now)
 end
 function R1.v3_order_for(st,a)
     local caps=S.evidence_v3_caps or {}
-    if caps.execution_identity~=true or type(bridge.read_active_order_identity_v3)~="function" then return nil,"CAPABILITY_UNAVAILABLE" end
-    local ok,e=pcall(bridge.read_active_order_identity_v3,st.uid)
-    if not ok or type(e)~="table" or e.schema~=3 or e.complete~=true or e.active~=true then return nil,"ORDER_UNAVAILABLE" end
-    if e.epoch~=S.epoch or e.unit_uid~=st.uid or not id(e.active_engine_seq)
-        or e.kind~=(a.type=="MOVE" and "MOVE" or "ATTACK") then return nil,"ORDER_KIND_MISMATCH" end
-    local rt=a.runtime or {};local seq=rt.accepted_receipt and rt.accepted_seq or a.seq
-    local receipt=rt.accepted_receipt or a.serial;local lifetime=rt.accepted_lifetime or a.unit_lifetime
-    if rt.accepted_receipt and not rt.accepted_seq then return nil,"ACCEPTED_WITHOUT_NATIVE_SEQUENCE" end
-    if e.known~=true or not id(e.accepted_journal_serial) or e.accepted_journal_serial~=receipt
-        or not id(e.unit_lifetime) or e.unit_lifetime~=lifetime then return nil,"EXECUTION_RECEIPT_OR_LIFETIME_MISMATCH" end
-    if not seq or seq~=e.active_engine_seq then return nil,"EXECUTION_SEQUENCE_MISMATCH" end
-    if a.type=="MOVE" then
-        if not finite(e.dest_x) or not finite(e.dest_z) or not a.pos
-            or math.abs(e.dest_x-a.pos.x)>0.05 or math.abs(e.dest_z-a.pos.z)>0.05 then return nil,"ORDER_DESTINATION_MISMATCH" end
-    elseif a.type=="ATTACK" and e.target_uid~=a.target_uid then return nil,"ORDER_TARGET_MISMATCH" end
+    if caps.execution_identity~=true then return nil,"CAPABILITY_UNAVAILABLE" end
+    local e,why=R1.read_active_execution(st)
+    if not e or e.provider~="V3" then return nil,why or "ORDER_UNAVAILABLE" end
+    local match,mwhy=R1.execution_matches_action(e,a)
+    if not match then return nil,mwhy end
     return e,"OK"
 end
 function R1.v3_handoff_scope(st,a,b,now)
@@ -3036,6 +3082,23 @@ function Core.maybe_reassert_exit(st,now)
     local b=current_block(st);local rt=action_runtime(a)
     if not b or b.closed or not b.exit_started_ms or rt.semantic_done then return false end
     if S.pending_by_uid[st.uid] or S.pending_count>=CFG.max_inflight then return false end
+    -- Layer 1: execution identity. SC5 is only a physical-disengagement recovery
+    -- after exact proof that this same Exit MOVE is still the native active order.
+    -- If Native has promoted a future Attack, reconciliation owns the recovery.
+    if (S.evidence_v3_caps or {}).execution_identity==true then
+        local active,identity_reason=R1.read_active_execution(st)
+        local matches=active and R1.execution_matches_action(active,a) or false
+        if not matches then
+            if DEBUG_TELEMETRY and (b.last_identity_defer_reason~=clean(identity_reason) or now-(b.last_identity_defer_ms or -1000000)>=1500) then
+                b.last_identity_defer_reason=clean(identity_reason);b.last_identity_defer_ms=now
+                if DEBUG_TELEMETRY then dlog("EXIT_REASSERT_DEFER_IDENTITY uid="..st.uid.." gen="..st.gen.." block="..clean(b.id)..
+                    " action="..a.action_id.." active_kind="..clean(active and active.kind)..
+                    " active_engine_seq="..clean(active and active.active_engine_seq).." provider="..clean(active and active.provider)..
+                    " reason="..clean(identity_reason or "ACTIVE_NOT_CURRENT_ACTION").." model_ms="..now) end
+            end
+            return false
+        end
+    end
     local speed=median(st.speeds) or 0
     local no_progress=now-(rt.last_progress_ms or now)
     local contacts=b.contact_scan
@@ -3083,26 +3146,38 @@ function Core.maybe_reassert_exit(st,now)
     return false
 end
 
+local function rollback_native_future_to_current(st,cur,future,future_index,e,now,fault_reason,route_reason,recovery_reason)
+    st.unverified_native_successor={gen=st.gen,action=cur.action_id,next_action=future and future.action_id or nil,
+        future_index=future_index,ms=now,exact=true,provider=e and e.provider or nil}
+    R1.fault(st,cur,"BLOCKED_EXECUTION_IDENTITY",fault_reason,now)
+    local budget_ok,budget=v3_recovery_available(st,cur,now,"NATIVE_ROLLBACK")
+    if budget_ok and S.pending_count<CFG.max_inflight and reassert_current_move(st,recovery_reason,now) then
+        local consumed,rwhy,left=v3_recovery_commit(budget,"NATIVE_ROLLBACK",now)
+        if not consumed then R1.fault(st,cur,"BLOCKED_EXECUTION","RECOVERY_ACCOUNTING_"..clean(rwhy),now);return false end
+        log("NATIVE_SUCCESSOR_ROLLBACK uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
+            " blocked_successor="..clean(future and future.action_id).." future_index="..clean(future_index)..
+            " active_kind="..clean(e and e.kind).." active_engine_seq="..clean(e and e.active_engine_seq)..
+            " provider="..clean(e and e.provider).." route_reason="..clean(route_reason)..
+            " remaining_budget="..left.." model_ms="..now.." preserved_tail=true shared_budget=true")
+        return true
+    end
+    return false
+end
 function Core.reconcile_native_successor(st,now)
     if not st.plan or st.blocked or S.pending_by_uid[st.uid] then return false end
-    local cur=st.plan[st.idx];local nexta=st.plan[st.idx+1]
-    if not cur or cur.type~="MOVE" or not nexta or nexta.type~="ATTACK" then return false end
-    -- RE02/R11: exact active order identity is authoritative when available. Do not
-    -- require current_target first; it is a semantic field, not an action identity.
-    local current_evidence=R1.evidence(st,cur,now)
-    if current_evidence then
-        st.unverified_native_successor=nil
-        if cur.runtime and cur.runtime.fault and cur.runtime.fault.code=="BLOCKED_EXECUTION_IDENTITY" then R1.clear_fault(st,cur,now) end
-        return false
-    end
-    local e=R1.evidence(st,nexta,now)
-    if not e then
-        -- Legacy target state remains diagnostic only. Without an exact accepted
-        -- receipt + engine order_id match we never advance the Lua cursor.
+    local cur=st.plan[st.idx]
+    if not cur or cur.type~="MOVE" then return false end
+
+    -- Read the native active execution exactly once. V3 is authoritative in the
+    -- production build; V2 is used only on a genuinely V3-unavailable compatibility
+    -- host. current_target() never authorizes a transition or rollback.
+    local e,ewhy=R1.read_active_execution(st)
+    if not e or e.active~=true or e.known~=true then
+        local nexta=st.plan[st.idx+1]
         local ok,target=pcall(function() return st.unit:current_target() end)
         local observed=(ok and target) and uid(target) or nil
-        if observed==nexta.target_uid then
-            st.unverified_native_successor={gen=st.gen,action=cur.action_id,next_action=nexta.action_id,ms=now}
+        if nexta and nexta.type=="ATTACK" and observed==nexta.target_uid then
+            st.unverified_native_successor={gen=st.gen,action=cur.action_id,next_action=nexta.action_id,ms=now,exact=false,reason=ewhy}
             R1.fault(st,cur,"BLOCKED_EXECUTION_IDENTITY","CURRENT_TARGET_IS_NOT_ACTION_ID",now)
         else
             st.unverified_native_successor=nil
@@ -3110,35 +3185,52 @@ function Core.reconcile_native_successor(st,now)
         end
         return false
     end
-    local g=geometry(st,nexta);if not g then return false end
-    g=attack_geometry(st,nexta,g);if not g then return false end
-    local route_ok,why=transition_handoff_ready(st,g,nexta)
-    if not route_ok then
-        st.unverified_native_successor={gen=st.gen,action=cur.action_id,next_action=nexta.action_id,ms=now,exact=true}
-        R1.fault(st,cur,"BLOCKED_EXECUTION_IDENTITY","NATIVE_ADVANCED_BEFORE_PERMISSION",now)
-        -- Exact RE02 identity makes this rollback safe: WH3 is executing the captured
-        -- immediate successor, while R1 says the current Move/Exit obligation is not
-        -- yet transferable. Reassert only the same user Move; the canonical suffix is
-        -- retained by Lua and will be re-issued later. No invented waypoint is used.
-        local budget_ok,budget=v3_recovery_available(st,cur,now,"NATIVE_ROLLBACK")
-        if budget_ok and S.pending_count<CFG.max_inflight and reassert_current_move(st,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE",now) then
-            local consumed,rwhy,left=v3_recovery_commit(budget,"NATIVE_ROLLBACK",now)
-            if not consumed then R1.fault(st,cur,"BLOCKED_EXECUTION","RECOVERY_ACCOUNTING_"..clean(rwhy),now);return false end
-            log("NATIVE_SUCCESSOR_ROLLBACK uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
-                " blocked_successor="..nexta.action_id.." active_engine_seq="..e.active_engine_seq..
-                " route_reason="..clean(why).." remaining_budget="..left.." model_ms="..now.." preserved_tail=true shared_budget=true")
-            return true
-        end
+
+    local current_match=R1.execution_matches_action(e,cur)
+    if current_match then
+        st.unverified_native_successor=nil
+        if cur.runtime and cur.runtime.fault and cur.runtime.fault.code=="BLOCKED_EXECUTION_IDENTITY" then R1.clear_fault(st,cur,now) end
         return false
     end
+
+    -- The engine may have promoted any captured future queue item before Lua's
+    -- canonical cursor advanced. Identify the exact future action, but never skip
+    -- intermediate canonical actions just because Native overran them.
+    local future_index=nil;local future=nil
+    for i=st.idx+1,#st.plan do
+        local match=R1.execution_matches_action(e,st.plan[i])
+        if match then future_index=i;future=st.plan[i];break end
+    end
+    if not future then
+        st.unverified_native_successor={gen=st.gen,action=cur.action_id,ms=now,exact=true,provider=e.provider,noncanonical=true}
+        R1.fault(st,cur,"BLOCKED_EXECUTION_IDENTITY","ACTIVE_EXECUTION_NOT_CANONICAL",now)
+        if DEBUG_TELEMETRY then dlog("NATIVE_EXECUTION_NOT_CANONICAL uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
+            " active_kind="..clean(e.kind).." active_engine_seq="..clean(e.active_engine_seq).." provider="..clean(e.provider).." model_ms="..now) end
+        return false
+    end
+
+    if future_index~=st.idx+1 or future.type~="ATTACK" then
+        return rollback_native_future_to_current(st,cur,future,future_index,e,now,
+            "NATIVE_FUTURE_OVERRUN","CANONICAL_INTERMEDIATE_ACTIONS_OWED","NATIVE_FUTURE_OVERRUN_ROLLBACK_TO_CURRENT_MOVE")
+    end
+
+    local g=geometry(st,future)
+    if g then g=attack_geometry(st,future,g) end
+    local route_ok,why=false,"SUCCESSOR_GEOMETRY_UNAVAILABLE"
+    if g then route_ok,why=transition_handoff_ready(st,g,future) end
+    if not route_ok then
+        return rollback_native_future_to_current(st,cur,future,future_index,e,now,
+            "NATIVE_ADVANCED_BEFORE_PERMISSION",why,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE")
+    end
+
     R1.clear_fault(st,cur,now)
     st.unverified_native_successor=nil
     st.idx=st.idx+1;st.origin=copy(st.pos);st.owned=false;st.tail_reached=false
-    enter_action(st,nexta,now,"NATIVE_SUCCESSOR_ADOPTED")
-    begin_attack_history(st,nexta,now,"NATIVE_CHAIN","0")
-    if DEBUG_TELEMETRY then log("NATIVE_SUCCESSOR_ADOPTED uid="..st.uid.." gen="..st.gen.." action="..nexta.action_id..
-        " target="..nexta.target_uid.." previous_action="..cur.action_id.." active_engine_seq="..e.active_engine_seq..
-        " route_reason="..clean(why).." model_ms="..now) end
+    enter_action(st,future,now,"NATIVE_SUCCESSOR_ADOPTED")
+    begin_attack_history(st,future,now,"NATIVE_CHAIN","0")
+    if DEBUG_TELEMETRY then log("NATIVE_SUCCESSOR_ADOPTED uid="..st.uid.." gen="..st.gen.." action="..future.action_id..
+        " target="..future.target_uid.." previous_action="..cur.action_id.." active_engine_seq="..e.active_engine_seq..
+        " provider="..clean(e.provider).." route_reason="..clean(why).." model_ms="..now) end
     return true
 end
 local function advance(st,now)
