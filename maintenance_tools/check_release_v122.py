@@ -5,8 +5,13 @@ import sys
 ROOT=Path(__file__).resolve().parents[1]
 def fail(s): print('FAIL:',s); raise SystemExit(1)
 src=(ROOT/'source/better_shift_command.lua').read_text(encoding='utf-8')
-if 'local CONTROLLER_VERSION = "1.2.1"' not in src or 'local RUN_ID = "V1_2_1"' not in src or 'build=BETTER_SHIFT_COMMAND_V1.2.1' not in src: fail('release identity')
+if 'local CONTROLLER_VERSION = "1.2.2"' not in src or 'local RUN_ID = "V1_2_2"' not in src or 'build=BETTER_SHIFT_COMMAND_V1.2.2' not in src: fail('release identity')
 if 'local DEBUG_TELEMETRY = false' not in src: fail('DEBUG_TELEMETRY must default false')
+if 'local BSC_HUGE = (type(math.huge)=="number" and math.huge) or 1e300' not in src: fail('math.huge compatibility sentinel missing')
+for i,line in enumerate(src.splitlines(),1):
+    if 'math.huge' in line and 'local BSC_HUGE =' not in line: fail(f'unguarded math.huge dependency line {i}')
+reg=(ROOT/'tests/test_regressions_v104.lua').read_text(encoding='utf-8')
+if 'missing math.huge host field does not disable controller' not in reg: fail('math.huge compatibility regression missing')
 if (ROOT/'source/better_shift_command.lua').read_bytes()!=(ROOT/'src/better_shift_command.lua').read_bytes(): fail('source/src controller mismatch')
 for forbidden in ('RMB_DIFF_V2','RAW_RMB_DOWN','RMB_EXIT_TRACE','read_input_snapshot','TH_RMB_DIFF_'):
     if forbidden in src: fail('temporary RMB diagnostic leaked into release: '+forbidden)
@@ -25,4 +30,4 @@ for token in ('order_identity_read_v2_retired','entity_snapshot_read_v2_retired'
     if token not in cpp: fail('V2 retirement hardening missing: '+token)
 for forbidden in ('read_input_snapshot','input_rmb_down','input_rmb_press_seq'):
     if forbidden in cpp: fail('temporary RMB native diagnostic leaked into release: '+forbidden)
-print('PASS: v1.2.1 identity + quiet logging + SC6 + source sync + native ABI retained')
+print('PASS: v1.2.2 identity + math.huge compatibility + quiet logging + SC6 + source sync + native ABI retained')

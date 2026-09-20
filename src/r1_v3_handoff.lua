@@ -5,7 +5,8 @@ local function id(s)
     return type(s)=="string" and #s>0 and #s<=10 and not s:find("[^0-9]")
         and (#s==1 or s:sub(1,1)~="0") and (#s<10 or s<="4294967295")
 end
-local function finite(n) return type(n)=="number" and n==n and n~=math.huge and n~=-math.huge end
+local BSC_HUGE = (type(math.huge)=="number" and math.huge) or 1e300
+local function finite(n) return type(n)=="number" and n==n and n<BSC_HUGE and n>-BSC_HUGE end
 local function copy_set(src)
     local out={};for k,v in pairs(src or {}) do if v==true then out[k]=true end end;return out
 end

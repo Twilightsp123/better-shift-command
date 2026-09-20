@@ -1,7 +1,8 @@
 -- R1 V3 unified bounded recovery budget.
 -- One budget is shared by every recovery command path for a single Exit action.
 local R={VERSION="R1_V3_RECOVERY_1"}
-local function finite(n) return type(n)=="number" and n==n and n~=math.huge and n~=-math.huge end
+local BSC_HUGE = (type(math.huge)=="number" and math.huge) or 1e300
+local function finite(n) return type(n)=="number" and n==n and n<BSC_HUGE and n>-BSC_HUGE end
 function R.new(generation,block_id,exit_action_id,max_attempts)
     assert(finite(generation) and generation>=1 and generation%1==0,"invalid generation")
     assert(type(block_id)=="string" and block_id~="","invalid block id")

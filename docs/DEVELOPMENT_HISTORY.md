@@ -1,6 +1,6 @@
 # Better Shift Command — 开发与维护总记录
 
-这份文档是 **v1.2.1 之后的长期工程记录**。它取代过去散落在根目录和 `docs/` 中的 R3/R4、SC1～SC6、诊断、BuildOnly、Package Check、Smoke Test 等阶段文档。
+这份文档是 **v1.2.2 之后的长期工程记录**。它取代过去散落在根目录和 `docs/` 中的 R3/R4、SC1～SC6、诊断、BuildOnly、Package Check、Smoke Test 等阶段文档。
 
 目标不是保存每一次实验输出，而是保存真正需要长期继承的内容：
 
@@ -14,15 +14,27 @@
 
 ## 1. 当前正式基线
 
-- **Release:** Better Shift Command `v1.2.1`
-- **Controller:** `1.2.1`
-- **Run ID:** `V1_2_1`
-- **Build marker:** `BETTER_SHIFT_COMMAND_V1.2.1`
+- **Release:** Better Shift Command `v1.2.2`
+- **Controller:** `1.2.2`
+- **Run ID:** `V1_2_2`
+- **Build marker:** `BETTER_SHIFT_COMMAND_V1.2.2`
 - **Native Bridge ABI:** `1.0.15-r4-evidence-v3-validated-userdata-root`
 - **Platform:** Windows x64
 
 
-v1.2.1 在 v1.2.0 的 SC1～SC5 行为基线上增加 **SC6 V3 Execution Identity Reconciliation**：当 CA Native active order 提前跳到 future canonical action 时，控制器使用 V3 exact execution identity 决定 adopt / rollback，并要求 SC5 physical recovery 只在当前 Exit MOVE 仍是 exact Native active execution 时运行。Native ABI 字符串继续保持 `1.0.15-r4-evidence-v3-validated-userdata-root`；旧 V2 evidence reader 导出仅保留兼容名称并 fail closed。
+v1.2.2 保留 v1.2.1 的完整 SC6 行为基线，只增加 Lua 数值兼容修复。v1.2.1 在 v1.2.0 的 SC1～SC5 行为基线上增加 **SC6 V3 Execution Identity Reconciliation**：当 CA Native active order 提前跳到 future canonical action 时，控制器使用 V3 exact execution identity 决定 adopt / rollback，并要求 SC5 physical recovery 只在当前 Exit MOVE 仍是 exact Native active execution 时运行。Native ABI 字符串继续保持 `1.0.15-r4-evidence-v3-validated-userdata-root`；旧 V2 evidence reader 导出仅保留兼容名称并 fail closed。
+
+### v1.2.2 compatibility release — missing `math.huge`
+
+2026-09-20 的实机日志显示，某个 WH3 Lua 环境中 `math.huge` 为 `nil`。旧代码的 `finite()` 在 `-math.huge` 处直接抛出 Lua 错误，先出现 `EARLY_BASELINE_UNAVAILABLE`，随后在正式 `start()` 的 `collections() -> clock() -> finite()` 路径进入 `CONTROLLER_FAIL`；此时 Controller 尚未处理任何 Shift/Move/Attack 计划。
+
+修复严格限定在 Lua 数值兼容层：增加本地 `BSC_HUGE`，优先沿用可用的 `math.huge`，否则使用 `1e300` 作为仅用于有限数检查与“无限优先级/容差”哨兵的后备值，并把运行时直接 `math.huge` 引用改为该本地常量。SC1～SC6、Native Bridge、17 个 hook、ContactPair 与 Native ABI 均未修改。
+
+回归套件加入“host `math.huge` 缺失时 Controller 仍能启动并处理基础 Move 队列”的案例；当前 v1.2.2 source gate 为 **19/19 jobs PASS**，mutation gate 为 **40/40 CAUGHT**。
+
+**实机闭环：** `script_log_200926_1849.txt` 在此前会触发该问题的 WH3 环境中验证通过：进入 `Deployed` 后不再出现 `EARLY_BASELINE_UNAVAILABLE` 或 `CONTROLLER_FAIL`，Controller 随后实际进入 SC6 的 `NATIVE_FUTURE_OVERRUN` / `NATIVE_SUCCESSOR_ROLLBACK` 路径。因此这次 `math.huge` 兼容问题已经完成“现场失败 → 最小修复 → 自动回归 → WH3 实机 PASS”的闭环。
+
+这次 v1.2.2 收尾**没有重新编译 Native Bridge，也没有构建/安装新的 `.pack`**；原因是 Native source、Hook、ASM、MinHook 和 ABI 均未改变。只有在发布可安装的 v1.2.2 `.pack` 时，才需要重新执行 Windows Build + CTest + deterministic pack verify。
 
 v1.2.0 的行为基线就是最后验证通过的 **SC5 EXIT REASSERT**。正式版收尾没有再改路线算法、接战算法或 Native 行为，只做了：
 

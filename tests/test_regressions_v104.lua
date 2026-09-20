@@ -59,6 +59,17 @@ T('more than 256 historical nodes compact without cancelling live generation',fu
  f:emit('MOVE',true,3000,0);f:tick(t,30,0)
  assert(f:has('ACTION_HISTORY_COMPACTED') and not f:has('GEN_CANCEL'));healthy(f)
 end)
+T('missing math.huge host field does not disable controller',function()
+ local old_huge=math.huge;math.huge=nil
+ local ok,f_or_err=pcall(function()
+  local f=F({cold_idle=true,debug_source=true});f:start();f:tick(100)
+  f:emit('MOVE',false,100,0);f:emit('MOVE',true,200,0);f:tick(200,0,0);f:tick(300,80,0)
+  return f
+ end)
+ math.huge=old_huge
+ assert(ok,f_or_err)
+ healthy(f_or_err)
+end)
 T('paused callbacks do not credit Attack hold time',function()
  local f=attack(true);f:tick(200);for i=1,50 do f:tick(200)end;assert(f.issued==0);ticks(f,300,2500);assert(f.issued==0);healthy(f)
 end)

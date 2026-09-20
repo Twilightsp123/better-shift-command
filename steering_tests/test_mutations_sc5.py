@@ -27,7 +27,7 @@ mutants=[
  ('sc4_stall_escape_unbounded_short_leg',controller,'local stall_escape_margin=math.min(CFG.route_corner_stall_escape_extra_m,\n        g.leg*CFG.route_corner_stall_escape_current_leg_fraction,\n        next_leg*CFG.route_corner_stall_escape_next_leg_fraction)','local stall_escape_margin=CFG.route_corner_stall_escape_extra_m','blocks'),
  ('remove_idle_finish_confirmation',controller,'if now-c.since>=CFG.move_idle_finish_confirm_ms then','if now-c.since>=0 then','blocks'),
  ('restore_four_unit_batching',controller,'max_inflight=32','max_inflight=4','contracts'),
- ('single_move_boolean_urgency',controller,'if not nexta then\n        if rt.semantic_done then return -100,"MOVE_COMPLETE_NO_SUCCESSOR" end\n        return math.huge,"NO_SUCCESSOR"\n    end','if not nexta then return rt.semantic_done and -100,"MOVE_COMPLETE_NO_SUCCESSOR" or math.huge,"NO_SUCCESSOR" end','contracts'),
+ ('single_move_boolean_urgency',controller,'if not nexta then\n        if rt.semantic_done then return -100,"MOVE_COMPLETE_NO_SUCCESSOR" end\n        return BSC_HUGE,"NO_SUCCESSOR"\n    end','if not nexta then return rt.semantic_done and -100,"MOVE_COMPLETE_NO_SUCCESSOR" or BSC_HUGE,"NO_SUCCESSOR" end','contracts'),
  ('routing_means_dead',controller,'local function target_viable(a)','local function target_viable(a)\n    if a.target and api_bool(a.target,"is_routing")==true then return false,"TARGET_DEAD" end','regressions'),
  ('remove_death_confirmation',controller,'if now-a.end_since>=CFG.target_end_confirm_ms then return false,why end','if true then return false,why end','regressions'),
  ('drop_no_tail_attack_latch',controller,'if not t.done then\n            t.done=true','if not t.done then\n            -- mutant: t.done latch removed','blocks'),

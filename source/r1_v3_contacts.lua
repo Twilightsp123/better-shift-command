@@ -16,7 +16,8 @@ local function uid(s)
         and (#s==1 or s:sub(1,1)~='0') and (#s<10 or s<='4294967295')
 end
 local function entity(s) return u64(s) end
-local function finite(n) return type(n)=='number' and n==n and n~=math.huge and n~=-math.huge end
+local BSC_HUGE = (type(math.huge)=="number" and math.huge) or 1e300
+local function finite(n) return type(n)=='number' and n==n and n<BSC_HUGE and n>-BSC_HUGE end
 function C.new() return {after='0',last_tick=nil,total=0,gaps=0} end
 local function valid_event(e)
     if type(e)~='table' or not u64(e.serial) or not u64(e.tick_ms) or not uid(e.uid_a) or not uid(e.uid_b)

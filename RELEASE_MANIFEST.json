@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "project": "Better Shift Command",
-  "release": "v1.2.1",
-  "controller_version": "1.2.1",
-  "run_id": "V1_2_1",
-  "build_marker": "BETTER_SHIFT_COMMAND_V1.2.1",
+  "release": "v1.2.2",
+  "controller_version": "1.2.2",
+  "run_id": "V1_2_2",
+  "build_marker": "BETTER_SHIFT_COMMAND_V1.2.2",
   "platform": "Windows x64",
   "native_abi": "1.0.15-r4-evidence-v3-validated-userdata-root",
-  "release_behavior_baseline": "SC6 V3 Execution Identity Reconciliation",
-  "release_behavior_change": true,
+  "release_behavior_baseline": "v1.2.1 SC6 V3 Execution Identity Reconciliation",
+  "release_behavior_change": false,
   "debug_telemetry_default": false,
   "windows_release_toolchain": "VS2019 / MSVC v142 x64 / MASM",
   "public_tree_policy": "Current source/build/tests plus one consolidated development history; temporary RMB differential artifacts omitted.",
@@ -31,5 +31,26 @@
     "asan_ubsan_native_ctest": "10/10 PASS",
     "deterministic_pack_verify": "PASS",
     "validated_on": "2026-09-18"
+  },
+  "compatibility_hotfix": {
+    "release": "v1.2.2",
+    "validated_on": "2026-09-20",
+    "scope": "Lua numeric compatibility only; SC1-SC6 and Native Bridge unchanged",
+    "issue": "math.huge may be nil in some WH3 Lua environments, causing startup CONTROLLER_FAIL",
+    "fix": "local BSC_HUGE fallback sentinel with no global math-table mutation",
+    "regression": "missing math.huge host field does not disable controller",
+    "field_validation": {
+      "log": "script_log_200926_1849.txt",
+      "result": "PASS",
+      "evidence": "controller entered live SC6 reconciliation without EARLY_BASELINE_UNAVAILABLE or CONTROLLER_FAIL"
+    }
+  },
+  "current_release_validation": {
+    "source_regression_jobs": "19/19 PASS",
+    "mutations": "40/40 CAUGHT",
+    "in_game_smoke": "PASS",
+    "native_bridge_rebuilt": false,
+    "native_bridge_reason": "Native source and ABI are unchanged from validated v1.2.1 baseline",
+    "pack_build_install": "NOT_RUN_FOR_SOURCE_ONLY_V1.2.2_CLEAN_TREE"
   }
 }

@@ -1,16 +1,16 @@
--- Better Shift Command v1.2.1 production controller. SC1-SC6 movement/exit/execution-identity fixes retained.
+-- Better Shift Command v1.2.2 production controller. SC1-SC6 movement/exit/execution-identity fixes retained.
 -- Command identity/ACK remains native-authoritative. V3 EntitySnapshot/ContactPair evidence
 -- supports bounded exit recovery while route semantics remain controller-authoritative.
 -- Post-exit A2 uses route semantic completion + post-ACK fresh-mode FEG.
-local RUN_ID = "V1_2_1"
+local RUN_ID = "V1_2_2"
 local TEST_PROFILE = "ROUTE_ONLY" -- Compatibility label only; never changes motion.
 local CONTROLLER_PHASE = "P2B" -- Installer can select P1E for terminal-only regression.
-local CONTROLLER_VERSION = "1.2.1"
+local CONTROLLER_VERSION = "1.2.2"
 local TAG = "[BETTER_SHIFT_COMMAND] "
 -- Production default: high-frequency diagnostics are disabled. Tests may explicitly re-enable them.
 local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.2.1 debug_telemetry=" .. tostring(DEBUG_TELEMETRY))
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.2.2 debug_telemetry=" .. tostring(DEBUG_TELEMETRY))
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -27,6 +27,7 @@ local function dlog(s)
     out(TAG .. tostring(s))
 end
 local function clean(s) return (tostring(s):gsub("[%c%s]", "_")) end
+local BSC_HUGE = (type(math.huge)=="number" and math.huge) or 1e300
 -- Self-contained native materializer.
 -- Keep every bootstrap helper inside one closure so the controller main chunk
 -- pays for exactly one local slot: ensure_embedded_native.
@@ -90,7 +91,7 @@ local ensure_embedded_native=(function()
         for i=1,#EMBEDDED_NATIVE do native_ensure_one(EMBEDDED_NATIVE[i]) end
     end
 end)()
-local function finite(n) return type(n)=="number" and n==n and n~=math.huge and n~=-math.huge end
+local function finite(n) return type(n)=="number" and n==n and n<BSC_HUGE and n>-BSC_HUGE end
 local function id(s)
     return type(s)=="string" and #s>0 and #s<=10 and not s:find("[^0-9]")
         and (#s==1 or s:sub(1,1)~="0") and (#s<10 or s<="4294967295")
@@ -146,7 +147,8 @@ local function id(s)
     return type(s)=="string" and #s>0 and #s<=10 and not s:find("[^0-9]")
         and (#s==1 or s:sub(1,1)~="0") and (#s<10 or s<="4294967295")
 end
-local function finite(n) return type(n)=="number" and n==n and n~=math.huge and n~=-math.huge end
+local BSC_HUGE = (type(math.huge)=="number" and math.huge) or 1e300
+local function finite(n) return type(n)=="number" and n==n and n<BSC_HUGE and n>-BSC_HUGE end
 local function copy_set(src)
     local out={};for k,v in pairs(src or {}) do if v==true then out[k]=true end end;return out
 end
@@ -216,7 +218,8 @@ local R1V3Recovery=(function()
 -- R1 V3 unified bounded recovery budget.
 -- One budget is shared by every recovery command path for a single Exit action.
 local R={VERSION="R1_V3_RECOVERY_1"}
-local function finite(n) return type(n)=="number" and n==n and n~=math.huge and n~=-math.huge end
+local BSC_HUGE = (type(math.huge)=="number" and math.huge) or 1e300
+local function finite(n) return type(n)=="number" and n==n and n<BSC_HUGE and n>-BSC_HUGE end
 function R.new(generation,block_id,exit_action_id,max_attempts)
     assert(finite(generation) and generation>=1 and generation%1==0,"invalid generation")
     assert(type(block_id)=="string" and block_id~="","invalid block id")
@@ -268,7 +271,8 @@ local function uid(s)
         and (#s==1 or s:sub(1,1)~='0') and (#s<10 or s<='4294967295')
 end
 local function entity(s) return u64(s) end
-local function finite(n) return type(n)=='number' and n==n and n~=math.huge and n~=-math.huge end
+local BSC_HUGE = (type(math.huge)=="number" and math.huge) or 1e300
+local function finite(n) return type(n)=='number' and n==n and n<BSC_HUGE and n>-BSC_HUGE end
 function C.new() return {after='0',last_tick=nil,total=0,gaps=0} end
 local function valid_event(e)
     if type(e)~='table' or not u64(e.serial) or not u64(e.tick_ms) or not uid(e.uid_a) or not uid(e.uid_b)
@@ -322,7 +326,8 @@ G.DEFAULTS={window_ms=600,max_gap_ms=1000,confirm_ms=700,close_confirm_ms=1000,
     contact_confirm_ms=1200,max_observed_speed_mps=80,
     geometry_confirm_ms=1500,geometry_bbox_m=1,
     strong_width_factor=0.25,strong_extra_cap_m=40}
-local function finite(n) return type(n)=="number" and n==n and n~=math.huge and n~=-math.huge end
+local BSC_HUGE = (type(math.huge)=="number" and math.huge) or 1e300
+local function finite(n) return type(n)=="number" and n==n and n<BSC_HUGE and n>-BSC_HUGE end
 local function len(x,z) return math.sqrt(x*x+z*z) end
 local function width(w) return finite(w) and w>=0 and w<=500 end
 local function conf(custom)
@@ -1935,7 +1940,7 @@ function Core.ingest(r,now)
             " rev="..r.unit_revision.." phase="..clean(st.phase).." model_ms="..string.format("%.0f",now)) end
         return
     elseif #st.actions==0 then
-        local age=cold and now-cold.ms or math.huge
+        local age=cold and now-cold.ms or BSC_HUGE
         local cold_good=a.type=="MOVE" and cold and
             ((cold.native_state=="UNSEEN" and cold.revision=="MISSING") or
              (cold.native_state=="REVISION_ZERO" and cold.revision=="0")) and r.unit_revision=="1"
@@ -1943,7 +1948,7 @@ function Core.ingest(r,now)
         local reset=st.queue_reset_cert
         local reset_good=reset and id(reset.revision) and r.unit_revision==inc(reset.revision)
         local idle_cert=st.restart_idle_cert
-        local idle_age=idle_cert and now-idle_cert.ms or math.huge
+        local idle_age=idle_cert and now-idle_cert.ms or BSC_HUGE
         local idle_good=idle_cert and id(idle_cert.revision) and r.unit_revision==inc(idle_cert.revision)
             and idle_age>=0 and idle_age<=CFG.restart_idle_max_age_ms
         if not cold_good and not reset_good and not idle_good then
@@ -2349,7 +2354,7 @@ local function route_handoff_ready(st,g,nexta)
         g.route_debt_mode="CLEAR";g.route_debt_count=0
     end
     if rt.semantic_done then
-        g.route_safe=true;g.route_mode="COMPLETE";g.route_reason="ACTION_COMPLETE";g.cut_error=0;g.cut_tolerance=math.huge
+        g.route_safe=true;g.route_mode="COMPLETE";g.route_reason="ACTION_COMPLETE";g.cut_error=0;g.cut_tolerance=BSC_HUGE
         return true,g.route_reason
     end
     -- Move -> Attack remains intentionally strict and is outside SC1.
@@ -3406,15 +3411,15 @@ function Core.maintain_current_action(st,now)
 end
 
 function Core.handoff_urgency(st,now)
-    if not st.plan or st.terminal or st.blocked then return math.huge,"INACTIVE" end
-    if S.pending_by_uid[st.uid] then return math.huge,"OWN_PENDING" end
+    if not st.plan or st.terminal or st.blocked then return BSC_HUGE,"INACTIVE" end
+    if S.pending_by_uid[st.uid] then return BSC_HUGE,"OWN_PENDING" end
     local cur=st.plan[st.idx]
-    if not cur then return math.huge,"NO_CURSOR" end
+    if not cur then return BSC_HUGE,"NO_CURSOR" end
     if cur.type=="ATTACK" then
         local t=st.attack;local tail=st.plan[st.idx+1]
-        if not t then return math.huge,"ATTACK_STATE_MISSING" end
+        if not t then return BSC_HUGE,"ATTACK_STATE_MISSING" end
         if t.done and tail then return -1000000,"ATTACK_COMPLETE_LATCHED" end
-        if not tail then return math.huge,"ATTACK_NO_EXIT_READY" end
+        if not tail then return BSC_HUGE,"ATTACK_NO_EXIT_READY" end
         if t.abort_reason then return -900000,"ATTACK_ABORT_TAIL_READY" end
         local left=math.max(0,CFG.attack_hold_ms-(t.eligible_ms or 0))
         local qualified=t.feg_result and t.feg_result.allow
@@ -3426,12 +3431,12 @@ function Core.handoff_urgency(st,now)
     local nexta=st.plan[st.idx+1]
     if not nexta then
         if rt.semantic_done then return -100,"MOVE_COMPLETE_NO_SUCCESSOR" end
-        return math.huge,"NO_SUCCESSOR"
+        return BSC_HUGE,"NO_SUCCESSOR"
     end
-    local g=geometry(st,nexta);if not g then return math.huge,"NO_GEOMETRY" end
+    local g=geometry(st,nexta);if not g then return BSC_HUGE,"NO_GEOMETRY" end
     if nexta.type=="ATTACK" then
-        if not target_viable(nexta) then return math.huge,"TARGET_NOT_READY" end
-        g=attack_geometry(st,nexta,g);if not g then return math.huge,"ATTACK_TARGET_POSITION_UNAVAILABLE" end
+        if not target_viable(nexta) then return BSC_HUGE,"TARGET_NOT_READY" end
+        g=attack_geometry(st,nexta,g);if not g then return BSC_HUGE,"ATTACK_TARGET_POSITION_UNAVAILABLE" end
         attack_brake_state(g)
         local route_ok=transition_handoff_ready(st,g,nexta)
         if not exit_gate_ready(st,nexta) then return 50000,"EXIT_BLOCK_PROTECT" end

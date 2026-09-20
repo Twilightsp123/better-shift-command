@@ -11,7 +11,8 @@ G.DEFAULTS={window_ms=600,max_gap_ms=1000,confirm_ms=700,close_confirm_ms=1000,
     contact_confirm_ms=1200,max_observed_speed_mps=80,
     geometry_confirm_ms=1500,geometry_bbox_m=1,
     strong_width_factor=0.25,strong_extra_cap_m=40}
-local function finite(n) return type(n)=="number" and n==n and n~=math.huge and n~=-math.huge end
+local BSC_HUGE = (type(math.huge)=="number" and math.huge) or 1e300
+local function finite(n) return type(n)=="number" and n==n and n<BSC_HUGE and n>-BSC_HUGE end
 local function len(x,z) return math.sqrt(x*x+z*z) end
 local function width(w) return finite(w) and w>=0 and w<=500 end
 local function conf(custom)

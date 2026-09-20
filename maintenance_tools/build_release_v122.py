@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build deterministic Better Shift Command v1.2.1 self-contained PFH5 pack. No install/game launch."""
+"""Build deterministic Better Shift Command v1.2.2 self-contained PFH5 pack. No install/game launch."""
 from __future__ import annotations
 import argparse,sys
 from pathlib import Path
