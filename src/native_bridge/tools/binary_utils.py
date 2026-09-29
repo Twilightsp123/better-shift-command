@@ -1,4 +1,8 @@
-"""Bounded, read-only PE/PFH5 utilities. No process access and no DLL loading."""
+"""LEGACY BASELINE-ONLY PE/PFH5 utilities. No process access and no DLL loading.
+
+The byte-locked constants below describe the historical baseline artifact and MUST NOT
+be used to verify the current FA06 diagnostic mapping. Use ../../tools/inspect_exe.py.
+"""
 from __future__ import annotations
 import hashlib
 import struct

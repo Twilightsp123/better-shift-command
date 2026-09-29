@@ -1,0 +1,161 @@
+--- /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/archive/upstream_v1.2.2/better_shift_command.lua	2026-09-27 13:23:35.520085986 +0000
++++ /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/source/better_shift_command.lua	2026-09-27 13:41:51.923440792 +0000
+@@ -1,16 +1,18 @@
+--- Better Shift Command v1.2.2 production controller. SC1-SC6 movement/exit/execution-identity fixes retained.
+--- Command identity/ACK remains native-authoritative. V3 EntitySnapshot/ContactPair evidence
+--- supports bounded exit recovery while route semantics remain controller-authoritative.
++-- Better Shift Command v1.2.2 COREPATH RC8 candidate. SC1-SC6 behavior baseline retained; unverified physical Entity evidence quarantined.
++-- Command identity/ACK remains native-authoritative. EntitySnapshot/Component/Alive/ContactPair
++-- is quarantined research evidence and is not a release/runtime prerequisite.
+ -- Post-exit A2 uses route semantic completion + post-ACK fresh-mode FEG.
+-local RUN_ID = "V1_2_2"
++local RUN_ID = "V1_2_2_COREPATH_RC8"
+ local TEST_PROFILE = "ROUTE_ONLY" -- Compatibility label only; never changes motion.
+ local CONTROLLER_PHASE = "P2B" -- Installer can select P1E for terminal-only regression.
+-local CONTROLLER_VERSION = "1.2.2"
++local CONTROLLER_VERSION = "1.2.2-corepath-rc8"
+ local TAG = "[BETTER_SHIFT_COMMAND] "
+ -- Production default: high-frequency diagnostics are disabled. Tests may explicitly re-enable them.
+ local DEBUG_TELEMETRY = false
+ local CENTER_A2_MODE = true
+-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.2.2 debug_telemetry=" .. tostring(DEBUG_TELEMETRY))
++local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
++local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
++out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.2.2_COREPATH_RC8 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE)
+ 
+ -- out is callable; it need not have Lua type "function".
+ local function log(s) out(TAG .. tostring(s)) end
+@@ -1014,6 +1016,7 @@
+     return true
+ end
+ function R1.v3_refresh_physical(st,now)
++    if not physical_evidence_enabled() then st.r1_v3_entity=nil;st.r1_v3_entity_reason="COREPATH_PHYSICAL_EVIDENCE_QUARANTINED";return end
+     local caps=S.evidence_v3_caps or {}
+     if caps.entity_snapshot~=true or type(bridge.read_entity_snapshot_v3)~="function" then st.r1_v3_entity=nil;st.r1_v3_entity_reason="CAPABILITY_UNAVAILABLE";return end
+     local ok,e,provider_reason=pcall(bridge.read_entity_snapshot_v3,st.uid,now)
+@@ -1082,6 +1085,7 @@
+     end
+ end
+ function R1.v3_drain_contacts(now)
++    if not physical_evidence_enabled() then S.v3_contact_healthy=false;return true,"COREPATH_PHYSICAL_EVIDENCE_QUARANTINED" end
+     local caps=S.evidence_v3_caps or {}
+     if caps.contact_pairs~=true or type(bridge.read_contact_events_v3)~="function" then S.v3_contact_healthy=false;return true,"CONTACT_CAPABILITY_UNAVAILABLE" end
+     local ok,events,meta=pcall(bridge.read_contact_events_v3,S.v3_contact_cursor.after,128)
+@@ -1403,6 +1407,7 @@
+     if old_id~=new_id and st.block_state then st.block_state[old_id]=nil end
+ end
+ local function bind_evidence_unit(u,unit,label)
++    if not physical_evidence_enabled() then return false end
+     if not u or not unit or not bridge or type(bridge.bind_evidence_unit_v3)~="function" then return false end
+     local now=clock();local retry=S.evidence_bind_retry and S.evidence_bind_retry[u]
+     if retry and now<(retry.next_ms or 0) then return false end
+@@ -3052,20 +3057,27 @@
+     local required_stall=CFG.exit_reassert_stall_ms
+     local v3why="UNUSED"
+     if (S.evidence_v3_caps or {}).execution_identity==true then
+-        -- Prefer exact V3 body/order evidence whenever it is live. SC5 adds one
+-        -- narrow fallback for the live failure seen at 10:44: the exact Exit MOVE
+-        -- ACK was known, but the EntitySnapshot aged out (ENTITY_STALE) while a
+-        -- positive global enemy contact and near-zero locomotion were still visible.
+-        -- Positive contact is used only as evidence that the body is still physically
+-        -- pinned; sticky melee=true or contact absence can never trigger this path.
+-        local status,why=R1.v3_exit_body_status(st,a,now);v3why=why or "OK"
+-        if status then
+-            confirmed_candidate=status.progressing_majority~=true
+-            evidence_mode="V3_BODY_NOT_PROGRESSING"
+-        elseif why=="ENTITY_STALE" then
++        local caps=S.evidence_v3_caps or {}
++        if physical_evidence_enabled() and caps.entity_snapshot==true and caps.contact_pairs==true then
++            -- Optional physical path. It may refine SC5 recovery, but it is never
++            -- allowed to become a prerequisite for command identity or dispatch.
++            local status,why=R1.v3_exit_body_status(st,a,now);v3why=why or "OK"
++            if status then
++                confirmed_candidate=status.progressing_majority~=true
++                evidence_mode="V3_BODY_NOT_PROGRESSING"
++            elseif why=="ENTITY_STALE" then
++                required_stall=CFG.exit_contact_fallback_stall_ms
++                confirmed_candidate=contact_fresh
++                evidence_mode="V3_ENTITY_STALE_CONTACT_FALLBACK"
++            end
++        else
++            -- RC8 core path: exact current Exit MOVE identity has already been checked
++            -- above. Positive enemy proximity/contact + near-zero locomotion + bounded
++            -- stall is sufficient for a recovery reassert without touching Entity data.
+             required_stall=CFG.exit_contact_fallback_stall_ms
+             confirmed_candidate=contact_fresh
+-            evidence_mode="V3_ENTITY_STALE_CONTACT_FALLBACK"
++            evidence_mode="COREPATH_POSITIVE_CONTACT_FALLBACK"
++            v3why="PHYSICAL_EVIDENCE_QUARANTINED"
+         end
+     else
+         confirmed_candidate=contact_fresh
+@@ -3521,6 +3533,13 @@
+     if bridge then
+         pcall(bridge.arm_verified_issue,false)
+         if S.epoch then pcall(bridge.end_battle,S.epoch) end
++        -- Production observer hooks stay resident across normal battle transitions.
++        -- Only an explicit Quit-to-Windows click disables the process-wide detours;
++        -- platform_stop_observer is intentionally one-shot until process restart.
++        if reason=="QUIT_WINDOWS_CLICK" and type(bridge.stop_observer)=="function" then
++            local sok,sr,se=pcall(bridge.stop_observer)
++            log("OBSERVER_SAFE_STOP reason=QUIT_WINDOWS_CLICK result="..tostring(sok and sr==true).." detail="..clean(se or sr or "OK"))
++        end
+     end
+     S.started=false; S.closed=true; S.pending_by_uid={}; S.pending_by_issue={}; S.pending_count=0
+ end
+@@ -3541,6 +3560,13 @@
+         local v3ok,v3=pcall(bridge.r1_evidence_capabilities_v3)
+         if v3ok and type(v3)=="table" and v3.schema==3 and v3.game_build_verified==true then S.evidence_v3_caps=v3 end
+     end
++    if not physical_evidence_enabled() then
++        S.evidence_v3_caps.entity_snapshot=false
++        S.evidence_v3_caps.combat_groups=false
++        S.evidence_v3_caps.contact_pairs=false
++        S.evidence_v3_caps.target_specific_physical_contact=false
++        S.evidence_v3_caps.physical_evidence_mode="QUARANTINED"
++    end
+     S.evidence_caps={game_build_verified=false,execution_identity=false,entity_snapshot=false,combat_groups=false,fresh_engagement=false}
+     if type(bridge.r1_evidence_capabilities_v2)=="function" then
+         local cok,caps=pcall(bridge.r1_evidence_capabilities_v2)
+@@ -3610,14 +3636,14 @@
+     if not bok or type(module)~="table" then error("DLL_INIT "..clean(be or module)) end
+     bridge=module
+     for _,k in ipairs({"version","number_abi_probe","exact_id_probe","get_status","start_observer","begin_battle","end_battle",
+-        "get_unit_revision","arm_verified_issue","issue_verified_command","cancel_pending_issue","read_journal","acknowledge",
+-        "r1_evidence_capabilities_v3","bind_evidence_unit_v3","read_active_order_identity_v3","read_entity_snapshot_v3","read_combat_groups_v3","read_contact_events_v3","contact_owner_ready_v3"}) do
++        "get_unit_revision","stop_observer","arm_verified_issue","issue_verified_command","cancel_pending_issue","read_journal","acknowledge",
++        "r1_evidence_capabilities_v3","read_active_order_identity_v3"}) do
+         if type(bridge[k])~="function" then error("MISSING_BRIDGE_API "..k) end
+     end
+-    if bridge.version()~="1.0.15-r4-evidence-v3-validated-userdata-root" then error("WRONG_BRIDGE_VERSION") end
++    if bridge.version()~="1.0.16-corepath-wh3-6c104-rc8" then error("WRONG_BRIDGE_VERSION") end
+     local n,f=bridge.number_abi_probe(); local a,c=bridge.exact_id_probe()
+     if n~=16777215 or f~=1.5 or a~="4294967295" or c~="16777217" then error("BRIDGE_ABI_SELFTEST") end
+-    log("BRIDGE_OK version=1.0.15-r4-evidence-v3-validated-userdata-root")
++    log("BRIDGE_OK version=1.0.16-corepath-wh3-6c104-rc8")
+     if DEBUG_TELEMETRY then log("FEG_CONFIG version="..FEG.VERSION.." enabled=true confirmation_ms="..FEG.DEFAULTS.confirm_ms..
+         " close_confirmation_ms="..FEG.DEFAULTS.close_confirm_ms.." sample_window_ms="..FEG.DEFAULTS.window_ms..
+         " sustained_contact_ms="..FEG.DEFAULTS.contact_confirm_ms.." geometry_confirm_ms="..FEG.DEFAULTS.geometry_confirm_ms.." hold_ms="..CFG.attack_hold_ms.." charging_required=false native_changed=true max_inflight="..CFG.max_inflight) end
+@@ -3634,6 +3660,22 @@
+     bmgr:register_phase_change_callback("Deployed",checked(schedule))
+     bmgr:register_phase_change_callback("VictoryCountdown",function() stop("VictoryCountdown") end)
+     bmgr:register_phase_change_callback("Complete",function() stop("Complete") end)
++    -- Quit-to-Windows can destroy battle UI before a normal phase callback fires.
++    -- Stop native detours on the desktop-quit button only; normal battle Complete
++    -- keeps the observer resident so later battles in the same WH3 process still work.
++    local core_ok,core_obj=pcall(function() return core end)
++    if core_ok and core_obj and type(core_obj.add_listener)=="function" then
++        pcall(function()
++            core_obj:add_listener("BSC_COREPATH_SAFE_STOP_QUIT_WINDOWS","ComponentLClickUp",
++                function(context)
++                    local ok,v=pcall(function() return context.string end)
++                    if ok and v=="button_windows" then return true end
++                    ok,v=pcall(function() return context:string() end)
++                    return ok and v=="button_windows"
++                end,
++                function() stop("QUIT_WINDOWS_CLICK") end,true)
++        end)
++    end
+     local phase=bmgr:get_current_phase_name()
+     S.late_start=(phase=="Deployed")
+     if DEBUG_TELEMETRY then dlog("LOADED phase="..clean(phase).." run="..RUN_ID) end

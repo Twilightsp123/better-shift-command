@@ -1,0 +1,24 @@
+BSC CorePath RC8 Documentation-Only Integrity Audit
+2026-09-27
+
+Purpose: prove the documentation refresh did not alter any pre-existing runtime source, test, build tool, validation snapshot, or binary outside the explicitly listed documentation/metadata files.
+
+Original archive: BSC_COREPATH_MAINTENANCE_20260927_PREBUILD.zip
+Unmodified pre-existing files checked: 146
+Unexpected mismatches: 0
+
+Intentionally modified pre-existing documentation/metadata files:
+  - COREPATH_CHANGELOG.md
+  - README.md
+  - README_FIRST.md
+  - RELEASE_MANIFEST.json
+  - SHA256SUMS.txt
+  - docs/DECISION_LOG.md
+  - docs/DEVELOPMENT_HISTORY.md
+  - docs/PROVENANCE.md
+  - docs/TEST_MATRIX.md
+  - src/native_bridge/CHANGELOG.md
+
+Added files are limited to documentation, documentation backups/reports, and the documentation contract checker.
+
+Result: PASS

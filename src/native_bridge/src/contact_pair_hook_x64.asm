@@ -1,5 +1,5 @@
 ; Windows x64 mid-function contact-pair observer stub.
-; Hook site: Warhammer3.exe+0x2F68C35, after contact/intersection branches.
+; Hook site: Warhammer3.exe+0x30A3859, after contact/intersection branches.
 ; This is NOT a normal function entry. Preserve all volatile GPRs, RFLAGS and
 ; volatile XMM registers before calling the C observer, then continue through
 ; MinHook's relocated trampoline.

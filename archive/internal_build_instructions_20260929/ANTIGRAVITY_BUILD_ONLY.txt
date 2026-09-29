@@ -1,0 +1,137 @@
+BSC COREPATH RC8 — WINDOWS BUILDONLY CONTRACT
+=============================================
+
+MODE: BUILD / VERIFY ONLY.
+DO NOT edit source files.
+DO NOT install or update Visual Studio, SDKs, drivers, BIOS, Python, CMake, MASM, or any system component.
+DO NOT copy anything into the WH3 game directory.
+DO NOT launch WH3.
+If VS2019 v142 x64 + MASM is not already available, STOP and report the blocker.
+
+Target WH3 EXE:
+C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\Warhammer3.exe
+Expected SHA256:
+6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297
+
+Expected bridge version:
+1.0.17-corepath-wh3-6c104-movevtfix
+Expected build id:
+WH3_6C104A63AACC4D86_COREPATH_RC8
+
+STEP 0 — ZERO SOURCE MUTATION PROOF
+-----------------------------------
+Record SHA256 of every file in the extracted package before work. Do not normalize timestamps/line endings.
+
+STEP 1 — SOURCE CONTRACT
+------------------------
+python maintenance_tools\check_corepath_rc8.py
+python maintenance_tools\audit_evidence_wiring.py
+python maintenance_tools\run_checks_corepath_rc8.py
+python tools\prebuild_contract_check.py
+
+Required:
+- controller jobs 19/19 PASS
+- mutations 40/40 CAUGHT
+- prebuild: core_hooks=16, optional_sites=2
+
+STEP 2 — PREBUILD CURRENT EXE INSPECT
+-------------------------------------
+python tools\inspect_exe.py ^
+  --exe "C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\Warhammer3.exe" ^
+  --out windows_validation\prebuild_inspect
+
+Required:
+- build_match=true
+- core_ready=true
+- core_matches=16 / core_total=16
+- optional sites are reported separately. For this audited build the expected static result is 2/2, but optional sites do NOT authorize or veto the core bridge.
+
+STEP 3 — WINDOWS VS2019 v142 x64 + MASM BUILD
+---------------------------------------------
+cmake -S src\native_bridge -B build_win -G "Visual Studio 16 2019" -A x64 -T v142
+cmake --build build_win --config Release
+
+Required output:
+build_win\Release\wh3_native_bridge.dll
+
+No compiler/toolchain substitution without owner approval.
+
+STEP 4 — WINDOWS CTEST
+----------------------
+ctest --test-dir build_win -C Release --output-on-failure
+
+All tests must pass, including:
+- backend_private_process
+- module_private_process
+- mid_function_hook_smoke
+
+The mid-function smoke remains required as an ABI/ASM preservation test even though ContactPair is staged disabled at runtime.
+
+STEP 5 — PE TOOLCHAIN VERIFY
+----------------------------
+python tools\verify_pe_toolchain.py build_win\Release\wh3_native_bridge.dll
+
+Required:
+- AMD64 / PE32+
+- MSVC linker 14.29 (v142 contract)
+
+STEP 6 — POSTBUILD EXE INSPECT
+------------------------------
+Run the same inspect_exe.py command into windows_validation\postbuild_inspect.
+Required result must still be build_match=true and 16/16 mandatory core.
+Confirm Warhammer3.exe SHA is unchanged.
+
+STEP 7 — BUILD CANDIDATE PACK
+-----------------------------
+python maintenance_tools\build_corepath_rc8.py ^
+  build_win\Release\wh3_native_bridge.dll ^
+  output\zzz_bsc_corepath_rc8_candidate.pack
+
+python maintenance_tools\verify_corepath_rc8.py ^
+  output\zzz_bsc_corepath_rc8_candidate.pack ^
+  build_win\Release\wh3_native_bridge.dll
+
+Required:
+- deterministic pack verification PASS
+- embedded Bridge bytes == freshly built DLL bytes
+- embedded MinHook SHA256 == df452eacdb076c35a80c795df920fd3c6f128faa3e0bccb0b7490e95f8659d54
+
+STEP 8 — DELIVERY
+-----------------
+Create BSC_COREPATH_RC8_WINDOWS_DELIVERY.zip containing ONLY:
+- wh3_native_bridge.dll
+- zzz_bsc_corepath_rc8_candidate.pack
+- windows_validation/ (all command outputs/reports)
+- WINDOWS_BUILD_REPORT.txt
+
+WINDOWS_BUILD_REPORT.txt must record:
+- package source ZIP SHA256
+- Warhammer3.exe SHA256 before/after
+- DLL SHA256
+- pack SHA256
+- embedded DLL SHA256
+- embedded MinHook SHA256
+- compiler/linker identity
+- CTest result/count
+- pre/post inspect result
+- explicit statement: SOURCE_FILES_MODIFIED=NO
+
+FINAL SOURCE INTEGRITY
+----------------------
+Re-hash the extracted source tree and compare with STEP 0. Source files must be byte-identical.
+Build/output/windows_validation directories are excluded from this comparison.
+
+STOP CONDITIONS
+---------------
+STOP without patching source if any of these occurs:
+- source contract fails
+- EXE SHA mismatch
+- any mandatory core guard mismatch
+- compiler/MASM/link failure
+- any CTest failure
+- PE verifier failure
+- deterministic pack failure
+- embedded DLL/MinHook mismatch
+- missing v142/MASM toolchain
+
+Do not “fix while building”. Return the logs and blocker instead.

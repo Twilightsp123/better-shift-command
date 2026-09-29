@@ -28,7 +28,7 @@ std::uint32_t execute(void* u,std::uint32_t a,void* p,std::uint8_t q){
   auto c=reinterpret_cast<void*>(root+(mode==5?0x300:0x278));
   void* s=h->allocate(c,mode==4?std::uint32_t(q)^1:q);CK(s==reinterpret_cast<void*>(root+0x288));
   if(mode==2)h->allocate(c,q);
-  auto vt=base+(kind==Kind::Move?0x37b31c8:0x37b2540);if(mode==3)++vt;
+  auto vt=base+(kind==Kind::Move?0x03910AA8:0x03910228);if(mode==3)++vt;if(mode==10&&kind==Kind::Move)vt=base+0x0390E248;
   wr(0x288+0x18,std::uint64_t(vt));wr(0x288+0x20,seq);wr(0x2f88,std::uint32_t(1));wr(0x2f8c,std::uint32_t(0));
   if(kind==Kind::Move){wr(0x288+0x58,mode==7?std::numeric_limits<float>::quiet_NaN():12.5f);wr(0x288+0x5c,2.0f);wr(0x288+0x60,-5.0f);}
   else{wr(0x288+0x58,std::uint64_t(mode==6?0xdeadbeef:target));unit[0x288+0x70]=1;unit[0x288+0x71]=2;unit[0x288+0x72]=3;unit[0x288+0x78]=4;}
@@ -49,11 +49,12 @@ struct Fixture {BridgeHost host{memory};Id epoch=0;Fixture(){
 }
 int main(){int passed=0,failed=0;auto test=[&](const char* n,auto f){try{f();++passed;std::cout<<"PASS "<<n<<"\n";}catch(const std::exception& e){++failed;std::cout<<"FAIL "<<n<<": "<<e.what()<<"\n";}};
  test("forwards all four parameters and full EAX",[]{Fixture f;ret=0x12345678;CK(f.send()==ret);CK(calls==1&&argument==0xabcdef12&&payload==reinterpret_cast<void*>(0x1234)&&queue==0);});
- test("seq zero and finite slot geometry",[]{Fixture f;f.send();auto e=f.page().events.at(0);CK(e.engine_seq&&*e.engine_seq==0&&e.order.x==12.5f&&e.order.z==-5.0f);});
+ test("seq zero and finite slot geometry",[]{Fixture f;f.send();auto e=f.page().events.at(0);auto st=f.host.status();CK(e.engine_seq&&*e.engine_seq==0&&e.order.x==12.5f&&e.order.z==-5.0f&&st.accepted_move_seen);});
  test("append/replace preserved without source invention",[]{Fixture f;f.send(true);seq=62;f.send(false);auto p=f.page();CK(p.events.size()==2&&*p.events[0].order.queued&&!*p.events[1].order.queued);CK(p.events[1].revision==2&&p.events[0].source==Source::Unknown);});
  test("attack pointer uid raw flags decoded",[]{Fixture f;kind=Kind::Attack;seq=1450;f.send(true);auto e=f.page().events.at(0);CK(e.order.target_uid==1008&&e.order.target_root==target&&e.order.raw78==4&&e.order.raw71==2);});
  test("native failure preserves return and has no phantom seq",[]{Fixture f;ret=0;CK(f.send()==0);auto e=f.page().events.at(0);CK(e.status==Status::NativeRejected&&!e.engine_seq&&e.revision==0);});
  test("accepted no slot explicit, advances revision",[]{Fixture f;mode=1;f.send();auto e=f.page().events.at(0);CK(e.status==Status::AcceptedNoSlot&&!e.engine_seq&&!e.order.x&&e.revision==1);CK(f.host.status().capture_errors==1&&f.host.status().fatal_errors==0&&f.host.status().gate_fault==Error::Ok);});
+ test("historical simple-move vtable is not full-move outcome and cannot calibrate",[]{Fixture f;mode=10;seq=55;f.send();auto e=f.page().events.at(0);auto st=f.host.status();CK(e.status==Status::AcceptedNoSlot&&!e.engine_seq&&st.capture_errors==1&&!st.accepted_move_seen&&st.fatal_errors==0&&st.gate_fault==Error::Ok);});
  for(int bad:{2,3,4,5})test(("invalid slot evidence mode "+std::to_string(bad)).c_str(),[bad]{Fixture f;mode=bad;f.send();auto e=f.page().events.at(0);CK(!e.engine_seq&&e.status==Status::AcceptedNoSlot&&calls==1);});
  test("unreadable target cannot be guessed",[]{Fixture f;mode=6;kind=Kind::Attack;f.send();auto e=f.page().events.at(0);CK(!e.order.target_uid&&!e.order.target_root&&e.engine_seq);CK(f.host.status().capture_errors==1&&f.host.status().fatal_errors==0&&f.host.status().gate_fault==Error::Ok);});
  test("NaN geometry not published as coordinates",[]{Fixture f;mode=7;f.send();auto e=f.page().events.at(0);CK(!e.order.x&&e.engine_seq);});

@@ -29,8 +29,8 @@ constexpr std::uintptr_t kGroupStride=0x10;
 constexpr Id kMaxEntities=300;
 constexpr Id kMaxGroups=128;
 constexpr Id kMaxOrders=40;
-constexpr std::uintptr_t kMoveVtableRva=0x37b31c8;
-constexpr std::uintptr_t kAttackVtableRva=0x37b2540;
+constexpr std::uintptr_t kMoveVtableRva=0x03910AA8;
+constexpr std::uintptr_t kAttackVtableRva=0x03910228;
 constexpr std::uint64_t kMaxMotionGapMs=2000;
 inline bool finite(float v){return std::isfinite(v);}
 }
@@ -68,13 +68,13 @@ ActiveOrderView EvidenceProbe::active_order(std::uintptr_t root)const noexcept{
   std::uintptr_t vt1=0;Id seq1=0;std::uintptr_t target1=0;float x1=0,z1=0;
   if(!get(slot,kOrderVtable,&vt1,8)||!get(slot,kOrderId,&seq1,4))return {};
   Kind kind=Kind::Move;
-  if(vt1==base_+kMoveVtableRva){kind=Kind::Move;if(!get(slot,kPayload,&x1,4)||!get(slot,kPayload+0x10,&z1,4)||!finite(x1)||!finite(z1))return {};}
+  if(vt1==base_+kMoveVtableRva){kind=Kind::Move;if(!get(slot,kPayload,&x1,4)||!get(slot,kPayload+0x08,&z1,4)||!finite(x1)||!finite(z1))return {};}
   else if(vt1==base_+kAttackVtableRva){kind=Kind::Attack;if(!get(slot,kPayload,&target1,8)||!target1)return {};}
   else return {};
   Id count2=0,head2=0,seq2=0;std::uintptr_t vt2=0,target2=0;float x2=0,z2=0;
   if(!get(root,kOrderCount,&count2,4)||!get(root,kOrderHead,&head2,4)||count2!=count1||head2!=head1)continue;
   if(!get(slot,kOrderVtable,&vt2,8)||!get(slot,kOrderId,&seq2,4)||vt2!=vt1||seq2!=seq1)continue;
-  if(kind==Kind::Move){if(!get(slot,kPayload,&x2,4)||!get(slot,kPayload+0x10,&z2,4)||x2!=x1||z2!=z1)continue;}
+  if(kind==Kind::Move){if(!get(slot,kPayload,&x2,4)||!get(slot,kPayload+0x08,&z2,4)||x2!=x1||z2!=z1)continue;}
   else {if(!get(slot,kPayload,&target2,8)||target2!=target1)continue;}
   out.complete=true;out.active=true;out.engine_seq=seq1;out.kind=kind;
   if(kind==Kind::Move){out.dest_x=x1;out.dest_z=z1;}else out.target_root=target1;

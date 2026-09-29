@@ -1,0 +1,5 @@
+PASS
+core_hooks=16
+optional_sites=2
+physical_evidence=QUARANTINED
+smart_guard=STAGED_DISABLED

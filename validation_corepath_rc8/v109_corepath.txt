@@ -1,0 +1,31 @@
+$ /usr/bin/texlua tests/test_v109_regressions.lua source/better_shift_command.lua tests/fixture.lua
+PASS E03/R04 clear cannot delete 70m of final exit route
+PASS E07/E09 recontact revokes current permission without deleting history
+PASS E10/R10 current recovery independent of successor NONE
+PASS E10/R10 current recovery independent of successor MOVE
+PASS E10/R10 current recovery independent of successor ATTACK
+PASS E10/R10 current recovery independent of successor INVALID_ATTACK
+PASS E11/R10 progress with constant contact must not cause reassert
+PASS E14/R11 unmeasurable secondary enemy is UNKNOWN not absence
+PASS E12/I04 recovery budget does not reset on append or revive after replacement
+PASS E15/E02 route-done Exit may append another Move without Entity evidence veto
+PASS E08 closed complete block is not reopened by later collision
+PASS M08/R12 missed prediction has explicit BLOCKED_ROUTE preserving suffix
+PASS R06 ordinary first Attack still completes when V2 entity/combat producer is unavailable
+PASS COREPATH quarantined physical majority samples cannot veto route-complete Exit to A2
+PASS COREPATH residual physical straggler fixtures do not reassert without positive live contact
+PASS N02 decision only exact native sequence adopts without a duplicate command
+PASS N04/R11 exact premature native successor is rolled back to the same unfinished Move
+PASS N03/R11 wrong native sequence cannot adopt even at same target
+PASS R11 stale entity sample must not renew residual permission
+PASS R11 incomplete entity sample remains telemetry and cannot veto route-complete A2
+PASS O04/R03 debug off does not disable recovery or fault reporting
+PASS A07 no target no movement after ACK has explicit execution fault
+PASS R4 widened dispatch pipeline does not batch an Attack behind four OTHER issues
+PASS COREPATH stale physical samples cannot revoke or gate a route-complete A2 transition
+PASS R11 missing incomplete evidence never overrides a known active Move via stale target
+PASS N03/R11 reused native sequence cannot adopt wrong bad_lifetime
+PASS N03/R11 reused native sequence cannot adopt wrong bad_receipt
+PASS R11 uncertain native successor must not be overwritten by recovery of old Move
+ACTUAL_INTERPRETER=Lua 5.3; R1 decision tests, synthetic evidence producer; WH3 mapping NOT verified
+TOTAL 28 PASS 0 FAIL

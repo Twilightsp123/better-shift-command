@@ -1,0 +1,63 @@
+{
+  "schema": 2,
+  "project": "Better Shift Command",
+  "artifact_status": "DESIGN_HANDOFF_NOT_FOR_RELEASE",
+  "candidate": "BSC Transition Policy Architecture D1",
+  "controller_version": "1.2.2-corepath-rc8",
+  "run_id": "V1_2_2_COREPATH_RC8",
+  "build_marker": "BETTER_SHIFT_COMMAND_V1.2.2_COREPATH_RC8",
+  "native_bridge": "1.0.17-corepath-wh3-6c104-movevtfix",
+  "platform": "Windows x64",
+  "target_wh3_sha256": "6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297",
+  "upstream_behavior_baseline": {
+    "repository": "Twilightsp123/better-shift-command",
+    "commit": "0b690d59940e23e475de332a82cfecf072961977",
+    "release": "v1.2.2",
+    "parent_behavior_release": "v1.2.1 SC6 V3 Execution Identity Reconciliation"
+  },
+  "native_policy": {
+    "mandatory_core_hooks": 16,
+    "optional_static_sites": [
+      "contact_pair",
+      "smart_guard"
+    ],
+    "contact_pair_runtime": "STAGED_DISABLED",
+    "smart_guard_runtime": "STAGED_DISABLED",
+    "physical_evidence": "QUARANTINED",
+    "safe_stop": "QUIT_TO_WINDOWS_ONLY"
+  },
+  "portable_validation": {
+    "controller_jobs": "19/19 PASS",
+    "mutations": "40/40 CAUGHT",
+    "native_ctest": "13/13 PASS",
+    "asan_ubsan_ctest": "13/13 PASS",
+    "prebuild_contract": "PASS"
+  },
+  "pending": [
+    "T1 behavior-neutral TransitionPolicy refactor",
+    "T2 immediate-MOVE reconciliation + Move-to-Attack terminal handoff + hysteresis",
+    "T2 WH3 transition runtime matrix",
+    "T3 MCT policy profile compiler and presets",
+    "separate battle lifecycle/teardown closure"
+  ],
+  "publish_allowed": false,
+  "documentation_revision": "TPOL_D1_20260929",
+  "documentation_entrypoint": "README_FIRST.md -> docs/MAINTAINER_INDEX.md -> docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md",
+  "documentation_policy": "CURRENT_STATE_DOCS_OVERRIDE_HISTORY",
+  "runtime_baseline": "CorePath RC8 Move VTable Fix",
+  "design_stream": "BSC-TPOL-D1",
+  "design_status": "APPROVED_NOT_IMPLEMENTED",
+  "product_default_policy": "SMOOTH",
+  "windows_validation": {
+    "delivery_sha256": "972a45164f1ae037927aad71b0ef6a28bc8dfecb53c25ae129f9b9b4cdf562ed",
+    "vs2019_v142_x64_masm": "PASS",
+    "native_ctest": "14/14 PASS",
+    "mandatory_guards": "16/16 PASS"
+  },
+  "runtime_evidence": {
+    "move_vtable_outcome_failure": "CLOSED",
+    "move_attack_smoothness": "OPEN",
+    "sc6_immediate_move_rollback": "OPEN",
+    "battle_teardown_hang": "OPEN_SEPARATE_STREAM"
+  }
+}

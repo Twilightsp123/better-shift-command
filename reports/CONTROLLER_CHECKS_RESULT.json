@@ -1,0 +1,82 @@
+{
+  "variant": "BSC_COREPATH_RC8_PREBUILD",
+  "status": "PASS",
+  "steps": [
+    {
+      "name": "corepath_contract.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "evidence_wiring_audit.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "gate.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "gate103.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "gate104.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "handoff.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "recovery.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "contacts_module.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "second_charge_legacy_research.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "center_b2.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "blocks.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "contracts.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "regressions.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "v107.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "v109_corepath.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "exec_identity_v3.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "tools.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "reverse.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "mutations.txt",
+      "exit_code": 0
+    }
+  ]
+}

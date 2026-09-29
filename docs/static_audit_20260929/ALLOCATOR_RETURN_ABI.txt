@@ -1,0 +1,55 @@
+================================================================================
+ALLOCATOR_RETURN_ABI.TXT — ORDER QUEUE ALLOCATOR RETURN ABI AUDIT
+================================================================================
+Target Executable: Warhammer3.exe
+Allocator RVA: 0x02F5248C (.trace)
+
+1. FUNCTION SIGNATURE & ARGUMENTS
+--------------------------------------------------------------------------------
+Signature: void* __fastcall OrderQueue::allocate_slot(OrderQueue* queue, bool queued)
+Registers:
+  - RCX: Pointer to OrderQueue container located at UnitController + 0x278.
+  - DL:  Boolean flag indicating whether the order is queued (shift-command) or immediate.
+
+2. QUEUED VS NON-QUEUED BEHAVIOR
+--------------------------------------------------------------------------------
+At 0x02F524A1:
+  0x02F524A1: test       dl, dl                         ; test queued flag
+  0x02F524A3: jne        0x142f524c5                    ; if queued (dl != 0), skip reset and allocate next slot
+  0x02F524A5: cmp        dword ptr [rcx + 0x2d10], 0
+  0x02F524AC: mov        byte ptr [rcx + 0x2d1c], 1
+  0x02F524B3: setne      al
+  0x02F524B6: mov        byte ptr [rcx + 0x2d1d], al
+  0x02F524BC: add        rcx, 0x10
+  0x02F524C0: call       0x142f3c030                    ; NON-QUEUED: CLEARS/RESETS ENTIRE ACTIVE QUEUE!
+
+3. SLOT BUFFER GEOMETRY & INDEXING
+--------------------------------------------------------------------------------
+The slot storage buffer begins at:
+  r8 = queue + 0x10 (UnitController + 0x288)
+
+Slot Size Calculation:
+  At 0x02F52582:
+    lea rbx, [rcx + rcx*8]
+    shl rbx, 5
+    add rbx, r8
+  Math: (rcx * 9) * 32 = rcx * 288 = rcx * 0x120 bytes.
+  Every slot is exactly 288 bytes (0x120 bytes).
+  Capacity: 40 slots (40 * 0x120 = 0x2D00 bytes, matching container offset 0x2D00).
+
+4. RETURN VALUE ABI
+--------------------------------------------------------------------------------
+At 0x02F525A5:
+  0x02F525A5: mov        rax, rbx                       ; RAX = pointer to start of slot
+  0x02F525A8: mov        rbx, qword ptr [rsp + 0x150]
+  0x02F525B0: add        rsp, 0x140
+  0x02F525B7: pop        rbp
+  0x02F525B8: ret
+
+MATHEMATICAL PROOF:
+  - Allocator returns strictly and unconditionally slot_base (the beginning of the 288-byte buffer).
+  - It does NOT return slot_base + 0x18.
+  - It does NOT return slot_base + 0x20.
+  - The +0x18 offset is added EXCLUSIVELY by the callers (lea rcx, [rbx + 0x18]).
+  - Both Move and Attack paths call the exact same allocator with identical semantics.
+  - Evidence Grade: LEVEL 1 (Proved by machine code instructions).

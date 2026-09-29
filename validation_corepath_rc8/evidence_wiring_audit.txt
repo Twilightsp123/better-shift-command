@@ -1,0 +1,2 @@
+$ /opt/pyvenv/bin/python maintenance_tools/audit_evidence_wiring.py
+PASS: command/execution identity is behavior-authoritative; physical Entity/Component/Alive/ContactPair is quarantined and non-gating

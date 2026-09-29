@@ -1,0 +1,38 @@
+================================================================================
+ENGINE_SEQUENCE_CONTRACT.TXT — ENGINE SEQUENCE GENERATION & ASSIGNMENT CONTRACT
+================================================================================
+Target Executable: Warhammer3.exe
+
+1. SEQUENCE GENERATOR LOCATION & MECHANISM
+--------------------------------------------------------------------------------
+In Base Order Constructor (RVA 0x0300A7EC):
+  0x0300A7F9: mov rax, qword ptr [rdx + 8]      ; RDX = slot_base. [slot_base + 8] = UnitController*
+  0x0300A7FD: mov r9, qword ptr [rax + 0x38]    ; [controller + 0x38] = BattleContext*
+  0x0300A801: mov r10, qword ptr [r9 + 0x440]   ; [context + 0x440] = OrderSequenceManager*
+  0x0300A808: mov r9d, dword ptr [r10 + 0x9c]   ; R9D = current global sequence counter
+  0x0300A80F: lea eax, [r9 + 1]                  ; EAX = sequence + 1
+  0x0300A813: mov dword ptr [r10 + 0x9c], eax   ; Store incremented counter back to manager
+  0x0300A81A: mov qword ptr [rcx + 0x10], rdx   ; [order_this + 0x10] = slot_base backpointer
+  0x0300A81E: mov dword ptr [rcx + 8], r9d      ; [order_this + 0x08] = ASSIGNED ENGINE SEQUENCE!
+  0x0300A835: mov byte ptr [rdx + 0x118], 1     ; [slot_base + 0x118] = 1 (marks slot ACTIVE)
+
+2. UNCONDITIONAL NATURE OF ENGINE SEQUENCE
+--------------------------------------------------------------------------------
+- Function 0x0300A7EC contains ZERO conditional jumps, branches, or return-early paths.
+- It is executed unconditionally on every call to:
+  * Move Constructor (0x0300B094)
+  * Simple Move Constructor (0x0300B038)
+  * Attack Constructor (0x0300AB98)
+- Therefore, every accepted Move and Attack order in the slot queue is GUARANTEED to have
+  an engine sequence written to [order_this + 8] (slot_base + 0x20).
+
+3. CAN AN ACCEPTED ORDER HAVE NO SEQUENCE?
+--------------------------------------------------------------------------------
+- A single-unit order that successfully passes validation in issue_move (0x030344D4)
+  or issue_attack (0x03032854) CANNOT exist without an engine sequence.
+- If top-level returns AL = 1 (accepted), the sequence counter has already been generated
+  and stored at slot_base + 0x20.
+- The only scenarios where sequence is absent:
+  1. The order was rejected before allocator/constructor (AL = 0 returned).
+  2. The multi-unit group delegation path (0x03034A71 -> 0x0302FC04) was taken, where
+     the parent call dispatches to subordinates which each individually construct their orders.

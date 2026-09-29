@@ -1,0 +1,38 @@
+BSC COREPATH RC8 MOVE VTABLE FIX VALIDATION
+Date: 2026-09-29
+
+Authoritative baseline:
+- DOCS_R1 / original CorePath RC8
+- upstream gameplay baseline v1.2.2
+- locked EXE SHA 6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297
+
+Static audit result:
+- allocator 0x02F5248C RAX = exact slot_base: VERIFIED
+- top-level Move 0x030344D4 -> Full Move constructor 0x0300B094: VERIFIED
+- Full Move VTable = 0x03910AA8: VERIFIED
+- Simple/Intercept Move constructor 0x0300B038 -> 0x0390E248: VERIFIED
+- Attack constructor 0x0300AB98 -> 0x03910228: VERIFIED
+- engine sequence slot+0x20: VERIFIED for constructed orders
+- Move XYZ slot+0x58/+0x5C/+0x60: VERIFIED
+- Attack target slot+0x58 and target UID +0x3EA0: VERIFIED
+
+Logic audit:
+- original allocator capture retained
+- R1/R2/R3 outcome resolver experiments withdrawn
+- outcome Move VTable corrected to 0x03910AA8
+- SC6 active Move execution VTable corrected to 0x03910AA8
+- calibration now requires complete accepted slot-bearing outcome
+- ACCEPTED_NO_SLOT retained due static-report queue-full contradiction
+
+Offline validation:
+- documentation contract: PASS
+- CorePath source contract: PASS
+- evidence wiring audit: PASS
+- Controller/core regression jobs: PASS
+- mutation gate: PASS
+- prebuild contract: PASS (16 core, 2 optional)
+- portable Native CTest: 13/13 PASS
+- ASan/UBSan Native CTest: 13/13 PASS
+
+Windows v142/MASM rebuild: PENDING
+WH3 runtime confirmation: PENDING

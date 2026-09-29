@@ -1,0 +1,21 @@
+BSC CorePath RC8 Move-VTable Fix — Windows BuildOnly
+
+Input: this PREBUILD tree.
+
+DO NOT modify source.
+DO NOT relocate addresses.
+DO NOT add hooks.
+DO NOT use R1/R2/R3 experimental branches.
+
+Required:
+1. Verify current Warhammer3.exe SHA remains:
+   6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297
+2. Verify existing 16/16 mandatory hook guards. No new hook is required.
+3. Build x64 Release with VS2019/MSVC v142 + MASM.
+4. Run Windows CTest including backend_private_process, module_private_process, mid_function_hook_smoke.
+5. Verify DLL reports version:
+   1.0.17-corepath-wh3-6c104-movevtfix
+6. Build deterministic candidate pack from this exact source/DLL.
+7. Record DLL and pack SHA256.
+
+This is a source-fixed BuildOnly. If build/tests fail, preserve evidence and stop. Do not redesign gameplay or Native logic.

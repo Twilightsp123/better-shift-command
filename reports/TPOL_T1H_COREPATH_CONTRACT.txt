@@ -1,0 +1,1 @@
+PASS: CorePath RC8 source contract; 16 command hooks mandatory, physical evidence quarantined, provenance frozen

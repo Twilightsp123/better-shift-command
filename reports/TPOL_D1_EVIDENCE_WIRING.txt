@@ -1,0 +1,1 @@
+PASS: command/execution identity is behavior-authoritative; physical Entity/Component/Alive/ContactPair is quarantined and non-gating

@@ -1,0 +1,27 @@
+$ /usr/bin/texlua tests/test_contracts_v104.lua source/better_shift_command.lua tests/fixture.lua
+PASS bootstrap and startup are visible
+PASS missing battle manager fails closed
+PASS wrong Bridge version fails closed
+PASS observer and begin failures do not start
+PASS journal reads 64 and paginates before executing
+PASS journal gap and overrun fail before dispatch
+PASS bad cursor is never acknowledged
+PASS ack failure prevents issue
+PASS revision race never reauthorizes stale plan
+PASS native stale gate skips callback
+PASS normal RMB cancels old generation and late ACK cannot revive it
+PASS HALT cancels controlled generation
+PASS ACK timeout disarms controller
+PASS wrong own issue and revision fail closed
+PASS wrong own Attack target ACK fails closed
+PASS command callback exception releases and fails visibly
+PASS missing vector helper fails before publish
+PASS five recipients share widened bounded pipeline without four-unit batching
+PASS queued append during pending affects only that recipient and redecides
+PASS paused callbacks drain ACK but do not create model-time handoff
+PASS poll reentry fails closed before a second issue
+PASS cancelling one of four pending recipients does not cancel siblings
+PASS recoverable capture yields ambiguous generation before a fresh replace can recover
+PASS dynamic reinforcement is registered before first fresh replacement plan
+ACTUAL_INTERPRETER=Lua 5.3; explicit engine doubles, not WH3
+TOTAL 24 PASS 0 FAIL

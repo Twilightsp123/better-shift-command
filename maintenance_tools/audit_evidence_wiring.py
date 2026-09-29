@@ -1,60 +1,44 @@
 #!/usr/bin/env python3
+"""CorePath RC8 evidence wiring audit.
+Execution identity is behavior-authoritative. Entity/Component/Alive/ContactPair
+remains archived research and cannot become a production prerequisite.
+"""
 from pathlib import Path
-import re,sys
+import re
 ROOT=Path(__file__).resolve().parents[1]
-SRC=ROOT/'source/better_shift_command.lua'
-s=SRC.read_text(encoding='utf-8')
-
-def fail(msg):
-    print('FAIL:',msg);raise SystemExit(1)
-
-def section(start,end):
-    a=s.find(start)
-    if a<0:fail('missing '+start)
-    b=s.find(end,a)
-    if b<0:fail('missing end '+end)
-    return s[a:b]
-
-# Behavior-critical execution identity must be V3-authoritative.
+s=(ROOT/'source/better_shift_command.lua').read_text(encoding='utf-8')
+def fail(msg): print('FAIL:',msg); raise SystemExit(1)
+def section(a,b):
+    i=s.find(a);j=s.find(b,i+1)
+    if i<0 or j<0: fail('missing section '+a)
+    return s[i:j]
+if 'local PHYSICAL_EVIDENCE_MODE = "QUARANTINED"' not in s: fail('physical evidence not quarantined')
 adapter=section('function R1.read_active_execution(st)','function R1.execution_matches_action')
-for token in ('S.evidence_v3_caps','read_active_order_identity_v3','S.evidence_caps','read_active_order_identity_v2'):
-    if token not in adapter:fail('identity adapter missing '+token)
-if adapter.index('read_active_order_identity_v3')>adapter.index('read_active_order_identity_v2'):
-    fail('V3 must precede V2 fallback')
+for t in ('S.evidence_v3_caps','read_active_order_identity_v3'):
+    if t not in adapter: fail('execution identity missing '+t)
 reconcile=section('function Core.reconcile_native_successor(st,now)','local function advance(st,now)')
-for token in ('R1.read_active_execution(st)','R1.execution_matches_action','NATIVE_FUTURE_OVERRUN','NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE'):
-    if token not in reconcile:fail('reconciliation missing '+token)
-for forbidden in ('read_active_order_identity_v2','R1.evidence(st'):
-    if forbidden in reconcile:fail('reconciliation directly uses legacy identity '+forbidden)
+for t in ('R1.read_active_execution(st)','R1.execution_matches_action','NATIVE_FUTURE_OVERRUN','NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE'):
+    if t not in reconcile: fail('SC6 reconciliation missing '+t)
 sc5=section('function Core.maybe_reassert_exit(st,now)','local function rollback_native_future_to_current')
-for token in ('EXIT_REASSERT_DEFER_IDENTITY','R1.read_active_execution(st)','R1.execution_matches_action(active,a)'):
-    if token not in sc5:fail('SC5 identity layer missing '+token)
-# current_target may remain diagnostic but may not authorize transition/adoption.
-if 'current_target()' in reconcile and 'NATIVE_SUCCESSOR_ADOPTED' not in reconcile:
-    fail('unexpected reconciliation structure')
-# Direct V2 execution-identity reads are allowed only inside the explicit adapter fallback.
-occ=[m.start() for m in re.finditer(r'read_active_order_identity_v2',s)]
-a0=s.find('function R1.read_active_execution(st)');a1=s.find('function R1.execution_matches_action')
-if len(occ)!=2 or any(not (a0 <= x < a1) for x in occ):
-    fail('legacy active-order read escaped compatibility adapter')
-# Old V2 entity/combat readers are telemetry-only legacy code. They must not appear in
-# route handoff, successor reconciliation, SC5 recovery, attack gating, or dispatch.
-critical='\n'.join([
-    section('function Core.observe_exit_block(st,now)','function Core.vector_at(st,p)'),
-    reconcile,
-    sc5,
-])
-for forbidden in ('read_entity_snapshot_v2','read_combat_groups_v2','R1.entity(st,now)','R1.combat(st,now)'):
-    if forbidden in critical:fail('legacy V2 physical evidence leaked into behavior-critical path: '+forbidden)
-# Native keeps V2 ABI names but they must fail explicitly retired after argument validation.
+for t in ('R1.read_active_execution(st)','R1.execution_matches_action(active,a)','COREPATH_POSITIVE_CONTACT_FALLBACK','PHYSICAL_EVIDENCE_QUARANTINED'):
+    if t not in sc5: fail('SC5 corepath contract missing '+t)
+# Quarantined physical helpers must visibly short-circuit.
+for fn,needle in (('function R1.v3_refresh_physical(st,now)','if not physical_evidence_enabled() then'),
+                  ('function R1.v3_drain_contacts(now)','if not physical_evidence_enabled() then')):
+    chunk=section(fn,'\nend')
+    if needle not in chunk: fail(fn+' lacks quarantine short-circuit')
+# Boot must not hard-require physical APIs.
+boot=s[s.find('function Core.boot()'):]
+rs=boot.find('for _,name in ipairs({');re_=boot.find('}) do',rs);req=boot[rs:re_]
+for t in ('bind_evidence_unit_v3','read_entity_snapshot_v3','read_combat_groups_v3','read_contact_events_v3','contact_owner_ready_v3'):
+    if t in req: fail('boot requires quarantined physical API '+t)
+# Native production exports fail closed for physical evidence.
 cpp=(ROOT/'src/native_bridge/src/lua_module.cpp').read_text(encoding='utf-8')
-for token in ('order_identity_read_v2_retired','entity_snapshot_read_v2_retired','combat_snapshot_read_v2_retired','V2_RETIRED_USE_V3'):
-    if token not in cpp:fail('native V2 retirement hardening missing '+token)
-reg=cpp[cpp.find('REG("r1_evidence_capabilities_v2"'):cpp.find('REG("version"')]
-for token in ('order_identity_read_v2_retired','entity_snapshot_read_v2_retired','combat_snapshot_read_v2_retired'):
-    if token not in reg:fail('native V2 export still wired to live reader: '+token)
-# Tests must include V3-only and V2-fallback coverage.
-t=(ROOT/'tests/test_exec_identity_v3.lua').read_text(encoding='utf-8')
-for token in ('V3_ONLY_SUCCESSOR_READY','V3_ONLY_SUCCESSOR_EARLY_ROLLBACK','V3_FUTURE_OVERRUN_ROLLBACK','V3_IDENTITY_MISMATCH_NO_FALSE_ADOPT','NONCANONICAL_ACTIVE_ORDER','V2_COMPAT_FALLBACK'):
-    if token not in t:fail('missing execution identity regression '+token)
-print('PASS: execution identity wiring is V3-authoritative; V2 is compatibility-only/telemetry-only; retired native V2 readers fail closed')
+for t in ('PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8','COREPATH_EXECUTION_IDENTITY_ONLY'):
+    if t not in cpp: fail('native quarantine marker missing '+t)
+# ContactPair remains code/archive but not mandatory core detour.
+plat=(ROOT/'src/native_bridge/src/platform_windows.cpp').read_text(encoding='utf-8')
+block=re.search(r'constexpr const char\* hook_names\[\]\s*=\s*\{(.*?)\};',plat,re.S)
+if not block or 'contact_pair' in block.group(1): fail('ContactPair still in mandatory hook_names')
+if 'contact_pair_guard' not in plat or 'g_wh3_physical_evidence_staged_disabled = true' not in plat: fail('optional ContactPair quarantine missing')
+print('PASS: command/execution identity is behavior-authoritative; physical Entity/Component/Alive/ContactPair is quarantined and non-gating')

@@ -1,0 +1,71 @@
+==================================================
+NEW_BUILD_MAP_FINAL.TXT
+TOTAL WAR: WARHAMMER III CURRENT DIAGNOSTIC PREBUILD MAP
+==================================================
+
+TARGET GAME: Total War: WARHAMMER III 9.0.1.0 / Steam BuildID 25546563
+TARGET EXE SHA256: 6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297
+DIAGNOSTIC BRIDGE VERSION: 1.0.16-diagnostic-wh3-update-gated-rc7-component-layout-safe-stop
+BUILD ID: WH3_6C104A63AACC4D86_DIAGNOSTIC_RC7_COMPONENT_LAYOUT_SAFE_STOP
+MAP STATUS: PHASE 6.2 CURRENT_BUILD_PREBUILD_MAP_COMPLETE; RC7 RUNTIME LAYOUT/SHUTDOWN GATES REQUIRED
+OPTIONAL HEADER SIZEOFIMAGE: 0x0EF12000
+MOVE VTABLE:   0x0390E248
+ATTACK VTABLE: 0x03910228
+CONTACT_PAIR:  0x030A3859
+SMART_GUARD OPTIONAL HOOK: 0x030E2524 (runtime remains staged disabled)
+
+HOOK MAPPINGS (17 CORE + 1 OPTIONAL SMART GUARD):
+--------------------------------------------------------------------------------------------------------------------------------------
+INDEX  NAME               RVA          SECTION    EXEC   LEN   ACTUAL_BYTES
+--------------------------------------------------------------------------------------------------------------------------------------
+[00]   move               0x030344D4   .trace     True   32    488bc4488958104889701848897820554154415541564157488da888feffff48
+[01]   attack             0x03032854   .trace     True   32    488bc448895808488968104889701857415641574883ec30498b18488bf1488b
+[02]   allocator          0x02F5248C   .trace     True   32    48895c240855488d6c24c04881ec40010000488bd984d2752083b9102d000000
+[03]   halt               0x0301B890   .trace     True   32    48895c24084889742410574883ec20488bf18ada4881c188020000e88007f2ff
+[04]   lua_move           0x02ED5808   .trace     True   32    488bc44889580848897018488978205541564157488d68d84881ec1001000048
+[05]   lua_attack         0x02ED50A0   .trace     True   32    48895c240848896c2410488974241857415641574881ecd0000000458af8488b
+[06]   publish_move       0x01CB1DC8   .trace     True   32    48895c2418574883ec408b0524c53b02488bd9488d4c245089442450488bfae8
+[07]   publish_attack     0x02DF28BC   .trace     True   32    48895c2418574883ec408b0504b92701488bd9488d4c245089442450488bfae8
+[08]   writer_begin       0x01BCE174   .trace     True   32    48895c24084c8bda488bd94c89590833d2668911418b8300500000894110418b
+[09]   writer_finalize    0x01BD140C   .trace     True   32    8039004c8bc9753180790100752b488b51088b4114440fb7820050000066442b
+[10]   copy               0x01BAF488   .trace     True   32    488bc44889581048897018574883ec20488bfa4c8d40088b920050000033db88
+[11]   stage              0x01BB0C94   .trace     True   32    48895c24084889742410574883ec20488bd98bf2488b4918498bf8e830330000
+[12]   move_handler       0x02ECF0E0   .trace     True   32    48895c241048897c242055488d6c24a94881ec00010000488bfa488bd9488bd1
+[13]   attack_handler     0x02ECEBAC   .trace     True   32    488bc448895810555657488d68a84881ec40010000488bf20f2970d8488bd148
+[14]   selection          0x02F042D4   .trace     True   32    40555356574157488d6c24c94881ecc00000004533ff4c8d456f488bda44897d
+[15]   free               0x0052F770   .trace     True   20    4883ec584885c90f8412010000f6054caaa30302
+[16]   contact_pair       0x030A3859   .trace     True   16    488b47184885c07418488b88e8020000
+[17]   smart_guard        0x030E2524   .trace     True   32    48895c24084889742410574883ec20488b02488bf1488bca418af8488bdaff90
+--------------------------------------------------------------------------------------------------------------------------------------
+
+VTABLES (read-only data; executable is NOT required):
+Move Order VTable   0x0390E248   .edata
+Attack Order VTable 0x03910228   .edata
+
+STATIC CLOSURE NOTES:
+- publish_attack direct identity: lua_attack -> publish_attack -> writer_begin -> virtual Serialize -> writer_finalize.
+- ContactPair ABI: r9 -> rdi ResultRecord* preserved to hook site.
+- Hook/VTable map is unchanged from Phase 6.2 and RC6.
+- Entity+0x18 / Component+0x4A0 / Component+0x8B0 / Entity vt+0x630 remain runtime-gated assumptions, not release facts.
+- Smart Guard internal state-object/vtable map was NOT re-audited for this build; optional runtime remains staged disabled.
+
+RC6 RUNTIME EVIDENCE THAT MOTIVATED RC7:
+- RC6 successfully observed native command roots.
+- uid=1006 produced exactly one physical evidence candidate with slot_count=60.
+- RC6 then failed before Alive at COMPONENT_GATE_FAIL / MOVEMENT_BACKREF_MISMATCH with sampled_count=0.
+- Therefore RC7 does not change hook addresses or guess a new component offset. It performs a bounded read-only layout discovery and reports candidates.
+
+RC7 DIAGNOSTIC SCOPE:
+- Root discovery remains the RC6 independent command-root/evidence-root design.
+- Component discovery scans Entity pointer offsets <0x200 and component memory <0xC00; exactly one backreference pair is required.
+- A discovered +0x8B0 state slot is accepted only with live non-zero 0..2 evidence; otherwise a narrow unique state candidate is required.
+- Every discovered pair/state is revalidated across the entire soldier array before Component Gate can pass.
+- Every Entity vtable and vt+0x630 target is read/validated as in-image executable before the Alive virtual is ever called.
+- Alive vt+0x630 remains forbidden until the Component Gate passes.
+- Safe observer stop queues disable for all bridge hooks and applies it, but does NOT unload the bridge, MinHook backend, or trampolines.
+- This safe-stop design is intended to remove allocator/free/etc. detours before WH3 teardown; the exit-hang fix remains RUNTIME_UNVERIFIED until an RC7 game log shows DIAG_OBSERVER_STOP PASS and WH3 exits normally.
+
+PRODUCTION LIMITS:
+- RC7 is diagnostic-only. src/native_bridge/src/evidence_probe.cpp still contains the historical production component offsets and is intentionally NOT auto-rewritten from an unproven scan result.
+- ContactPair ctrl+0x4A0 is a separate controller path and is intentionally unchanged; do not infer that the MovementComponent backreference offset applies to ContactPair.
+- Do not label RELEASE_READY / WH3_UPDATE_COMPATIBLE until runtime layout, Alive, safe-stop, and later behavior regressions pass.

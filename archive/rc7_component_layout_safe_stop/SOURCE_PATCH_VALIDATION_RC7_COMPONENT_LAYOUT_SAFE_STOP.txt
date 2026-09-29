@@ -1,0 +1,107 @@
+RC7 COMPONENT LAYOUT + SAFE STOP — SOURCE PATCH VALIDATION
+===========================================================
+Target WH3 EXE SHA256:
+6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297
+
+Diagnostic version:
+1.0.16-diagnostic-wh3-update-gated-rc7-component-layout-safe-stop
+Build ID:
+WH3_6C104A63AACC4D86_DIAGNOSTIC_RC7_COMPONENT_LAYOUT_SAFE_STOP
+
+BASELINE / RUNTIME MOTIVATION
+-----------------------------
+RC6 runtime proved:
+- correct RC6 loaded;
+- native command-root observation worked;
+- uid=1006 found a unique physical evidence candidate;
+- candidate slot_count=60;
+- Component Gate failed at sampled_count=0 with MOVEMENT_BACKREF_MISMATCH;
+- Entity Alive vt+0x630 was not executed.
+
+RC7 also addresses a separate lifecycle risk observed when quitting WH3: RC6 left all 17 detours enabled after the Lua diagnostic session stopped. RC7 adds an explicit detour-disable path. This is a targeted fix candidate, NOT a claim that the exit hang is already runtime-closed.
+
+PATCH CONTENT
+-------------
+- clients/diagnostic/bsc_wh3_update_diagnostic.lua
+  SHA256 1c74d2d8c01cc310edf25fcf0a58eb4c13e7a922a67c58fd34395c04230ee0ce
+- release_tools/build_bsc_gate_diagnostic.py
+  SHA256 35b2897af78101969fb42828c550edbfd717696aaa0a7682a2cb35ded75d4c4c
+- release_tools/common_pack.py
+  SHA256 b2fce9bbdbc0678ed91c4fa5d384b21757aea9ece0071d11d0ad829ea84ec183
+- src/native_bridge/CHANGELOG.md
+  SHA256 b16e44e69cb9c6ac7dca46bd3412bd8f1d7b5e1b5c2c55691a702464c143880d
+- src/native_bridge/CMakeLists.txt
+  SHA256 ab53fb734b2dbb43df203858803fbe92129897054488a18ac51625a8fee108ac
+- src/native_bridge/include/wh3/bridge_host.hpp
+  SHA256 1e6791c75d096855b8d0b32b3e8cee8d755eca21f552c378a4d8349e54b7c8e5
+- src/native_bridge/include/wh3/component_layout.hpp
+  SHA256 d03d84b42f163ca0a1db34761a74e127bd28bca1a64bad2607f52b2658d78a80
+- src/native_bridge/src/component_layout.cpp
+  SHA256 b67fe3547c75792662684f8522f2c2f0301465051990451d08c770bc1c0b0137
+- src/native_bridge/src/lua_module.cpp
+  SHA256 2a985d8f67d5244a4accbd85fdf6eb97a9e5fded444c6e5fe95e57f0d978dff7
+- src/native_bridge/src/platform_unavailable.cpp
+  SHA256 ca5465bd7740bfbb482cdd4b14f326d4b623d404caa9aff7603c8f84e2a5ef77
+- src/native_bridge/src/platform_windows.cpp
+  SHA256 1f2793a97f0dd11816d8ac9cc3699f21ab4deae9990aabcfbab206fa2a89745b
+- src/native_bridge/tests/test_component_layout.cpp
+  SHA256 8140b1ffe43897b81e77c601951746af9e2b826fd67f65e03434f786788cff5d
+- src/native_bridge/tests/test_diagnostic_gates.cpp
+  SHA256 27b88227af23228c4954ad216408fba7f861ef361a86c5ebd7979e808e2b94a1
+- src/native_bridge/tests/test_lua_exports.cpp
+  SHA256 1b180efb5199659b7519c1b9a6ab7584a92f472a2ce953e74bdd3b0797432dfa
+- tools/prebuild_contract_check.py
+  SHA256 86815848cd98b6aaf5869422fcc06a87c0f142182828027849fe5821e6338ee0
+
+Patch file:
+- SOURCE_FIX_RC6_TO_RC7_COMPONENT_LAYOUT_SAFE_STOP.patch
+  SHA256 2c7c027467d33ddb7a5522a38023f78a3ad63a6cae6fecc62d5e455409d321b2
+  Patch apply/reproduction test: PASS (15/15 files exactly reproduced from clean RC6 source).
+
+CORE SAFETY PROPERTIES
+----------------------
+- 17 core hook RVAs/guards unchanged.
+- 1 optional Smart Guard hook RVA/guard unchanged; runtime staged disabled.
+- Move/Attack VTables unchanged.
+- Command root remains distinct from evidence/physical root.
+- Component scan is read-only and bounded: Entity <0x200, Component <0xC00.
+- Exactly one cross-Entity backreference pair required; ambiguity fails closed.
+- Discovered historical +0x8B0 is accepted only with live non-zero 0..2 evidence, avoiding zero-padding false proof.
+- Full soldier-array component/vtable/vt+0x630 executable precheck occurs before Component Gate PASS.
+- vt+0x630 is not called before Component Gate PASS.
+- Safe stop uses MinHook QueueDisable + ApplyQueued.
+- Safe stop does not FreeLibrary, MH_Uninitialize, or MH_RemoveHook; DLL/backend/trampolines remain resident.
+- Diagnostic still never arms/issues BSC commands.
+- Production EvidenceProbe hardcoded component offsets are intentionally unchanged pending runtime proof.
+- ContactPair controller +0x4A0 path is intentionally unchanged and is not inferred from MovementComponent discovery.
+
+PORTABLE VALIDATION
+-------------------
+- CTest: 13/13 PASS.
+- ASan + UBSan CTest: 13/13 PASS.
+- Lua C-API fixture: 48/48 PASS.
+- Component layout fixture: 7/7 PASS.
+- Diagnostic gate fixture: 15/15 PASS.
+- Dual-root fixture: PASS.
+- Diagnostic Lua texluac parse: PASS.
+- prebuild_contract_check.py: PASS, 17 core + 1 optional.
+- fake-bridge pack builder round-trip: PASS, injected Lua parse PASS.
+- python -O pack-builder bypass: rejected.
+
+WINDOWS / RUNTIME STILL REQUIRED
+--------------------------------
+- VS2019 v142 x64 + MASM build.
+- Windows CTest including component_layout_discovery and mid_function_hook_smoke.
+- verify_pe_toolchain.py.
+- pre-build + post-build inspect_exe.py against current WH3.
+- pack embedded DLL SHA == fresh DLL SHA.
+- WH3 runtime Component layout result.
+- WH3 runtime Alive deployment + casualty proof.
+- DIAG_OBSERVER_STOP result=PASS.
+- normal Quit-to-Windows without hang after observer stop.
+
+RELEASE VERDICT
+---------------
+SOURCE_READY_FOR_WINDOWS_BUILD_ONLY
+NOT_RELEASE_READY
+NOT_YET_RUNTIME_VERIFIED

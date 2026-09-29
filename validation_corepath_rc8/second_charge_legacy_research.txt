@@ -1,0 +1,8 @@
+$ /usr/bin/texlua tests/test_r1_v3_second_charge.lua source/better_shift_command.lua tests/fixture.lua
+PASS route-complete Exit issues A2 without EntitySnapshot and fresh approach releases P2
+PASS A2 start-near stationary sticky melee cannot borrow A1 contact
+PASS A2 explicit melee-clear creates a fresh episode and can release P2
+PASS wrong target after A2 ACK cannot credit fresh-mode hold
+PASS missing V3 physical evidence is telemetry only and cannot veto A2
+PASS same-target A2 credit always starts after ACK-side fresh or approach evidence
+TOTAL 6 PASS 0 FAIL

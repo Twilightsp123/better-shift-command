@@ -1,0 +1,25 @@
+BSC CorePath RC8 Documentation Refresh Revalidation
+2026-09-27
+
+Scope: source/contract regression after documentation-only restructuring.
+
+Executed during refresh:
+  python maintenance_tools/check_documentation_contract.py
+  python maintenance_tools/check_corepath_rc8.py
+  python maintenance_tools/audit_evidence_wiring.py
+  python maintenance_tools/run_checks_corepath_rc8.py
+  python tools/prebuild_contract_check.py
+
+Observed results:
+  Documentation contract: PASS
+  CorePath source contract: PASS
+  Evidence wiring audit: PASS
+  Controller/source jobs: 19/19 PASS
+  Mutation gate: PASS (existing suite reports all caught)
+  Prebuild contract: PASS
+  Core hooks: 16
+  Optional sites: 2
+  Physical evidence: QUARANTINED
+  Smart Guard: STAGED_DISABLED
+
+Note: run_checks_corepath_rc8.py rewrites validation_corepath_rc8 outputs. After confirming PASS, those historical validation snapshot files were restored byte-for-byte from the original uploaded PREBUILD ZIP. This report records the refresh-time rerun separately.

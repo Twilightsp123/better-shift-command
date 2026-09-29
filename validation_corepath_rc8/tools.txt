@@ -1,0 +1,29 @@
+$ /opt/pyvenv/bin/python tests/test_tools.py
+test_duplicate_path_rejected (__main__.PackTests.test_duplicate_path_rejected) ... ok
+test_gate_inline_matches_module_source (__main__.PackTests.test_gate_inline_matches_module_source) ... ok
+test_min_hook_hash_required (__main__.PackTests.test_min_hook_hash_required) ... ok
+test_no_charge_or_killcount_dependency (__main__.PackTests.test_no_charge_or_killcount_dependency) ... ok
+test_payload_roundtrip_all_byte_values (__main__.PackTests.test_payload_roundtrip_all_byte_values) ... ok
+test_ready_pack_is_exact_controller (__main__.PackTests.test_ready_pack_is_exact_controller) ... ok
+test_selfcontained_preserves_bytes (__main__.PackTests.test_selfcontained_preserves_bytes) ... ok
+test_trailing_garbage_rejected (__main__.PackTests.test_trailing_garbage_rejected) ... ok
+test_truncation_rejected (__main__.PackTests.test_truncation_rejected) ... ok
+test_v104_block_architecture_is_present (__main__.PackTests.test_v104_block_architecture_is_present) ... ok
+test_v109_native_startup_hardening_is_present (__main__.PackTests.test_v109_native_startup_hardening_is_present) ... ok
+test_ack_without_issue_rejected (__main__.Reports.test_ack_without_issue_rejected) ... ok
+test_closed_credit_rejected (__main__.Reports.test_closed_credit_rejected) ... ok
+test_controller_failure_overrides_success (__main__.Reports.test_controller_failure_overrides_success) ... ok
+test_no_test_is_not_pass (__main__.Reports.test_no_test_is_not_pass) ... ok
+test_sample_proof_not_physical_proof (__main__.Reports.test_sample_proof_not_physical_proof) ... ok
+test_under_three_seconds_rejected (__main__.Reports.test_under_three_seconds_rejected) ... ok
+test_active_receipt_blocks_second_install (__main__.Transactions.test_active_receipt_blocks_second_install) ... ok
+test_changed_pack_blocks_rollback (__main__.Transactions.test_changed_pack_blocks_rollback) ... ok
+test_failure_during_replace_restores_old_pack (__main__.Transactions.test_failure_during_replace_restores_old_pack) ... ok
+test_install_then_rollback_does_not_touch_dlls (__main__.Transactions.test_install_then_rollback_does_not_touch_dlls) ... ok
+test_native_failure_makes_no_install (__main__.Transactions.test_native_failure_makes_no_install) ... ok
+test_source_pack_mismatch_refused (__main__.Transactions.test_source_pack_mismatch_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 0.023s
+
+OK

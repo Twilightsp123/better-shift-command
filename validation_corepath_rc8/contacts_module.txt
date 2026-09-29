@@ -1,0 +1,8 @@
+$ /usr/bin/texlua tests/test_r1_v3_contacts.lua source/r1_v3_contacts.lua
+PASS consume advances exact string cursor
+PASS gap is fail closed
+PASS serial reversal rejected
+PASS tick reversal rejected across pages
+PASS attack match requires own cohort entity target and exact order
+PASS reverse pair orientation matches symmetrically
+TOTAL 6 PASS 0 FAIL

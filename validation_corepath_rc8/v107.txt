@@ -1,0 +1,10 @@
+$ /usr/bin/texlua tests/test_v107_regressions.lua source/better_shift_command.lua tests/fixture.lua
+PASS accepted HALT creates a trusted queue-reset predecessor for an immediate Shift Attack
+PASS HALT reset certificate is single-use and the following Shift tail appends normally
+PASS queued-only start without cold idle, HALT reset, or stable idle still fails closed
+PASS stable clean idle can rebuild a fresh queued-start certificate after cancellation
+PASS Center A2 route completion is not vetoed by unrelated melee contact
+PASS source target death does not complete exit while another enemy still holds the unit in melee
+PASS global melee clear commits exit after real exit motion and then permits the next Attack
+PASS sticky melee flag may clear only after all registered enemy contacts are absent for the longer fallback dwell
+TOTAL 8 PASS 0 FAIL

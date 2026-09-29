@@ -1,0 +1,18 @@
+Better Shift Command upstream baseline frozen for CorePath RC8 maintenance
+=======================================================================
+Repository: Twilightsp123/better-shift-command
+Branch: main
+Commit: 0b690d59940e23e475de332a82cfecf072961977
+Commit message: Release v1.2.2 - Lua math.huge compatibility
+Parent v1.2.1: 46592fe2a5e7108aced34ad698dfb44941ffb73b
+
+Authoritative upstream controller/module SHA256 values:
+7876a5068378d36cd302e39d7c6e1cb8c6b964fa8ac77a7c7ed87c0213570302  better_shift_command.lua
+31cb6fa4b2264dec7016cb100c206e6ab311ef6be56e49faec68a240ba7feb8b  fresh_engagement_gate.lua
+53e175cf26c7007c44e530190f814eb2b6ed4d06ea30a803b519f6342a1cafbe  r1_v3_contacts.lua
+69b9acab964b602ab85e841fc39fde3e13a2c8f6fcb7eebe6cad6e4cc98bd670  r1_v3_handoff.lua
+2b9899fc27e0d6aa3257728981227057d861aa2ae3a510ed14fa7b82efed88b4  r1_v3_recovery.lua
+
+Upstream v1.2.2 scope was Lua numeric compatibility (math.huge fallback); it did not
+change Native Bridge behavior. The CorePath RC8 candidate intentionally DOES change
+the Native Bridge and is therefore NOT v1.2.2 release-equivalent and NOT ready to publish.

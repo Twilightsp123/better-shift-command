@@ -1,0 +1,3 @@
+PASS candidate pack
+bridge_sha256=8fc223c9d1da5834b2034ced8e34ea9f0a8bc0a27964d6704ce931bc9a3b3b0a
+pack_sha256=6098b5efb9e2d0134a28dbe3bd44af04ccbeae3bd9e524aa4a4cac6ee2956720

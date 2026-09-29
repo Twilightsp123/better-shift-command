@@ -1,0 +1,1 @@
+PASS: BSC-TPOL-D1 documentation contract; current runtime, approved-next design, MCT boundary, staged migration, open issues and historical authority are explicit

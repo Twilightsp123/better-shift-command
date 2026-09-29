@@ -1,0 +1,12 @@
+$ /opt/pyvenv/bin/python tests/test_reverse_inventory.py
+test_read_does_not_modify_input (__main__.TestPE.test_read_does_not_modify_input) ... ok
+test_reject_non_x64 (__main__.TestPE.test_reject_non_x64) ... ok
+test_reject_truncated (__main__.TestPE.test_reject_truncated) ... ok
+test_roundtrip (__main__.TestPE.test_roundtrip) ... ok
+test_string_rva (__main__.TestPE.test_string_rva) ... ok
+test_virtual_tail_not_file_backed (__main__.TestPE.test_virtual_tail_not_file_backed) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK

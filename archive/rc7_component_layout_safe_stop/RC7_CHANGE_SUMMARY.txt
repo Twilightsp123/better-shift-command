@@ -1,0 +1,66 @@
+RC7 COMPONENT LAYOUT + SAFE STOP — CHANGE SUMMARY
+=================================================
+Target: WH3 9.0.1 / EXE SHA256 6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297
+Version: 1.0.16-diagnostic-wh3-update-gated-rc7-component-layout-safe-stop
+Build ID: WH3_6C104A63AACC4D86_DIAGNOSTIC_RC7_COMPONENT_LAYOUT_SAFE_STOP
+
+WHY RC7 EXISTS
+--------------
+RC6 closed the old EVIDENCE_ROOT_NOT_FOUND blocker far enough to find a unique physical candidate. In the 2026-09-27 runtime log, uid=1006 bound a candidate with slot_count=60, then Component Gate failed immediately with sampled_count=0 / MOVEMENT_BACKREF_MISMATCH. Entity Alive vt+0x630 was never executed.
+
+The same test also exposed a shutdown lifecycle risk: the diagnostic session stopped, but the 17 native detours remained enabled until process teardown. The user's quit-to-Windows flow reached UI destruction and the process then hung. RC7 treats that observer lifetime as a blocker rather than assuming Windows/SSD is responsible.
+
+SOURCE CHANGES
+--------------
+1. Bounded read-only component layout discovery
+   - New component_layout.hpp/.cpp.
+   - Samples 3-4 soldier Entities from the already-bound physical container.
+   - Entity pointer offset scan: [0x000, 0x200), pointer aligned.
+   - Component backreference scan: [0x000, 0xC00), pointer aligned.
+   - Requires exactly one (Entity->component offset, Component->Entity backref offset) pair across independent Entities.
+   - 0 candidates => COMPONENT_LAYOUT_PAIR_NOT_FOUND.
+   - >1 candidates => COMPONENT_LAYOUT_PAIR_AMBIGUOUS.
+   - Historical movement state +0x8B0 is preferred only with live non-zero state evidence in 0..2; zero-filled padding is not accepted as proof.
+   - Otherwise scans 0x600..0xB00 for exactly one live state candidate; ambiguity fails closed.
+
+2. Full-chain revalidation before Alive
+   - The discovered offsets are not trusted after the sample scan.
+   - RC7 revalidates the layout against every soldier Entity in the unit.
+   - It also validates Entity vtable and the vt+0x630 function pointer as in-image executable, but does not call it yet.
+   - Only after this read-only full validation may Component Gate publish the discovered offsets.
+   - Alive probe reloads those published dynamic offsets and revalidates the chain immediately before every virtual call.
+
+3. Diagnostic telemetry
+   DIAG_COMPONENT now logs:
+   - layout_method
+   - entity_component_offset
+   - component_backref_offset
+   - movement_state_offset
+   - pair_candidates / pair_report
+   - state_candidates / state_report
+   - slot_count / sampled_count / reason
+
+4. Safe native observer stop
+   - Resolves MH_QueueDisableHook and MH_ApplyQueued from the frozen MinHook backend.
+   - platform_stop_observer() queues MH_ALL_HOOKS disable and applies it.
+   - Does NOT FreeLibrary, MH_Uninitialize, or MH_RemoveHook during safe stop.
+   - Bridge DLL remains PINned, MinHook remains loaded, trampolines remain resident until process exit.
+   - Observer restart in the same process is rejected after a successful stop.
+   - Diagnostic stop path calls stop_observer after end_battle.
+   - A best-effort ComponentLClickUp listener stops the observer immediately when button_windows is clicked, before normal WH3 shutdown teardown.
+
+5. Fail-closed release boundary retained
+   - Smart Guard remains staged disabled.
+   - Diagnostic harness never arms or issues BSC commands.
+   - Hook/VTable map remains exactly the Phase 6.2 / RC6 map.
+   - Production evidence_probe hardcoded component offsets remain unchanged until runtime proves the new layout.
+   - ContactPair controller +0x4A0 logic remains untouched and must not be conflated with MovementComponent discovery.
+
+PORTABLE VALIDATION
+-------------------
+- Portable CTest: 13/13 PASS.
+- ASan + UBSan CTest: 13/13 PASS.
+- component_layout_discovery includes: legacy pair, relocated pair, ambiguous pair fail-closed, unique fallback state, zero-filled +0x8B0 rejection, ambiguous state fail-closed, <3 entity rejection.
+- prebuild_contract_check.py: PASS, 17 core + 1 optional.
+- Diagnostic Lua syntax: PASS.
+- Windows/MSVC/MASM and real-game safe-stop remain pending and MUST be performed from ANTIGRAVITY_BUILD_ONLY.txt.

@@ -1,0 +1,9 @@
+$ /usr/bin/texlua tests/test_r1_v3_recovery.lua source/r1_v3_recovery.lua
+PASS all recovery paths share one total budget
+PASS switching recovery reason cannot reset budget
+PASS zero budget is immediately exhausted
+PASS scope identity is generation block and Exit action
+PASS closing budget prevents later recovery
+PASS time reversal never consumes budget
+PASS remaining is monotonic
+TOTAL 7 PASS 0 FAIL

@@ -1,0 +1,11 @@
+$ /usr/bin/texlua tests/test_r1_v3_handoff.lua source/r1_v3_handoff.lua
+PASS freeze deep-copies body cohort
+PASS frozen handoff cannot be overwritten by later poll
+PASS generation mismatch invalidates record
+PASS successor target mismatch invalidates record
+PASS exit order mismatch invalidates record
+PASS stale handoff is rejected rather than reused
+PASS future freeze timestamp is rejected
+PASS cohort scope must match handoff scope
+PASS cohort marks only entities progressing toward Exit
+TOTAL 9 PASS 0 FAIL

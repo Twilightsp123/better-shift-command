@@ -1,0 +1,73 @@
+================================================================================
+ORDER_CONSTRUCTOR_CALLGRAPH.TXT — ORDER CONSTRUCTORS & VTABLE RELATIONSHIPS
+================================================================================
+Target Executable: Warhammer3.exe
+
+1. THE FOUR ORDER CONSTRUCTORS
+--------------------------------------------------------------------------------
+[1] Base Order Constructor: RVA 0x0300A7EC
+    - Parameters: RCX = order_this (slot+0x18), RDX = slot_base, R8D = order_mode, R9 = payload
+    - Action: Initializes base order fields, increments sequence manager counter, assigns
+      engine sequence to [order_this + 8] (slot + 0x20), sets [slot + 0x118] = 1.
+    - Zero branches (straight-line execution).
+
+[2] Full Move Order Constructor: RVA 0x0300B094
+    - Parameters: RCX = order_this (slot+0x18), RDX = slot_base, R8D = order_mode, R9 = payload
+    - Calls: 0x0300A7EC (Base Order Constructor)
+    - Installs VTable: 0x03910AA8
+    - Calls: 0x0300B0D8 (full payload copy: XYZ coordinates, width, orientation, flags)
+    - Directly called by:
+      * 0x030347F0 (Move top-level RVA 0x030344D4, primary player issue branch)
+      * 0x03034863 (Move top-level RVA 0x030344D4, test evaluation branch)
+      * 0x03033764, 0x03033C17, 0x030341D8
+
+[3] Simple Move / Intercept Order Constructor: RVA 0x0300B038
+    - Parameters: RCX = order_this (slot+0x18), RDX = slot_base, R8D = order_mode, R9 = payload
+    - Calls: 0x0300A7EC (Base Order Constructor)
+    - Installs VTable: 0x0390E248
+    - Copies 0x28-byte minimal coordinates directly inline (XYZ at +0x40, waypoint at +0x50/+0x58).
+    - Directly called by:
+      * 0x03033095 (inside secondary intercept function RVA 0x03032DE8)
+
+[4] Attack Order Constructor: RVA 0x0300AB98
+    - Parameters: RCX = order_this (slot+0x18), RDX = slot_base, R8D = order_mode, R9 = payload
+    - Calls: 0x0300A7EC (Base Order Constructor)
+    - Installs VTable: 0x03910228
+    - Copies target_root pointer to [order_this + 0x40] (slot + 0x58) and flags.
+    - Directly called by:
+      * 0x03032A72 (Attack top-level RVA 0x03032854, primary player issue branch)
+
+2. CALLGRAPH SUMMARY
+--------------------------------------------------------------------------------
+                  Order::issue_move (0x030344D4)
+                                |
+                                v
+               Full Move Constructor (0x0300B094)
+                                |
+          +---------------------+---------------------+
+          |                                           |
+          v                                           v
+Base Order Constructor (0x0300A7EC)         Payload Copy (0x0300B0D8)
+  - Engine Sequence -> [slot+0x20]            - XYZ -> [slot+0x58]
+  - Installs VTable: 0x03910AA8
+
+                 Order::issue_attack (0x03032854)
+                                |
+                                v
+                 Attack Constructor (0x0300AB98)
+                                |
+          +---------------------+---------------------+
+          |                                           |
+          v                                           v
+Base Order Constructor (0x0300A7EC)         Target Copy & Status
+  - Engine Sequence -> [slot+0x20]            - Target -> [slot+0x58]
+  - Installs VTable: 0x03910228
+
+3. RESOLUTION OF 0x0300B038 VS 0x0300B094
+--------------------------------------------------------------------------------
+Question: What is the relationship between 0x0300B038 and 0x0300B094?
+Answer:
+  - They are SIBLING CONSTRUCTORS derived from the same base class (0x0300A7EC).
+  - 0x0300B094 is the FULL MOVE constructor called by the hooked top-level Move function (0x030344D4). It installs VTable 0x03910AA8.
+  - 0x0300B038 is a LIGHTWEIGHT/INTERCEPT MOVE constructor called by an internal intercept function (0x03032DE8). It installs VTable 0x0390E248.
+  - In earlier build maps, 0x0390E248 was erroneously assumed to be the sole Move VTable. In reality, the hooked Order::issue_move top-level path exclusively produces orders with VTable 0x03910AA8.

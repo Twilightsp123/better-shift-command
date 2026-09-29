@@ -1,0 +1,36 @@
+$ /usr/bin/texlua tests/test_v104_blocks.lua source/better_shift_command.lua tests/fixture.lua
+PASS single Move completion is latched with no successor and later Attack does not re-wait
+PASS brief idle or distant idle does not latch Move completion
+PASS paused model time cannot accrue Move idle completion
+PASS Move idle completion cannot bridge a long observation gap
+PASS normal replacement cancels an in-progress Move idle candidate
+PASS Move to Move uses a bounded steering corridor for a right-angle waypoint while collinear prediction stays unchanged
+PASS strict PATH_SAFE still requires the safety margin before SC4 stall logic can matter
+PASS 20m Move to Move cannot hand off at only 20 percent progress
+PASS predictive Move handoff transfers the old waypoint obligation until the actual path satisfies it
+PASS SC3 soft debt allows a dense collinear Move handoff while keeping the old waypoint debt unresolved
+PASS SC3 soft debt becomes a hard block when the proposed successor chord cuts away from the owed waypoint
+PASS an unresolved transferred waypoint still blocks the next action after the successor Move itself completes
+PASS SC4 stalled turn corridor escapes inside a bounded margin instead of parking at the waypoint
+PASS SC4 stall escape keeps the very-short-successor adjacent-leg cap
+PASS SC1 steering corridor cannot swallow a very short successor leg
+PASS SC1 accepted steering-corner handoff completes the intermediate waypoint without creating return debt
+PASS SC1 U-turn starts before the waypoint instead of requiring a node-complete stop
+PASS SC2 early A/B opens near the existing predictive threshold before the SC1 dynamic window
+PASS R4 route debt does not fault while the old waypoint is still making measurable progress
+PASS Move to Attack cannot use braking until the waypoint route is safe
+PASS Move to Attack uses a formation-aware reached envelope before idle, while a short leg stays protected
+PASS completed Attack with no tail stays completed and a later Move exits immediately
+PASS exit block may advance through internal Move nodes before disengagement, but not into next Attack
+PASS stalled post-Attack exit reasserts the same Move only after a stall and is bounded
+PASS SC5 quarantined physical evidence falls back to positive contact and reasserts the exact accepted Move
+PASS SC5 corepath recovery never reasserts when execution identity is not the current Exit Move
+PASS SC5 sticky melee without positive enemy contact never triggers the corepath fallback
+PASS native target match cannot skip an unfinished exit Move
+PASS native target match cannot skip an unfinished ordinary Move
+PASS completed Move plus matching target still needs independent native action identity
+PASS ordinary RMB replacement still overrides every block obligation
+PASS FEG4 matched-melee extended formation contact can hold without center-distance relock
+PASS FEG4 extended matched-melee still rejects contact beyond the bounded formation envelope
+ACTUAL_INTERPRETER=Lua 5.3; explicit engine doubles, not WH3
+TOTAL 33 PASS 0 FAIL

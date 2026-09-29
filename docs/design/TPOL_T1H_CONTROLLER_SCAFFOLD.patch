@@ -1,0 +1,69 @@
+--- D1/source/better_shift_command.lua
++++ T1H/source/better_shift_command.lua
+@@ -12,7 +12,7 @@
+ local CENTER_A2_MODE = true
+ local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
+ local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
+-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.2.2_COREPATH_RC8 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE)
++out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.2.2_COREPATH_RC8 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1H_HIDDEN")
+ 
+ -- out is callable; it need not have Lua type "function".
+ local function log(s) out(TAG .. tostring(s)) end
+@@ -838,6 +838,57 @@
+ -- R1: faults are per-action records, NOT st.blocked. Input draining/observations
+ -- remain live and suffixes are preserved. A safe failure is not semantic completion.
+ local R1={}
++
++-- TPOL-T1H hidden policy scaffold.
++-- No MCT page is registered in this runtime stage.  The schema/profile compiler is
++-- intentionally present now so a future MCT adapter can provide values without
++-- rewriting gameplay state.  Only engagement_hold_seconds is wired in T1H, and its
++-- built-in 3.0 s value is byte-for-behaviour equivalent to the legacy attack_hold_ms=3000.
++R1.Policy=(function()
++    local P={VERSION="TPOL_T1H_1",SCHEMA=1,UI_EXPOSED=false}
++    P.schema={
++        behavior_preset={kind="enum",values={"SMOOTH","BALANCED","PRECISE","CUSTOM"}},
++        movement_cornering={kind="number",min=0,max=100,step=5},
++        attack_handoff={kind="number",min=0,max=100,step=5},
++        route_fidelity={kind="number",min=0,max=100,step=5},
++        native_successor_tolerance={kind="number",min=0,max=100,step=5},
++        engagement_hold_seconds={kind="number",min=0.5,max=10.0,step=0.5},
++        disengage_priority={kind="number",min=0,max=100,step=5}}
++    P.presets={
++        SMOOTH={movement_cornering=85,attack_handoff=80,route_fidelity=45,native_successor_tolerance=85,disengage_priority=80},
++        BALANCED={movement_cornering=65,attack_handoff=60,route_fidelity=65,native_successor_tolerance=65,disengage_priority=65},
++        PRECISE={movement_cornering=35,attack_handoff=25,route_fidelity=90,native_successor_tolerance=35,disengage_priority=55}}
++    P.defaults={behavior_preset="SMOOTH",engagement_hold_seconds=3.0}
++    local function bounded(v,lo,hi,fallback)
++        v=tonumber(v)
++        if not finite(v) then return fallback end
++        return clamp(v,lo,hi)
++    end
++    function P.compile(values,source)
++        values=type(values)=="table" and values or {}
++        local preset=tostring(values.behavior_preset or P.defaults.behavior_preset):upper()
++        local base=P.presets[preset] or P.presets.SMOOTH
++        local hold=bounded(values.engagement_hold_seconds,P.schema.engagement_hold_seconds.min,
++            P.schema.engagement_hold_seconds.max,P.defaults.engagement_hold_seconds)
++        return {schema=P.SCHEMA,policy_version=P.VERSION,source=source or "BUILTIN_HIDDEN",ui_exposed=false,
++            behavior_preset=preset,
++            movement_cornering=bounded(values.movement_cornering,0,100,base.movement_cornering),
++            attack_handoff=bounded(values.attack_handoff,0,100,base.attack_handoff),
++            route_fidelity=bounded(values.route_fidelity,0,100,base.route_fidelity),
++            native_successor_tolerance=bounded(values.native_successor_tolerance,0,100,base.native_successor_tolerance),
++            engagement_hold_seconds=hold,engagement_hold_ms=math.floor(hold*1000+0.5),
++            disengage_priority=bounded(values.disengage_priority,0,100,base.disengage_priority),
++            runtime_wired={engagement_hold_seconds=true,movement_cornering=false,attack_handoff=false,
++                route_fidelity=false,native_successor_tolerance=false,disengage_priority=false}}
++    end
++    -- Future MCT adapter boundary: collect UI values into a plain table and call this.
++    -- T1H intentionally does not query the MCT runtime, registers no mod/options, and never exposes UI.
++    function P.from_mct_values(values) return P.compile(values,"MCT_FUTURE") end
++    function P.snapshot_hidden() return P.compile(nil,"BUILTIN_HIDDEN") end
++    return P
++end)()
++R1.Policy.active=R1.Policy.snapshot_hidden()
++CFG.attack_hold_ms=R1.Policy.active.engagement_hold_ms
+ function R1.fault(st,a,code,reason,now)
+     if not a then return end
+     local rt=a.runtime or {};a.runtime=rt

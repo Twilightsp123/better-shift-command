@@ -15,6 +15,7 @@ struct Api {
     Number (*tonumber)(lua_State*,int)=nullptr;
     int (*toboolean)(lua_State*,int)=nullptr;
     void* (*touserdata)(lua_State*,int)=nullptr;
+    std::size_t (*objlen)(lua_State*,int)=nullptr; // optional Lua 5.1 full-userdata payload size
     void (*pushnil)(lua_State*)=nullptr;
     void (*pushnumber)(lua_State*,Number)=nullptr;
     void (*pushlstring)(lua_State*,const char*,std::size_t)=nullptr;

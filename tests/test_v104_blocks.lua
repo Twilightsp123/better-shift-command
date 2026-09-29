@@ -276,7 +276,7 @@ T('stalled post-Attack exit reasserts the same Move only after a stall and is bo
 end)
 
 
-T('SC5 stale V3 Exit body evidence falls back to positive contact and reasserts the accepted Move',function()
+T('SC5 quarantined physical evidence falls back to positive contact and reasserts the exact accepted Move',function()
  local f=F({width=40,debug_source=true,native_evidence_v3=true,native_order_evidence_v3=active_order_v3});f:start();f.enemy.x=0;f.enemy.z=0;f.unit.x=-8;f.unit.z=0;f.unit.melee=true;f.unit.target=f.enemy
  function f.unit:unit_distance()return self.box_gap or 0 end;f.unit.box_gap=0
  f:emit('ATTACK',false,nil,nil,'2001');f:emit('MOVE',true,-28,0);f:tick(100)
@@ -285,13 +285,28 @@ T('SC5 stale V3 Exit body evidence falls back to positive contact and reasserts 
  for t=6200,6900,100 do f:tick(t,-8,0)end
  assert(f.issued==1,'SC5 fallback must still wait for the bounded 900ms physical stall window')
  f:tick(7000,-8,0)
- assert(f.issued==2,'stale V3 EntitySnapshot plus positive contact and exact active Exit Move must reassert once')
+ assert(f.issued==2,'quarantined physical evidence plus positive contact and exact active Exit Move must reassert once')
  hascmd(f,2,'MOVE',-28)
- assert(f:has('evidence=V3_ENTITY_STALE_CONTACT_FALLBACK') and f:has('v3_reason=ENTITY_STALE'))
+ assert(f:has('evidence=COREPATH_POSITIVE_CONTACT_FALLBACK') and f:has('v3_reason=PHYSICAL_EVIDENCE_QUARANTINED'))
  healthy(f)
 end)
 
-T('SC5 sticky melee without positive enemy contact never triggers the stale-V3 fallback',function()
+T('SC5 corepath recovery never reasserts when execution identity is not the current Exit Move',function()
+ local function wrong_active(f,u)
+  local e,why=active_order_v3(f,u);if not e then return e,why end
+  e.active_engine_seq='4294967295';return e
+ end
+ local f=F({width=40,debug_source=true,native_evidence_v3=true,native_order_evidence_v3=wrong_active});f:start();f.enemy.x=0;f.enemy.z=0;f.unit.x=-8;f.unit.z=0;f.unit.melee=true;f.unit.target=f.enemy
+ function f.unit:unit_distance()return self.box_gap or 0 end;f.unit.box_gap=0
+ f:emit('ATTACK',false,nil,nil,'2001');f:emit('MOVE',true,-28,0);f:tick(100)
+ run_attack_hold(f,200,6000);assert(f.issued==1);hascmd(f,1,'MOVE',-28)
+ f:deliver();f:tick(6100,-8,0)
+ for t=6200,9000,100 do f:tick(t,-8,0)end
+ assert(f:count('EXIT_BLOCK_REASSERT')==0,'SC5 may recover only the exact current native Exit MOVE')
+ healthy(f)
+end)
+
+T('SC5 sticky melee without positive enemy contact never triggers the corepath fallback',function()
  local f=F({width=40,debug_source=true,native_evidence_v3=true});f:start();f.enemy.x=0;f.enemy.z=0;f.unit.x=-8;f.unit.z=0;f.unit.melee=true;f.unit.target=f.enemy
  function f.unit:unit_distance()return self.box_gap or 0 end;f.unit.box_gap=0
  f:emit('ATTACK',false,nil,nil,'2001');f:emit('MOVE',true,-28,0);f:tick(100)
@@ -299,7 +314,7 @@ T('SC5 sticky melee without positive enemy contact never triggers the stale-V3 f
  f.unit.box_gap=50 -- keep the intentionally sticky melee flag, but remove real contact evidence.
  for t=6200,9000,100 do f:tick(t,-8,0)end
  assert(f.issued==1,'sticky melee alone must never cause Exit command spam')
- assert(not f:has('V3_ENTITY_STALE_CONTACT_FALLBACK'))
+ assert(not f:has('COREPATH_POSITIVE_CONTACT_FALLBACK'))
  healthy(f)
 end)
 

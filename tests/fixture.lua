@@ -131,7 +131,7 @@ local function F(options)
  function bm:get_player_army() return player_army end
  function bm:get_scriptunit_for_unit(bu) return find_su(bu) end
  local B={}
- function B.version()return f.cfg.wrong_version and "0.1.1" or "1.0.15-r4-evidence-v3-validated-userdata-root" end
+ function B.version()return f.cfg.wrong_version and "0.1.1" or "1.0.17-corepath-wh3-6c104-movevtfix" end
 
  local function mirror_v2_order_to_v3(e)
   if type(e)~="table" then return e end
@@ -219,6 +219,7 @@ local function F(options)
  function B.number_abi_probe()return 16777215,1.5 end
  function B.exact_id_probe()return "4294967295","16777217" end
  function B.start_observer(ack)check(ack==true);if f.cfg.observer_fail then return false,"TEST_FAIL" end;return true end
+ function B.stop_observer() f.observer_stopped=true;return true end
  function B.begin_battle(s)
   check(type(s)=="string" and #s<=64)
   if f.cfg.begin_nil then return nil,"BEGIN_DENIED" end

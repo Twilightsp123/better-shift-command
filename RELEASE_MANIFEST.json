@@ -1,56 +1,57 @@
 {
-  "schema": 1,
+  "schema": 3,
   "project": "Better Shift Command",
-  "release": "v1.2.2",
-  "controller_version": "1.2.2",
-  "run_id": "V1_2_2",
-  "build_marker": "BETTER_SHIFT_COMMAND_V1.2.2",
+  "formal_version": "1.3.0",
+  "version_tag": "v1.3.0",
+  "artifact_status": "GITHUB_MAINTENANCE_ARCHIVE",
+  "canonical_pack_name": "zzz_better_shift_command_steam.pack",
+  "pack_generated_in_this_archive": false,
+  "controller_version": "1.3.0",
+  "run_id": "V1_3_0",
+  "build_marker": "BETTER_SHIFT_COMMAND_V1.3.0",
+  "native_bridge_compatibility_id": "1.0.17-corepath-wh3-6c104-movevtfix",
   "platform": "Windows x64",
-  "native_abi": "1.0.15-r4-evidence-v3-validated-userdata-root",
-  "release_behavior_baseline": "v1.2.1 SC6 V3 Execution Identity Reconciliation",
-  "release_behavior_change": false,
-  "debug_telemetry_default": false,
-  "windows_release_toolchain": "VS2019 / MSVC v142 x64 / MASM",
-  "public_tree_policy": "Current source/build/tests plus one consolidated development history; temporary RMB differential artifacts omitted.",
-  "expected_offline_validation": {
-    "release_jobs": "19/19 PASS",
-    "mutations": "40/40 CAUGHT",
-    "portable_native_ctest": "10/10 PASS",
-    "asan_ubsan_native_ctest": "10/10 PASS"
-  },
-  "field_validation": {
-    "log": "script_log_180926_2022.txt",
-    "result": "PASS",
-    "key_case": "future ATTACK appended during EXIT_ROUTE_PROTECT while current Native MOVE remained active until route completion",
-    "validated_on": "2026-09-18"
-  },
-  "clean_tree_validation": {
-    "release_jobs": "19/19 PASS",
-    "mutations": "40/40 CAUGHT",
-    "portable_native_ctest": "10/10 PASS",
-    "asan_ubsan_native_ctest": "10/10 PASS",
-    "deterministic_pack_verify": "PASS",
-    "validated_on": "2026-09-18"
-  },
-  "compatibility_hotfix": {
+  "target_wh3_sha256": "6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297",
+  "upstream_behavior_baseline": {
+    "repository": "Twilightsp123/better-shift-command",
+    "commit": "0b690d59940e23e475de332a82cfecf072961977",
     "release": "v1.2.2",
-    "validated_on": "2026-09-20",
-    "scope": "Lua numeric compatibility only; SC1-SC6 and Native Bridge unchanged",
-    "issue": "math.huge may be nil in some WH3 Lua environments, causing startup CONTROLLER_FAIL",
-    "fix": "local BSC_HUGE fallback sentinel with no global math-table mutation",
-    "regression": "missing math.huge host field does not disable controller",
-    "field_validation": {
-      "log": "script_log_200926_1849.txt",
-      "result": "PASS",
-      "evidence": "controller entered live SC6 reconciliation without EARLY_BASELINE_UNAVAILABLE or CONTROLLER_FAIL"
-    }
+    "note": "Historical behavior ancestry; formal maintained project version is v1.3.0."
   },
-  "current_release_validation": {
-    "source_regression_jobs": "19/19 PASS",
+  "native_policy": {
+    "mandatory_core_hooks": 16,
+    "optional_static_sites": [
+      "contact_pair",
+      "smart_guard"
+    ],
+    "contact_pair_runtime": "STAGED_DISABLED",
+    "smart_guard_runtime": "STAGED_DISABLED",
+    "physical_evidence": "QUARANTINED",
+    "safe_stop": "QUIT_TO_WINDOWS_ONLY_CURRENTLY"
+  },
+  "policy_architecture": {
+    "design_stream": "BSC-TPOL-D1",
+    "implemented_internal_stage": "BSC-TPOL-T1H",
+    "mct_ui": "NOT_REGISTERED",
+    "default_policy": "SMOOTH_HIDDEN",
+    "minimum_engagement_time_seconds": 3.0,
+    "movement_policy_fields": "RESERVED_NOT_RUNTIME_WIRED"
+  },
+  "validation": {
+    "controller_jobs": "19/19 PASS",
     "mutations": "40/40 CAUGHT",
-    "in_game_smoke": "PASS",
-    "native_bridge_rebuilt": false,
-    "native_bridge_reason": "Native source and ABI are unchanged from validated v1.2.1 baseline",
-    "pack_build_install": "NOT_RUN_FOR_SOURCE_ONLY_V1.2.2_CLEAN_TREE"
-  }
+    "portable_native_ctest": "13/13 PASS",
+    "asan_ubsan_ctest": "13/13 PASS",
+    "windows_native_ctest": "14/14 PASS",
+    "mandatory_guards": "16/16 PASS"
+  },
+  "current_open_work": [
+    "Move-to-Attack terminal handoff",
+    "SC6 immediate-successor MOVE adopt/soft-adopt",
+    "transition hysteresis",
+    "future visible MCT UI wiring",
+    "separate battle lifecycle/teardown closure"
+  ],
+  "archive_policy": "CURRENT_DOCS_OVERRIDE_HISTORY; archives and runtime logs preserve original historical version strings",
+  "documentation_entrypoint": "README_FIRST.md"
 }

@@ -1,0 +1,6 @@
+$ /usr/bin/texlua tests/test_center_phase_b2.lua source/better_shift_command.lua tests/fixture.lua
+PASS B2 entity evidence can never hard-fault Center exit
+PASS B2 accepted A2 that goes idle reasserts same action/target and preserves credit
+PASS B2 attack recovery is bounded to two same-action reasserts
+PASS B2 near debt is not killed by an arbitrary stall timer
+TOTAL 4 PASS 0 FAIL

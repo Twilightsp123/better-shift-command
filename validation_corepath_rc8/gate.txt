@@ -1,0 +1,29 @@
+$ /usr/bin/texlua tests/test_gate.lua source/fresh_engagement_gate.lua
+PASS residual melee far never opens over 90 seconds
+PASS brief passage through the near band cannot open contact
+PASS far slowdown obstacle is not an impact
+PASS sustained close melee opens without requiring a false edge or static body
+PASS close start requires warmup plus stable confirmation
+PASS no charge field/API is required
+PASS false-to-true while body far does not bypass geometry
+PASS fresh melee near and settled opens
+PASS wrong target never opens even at zero distance
+PASS correct target without melee never opens
+PASS missing position and NaN never open
+PASS long sample gap resets confirmation rather than crediting absence
+PASS journal input gap resets rate window
+PASS pause duplicate timestamp advances nothing
+PASS 500ms model cadence supported
+PASS 1000ms model cadence supported
+PASS confirmed contact is not denied just because the body keeps moving
+PASS close moving melee needs sustained confirmation then may accumulate hold
+PASS transient melee false suspends but does not erase open episode
+PASS far separation sustained relocks and requests credit reset
+PASS new Attack resets gate independent of previous engagement
+PASS changing widths later cannot inflate the frozen gate
+PASS missing widths use explicit fallback; extreme widths are capped
+PASS teleport/discontinuity resets sampling and cannot prove contact
+PASS position read failure after open suspends immediately
+PASS clock reversal is refused
+ACTUAL_INTERPRETER=Lua 5.3
+TOTAL 26 PASS 0 FAIL

@@ -14,6 +14,10 @@ bool bind(){std::lock_guard<std::mutex> l(mu);if(bound)return true;Api next;
 #define B(n) do{void* p=platform_lua_symbol("lua_" #n); if(!p)return false;static_assert(sizeof(next.n)==sizeof(p));std::memcpy(&next.n,&p,sizeof(p));}while(false)
  B(settop);B(pushvalue);B(pcall);B(gettop);B(type);B(tolstring);B(tonumber);B(toboolean);B(touserdata);B(pushnil);B(pushnumber);
  B(pushlstring);B(pushboolean);B(createtable);B(setfield);B(rawseti);B(pushcclosure);
+ // lua_objlen is part of Lua 5.1, but keep it optional so an export-stripped host
+ // cannot prevent the entire bridge from loading. Diagnostic discovery falls
+ // back to the historical 24-byte seed window if it is unavailable.
+ if(void* p=platform_lua_symbol("lua_objlen")){static_assert(sizeof(next.objlen)==sizeof(p));std::memcpy(&next.objlen,&p,sizeof p);}
 #undef B
  A=next;bound=true;return true;}
 static void str(lua_State* L,const std::string& s){A.pushlstring(L,s.data(),s.size());}
@@ -27,13 +31,13 @@ static Result<Id> read_id(lua_State* L,int i){
     if(A.type(L,i)!=4)return {{},Error::Invalid};std::size_t n=0;const char* s=A.tolstring(L,i,&n);
     if(!s||n>10)return {{},Error::Invalid};return parse_id(std::string(s,n));
 }
-static bool read_u64(lua_State* L,int i,std::uint64_t& out){
+[[maybe_unused]] static bool read_u64(lua_State* L,int i,std::uint64_t& out){
     if(A.type(L,i)!=4)return false;std::size_t n=0;const char* s=A.tolstring(L,i,&n);if(!s||n==0||n>20)return false;
     std::uint64_t v=0;for(std::size_t k=0;k<n;++k){if(s[k]<'0'||s[k]>'9')return false;const auto d=static_cast<unsigned>(s[k]-'0');if(v>(std::numeric_limits<std::uint64_t>::max()-d)/10)return false;v=v*10+d;}out=v;return true;
 }
 static void u64str(lua_State* L,const char* k,std::uint64_t v){fld(L,k,std::to_string(v));}
-static int version(lua_State* L){str(L,"1.0.15-r4-evidence-v3-validated-userdata-root");return 1;}
-static int capabilities(lua_State* L){auto s=host().status();A.createtable(L,0,18);
+static int version(lua_State* L){str(L,kDiagnosticBridgeVersion);return 1;}
+static int capabilities(lua_State* L){auto s=host().status();A.createtable(L,0,20);
     fld(L,"host_lua_number","float32");num(L,"host_lua_number_bytes",4);
     bit(L,"observer_hooks_installed",platform_hooks_installed());
     bit(L,"exact_source",s.exact_source);bit(L,"verified_issue",s.verified_issue);bit(L,"controller_connected",false);
@@ -46,14 +50,27 @@ static int capabilities(lua_State* L){auto s=host().status();A.createtable(L,0,1
     bit(L,"experimental_calibration_ready",s.experimental_calibration_ready);bit(L,"experimental_issue_armed",s.experimental_issue_armed);
     bit(L,"accepted_move_seen",s.accepted_move_seen);bit(L,"accepted_attack_seen",s.accepted_attack_seen);
     fld(L,"mapping_coverage","OBSERVED_COPY_PATHS_ONLY");
+    bit(L,"smart_guard_capable",true);bit(L,"smart_guard_installed",s.smart_guard_installed);bit(L,"smart_guard_enabled",s.smart_guard_enabled);
+    bit(L,"smart_guard_client_active",s.smart_guard_client_active);num(L,"active_clients",static_cast<float>(s.active_clients));
     bit(L,"identity_core_compiled",true);fld(L,"deployment_status",s.native_issue_authorized?"V3_RUNTIME_VERIFIED":"OBSERVER_NOT_VERIFIED");return 1;}
 // R1 Evidence V3. Native exposes only build-locked facts; Lua owns R1 verdicts.
-static int evidence_caps(lua_State* L){const bool verified=platform_evidence_build_verified();A.createtable(L,0,14);
- num(L,"schema",3);bit(L,"game_build_verified",verified);bit(L,"execution_identity",verified);
- bit(L,"entity_snapshot",verified);bit(L,"combat_groups",verified);bit(L,"contact_pairs",verified);
- bit(L,"target_specific_physical_contact",verified);bit(L,"state74_runtime_melee",false);
- fld(L,"build_id",platform_evidence_build_id());fld(L,"evidence_method","R1_RAW_EVIDENCE_V3_CONTACT_PAIR");
- fld(L,"reason",verified?"OK":"BUILD_NOT_VERIFIED");return 1;}
+static int evidence_caps(lua_State* L){
+ const bool build_ok=platform_hooks_installed();
+ A.createtable(L,0,16);
+ num(L,"schema",3);
+ bit(L,"game_build_verified",build_ok);
+ bit(L,"execution_identity",build_ok);
+ bit(L,"entity_snapshot",false);
+ bit(L,"combat_groups",false);
+ bit(L,"contact_pairs",false);
+ bit(L,"target_specific_physical_contact",false);
+ bit(L,"physical_evidence_quarantined",true);
+ bit(L,"state74_runtime_melee",false);
+ fld(L,"build_id",platform_evidence_build_id());
+ fld(L,"evidence_method","COREPATH_EXECUTION_IDENTITY_ONLY");
+ fld(L,"reason",build_ok?"OK_COREPATH_PHYSICAL_QUARANTINED":"BUILD_NOT_VERIFIED");
+ return 1;
+}
 static int evidence_caps_v2_retired(lua_State* L){A.createtable(L,0,10);num(L,"schema",2);bit(L,"game_build_verified",false);bit(L,"execution_identity",false);bit(L,"entity_snapshot",false);bit(L,"combat_groups",false);bit(L,"fresh_engagement",false);fld(L,"build_id",platform_evidence_build_id());fld(L,"evidence_method","RETIRED_RE07_STATE74_INVALID");fld(L,"reason","V2_RETIRED_USE_V3");return 1;}
 static int bind_evidence_unit_v2_retired(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");if(A.type(L,2)!=7)return fail(L,"BATTLE_UNIT_USERDATA_REQUIRED");return fail(L,"V2_RETIRED_USE_V3");}
 static int order_identity_read_v2_retired(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");return fail(L,"V2_RETIRED_USE_V3");}
@@ -68,38 +85,30 @@ static int order_identity_read(lua_State* L){auto u=read_id(L,1);if(!u)return fa
   else {optnum(L,"dest_x",e.dest_x);optnum(L,"dest_z",e.dest_z);}}
  return 1;}
 static void ptr_id(lua_State* L,std::uintptr_t p){char b[32]{};std::snprintf(b,sizeof b,"%llu",static_cast<unsigned long long>(p));str(L,b);}
-static const char* evidence_bind_error(Error e) noexcept{
+[[maybe_unused]] static const char* evidence_bind_error(Error e) noexcept{
  switch(e){case Error::Missing:return "EVIDENCE_ROOT_NOT_FOUND";case Error::BindingMismatch:return "EVIDENCE_ROOT_AMBIGUOUS_OR_CONFLICT";
   case Error::Capacity:return "ENTITY_OWNER_INDEX_BIND_FAILED";case Error::Invalid:return "EVIDENCE_USERDATA_INVALID";default:return name(e);}
 }
-static int bind_evidence_unit(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
+static int bind_evidence_unit(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");return fail(L,"PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");}
+static int diagnostic_command_root(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
+ const auto r=host().observed_command_root(u.value);if(!r){A.pushboolean(L,0);str(L,"COMMAND_ROOT_NOT_OBSERVED");return 2;}A.pushboolean(L,1);ptr_id(L,r.value);return 2;}
+static int diagnostic_bind_evidence(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
  if(A.type(L,2)!=7)return fail(L,"BATTLE_UNIT_USERDATA_REQUIRED");void* raw=A.touserdata(L,2);if(!raw)return fail(L,"BATTLE_UNIT_USERDATA_NULL");
- const auto r=host().resolve_evidence_userdata(u.value,reinterpret_cast<std::uintptr_t>(raw));if(!r)return fail(L,evidence_bind_error(r.error));
- A.pushboolean(L,1);ptr_id(L,r.value);return 2;}
-static int contact_owner_ready(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");A.pushboolean(L,host().contact_owner_ready(u.value)?1:0);return 1;}
-static int entity_snapshot_read(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
- if(A.gettop(L)<2||A.type(L,2)!=3)return fail(L,"MODEL_MS_NUMBER_REQUIRED");const float f=A.tonumber(L,2);if(!std::isfinite(f)||f<0)return fail(L,"MODEL_MS_INVALID");
- auto r=host().entity_snapshot(u.value,static_cast<std::uint64_t>(f));if(!r)return fail(L,name(r.error));const auto& e=r.value;
- A.createtable(L,0,22);num(L,"schema",3);bit(L,"complete",e.complete);fld(L,"probe_reason",name(e.probe_reason));num(L,"model_ms",f);
- num(L,"slot_count",static_cast<float>(e.slot_count));num(L,"live_count",static_cast<float>(e.live_count));num(L,"dead_count",static_cast<float>(e.dead_count));
- num(L,"movement_idle_count",static_cast<float>(e.movement_idle_count));num(L,"movement_pathing_count",static_cast<float>(e.movement_pathing_count));num(L,"movement_halted_count",static_cast<float>(e.movement_halted_count));
- num(L,"median_x",e.median_x);num(L,"median_z",e.median_z);bit(L,"motion_complete",e.motion_complete);num(L,"motion_matched_count",static_cast<float>(e.motion_matched_count));
- if(e.motion_complete){num(L,"previous_model_ms",static_cast<float>(e.previous_model_ms));num(L,"median_vx",e.median_vx);num(L,"median_vz",e.median_vz);}
- A.createtable(L,static_cast<int>(e.entities.size()),0);int i=0;for(const auto& v:e.entities){A.createtable(L,0,9);ptr_id(L,v.entity);A.setfield(L,-2,"entity");num(L,"x",v.x);num(L,"z",v.z);num(L,"movement_state",static_cast<float>(v.movement_state));bit(L,"motion_complete",v.motion_complete);if(v.motion_complete){num(L,"vx",v.vx);num(L,"vz",v.vz);}A.rawseti(L,-2,++i);}A.setfield(L,-2,"entities");
- return 1;}
-static int combat_snapshot_read(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");auto r=host().combat_snapshot(u.value);if(!r)return fail(L,name(r.error));const auto& e=r.value;
- A.createtable(L,0,10);num(L,"schema",3);bit(L,"complete",e.complete);fld(L,"probe_reason",name(e.probe_reason));
- num(L,"coarse_contact_count",static_cast<float>(e.coarse_contact_count));num(L,"group_count",static_cast<float>(e.group_count));num(L,"active_melee_group_count",static_cast<float>(e.active_melee_group_count));
- A.createtable(L,static_cast<int>(e.active_target_uids.size()),0);int i=0;for(auto uid:e.active_target_uids){str(L,format_id(uid));A.rawseti(L,-2,++i);}A.setfield(L,-2,"active_target_uids");return 1;}
-static int contact_events_read(lua_State* L){std::uint64_t after=0;if(A.gettop(L)>=1&&!read_u64(L,1,after))return fail(L,"AFTER_SERIAL_DECIMAL_STRING_REQUIRED");
- std::size_t n=128;if(A.gettop(L)>=2){if(A.type(L,2)!=3)return fail(L,"COUNT_NUMBER_REQUIRED");const float f=A.tonumber(L,2);if(!std::isfinite(f)||f<1||f>512||std::floor(f)!=f)return fail(L,"COUNT_RANGE_1_TO_512");n=static_cast<std::size_t>(f);}
- const auto p=host().contact_events(after,n);const auto now=platform_tick_ms();A.createtable(L,static_cast<int>(p.events.size()),0);int i=0;
- for(const auto& e:p.events){A.createtable(L,0,16);u64str(L,"serial",e.serial);u64str(L,"tick_ms",e.tick_ms);num(L,"age_ms",now>=e.tick_ms?static_cast<float>(now-e.tick_ms):0.0f);fld(L,"uid_a",format_id(e.uid_a));fld(L,"uid_b",format_id(e.uid_b));ptr_id(L,e.entity_a);A.setfield(L,-2,"entity_a");ptr_id(L,e.entity_b);A.setfield(L,-2,"entity_b");bit(L,"active_a",e.active_a);bit(L,"active_b",e.active_b);if(e.active_a)fld(L,"active_engine_seq_a",format_id(e.active_engine_seq_a));if(e.active_b)fld(L,"active_engine_seq_b",format_id(e.active_engine_seq_b));A.rawseti(L,-2,++i);}
- A.createtable(L,0,10);num(L,"schema",3);u64str(L,"next_after",p.next_after);u64str(L,"newest",p.newest);u64str(L,"oldest",p.oldest);u64str(L,"dropped",p.dropped);u64str(L,"read_tick_ms",now);bit(L,"gap",p.gap);bit(L,"complete",!p.gap);num(L,"count",static_cast<float>(p.events.size()));return 2;}
+ if(A.gettop(L)<3||A.type(L,3)!=3)return fail(L,"EXPECTED_MEN_NUMBER_REQUIRED");const float f=A.tonumber(L,3);
+ if(!std::isfinite(f)||f<1||f>300||f!=std::floor(f))return fail(L,"EXPECTED_MEN_RANGE_1_TO_300");
+ std::size_t user_size=A.objlen?A.objlen(L,2):32;if(user_size==0)user_size=32;if(user_size>256)user_size=256;
+ const auto r=host().diagnostic_bind_evidence(u.value,reinterpret_cast<std::uintptr_t>(raw),user_size,static_cast<std::size_t>(f));
+ A.createtable(L,0,10);bit(L,"passed",r.passed);if(r.passed)ptr_id(L,r.root),A.setfield(L,-2,"root");
+ bit(L,"command_root_seen",r.command_root!=0);if(r.command_root)ptr_id(L,r.command_root),A.setfield(L,-2,"command_root");
+ num(L,"userdata_size",static_cast<float>(r.userdata_size));num(L,"nodes_scanned",static_cast<float>(r.nodes_scanned));num(L,"candidate_count",static_cast<float>(r.candidate_count));fld(L,"method",r.method);fld(L,"reason",r.failure_reason);return 1;}
+static int contact_owner_ready(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");A.pushboolean(L,0);return 1;}
+static int entity_snapshot_read(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");return fail(L,"PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");}
+static int combat_snapshot_read(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");return fail(L,"PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");}
+static int contact_events_read(lua_State* L){return fail(L,"PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");}
 static int numbers(lua_State* L){A.pushnumber(L,16777215.0f);A.pushnumber(L,1.5f);return 2;}
 static int ids(lua_State* L){str(L,"4294967295");str(L,"16777217");return 2;}
 static int status(lua_State* L){auto s=host().status();A.createtable(L,0,8);
-    fld(L,"version","1.0.15-r4-evidence-v3-validated-userdata-root");fld(L,"epoch",format_id(s.epoch));bit(L,"recording",s.recording);
+    fld(L,"version",kDiagnosticBridgeVersion);fld(L,"epoch",format_id(s.epoch));bit(L,"recording",s.recording);
     fld(L,"capture_errors",std::to_string(s.capture_errors));fld(L,"fatal_errors",std::to_string(s.fatal_errors));fld(L,"gate_fault",name(s.gate_fault));
     fld(L,"last_recoverable_uid",format_id(s.last_recoverable_uid));fld(L,"last_recoverable_error",s.last_recoverable_error);fld(L,"last_fatal_error",s.last_fatal_error);
     fld(L,"native_error",platform_last_error());fld(L,"adapter_error",s.adapter_error);
@@ -121,10 +130,37 @@ static int status(lua_State* L){auto s=host().status();A.createtable(L,0,8);
     fld(L,"last_reader_data",std::to_string(s.last_reader_data));fld(L,"last_reader_a",std::to_string(s.last_reader_a));fld(L,"last_reader_b",std::to_string(s.last_reader_b));
     fld(L,"last_reader_cursor",std::to_string(s.last_reader_cursor));fld(L,"last_reader_end",std::to_string(s.last_reader_end));
     fld(L,"last_reader_lineage_bytes",std::to_string(s.last_reader_lineage_bytes));fld(L,"last_reader_lineage_fragments",std::to_string(s.last_reader_lineage_fragments));
-    fld(L,"last_path_stage",s.last_path_stage);return 1;}
+    fld(L,"last_path_stage",s.last_path_stage);
+    bit(L,"smart_guard_installed",s.smart_guard_installed);bit(L,"smart_guard_enabled",s.smart_guard_enabled);
+    num(L,"smart_guard_local_units",static_cast<float>(s.smart_guard_local_units));
+    u64str(L,"smart_guard_intercepted",s.smart_guard_intercepted);
+    u64str(L,"smart_guard_suppressed",s.smart_guard_suppressed);
+    u64str(L,"smart_guard_duplicates",s.smart_guard_duplicates);
+    u64str(L,"smart_guard_overflows",s.smart_guard_overflows);
+    u64str(L,"smart_guard_drained",s.smart_guard_drained);
+    u64str(L,"smart_guard_hook17_calls",s.smart_guard_hook17_calls);
+    u64str(L,"smart_guard_target_pursue_seen",s.smart_guard_target_pursue_seen);
+    u64str(L,"smart_guard_target_takeup_seen",s.smart_guard_target_takeup_seen);
+    u64str(L,"smart_guard_unit_resolved",s.smart_guard_unit_resolved);
+    u64str(L,"smart_guard_unit_resolve_failed",s.smart_guard_unit_resolve_failed);
+    u64str(L,"smart_guard_active_probe_ok",s.smart_guard_active_probe_ok);
+    u64str(L,"smart_guard_active_probe_failed",s.smart_guard_active_probe_failed);
+    u64str(L,"smart_guard_active_attack_matched",s.smart_guard_active_attack_matched);
+    u64str(L,"smart_guard_active_not_attack",s.smart_guard_active_not_attack);
+    u64str(L,"smart_guard_local_rejected",s.smart_guard_local_rejected);
+    u64str(L,"smart_guard_ranged_rejected",s.smart_guard_ranged_rejected);
+    u64str(L,"smart_guard_guard_rejected",s.smart_guard_guard_rejected);
+    u64str(L,"smart_guard_enqueue_ok",s.smart_guard_enqueue_ok);
+    u64str(L,"smart_guard_enqueue_fail",s.smart_guard_enqueue_fail);
+    num(L,"active_clients",static_cast<float>(s.active_clients));
+    bit(L,"smart_guard_client_active",s.smart_guard_client_active);
+    return 1;}
 static int start(lua_State* L){
     if(A.type(L,1)!=1||!A.toboolean(L,1)){A.pushboolean(L,0);str(L,"EXPLICIT_OBSERVER_ACK_REQUIRED");return 2;}
     const char* e=platform_start_observer();A.pushboolean(L,e?0:1);if(e){str(L,e);return 2;}return 1;
+}
+static int stop_observer(lua_State* L){
+    const char* e=platform_stop_observer();A.pushboolean(L,e?0:1);if(e){str(L,e);return 2;}return 1;
 }
 static int begin(lua_State* L){
     if(A.type(L,1)!=4)return fail(L,"SESSION_KEY_STRING_REQUIRED");
@@ -133,6 +169,48 @@ static int begin(lua_State* L){
 }
 static int end(lua_State* L){auto e=read_id(L,1);if(!e)return fail(L,"EPOCH_DECIMAL_STRING_REQUIRED");
     auto r=host().end(e.value);if(r!=Error::Ok)return fail(L,name(r));A.pushboolean(L,1);return 1;}
+static int acquire_client(lua_State* L){
+    if(A.type(L,1)!=4)return fail(L,"CLIENT_NAME_STRING_REQUIRED");
+    std::size_t n1=0;const char* s1=A.tolstring(L,1,&n1);
+    if(!s1||n1==0)return fail(L,"CLIENT_NAME_STRING_REQUIRED");
+    std::string client_name(s1,n1);
+    std::string session_key;
+    if(A.gettop(L)>=2&&A.type(L,2)==4){
+        std::size_t n2=0;const char* s2=A.tolstring(L,2,&n2);
+        if(s2&&n2>0)session_key.assign(s2,n2);
+    }
+    auto r=host().acquire_client(client_name,session_key);
+    if(!r)return fail(L,name(r.error));
+    str(L,r.value.first);
+    str(L,format_id(r.value.second));
+    return 2;
+}
+static int release_client(lua_State* L){
+    if(A.type(L,1)!=4)return fail(L,"CLIENT_TOKEN_STRING_REQUIRED");
+    std::size_t n=0;const char* s=A.tolstring(L,1,&n);
+    if(!s||n==0)return fail(L,"CLIENT_TOKEN_STRING_REQUIRED");
+    std::string token(s,n);
+    auto err=host().release_client(token);
+    if(err!=Error::Ok)return fail(L,name(err));
+    A.pushboolean(L,1);
+    return 1;
+}
+static int smart_guard_enable(lua_State* L){
+    if(A.type(L,1)!=4)return fail(L,"CLIENT_TOKEN_STRING_REQUIRED");
+    std::size_t n=0;const char* s=A.tolstring(L,1,&n);
+    if(!s||n==0)return fail(L,"CLIENT_TOKEN_STRING_REQUIRED");
+    std::string token(s,n);
+    if(A.gettop(L)<2||A.type(L,2)!=1)return fail(L,"BOOLEAN_REQUIRED");
+    bool enable=A.toboolean(L,2)!=0;
+    auto r=host().smart_guard_enable(token,enable);
+    if(!r){
+        if(r.error==Error::Missing)return fail(L,"CLIENT_TOKEN_UNKNOWN");
+        if(r.error==Error::BindingMismatch)return fail(L,"TRUE_GUARD_CLIENT_REQUIRED");
+        return fail(L,name(r.error));
+    }
+    A.pushboolean(L,1);
+    return 1;
+}
 static int epoch(lua_State* L){str(L,format_id(host().status().epoch));return 1;}
 static int revision(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
     auto s=host().unit_snapshot(u.value);if(!s)return fail(L,name(s.error));str(L,format_id(s.value.revision));return 1;}
@@ -214,18 +292,127 @@ static int journal(lua_State* L){auto e=read_id(L,1),c=read_id(L,2);if(!e||!c)re
  fld(L,"dropped",std::to_string(p.dropped));bit(L,"gap",p.gap);bit(L,"complete",!p.gap);bit(L,"overrun",p.gap);num(L,"count",static_cast<float>(p.events.size()));
  fld(L,"error",p.gap?"Overrun":"Ok");fld(L,"journal_fault",host().status().gate_fault==Error::Ok?"Ok":name(host().status().gate_fault));return 2;
 }
+static int drain_smart_guard_cancels(lua_State* L){
+ auto requests=host().drain_smart_guard_cancel_requests();
+ A.createtable(L,static_cast<int>(requests.size()),0);
+ int i=0;
+ for(const auto& req:requests){
+  A.createtable(L,0,3);
+  fld(L,"unit_uid",format_id(req.unit_uid));
+  fld(L,"engine_seq",format_id(req.engine_seq));
+  const char* reason_str=req.reason==SmartGuardCancelReason::Pursue?"PURSUE":
+                         (req.reason==SmartGuardCancelReason::TakeUpPositions?"TAKE_UP_POSITIONS":"UNKNOWN");
+  fld(L,"reason",reason_str);
+  A.rawseti(L,-2,++i);
+ }
+ return 1;
+}
+static int smart_guard_register_local(lua_State* L){
+ auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
+ const bool ok=host().smart_guard_register_local_unit(u.value);
+ A.pushboolean(L,ok?1:0);
+ return 1;
+}
+static int smart_guard_unregister_local(lua_State* L){
+ auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
+ const bool ok=host().smart_guard_unregister_local_unit(u.value);
+ A.pushboolean(L,ok?1:0);
+ return 1;
+}
+static int smart_guard_clear_local(lua_State* L){
+ host().smart_guard_clear_local_units();
+ A.pushboolean(L,1);
+ return 1;
+}
+static int diag_probe_component(lua_State* L){
+    auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
+    auto r=host().evidence_root(u.value);
+    if(!r)return fail(L,"UNIT_NOT_FOUND");
+    auto res=platform_probe_component_chain(r.value,300);
+    A.createtable(L,0,16);
+    bit(L,"passed",res.passed);
+    num(L,"slot_count",static_cast<float>(res.slot_count));
+    num(L,"sampled_count",static_cast<float>(res.sampled_count));
+    num(L,"entity_component_offset",static_cast<float>(res.entity_component_offset));
+    num(L,"component_backref_offset",static_cast<float>(res.component_backref_offset));
+    num(L,"movement_state_offset",static_cast<float>(res.movement_state_offset));
+    num(L,"layout_pair_candidate_count",static_cast<float>(res.layout_pair_candidate_count));
+    num(L,"layout_state_candidate_count",static_cast<float>(res.layout_state_candidate_count));
+    fld(L,"layout_method",res.layout_method);
+    A.createtable(L,static_cast<int>(res.layout_pair_reported),0);
+    for(std::size_t i=0;i<res.layout_pair_reported&&i<res.layout_pairs.size();++i){
+        A.createtable(L,0,2);
+        num(L,"entity_component_offset",static_cast<float>(res.layout_pairs[i].entity_component_offset));
+        num(L,"component_backref_offset",static_cast<float>(res.layout_pairs[i].component_backref_offset));
+        A.rawseti(L,-2,static_cast<int>(i+1));
+    }
+    A.setfield(L,-2,"layout_pairs");
+    A.createtable(L,static_cast<int>(res.layout_state_reported),0);
+    for(std::size_t i=0;i<res.layout_state_reported&&i<res.layout_state_offsets.size();++i){
+        A.pushnumber(L,static_cast<float>(res.layout_state_offsets[i]));A.rawseti(L,-2,static_cast<int>(i+1));
+    }
+    A.setfield(L,-2,"layout_state_offsets");
+    fld(L,"reason",res.failure_reason);
+    return 1;
+}
+static int diag_probe_alive(lua_State* L){
+    auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
+    if(A.gettop(L)<2||A.type(L,2)!=3)return fail(L,"LUA_MEN_ALIVE_NUMBER_REQUIRED");
+    const float men_f=A.tonumber(L,2);
+    if(!std::isfinite(men_f)||men_f<0.0f||men_f>300.0f||std::floor(men_f)!=men_f)return fail(L,"LUA_MEN_ALIVE_RANGE_0_TO_300");
+    const std::uint32_t men=static_cast<std::uint32_t>(men_f);
+    auto r=host().evidence_root(u.value);
+    if(!r)return fail(L,"UNIT_NOT_FOUND");
+    auto res=platform_probe_entity_alive(r.value,men);
+    A.createtable(L,0,9);
+    bit(L,"match",res.match);
+    num(L,"slot_count",static_cast<float>(res.slot_count));
+    num(L,"native_alive_count",static_cast<float>(res.native_alive_count));
+    num(L,"lua_men_alive",static_cast<float>(res.lua_men_alive));
+    fld(L,"phase",res.phase);
+    bit(L,"deployment_passed",res.deployment_passed);
+    bit(L,"casualty_passed",res.casualty_passed);
+    bit(L,"gate_passed",res.gate_passed);
+    fld(L,"reason",res.failure_reason);
+    return 1;
+}
+static int diag_gate_status(lua_State* L){
+    auto s=platform_diagnostic_gate_status();
+    A.createtable(L,0,12);
+    bit(L,"component_chain_gate",s.component_chain_gate);
+    u64str(L,"component_gate_root",static_cast<std::uint64_t>(s.component_gate_root));
+    num(L,"entity_component_offset",static_cast<float>(s.entity_component_offset));
+    num(L,"component_backref_offset",static_cast<float>(s.component_backref_offset));
+    num(L,"movement_state_offset",static_cast<float>(s.movement_state_offset));
+    fld(L,"component_layout_method",s.component_layout_method);
+    bit(L,"alive_deployment_passed",s.alive_deployment_passed);
+    bit(L,"alive_casualty_passed",s.alive_casualty_passed);
+    bit(L,"entity_alive_gate",s.entity_alive_gate);
+    u64str(L,"alive_gate_root",static_cast<std::uint64_t>(s.alive_gate_root));
+    fld(L,"build_id",s.build_id);
+    fld(L,"bridge_version",s.bridge_version);
+    return 1;
+}
 // Never allow a C++ exception to escape through the Lua C ABI. Native SEH/OOM
 // longjmp from a Lua allocator is not falsely advertised as recoverable here.
 template<int(*F)(lua_State*)> int boundary(lua_State* L){try{return F(L);}catch(...){return fail(L,"BRIDGE_CPP_EXCEPTION");}}
-int open(lua_State* L){if(!bind())return 0;A.createtable(L,0,28);
+int open(lua_State* L){if(!bind())return 0;A.createtable(L,0,41);
 #define REG(k,f) A.pushcclosure(L,boundary<f>,0);A.setfield(L,-2,k)
- REG("r1_evidence_capabilities_v3",evidence_caps);REG("bind_evidence_unit_v3",bind_evidence_unit);REG("read_active_order_identity_v3",order_identity_read);REG("read_entity_snapshot_v3",entity_snapshot_read);REG("read_combat_groups_v3",combat_snapshot_read);REG("read_contact_events_v3",contact_events_read);REG("contact_owner_ready_v3",contact_owner_ready);
+ REG("r1_evidence_capabilities_v3",evidence_caps);REG("bind_evidence_unit_v3",bind_evidence_unit);REG("diagnostic_command_root_v3",diagnostic_command_root);REG("diagnostic_bind_evidence_unit_v3",diagnostic_bind_evidence);REG("read_active_order_identity_v3",order_identity_read);REG("read_entity_snapshot_v3",entity_snapshot_read);REG("read_combat_groups_v3",combat_snapshot_read);REG("read_contact_events_v3",contact_events_read);REG("contact_owner_ready_v3",contact_owner_ready);
  REG("r1_evidence_capabilities_v2",evidence_caps_v2_retired);REG("bind_evidence_unit_v2",bind_evidence_unit_v2_retired);REG("read_active_order_identity_v2",order_identity_read_v2_retired);REG("read_entity_snapshot_v2",entity_snapshot_read_v2_retired);REG("read_combat_groups_v2",combat_snapshot_read_v2_retired);
  REG("version",version);REG("capabilities",capabilities);REG("number_abi_probe",numbers);
- REG("exact_id_probe",ids);REG("get_status",status);REG("start_observer",start);
+ REG("exact_id_probe",ids);REG("get_status",status);REG("start_observer",start);REG("stop_observer",stop_observer);
  REG("begin_battle",begin);REG("end_battle",end);REG("get_battle_epoch",epoch);
+ REG("acquire_client",acquire_client);REG("release_client",release_client);REG("smart_guard_enable",smart_guard_enable);
  REG("get_unit_revision",revision);REG("arm_verified_issue",arm);REG("issue_verified_command",issue);REG("cancel_pending_issue",cancel_pending);
  REG("read_journal",journal);REG("acknowledge",ack);
+ REG("drain_smart_guard_cancel_requests",drain_smart_guard_cancels);
+ REG("diagnostic_probe_component_chain",diag_probe_component);
+ REG("diagnostic_probe_entity_alive",diag_probe_alive);
+ REG("diagnostic_gate_status",diag_gate_status);
+ REG("smart_guard_register_local_unit",smart_guard_register_local);
+ REG("smart_guard_unregister_local_unit",smart_guard_unregister_local);
+ REG("smart_guard_clear_local_units",smart_guard_clear_local);
 #undef REG
  return 1;}
 } // namespace

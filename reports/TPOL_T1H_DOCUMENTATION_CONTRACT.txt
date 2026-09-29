@@ -1,0 +1,1 @@
+PASS: BSC-TPOL-T1H documentation contract; implemented hidden profile scaffold is separated from pending T2/T3 behavior

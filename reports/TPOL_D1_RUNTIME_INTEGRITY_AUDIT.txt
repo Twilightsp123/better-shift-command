@@ -1,0 +1,19 @@
+BSC-TPOL-D1 runtime/code integrity audit
+baseline=BSC_COREPATH_RC8_MOVE_VTABLE_FIX_PREBUILD
+compared=source, src, tests, steering_tests, baseline, controller_tools, tools
+excluded=__pycache__/*.pyc
+compared_files=83
+mismatches=0
+missing=0
+extra=0
+
+MISMATCHES:
+NONE
+
+MISSING:
+NONE
+
+EXTRA:
+NONE
+
+RESULT=PASS_RUNTIME_CODE_UNCHANGED

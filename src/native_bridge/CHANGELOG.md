@@ -1,12 +1,71 @@
+> **NATIVE-BRIDGE HISTORY ONLY.** This changelog has its own Native version/RC stream and does not define the current BSC Controller release. For current package status and RC disambiguation, read `../../docs/MAINTAINER_INDEX.md` and `../../docs/VERSION_LINEAGE.md`. Historical entries may contain physical-evidence claims later quarantined by CorePath RC8.
+
+# CorePath RC8 Move-VTable correction — 2026-09-29
+
+- Direct current-EXE dataflow audit proves top-level `Order::issue_move` (`0x030344D4`) calls Full Move constructor `0x0300B094`, installing VTable `0x03910AA8`.
+- Historical/current-map `0x0390E248` is the sibling Simple/Intercept Move constructor VTable and is retracted as the top-level Move outcome identity.
+- `BridgeHost::outcome()` and CorePath active execution identity now use `0x03910AA8`; Attack remains `0x03910228`.
+- Allocator ABI is explicitly vindicated: `0x02F5248C` returns exact `slot_base` in RAX; no allocator-index/container-scan/constructor-witness replacement is used.
+- Per-kind accepted calibration now requires a complete slot-bearing native outcome so a partial decoder result cannot authorize the first owned issue.
+- Core fixtures are corrected to use the full Move VTable and include a regression that the old Simple/Intercept VTable cannot calibrate the top-level Move path.
+- `ACCEPTED_NO_SLOT` remains supported; the supplied static report contains an unresolved queue-full branch/return contradiction and does not justify deleting the historical no-slot contract.
+
+# CorePath RC8 maintenance candidate — 2026-09-27
+
+- Target build: WH3 SHA256 `6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297`.
+- 16 mandatory command/packet hooks; ContactPair separated as optional staged-disabled physical research site.
+- Smart Guard remains optional staged disabled.
+- Production physical Evidence V3 APIs quarantined; command execution identity remains available.
+- Command issue authorization no longer depends on Component/Alive diagnostic gates.
+- RC7 safe observer disable retained.
+- Status: PREBUILD; Windows v142/MASM and WH3 runtime smoke pending.
+
+---
+
+# RC7 Component Layout + Safe Stop Diagnostic
+
+- RC6 runtime bound a unique 60-slot evidence root, then failed at the first soldier with `MOVEMENT_BACKREF_MISMATCH`; RC7 adds bounded read-only component-layout discovery instead of guessing offsets.
+- Requires exactly one Entity->component / component->Entity backreference pair across independent soldiers and revalidates the result across the full soldier array.
+- Movement-state fallback is fail-closed; zero-filled historical `+0x8B0` is not accepted as live evidence for a discovered pair.
+- Validates Entity vtable and `vt+0x630` target as executable without calling it before Component Gate.
+- Alive diagnostic revalidation uses the discovered offsets only after the Component Gate publishes them.
+- Adds `stop_observer`: queues disable for all bridge hooks and applies it while keeping the pinned bridge, MinHook backend, and trampolines resident.
+- Diagnostic shutdown calls `stop_observer`; Quit-to-Windows has a best-effort early stop listener to avoid carrying allocator/free detours into engine teardown.
+- Hook/VTable map is unchanged; Smart Guard remains staged disabled. Production EvidenceProbe and ContactPair layouts are intentionally not auto-migrated from an unverified runtime scan.
+
+# RC6 Root Discovery Diagnostic
+
+- Added fail-closed evidence-root discovery after RC5 runtime proved the strict Lua userdata resolver no longer matches the current WH3 wrapper layout.
+- Preserved command roots and physical/evidence roots as separate object identities.
+- Added optional `lua_objlen`-bounded userdata graph scan and expected deployment soldier-count discriminator.
+- Added native command-root observation fallback and bounded read-only pointer graph scan.
+- Added `diagnostic_command_root_v3` and `diagnostic_bind_evidence_unit_v3` Lua diagnostics.
+- Diagnostic harness now waits for one normal user MOVE if userdata-only discovery fails; it never issues commands itself.
+- Removed duplicate diagnostic log emission.
+- Hook/VTable map remains unchanged from Phase 6.2; Smart Guard remains staged disabled.
+
+# v1.0.16 diagnostic RC4 — 2026-09-26
+
+- Pre-gate evidence-root resolution no longer calls EntitySnapshot / Entity::is_alive; it uses read-only stable container + finite position validation.
+- Component runtime gate is root-bound and revokes prior Alive proof whenever re-probed.
+- Alive diagnostic requires the same component-verified root and keeps two-stage deployment/casualty proof.
+- Begin-issue rechecks runtime gates so a stale armed state cannot outlive revoked physical evidence.
+- Lua diagnostic alive-count input is finite/integer/range checked (0..300).
+- Current EXE verifier dynamically parses 17 core guards plus the independent Smart Guard guard and verifies executable sections.
+- Diagnostic harness retains the battle epoch until end_battle succeeds, requires pristine deployment, and uses exact UID handling.
+- Smart Guard remains staged disabled for the first new-build runtime gate test.
+
 # v1.0.14-r1-evidence-v2
 
 - Controller-side second-charge semantic hotfix release; Native dual-root ABI retained with version lock bump.
 
 # v1.0.13-r1-evidence-v2
 
+> **Historical evidence semantics:** this section records the v1.0.13-era interpretation. CorePath RC8 later quarantined this physical model as release proof, and the specific `Entity+0x18 = MovementComponent*` attribution was retracted.
+
 - Evidence V2 exposes raw order/entity/combat facts; Lua owns R1 semantic verdicts.
-- Entity liveness uses the engine Entity::is_alive virtual method.
-- MovementCollisionController provenance is Entity+0x18; +0x74 local state and +0x8B0 movement state are sampled separately.
+- Entity liveness used the then-current `Entity::is_alive` interpretation; RC8 does not treat that class/slot semantic as production-proven.
+- **RETRACTED AS CURRENT PROOF:** the v1.0.13 line attributed MovementCollisionController provenance to `Entity+0x18`; RC8 found the cited proof was actually a different `ResultRecord+0x18 = Controller*` access. Historical `+0x74` / `+0x8B0` sampling remains research-only.
 - Post-exit Attacks use fresh Entity lock episodes tied to exact native order identity and intended CombatGroup target.
 - Ordinary first Attacks keep the mature FEG path and do not globally depend on Entity V2 availability.
 

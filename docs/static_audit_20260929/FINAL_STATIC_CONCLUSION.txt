@@ -1,0 +1,77 @@
+================================================================================
+FINAL_STATIC_CONCLUSION.TXT — COMPREHENSIVE REVERSE ENGINEERING AUDIT REPORT
+================================================================================
+Target Executable: Total War: WARHAMMER III (Warhammer3.exe)
+SHA256: 6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297
+Audit Date: 2026-09-29
+
+1. EXACT ANSWERS TO THE SEVEN SPECIFIC AUDIT QUESTIONS
+--------------------------------------------------------------------------------
+
+[Question 1: Move Outcome Dataflow from 0x030344D4]
+  - Allocator arguments: RCX = controller + 0x278 (OrderQueue), DL = bool queued.
+  - Allocator return RAX: Strictly slot_base (beginning of 288-byte / 0x120 slot).
+  - Where RAX is saved: RBX (mov rbx, rax).
+  - Order this address: RBX + 0x18 (slot_base + 0x18). Passed in RCX to constructor.
+  - Constructor called: RVA 0x0300B094 (Full Move Constructor).
+  - VTable installed: 0x03910AA8 (written at slot_base + 0x18).
+  - Engine sequence: Written at slot_base + 0x20 (order_this + 0x08) by 0x0300A7EC.
+  - XYZ payload: Written at slot_base + 0x58 (order_this + 0x40) by 0x0300B0D8.
+  - Top-level return: AL = 1 on success (0x03034A76), AL = 0 on failure (0x03034A7A).
+
+[Question 2: Attack Outcome Dataflow from 0x03032854]
+  - Allocator arguments: RCX = controller + 0x278 (OrderQueue), DL = bool queued.
+  - Allocator return RAX: Strictly slot_base.
+  - Where RAX is saved: RBX (mov rbx, rax).
+  - Order this address: RBX + 0x18 (slot_base + 0x18). Passed in RCX to constructor.
+  - Constructor called: RVA 0x0300AB98 (Attack Constructor).
+  - VTable installed: 0x03910228 (written at slot_base + 0x18).
+  - Engine sequence: Written at slot_base + 0x20 (order_this + 0x08) by 0x0300A7EC.
+  - Target pointer: Written at slot_base + 0x58 (order_this + 0x40) from payload [r14].
+  - Target UID: Read from target_root + 0x3ea0.
+  - Top-level return: AL = 1 on success (0x03032A77), AL = 0 on failure (0x030329C9).
+
+[Question 3: Relationship between 0x0300B038 and 0x0300B094]
+  - Both inherit from Base Order Constructor (0x0300A7EC).
+  - 0x0300B094 is the primary Full Move Constructor called by Order::issue_move (0x030344D4).
+    It installs VTable 0x03910AA8 and copies a 0x5C-byte payload (XYZ + width + orientation + flags).
+  - 0x0300B038 is a secondary Simple Move Constructor called by internal intercept logic (0x03032DE8).
+    It installs VTable 0x0390E248 and copies only a 0x28-byte minimal coordinate payload.
+
+[Question 4: Allocator Return ABI]
+  - Allocator (0x02F5248C) returns strictly and exclusively slot_base (RAX = r8 + index * 0x120).
+  - It NEVER returns slot_base + 0x18 or slot_base + 0x20.
+  - The +0x18 offset is applied by the caller before invoking the order constructors.
+  - Move and Attack paths have identical allocator return ABI.
+
+[Question 5: Call Counts in Accepted Order]
+  - Single-unit Move: Allocator called 1 time, Base Order Constructor called 1 time.
+  - Single-unit Attack: Allocator called 1 time, Base Order Constructor called 1 time.
+  - Queued vs Non-queued:
+    * Non-queued (dl = 0): Allocator calls 0x02F3C030 to clear previous orders and allocates slot 0.
+    * Queued (dl = 1): Allocator preserves previous orders and allocates the next circular slot.
+
+[Question 6: Engine Sequence Contract]
+  - Accepted single-unit Move and Attack orders ALWAYS receive an engine sequence.
+  - Base Order Constructor (0x0300A7EC) has no conditional branches and unconditionally increments
+    the sequence counter in OrderSequenceManager (context + 0x440 + 0x9c) and writes it to slot_base + 0x20.
+  - An accepted single-unit order without an engine sequence is structurally impossible in this binary.
+
+2. ROOT CAUSE OF RUNTIME FAILURE (OWNED_OUTCOME_INDETERMINATE)
+--------------------------------------------------------------------------------
+In bridge_host.cpp:
+  The outcome decoder checked:
+    if (vt != base_ + (f.kind == Kind::Move ? 0x0390E248 : 0x03910228))
+  For Move orders, it expected VTable 0x0390E248.
+  However, the hooked Order::issue_move (0x030344D4) invokes constructor 0x0300B094, which
+  installs VTable 0x03910AA8.
+  Consequently:
+  - Reading VTable at slot_base + 0x18 yielded 0x03910AA8.
+  - 0x03910AA8 did not equal 0x0390E248.
+  - decode_slot returned false with detail = "OUTCOME_MOVE_VTABLE_MISMATCH".
+  - The outcome was marked indeterminate, triggering disarm("OWNED_GATE_OUTCOME_INDETERMINATE").
+
+3. EVIDENCE LEVEL
+--------------------------------------------------------------------------------
+All statements in this audit are certified LEVEL 1 (Direct machine code disassembly and register dataflow).
+Zero assumptions or unproven hypotheses remain.

@@ -1,0 +1,5 @@
+PASS TPOL-T1H hidden policy contract
+mct_ui=NOT_REGISTERED
+engagement_hold_seconds_default=3.0
+engagement_hold_ms=3000
+movement_policy_fields=RESERVED_NOT_WIRED

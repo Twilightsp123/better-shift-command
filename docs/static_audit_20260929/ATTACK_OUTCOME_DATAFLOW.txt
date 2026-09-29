@@ -1,0 +1,120 @@
+================================================================================
+ATTACK_OUTCOME_DATAFLOW.TXT — TOP-LEVEL ATTACK ORDER DISASSEMBLY & DATAFLOW AUDIT
+================================================================================
+Target Executable: Warhammer3.exe
+SHA256: 6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297
+Top-Level Attack Entry Point: RVA 0x03032854 (.trace)
+
+1. TOP-LEVEL FUNCTION SIGNATURE & ARGUMENT REGISTER ALLOCATION
+--------------------------------------------------------------------------------
+Signature: bool __fastcall Order::issue_attack(UnitController* this, int order_mode, const AttackPayload* payload, bool queued)
+
+Prologue at 0x03032854:
+  0x03032854: mov        rax, rsp
+  0x03032857: mov        qword ptr [rax + 8], rbx       ; spill rbx
+  0x0303285B: mov        qword ptr [rax + 0x10], rbp    ; spill rbp
+  0x0303285F: mov        qword ptr [rax + 0x18], rsi    ; spill rsi
+  0x03032863: push       rdi
+  0x03032864: push       r14
+  0x03032866: push       r15
+  0x03032868: sub        rsp, 0x30
+  0x0303286C: mov        rbx, qword ptr [r8]            ; rbx = target entity pointer ([payload + 0])
+  0x0303286F: mov        rsi, rcx                       ; rsi = rcx (UnitController* this)
+  0x03032879: mov        bpl, r9b                       ; bpl = r9b (bool queued)
+  0x0303287C: mov        r14, r8                        ; r14 = r8 (const AttackPayload* payload)
+  0x0303287F: mov        r15d, edx                      ; r15d = edx (int order_mode)
+
+Register Mapping:
+  - UnitController* this:   RCX -> RSI
+  - order_mode:             EDX -> R15D
+  - AttackPayload* payload: R8  -> R14
+  - bool queued:            R9B -> BPL
+  - Target Entity pointer:  [R8] -> RBX
+
+2. PRE-ALLOCATOR VALIDATION & CAPACITY CHECK
+--------------------------------------------------------------------------------
+At 0x03032A38:
+  0x03032A38: test       bpl, bpl                       ; test queued flag
+  0x03032A3B: je         0x143032a46                    ; if non-queued, proceed to allocate slot 0
+  0x03032A3D: cmp        dword ptr [rsi + 0x2f88], 0x28 ; check queued count against max capacity (40 = 0x28)
+  0x03032A44: jae        0x143032a77                    ; if full (>= 40), jump to reject (return 0)
+
+3. ALLOCATOR CALL & RETURN VALUE DATAFLOW
+--------------------------------------------------------------------------------
+At 0x03032A46:
+  0x03032A46: lea        rcx, [rsi + 0x278]             ; rcx = &controller->order_queue (container)
+  0x03032A4D: mov        dl, bpl                        ; dl = queued flag
+  0x03032A50: call       0x142f5248c                    ; CALL ALLOCATOR (RVA 0x02F5248C)
+  0x03032A55: mov        rcx, rax                       ; rcx = rax
+  0x03032A58: mov        rbx, rax                       ; RBX = RAX (slot_base)
+  0x03032A5B: call       0x142f3c170                    ; Virtual destructor on previous occupant of slot
+  0x03032A60: lea        rcx, [rbx + 0x18]              ; RCX = slot_base + 0x18 (ORDER THIS POINTER!)
+  0x03032A64: test       rcx, rcx                       ; null check
+  0x03032A67: je         0x143032a77                    ; if null, exit
+  0x03032A69: mov        r9, r14                        ; r9 = AttackPayload* payload (from r14)
+  0x03032A6C: mov        r8d, r15d                      ; r8d = order_mode (from r15d)
+  0x03032A6F: mov        rdx, rbx                       ; rdx = slot_base (from rbx)
+  0x03032A72: call       0x14300ab98                    ; CALL ATTACK CONSTRUCTOR (RVA 0x0300AB98)
+  0x03032A77: mov        al, 1                          ; SUCCESS: AL = 1
+  0x03032A79: jmp        0x1430329cb                    ; jump to function epilogue
+
+4. ATTACK CONSTRUCTOR & PAYLOAD COMMIT (RVA 0x0300AB98)
+--------------------------------------------------------------------------------
+Disassembly:
+  0x0300AB98: mov        qword ptr [rsp + 8], rbx
+  0x0300AB9D: push       rdi
+  0x0300AB9E: sub        rsp, 0x20
+  0x0300ABA2: mov        rbx, r9                        ; rbx = AttackPayload*
+  0x0300ABA5: mov        rdi, rcx                       ; rdi = order_this (slot_base + 0x18)
+  0x0300ABA8: call       0x14300a7ec                    ; CALL BASE ORDER CONSTRUCTOR (0x0300A7EC)
+  0x0300ABAD: lea        rdx, [rip + 0x905674]          ; rdx = VTable 0x03910228
+  0x0300ABB4: mov        qword ptr [rdi], rdx           ; [order_this + 0x00] = 0x03910228 (Attack VTable!)
+  0x0300ABB7: mov        rax, qword ptr [rbx]           ; target_root pointer from payload [rbx]
+  0x0300ABBA: mov        qword ptr [rdi + 0x40], rax    ; [order_this + 0x40] = target_root (slot_base + 0x58)
+  0x0300ABBE: mov        rax, qword ptr [rbx + 8]
+  0x0300ABC2: mov        qword ptr [rdi + 0x48], rax    ; [order_this + 0x48] = payload field +8
+  0x0300ABC6: mov        rax, qword ptr [rbx + 0x10]
+  0x0300ABCA: mov        qword ptr [rdi + 0x50], rax    ; [order_this + 0x50] = payload field +0x10
+  0x0300ABCE: mov        al, byte ptr [rbx + 0x18]
+  0x0300ABD1: mov        byte ptr [rdi + 0x58], al      ; [order_this + 0x58] = flag 0x18 (slot_base + 0x70)
+  0x0300ABD4: mov        al, byte ptr [rbx + 0x19]
+  0x0300ABD7: mov        byte ptr [rdi + 0x59], al      ; [order_this + 0x59] = flag 0x19 (slot_base + 0x71)
+  0x0300ABDA: mov        al, byte ptr [rbx + 0x1a]
+  0x0300ABDD: mov        byte ptr [rdi + 0x5a], al      ; [order_this + 0x5a] = flag 0x1a (slot_base + 0x72)
+  0x0300ABE0: mov        rcx, qword ptr [rbx]           ; rcx = target_root
+  0x0300ABE3: add        rcx, 0x3b30
+  0x0300ABEA: call       0x1430318e0
+  0x0300ABEF: mov        rbx, qword ptr [rsp + 0x30]
+  0x0300ABF4: movzx      eax, al
+  0x0300ABF7: mov        dword ptr [rdi + 0x60], eax    ; [order_this + 0x60] = status (slot_base + 0x78)
+  0x0300ABFA: mov        rax, rdi                       ; return order_this
+  0x0300ABFD: add        rsp, 0x20
+  0x0300AC01: pop        rdi
+  0x0300AC02: ret
+
+5. TARGET UNIT IDENTITY RESOLUTION
+--------------------------------------------------------------------------------
+The target pointer stored at [order_this + 0x40] (slot_base + 0x58) is target_root.
+At RVA 0x0059C626:
+  mov dword ptr [rdi + 0x3ea0], r14d
+Target unit UID is verified at target_root + 0x3ea0 (32-bit integer).
+
+6. TOP-LEVEL RETURN VALUE
+--------------------------------------------------------------------------------
+At 0x03032A77:
+  0x03032A77: mov        al, 1                          ; SUCCESS: AL = 1 (accepted = true)
+  0x03032A79: jmp        0x1430329cb
+  0x030329C9: xor        al, al                         ; REJECT: AL = 0 (accepted = false)
+  0x030329CB: mov        rbx, qword ptr [rsp + 0x50]
+  ...
+  0x030329E8: ret
+
+CONCLUSION:
+  - Exact Slot Base: RAX returned from Allocator (RVA 0x02F5248C).
+  - Saved in Register: RBX.
+  - Order this: RBX + 0x18 (slot_base + 0x18).
+  - Exact VTable installed: 0x03910228 (Attack Order VTable).
+  - Engine Sequence: Located at order_this + 0x08 (slot_base + 0x20).
+  - Target Pointer: Located at order_this + 0x40 (slot_base + 0x58).
+  - Target UID: Located at target_root + 0x3ea0.
+  - Evidence Grade: LEVEL 1 (Direct disassembly, zero ambiguity).

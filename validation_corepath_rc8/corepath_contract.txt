@@ -1,0 +1,2 @@
+$ /opt/pyvenv/bin/python maintenance_tools/check_corepath_rc8.py
+PASS: CorePath RC8 source contract; 16 command hooks mandatory, physical evidence quarantined, provenance frozen

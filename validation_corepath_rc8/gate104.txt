@@ -1,0 +1,6 @@
+$ /usr/bin/texlua tests/test_gate_v104.lua source/fresh_engagement_gate.lua
+PASS FEG4 bounded matched-melee formation contact may qualify inside strong envelope
+PASS FEG4 matched-melee contact beyond strong envelope cannot qualify
+PASS FEG4 extended matched-melee path requires bounding-box overlap
+ACTUAL_INTERPRETER=Lua 5.3
+TOTAL 3 PASS 0 FAIL

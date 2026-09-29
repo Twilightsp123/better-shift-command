@@ -1,0 +1,1268 @@
+--- a/clients/diagnostic/bsc_wh3_update_diagnostic.lua
++++ b/clients/diagnostic/bsc_wh3_update_diagnostic.lua
+@@ -2,7 +2,7 @@
+ -- Dedicated harness for Component Chain + two-stage Entity Alive runtime gates.
+ -- Diagnostic only: DOES NOT issue commands, arm BSC, take control, or enable Smart Guard.
+ 
+-local DIAG_VERSION = "1.0.16-diagnostic-wh3-update-gated-rc6-root-discovery"
++local DIAG_VERSION = "1.0.16-diagnostic-wh3-update-gated-rc7-component-layout-safe-stop"
+ local SESSION_KEY = "WH3_UPDATE_GATE_DIAGNOSTIC"
+ local TAG = "[BSC_WH3_UPDATE_DIAGNOSTIC] "
+ local ROOT_TIMER_NAME = "bsc_wh3_root_discovery_poll"
+@@ -51,7 +51,10 @@
+     component_passed = false,
+     deployment_passed = false,
+     casualty_passed = false,
+-    all_passed = false
++    all_passed = false,
++    observer_attempted = false,
++    observer_started = false,
++    observer_stopped = false
+ }
+ 
+ local function end_session_if_needed()
+@@ -70,11 +73,30 @@
+     log("DIAG_SESSION_END result=PASS epoch=" .. tostring(epoch))
+ end
+ 
++local function stop_native_observer_if_needed()
++    if not bridge or type(bridge.stop_observer) ~= "function" or S.observer_stopped then return true end
++    if not S.observer_attempted then return true end
++    local call_ok, stopped, err = pcall(bridge.stop_observer)
++    if not call_ok then
++        log("DIAG_OBSERVER_STOP result=FAIL call_error=" .. clean(stopped))
++        return false
++    end
++    if stopped ~= true then
++        log("DIAG_OBSERVER_STOP result=FAIL error=" .. clean(err))
++        return false
++    end
++    S.observer_stopped = true
++    S.observer_started = false
++    log("DIAG_OBSERVER_STOP result=PASS hooks_disabled=true dll_pinned=true trampolines_resident=true")
++    return true
++end
++
+ local function stop_diagnostic(reason)
+     if S.stopped then
+-        -- A later battle phase may give a previously failed end_battle call one
+-        -- more chance to close the session using the retained epoch.
++        -- A later battle phase may give a previously failed end/disable call one
++        -- more chance to close the session using the retained epoch/state.
+         if S.epoch then end_session_if_needed() end
++        if not S.observer_stopped then stop_native_observer_if_needed() end
+         return
+     end
+     S.stopped = true
+@@ -84,6 +106,7 @@
+         pcall(function() bmgr:remove_real_callback(CASUALTY_TIMER_NAME) end)
+     end
+     end_session_if_needed()
++    stop_native_observer_if_needed()
+     log("DIAG_STOPPED reason=" .. tostring(reason))
+ end
+ 
+@@ -116,6 +139,10 @@
+     log(prefix ..
+         " component=" .. tostring(st.component_chain_gate) ..
+         " component_root=" .. tostring(st.component_gate_root) ..
++        " layout_method=" .. tostring(st.component_layout_method) ..
++        " entity_component_offset=" .. tostring(st.entity_component_offset) ..
++        " component_backref_offset=" .. tostring(st.component_backref_offset) ..
++        " movement_state_offset=" .. tostring(st.movement_state_offset) ..
+         " deployment=" .. tostring(st.alive_deployment_passed) ..
+         " casualty=" .. tostring(st.alive_casualty_passed) ..
+         " alive=" .. tostring(st.entity_alive_gate) ..
+@@ -241,9 +268,11 @@
+ end
+ 
+ local function begin_native_session()
++    S.observer_attempted = true
+     local obs_call_ok, obs_ok, obs_err = pcall(bridge.start_observer, true)
+     if not obs_call_ok then return false, "OBSERVER_START_CALL_FAILED_" .. clean(obs_ok) end
+     if obs_ok ~= true then return false, "OBSERVER_START_FAILED_" .. clean(obs_err) end
++    S.observer_started = true
+ 
+     local begin_call_ok, epoch, begin_err = pcall(bridge.begin_battle, SESSION_KEY)
+     if not begin_call_ok then return false, "BEGIN_BATTLE_CALL_FAILED_" .. clean(epoch) end
+@@ -253,6 +282,25 @@
+     return true, nil
+ end
+ 
++local function join_layout_pairs(t)
++    if type(t) ~= "table" then return "[]" end
++    local parts = {}
++    for i = 1, #t do
++        local p = t[i]
++        if type(p) == "table" then
++            parts[#parts + 1] = tostring(p.entity_component_offset) .. ":" .. tostring(p.component_backref_offset)
++        end
++    end
++    return "[" .. table.concat(parts, ",") .. "]"
++end
++
++local function join_offsets(t)
++    if type(t) ~= "table" then return "[]" end
++    local parts = {}
++    for i = 1, #t do parts[#parts + 1] = tostring(t[i]) end
++    return "[" .. table.concat(parts, ",") .. "]"
++end
++
+ local function continue_after_bind(c, bind_res)
+     S.selected_unit, S.selected_uid, S.initial_men = c.unit, c.uid, c.men
+     log_bind_result("DIAG_UNIT_BOUND", c, bind_res)
+@@ -260,7 +308,19 @@
+ 
+     local comp_call_ok, comp_res, comp_err = pcall(bridge.diagnostic_probe_component_chain, c.uid)
+     if not comp_call_ok or type(comp_res) ~= "table" then fatal("CALL_ERROR_PROBE_COMPONENT", comp_res or comp_err); return end
+-    log("DIAG_COMPONENT uid=" .. tostring(c.uid) .. " passed=" .. tostring(comp_res.passed) .. " slot_count=" .. tostring(comp_res.slot_count) .. " sampled_count=" .. tostring(comp_res.sampled_count) .. " reason=" .. tostring(comp_res.reason))
++    log("DIAG_COMPONENT uid=" .. tostring(c.uid) ..
++        " passed=" .. tostring(comp_res.passed) ..
++        " slot_count=" .. tostring(comp_res.slot_count) ..
++        " sampled_count=" .. tostring(comp_res.sampled_count) ..
++        " layout_method=" .. tostring(comp_res.layout_method) ..
++        " entity_component_offset=" .. tostring(comp_res.entity_component_offset) ..
++        " component_backref_offset=" .. tostring(comp_res.component_backref_offset) ..
++        " movement_state_offset=" .. tostring(comp_res.movement_state_offset) ..
++        " pair_candidates=" .. tostring(comp_res.layout_pair_candidate_count) ..
++        " pair_report=" .. join_layout_pairs(comp_res.layout_pairs) ..
++        " state_candidates=" .. tostring(comp_res.layout_state_candidate_count) ..
++        " state_report=" .. join_offsets(comp_res.layout_state_offsets) ..
++        " reason=" .. tostring(comp_res.reason))
+     if comp_res.passed ~= true then fatal("COMPONENT_GATE_FAIL", comp_res.reason); return end
+     if comp_res.slot_count ~= comp_res.sampled_count then fatal("COMPONENT_GATE_INCOMPLETE_SAMPLE", "slot=" .. tostring(comp_res.slot_count) .. " sampled=" .. tostring(comp_res.sampled_count)); return end
+     S.component_passed = true
+@@ -348,7 +408,7 @@
+     log("BRIDGE_OK version=" .. tostring(v))
+ 
+     for _, fn in ipairs({
+-        "start_observer", "begin_battle", "end_battle",
++        "start_observer", "stop_observer", "begin_battle", "end_battle",
+         "diagnostic_command_root_v3",
+         "diagnostic_bind_evidence_unit_v3",
+         "diagnostic_probe_component_chain",
+@@ -369,6 +429,28 @@
+     bmgr:register_phase_change_callback("VictoryCountdown", function() stop_diagnostic("VictoryCountdown") end)
+     bmgr:register_phase_change_callback("Complete", function() stop_diagnostic("Complete") end)
+ 
++    -- Quit-to-Windows can destroy battle UI before a normal phase callback fires.
++    -- Disable native detours as soon as that button is clicked; cancelling the
++    -- confirmation simply leaves this diagnostic stopped, which is safer than
++    -- carrying allocator/free hooks into engine shutdown.
++    local core_ok, core_obj = pcall(function() return core end)
++    if core_ok and core_obj and type(core_obj.add_listener) == "function" then
++        pcall(function()
++            core_obj:add_listener(
++                "BSC_RC7_SAFE_STOP_QUIT_WINDOWS",
++                "ComponentLClickUp",
++                function(context)
++                    local ok, v = pcall(function() return context.string end)
++                    if ok and v == "button_windows" then return true end
++                    ok, v = pcall(function() return context:string() end)
++                    return ok and v == "button_windows"
++                end,
++                function() stop_diagnostic("QUIT_WINDOWS_CLICK") end,
++                true
++            )
++        end)
++    end
++
+     local phase_ok, current_phase = pcall(function() return bmgr:get_current_phase_name() end)
+     log("DIAG_CURRENT_PHASE phase=" .. clean(phase_ok and current_phase or "UNKNOWN"))
+     if phase_ok and current_phase == "Deployed" then schedule() end
+--- a/release_tools/build_bsc_gate_diagnostic.py
++++ b/release_tools/build_bsc_gate_diagnostic.py
+@@ -16,8 +16,8 @@
+     sha,
+ )
+ 
+-DIAGNOSTIC_VERSION = "1.0.16-diagnostic-wh3-update-gated-rc6-root-discovery"
+-BUILD_ID = "WH3_6C104A63AACC4D86_DIAGNOSTIC_RC6_ROOT"
++DIAGNOSTIC_VERSION = "1.0.16-diagnostic-wh3-update-gated-rc7-component-layout-safe-stop"
++BUILD_ID = "WH3_6C104A63AACC4D86_DIAGNOSTIC_RC7_COMPONENT_LAYOUT_SAFE_STOP"
+ 
+ if not __debug__:
+     raise SystemExit("Diagnostic pack builder requires Python assertions; do not run with -O/-OO")
+@@ -71,6 +71,8 @@
+         "current_men", "DEPLOYMENT_NOT_PRISTINE", "unit_uid",
+         "diagnostic_command_root_v3", "diagnostic_bind_evidence_unit_v3",
+         "DIAG_WAITING_FOR_COMMAND_ROOT",
++        "stop_observer", "DIAG_OBSERVER_STOP", "QUIT_WINDOWS_CLICK",
++        "layout_method", "pair_report=", "state_report=",
+     ):
+         assert required in script_text, f"Diagnostic harness missing required contract token: {required}"
+ 
+--- a/release_tools/common_pack.py
++++ b/release_tools/common_pack.py
+@@ -6,7 +6,7 @@
+ from pathlib import Path
+ 
+ MINHOOK_SHA256 = "df452eacdb076c35a80c795df920fd3c6f128faa3e0bccb0b7490e95f8659d54"
+-UNIFIED_ABI_VERSION = "1.0.16-diagnostic-wh3-update-gated-rc6-root-discovery"
++UNIFIED_ABI_VERSION = "1.0.16-diagnostic-wh3-update-gated-rc7-component-layout-safe-stop"
+ 
+ def sha(data: bytes) -> str:
+     return hashlib.sha256(data).hexdigest()
+--- a/src/native_bridge/CHANGELOG.md
++++ b/src/native_bridge/CHANGELOG.md
+@@ -1,3 +1,14 @@
++# RC7 Component Layout + Safe Stop Diagnostic
++
++- RC6 runtime bound a unique 60-slot evidence root, then failed at the first soldier with `MOVEMENT_BACKREF_MISMATCH`; RC7 adds bounded read-only component-layout discovery instead of guessing offsets.
++- Requires exactly one Entity->component / component->Entity backreference pair across independent soldiers and revalidates the result across the full soldier array.
++- Movement-state fallback is fail-closed; zero-filled historical `+0x8B0` is not accepted as live evidence for a discovered pair.
++- Validates Entity vtable and `vt+0x630` target as executable without calling it before Component Gate.
++- Alive diagnostic revalidation uses the discovered offsets only after the Component Gate publishes them.
++- Adds `stop_observer`: queues disable for all bridge hooks and applies it while keeping the pinned bridge, MinHook backend, and trampolines resident.
++- Diagnostic shutdown calls `stop_observer`; Quit-to-Windows has a best-effort early stop listener to avoid carrying allocator/free detours into engine teardown.
++- Hook/VTable map is unchanged; Smart Guard remains staged disabled. Production EvidenceProbe and ContactPair layouts are intentionally not auto-migrated from an unverified runtime scan.
++
+ # RC6 Root Discovery Diagnostic
+ 
+ - Added fail-closed evidence-root discovery after RC5 runtime proved the strict Lua userdata resolver no longer matches the current WH3 wrapper layout.
+--- a/src/native_bridge/CMakeLists.txt
++++ b/src/native_bridge/CMakeLists.txt
+@@ -12,7 +12,7 @@
+ add_library(wh3_identity_gate STATIC src/identity_gate.cpp)
+ target_include_directories(wh3_identity_gate PUBLIC include)
+ target_link_libraries(wh3_identity_gate PUBLIC Threads::Threads)
+-add_library(wh3_host_core STATIC src/bridge_host.cpp src/packet_tracker.cpp src/evidence_probe.cpp src/contact_tracker.cpp)
++add_library(wh3_host_core STATIC src/bridge_host.cpp src/packet_tracker.cpp src/evidence_probe.cpp src/contact_tracker.cpp src/component_layout.cpp)
+ target_include_directories(wh3_host_core PUBLIC include)
+ target_link_libraries(wh3_host_core PUBLIC wh3_identity_gate)
+ add_library(wh3_native_bridge SHARED src/lua_module.cpp)
+@@ -85,6 +85,9 @@
+ add_executable(test_diagnostic_gates tests/test_diagnostic_gates.cpp)
+ target_link_libraries(test_diagnostic_gates PRIVATE wh3_host_core)
+ add_test(NAME diagnostic_gates COMMAND test_diagnostic_gates)
++add_executable(test_component_layout tests/test_component_layout.cpp)
++target_link_libraries(test_component_layout PRIVATE wh3_host_core)
++add_test(NAME component_layout_discovery COMMAND test_component_layout)
+ 
+ if(MSVC)
+  foreach(t test_host test_dual_root test_contact_tracker test_integrated_host test_smart_guard test_diagnostic_gates)
+--- a/src/native_bridge/include/wh3/bridge_host.hpp
++++ b/src/native_bridge/include/wh3/bridge_host.hpp
+@@ -340,12 +340,27 @@
+  std::uint64_t next_client_id_{0};
+  std::atomic<bool> smart_guard_client_active_{false};
+ };
+-static constexpr const char* kDiagnosticBridgeVersion = "1.0.16-diagnostic-wh3-update-gated-rc6-root-discovery";
++static constexpr const char* kDiagnosticBridgeVersion = "1.0.16-diagnostic-wh3-update-gated-rc7-component-layout-safe-stop";
++
++struct DiagnosticLayoutPair {
++    std::size_t entity_component_offset{0};
++    std::size_t component_backref_offset{0};
++};
+ 
+ struct DiagnosticChainResult {
+     bool passed{false};
+     std::size_t slot_count{0};
+     std::size_t sampled_count{0};
++    std::size_t entity_component_offset{0};
++    std::size_t component_backref_offset{0};
++    std::size_t movement_state_offset{0};
++    std::size_t layout_pair_candidate_count{0};
++    std::size_t layout_state_candidate_count{0};
++    std::size_t layout_pair_reported{0};
++    std::size_t layout_state_reported{0};
++    std::array<DiagnosticLayoutPair, 8> layout_pairs{};
++    std::array<std::size_t, 16> layout_state_offsets{};
++    const char* layout_method{"NONE"};
+     const char* failure_reason{"NONE"};
+ };
+ 
+@@ -364,6 +379,10 @@
+ struct DiagnosticGateStatus {
+     bool component_chain_gate{false};
+     std::uintptr_t component_gate_root{0};
++    std::size_t entity_component_offset{0};
++    std::size_t component_backref_offset{0};
++    std::size_t movement_state_offset{0};
++    const char* component_layout_method{"NONE"};
+     bool alive_deployment_passed{false};
+     bool alive_casualty_passed{false};
+     bool entity_alive_gate{false};
+@@ -379,7 +398,7 @@
+ bool platform_combat_group_query(std::uintptr_t,bool*,std::uintptr_t*) noexcept;
+ bool platform_frame_active(const FrameIdentity&) noexcept;
+ FrameIdentity platform_caller_frame(void*) noexcept;
+-void* platform_lua_symbol(const char*) noexcept;const char* platform_start_observer();
++void* platform_lua_symbol(const char*) noexcept;const char* platform_start_observer();const char* platform_stop_observer();
+ bool platform_hooks_installed() noexcept;const char* platform_last_error() noexcept;
+ bool platform_evidence_build_verified() noexcept;const char* platform_evidence_build_id() noexcept;
+ std::uint64_t platform_tick_ms() noexcept;
+--- a/src/native_bridge/include/wh3/component_layout.hpp
++++ b/src/native_bridge/include/wh3/component_layout.hpp
+@@ -0,0 +1,48 @@
++#pragma once
++#include <array>
++#include <cstddef>
++#include <cstdint>
++
++namespace wh3 {
++
++using ComponentLayoutReadFn = bool (*)(std::uintptr_t, void*, std::size_t) noexcept;
++
++enum class ComponentLayoutMethod : unsigned {
++    None = 0,
++    LegacyExact = 1,
++    DiscoveredPairLegacyState = 2,
++    DiscoveredPairDiscoveredState = 3
++};
++
++struct ComponentLayoutPair {
++    std::size_t entity_component_offset{0};
++    std::size_t component_backref_offset{0};
++};
++
++struct ComponentLayoutScanResult {
++    bool passed{false};
++    std::size_t entity_component_offset{0};
++    std::size_t component_backref_offset{0};
++    std::size_t movement_state_offset{0};
++    std::size_t pair_candidate_count{0};
++    std::size_t state_candidate_count{0};
++    std::size_t pair_reported{0};
++    std::size_t state_reported{0};
++    std::array<ComponentLayoutPair, 8> pairs{};
++    std::array<std::size_t, 16> states{};
++    ComponentLayoutMethod method{ComponentLayoutMethod::None};
++    const char* failure_reason{"NONE"};
++};
++
++// Read-only, bounded discovery around a soldier Entity array. It never calls
++// engine code. Exactly one Entity->component/backref pair is required. The
++// historical movement-state offset is preferred only if it validates live;
++// otherwise a narrow unique fallback candidate is required.
++ComponentLayoutScanResult scan_component_layout(
++    ComponentLayoutReadFn read,
++    std::uintptr_t soldier_array,
++    std::uint32_t slot_count) noexcept;
++
++const char* component_layout_method_name(ComponentLayoutMethod method) noexcept;
++
++} // namespace wh3
+--- a/src/native_bridge/src/component_layout.cpp
++++ b/src/native_bridge/src/component_layout.cpp
+@@ -0,0 +1,164 @@
++#include "wh3/component_layout.hpp"
++#include <algorithm>
++#include <array>
++#include <cstring>
++#include <limits>
++
++namespace wh3 {
++namespace {
++
++bool plausible_runtime_pointer(std::uintptr_t p) noexcept {
++    return p >= 0x10000ULL && p <= 0x00007FFFFFFFFFFFULL && (p % alignof(void*) == 0);
++}
++
++} // namespace
++
++const char* component_layout_method_name(ComponentLayoutMethod method) noexcept {
++    switch (method) {
++        case ComponentLayoutMethod::LegacyExact: return "LEGACY_EXACT";
++        case ComponentLayoutMethod::DiscoveredPairLegacyState: return "DISCOVERED_PAIR_LEGACY_STATE";
++        case ComponentLayoutMethod::DiscoveredPairDiscoveredState: return "DISCOVERED_PAIR_DISCOVERED_STATE";
++        default: return "NONE";
++    }
++}
++
++ComponentLayoutScanResult scan_component_layout(
++    ComponentLayoutReadFn read,
++    std::uintptr_t arr,
++    std::uint32_t slot_count) noexcept {
++    ComponentLayoutScanResult d{};
++    if (!read || !arr || slot_count < 1 || slot_count > 300) {
++        d.failure_reason = "COMPONENT_LAYOUT_INVALID_ARGUMENT";
++        return d;
++    }
++    const std::size_t sample_count = std::min<std::size_t>(slot_count, 4);
++    if (sample_count < 3) {
++        d.failure_reason = "COMPONENT_LAYOUT_NEEDS_3_ENTITIES";
++        return d;
++    }
++    std::array<std::uintptr_t, 4> entities{};
++    for (std::size_t i = 0; i < sample_count; ++i) {
++        const auto stride = i * sizeof(std::uintptr_t);
++        if (arr > UINTPTR_MAX - stride ||
++            !read(arr + stride, &entities[i], sizeof(entities[i])) ||
++            !plausible_runtime_pointer(entities[i])) {
++            d.failure_reason = "COMPONENT_LAYOUT_ENTITY_READ_FAILED";
++            return d;
++        }
++    }
++
++    constexpr std::size_t kEntityScanEnd = 0x200;
++    constexpr std::size_t kComponentScanEnd = 0xC00;
++    for (std::size_t entity_off = 0; entity_off < kEntityScanEnd; entity_off += sizeof(std::uintptr_t)) {
++        std::array<std::uintptr_t, 4> components{};
++        bool components_ok = true;
++        for (std::size_t i = 0; i < sample_count; ++i) {
++            if (entities[i] > UINTPTR_MAX - entity_off ||
++                !read(entities[i] + entity_off, &components[i], sizeof(components[i])) ||
++                !plausible_runtime_pointer(components[i]) || components[i] == entities[i]) {
++                components_ok = false;
++                break;
++            }
++            for (std::size_t j = 0; j < i; ++j) {
++                if (components[i] == components[j]) {
++                    components_ok = false;
++                    break;
++                }
++            }
++            if (!components_ok) break;
++        }
++        if (!components_ok) continue;
++
++        std::array<unsigned char, kComponentScanEnd> first_component{};
++        if (!read(components[0], first_component.data(), first_component.size())) continue;
++        for (std::size_t back_off = 0;
++             back_off + sizeof(std::uintptr_t) <= first_component.size();
++             back_off += sizeof(std::uintptr_t)) {
++            std::uintptr_t p = 0;
++            std::memcpy(&p, first_component.data() + back_off, sizeof(p));
++            if (p != entities[0]) continue;
++            bool all = true;
++            for (std::size_t i = 1; i < sample_count; ++i) {
++                std::uintptr_t back = 0;
++                if (components[i] > UINTPTR_MAX - back_off ||
++                    !read(components[i] + back_off, &back, sizeof(back)) || back != entities[i]) {
++                    all = false;
++                    break;
++                }
++            }
++            if (!all) continue;
++            if (d.pair_reported < d.pairs.size()) {
++                d.pairs[d.pair_reported++] = {entity_off, back_off};
++            }
++            ++d.pair_candidate_count;
++        }
++    }
++
++    if (d.pair_candidate_count == 0) {
++        d.failure_reason = "COMPONENT_LAYOUT_PAIR_NOT_FOUND";
++        return d;
++    }
++    if (d.pair_candidate_count != 1) {
++        d.failure_reason = "COMPONENT_LAYOUT_PAIR_AMBIGUOUS";
++        return d;
++    }
++    d.entity_component_offset = d.pairs[0].entity_component_offset;
++    d.component_backref_offset = d.pairs[0].component_backref_offset;
++
++    std::array<std::uintptr_t, 4> components{};
++    for (std::size_t i = 0; i < sample_count; ++i) {
++        if (!read(entities[i] + d.entity_component_offset, &components[i], sizeof(components[i])) ||
++            !plausible_runtime_pointer(components[i])) {
++            d.failure_reason = "COMPONENT_LAYOUT_COMPONENT_REREAD_FAILED";
++            return d;
++        }
++    }
++
++    auto state_valid = [&](std::size_t off, bool require_nonzero) noexcept {
++        bool any_nonzero = false;
++        for (std::size_t i = 0; i < sample_count; ++i) {
++            std::uint32_t value = 0xFFFFFFFFU;
++            if (components[i] > UINTPTR_MAX - off ||
++                !read(components[i] + off, &value, sizeof(value)) || value > 2) {
++                return false;
++            }
++            if (value != 0) any_nonzero = true;
++        }
++        return !require_nonzero || any_nonzero;
++    };
++
++    // A discovered pair does not make the historical state slot trustworthy.
++    // Require live non-zero evidence before preferring +0x8B0; otherwise zero-filled
++    // padding could masquerade as a valid 0..2 state field.
++    if (state_valid(0x8B0, true)) {
++        d.movement_state_offset = 0x8B0;
++        d.state_candidate_count = 1;
++        d.state_reported = 1;
++        d.states[0] = 0x8B0;
++        d.method = ComponentLayoutMethod::DiscoveredPairLegacyState;
++        d.passed = true;
++        d.failure_reason = "NONE";
++        return d;
++    }
++
++    for (std::size_t off = 0x600; off <= 0xB00; off += sizeof(std::uint32_t)) {
++        if (!state_valid(off, true)) continue;
++        if (d.state_reported < d.states.size()) d.states[d.state_reported++] = off;
++        ++d.state_candidate_count;
++    }
++    if (d.state_candidate_count == 0) {
++        d.failure_reason = "MOVEMENT_STATE_CANDIDATE_NOT_FOUND";
++        return d;
++    }
++    if (d.state_candidate_count != 1) {
++        d.failure_reason = "MOVEMENT_STATE_CANDIDATE_AMBIGUOUS";
++        return d;
++    }
++    d.movement_state_offset = d.states[0];
++    d.method = ComponentLayoutMethod::DiscoveredPairDiscoveredState;
++    d.passed = true;
++    d.failure_reason = "NONE";
++    return d;
++}
++
++} // namespace wh3
+--- a/src/native_bridge/src/lua_module.cpp
++++ b/src/native_bridge/src/lua_module.cpp
+@@ -179,6 +179,9 @@
+     if(A.type(L,1)!=1||!A.toboolean(L,1)){A.pushboolean(L,0);str(L,"EXPLICIT_OBSERVER_ACK_REQUIRED");return 2;}
+     const char* e=platform_start_observer();A.pushboolean(L,e?0:1);if(e){str(L,e);return 2;}return 1;
+ }
++static int stop_observer(lua_State* L){
++    const char* e=platform_stop_observer();A.pushboolean(L,e?0:1);if(e){str(L,e);return 2;}return 1;
++}
+ static int begin(lua_State* L){
+     if(A.type(L,1)!=4)return fail(L,"SESSION_KEY_STRING_REQUIRED");
+     std::size_t n=0;auto s=A.tolstring(L,1,&n);if(!s||!n||n>64)return fail(L,"SESSION_KEY_LENGTH_1_TO_64");
+@@ -346,10 +349,29 @@
+     auto r=host().evidence_root(u.value);
+     if(!r)return fail(L,"UNIT_NOT_FOUND");
+     auto res=platform_probe_component_chain(r.value,300);
+-    A.createtable(L,0,4);
++    A.createtable(L,0,16);
+     bit(L,"passed",res.passed);
+     num(L,"slot_count",static_cast<float>(res.slot_count));
+     num(L,"sampled_count",static_cast<float>(res.sampled_count));
++    num(L,"entity_component_offset",static_cast<float>(res.entity_component_offset));
++    num(L,"component_backref_offset",static_cast<float>(res.component_backref_offset));
++    num(L,"movement_state_offset",static_cast<float>(res.movement_state_offset));
++    num(L,"layout_pair_candidate_count",static_cast<float>(res.layout_pair_candidate_count));
++    num(L,"layout_state_candidate_count",static_cast<float>(res.layout_state_candidate_count));
++    fld(L,"layout_method",res.layout_method);
++    A.createtable(L,static_cast<int>(res.layout_pair_reported),0);
++    for(std::size_t i=0;i<res.layout_pair_reported&&i<res.layout_pairs.size();++i){
++        A.createtable(L,0,2);
++        num(L,"entity_component_offset",static_cast<float>(res.layout_pairs[i].entity_component_offset));
++        num(L,"component_backref_offset",static_cast<float>(res.layout_pairs[i].component_backref_offset));
++        A.rawseti(L,-2,static_cast<int>(i+1));
++    }
++    A.setfield(L,-2,"layout_pairs");
++    A.createtable(L,static_cast<int>(res.layout_state_reported),0);
++    for(std::size_t i=0;i<res.layout_state_reported&&i<res.layout_state_offsets.size();++i){
++        A.pushnumber(L,static_cast<float>(res.layout_state_offsets[i]));A.rawseti(L,-2,static_cast<int>(i+1));
++    }
++    A.setfield(L,-2,"layout_state_offsets");
+     fld(L,"reason",res.failure_reason);
+     return 1;
+ }
+@@ -376,9 +398,13 @@
+ }
+ static int diag_gate_status(lua_State* L){
+     auto s=platform_diagnostic_gate_status();
+-    A.createtable(L,0,8);
++    A.createtable(L,0,12);
+     bit(L,"component_chain_gate",s.component_chain_gate);
+     u64str(L,"component_gate_root",static_cast<std::uint64_t>(s.component_gate_root));
++    num(L,"entity_component_offset",static_cast<float>(s.entity_component_offset));
++    num(L,"component_backref_offset",static_cast<float>(s.component_backref_offset));
++    num(L,"movement_state_offset",static_cast<float>(s.movement_state_offset));
++    fld(L,"component_layout_method",s.component_layout_method);
+     bit(L,"alive_deployment_passed",s.alive_deployment_passed);
+     bit(L,"alive_casualty_passed",s.alive_casualty_passed);
+     bit(L,"entity_alive_gate",s.entity_alive_gate);
+@@ -395,7 +421,7 @@
+  REG("r1_evidence_capabilities_v3",evidence_caps);REG("bind_evidence_unit_v3",bind_evidence_unit);REG("diagnostic_command_root_v3",diagnostic_command_root);REG("diagnostic_bind_evidence_unit_v3",diagnostic_bind_evidence);REG("read_active_order_identity_v3",order_identity_read);REG("read_entity_snapshot_v3",entity_snapshot_read);REG("read_combat_groups_v3",combat_snapshot_read);REG("read_contact_events_v3",contact_events_read);REG("contact_owner_ready_v3",contact_owner_ready);
+  REG("r1_evidence_capabilities_v2",evidence_caps_v2_retired);REG("bind_evidence_unit_v2",bind_evidence_unit_v2_retired);REG("read_active_order_identity_v2",order_identity_read_v2_retired);REG("read_entity_snapshot_v2",entity_snapshot_read_v2_retired);REG("read_combat_groups_v2",combat_snapshot_read_v2_retired);
+  REG("version",version);REG("capabilities",capabilities);REG("number_abi_probe",numbers);
+- REG("exact_id_probe",ids);REG("get_status",status);REG("start_observer",start);
++ REG("exact_id_probe",ids);REG("get_status",status);REG("start_observer",start);REG("stop_observer",stop_observer);
+  REG("begin_battle",begin);REG("end_battle",end);REG("get_battle_epoch",epoch);
+  REG("acquire_client",acquire_client);REG("release_client",release_client);REG("smart_guard_enable",smart_guard_enable);
+  REG("get_unit_revision",revision);REG("arm_verified_issue",arm);REG("issue_verified_command",issue);REG("cancel_pending_issue",cancel_pending);
+--- a/src/native_bridge/src/platform_unavailable.cpp
++++ b/src/native_bridge/src/platform_unavailable.cpp
+@@ -9,6 +9,7 @@
+ bool platform_read(std::uintptr_t,void*,std::size_t) noexcept{return false;}
+ void* platform_lua_symbol(const char*) noexcept{return nullptr;}
+ const char* platform_start_observer(){return "WINDOWS_X64_REQUIRED";}
++const char* platform_stop_observer(){return nullptr;}
+ bool platform_hooks_installed() noexcept{return false;}
+ bool platform_evidence_build_verified() noexcept{return false;}
+ const char* platform_evidence_build_id() noexcept{return "UNAVAILABLE";}
+@@ -23,6 +24,10 @@
+     DiagnosticGateStatus s{};
+     s.component_chain_gate = true;
+     s.component_gate_root = 0;
++    s.entity_component_offset = 0x18;
++    s.component_backref_offset = 0x4a0;
++    s.movement_state_offset = 0x8b0;
++    s.component_layout_method = "LEGACY_EXACT";
+     s.alive_deployment_passed = true;
+     s.alive_casualty_passed = true;
+     s.entity_alive_gate = true;
+@@ -36,6 +41,10 @@
+     r.passed = true;
+     r.slot_count = 10;
+     r.sampled_count = 10;
++    r.entity_component_offset = 0x18;
++    r.component_backref_offset = 0x4a0;
++    r.movement_state_offset = 0x8b0;
++    r.layout_method = "LEGACY_EXACT";
+     r.failure_reason = "NONE";
+     return r;
+ }
+--- a/src/native_bridge/src/platform_windows.cpp
++++ b/src/native_bridge/src/platform_windows.cpp
+@@ -6,6 +6,7 @@
+ #include <intrin.h>
+ #include <bcrypt.h>
+ #include "wh3/bridge_host.hpp"
++#include "wh3/component_layout.hpp"
+ #include <algorithm>
+ #include <array>
+ #include <cstring>
+@@ -47,7 +48,16 @@
+ };
+ using Init=int(WINAPI*)();using Create=int(WINAPI*)(void*,void*,void**);
+ using Target=int(WINAPI*)(void*);using Apply=int(WINAPI*)();
+-struct MH {Init init=nullptr;Create create=nullptr;Target queue=nullptr,remove=nullptr;Apply apply=nullptr;};
++struct MH {
++ Init init=nullptr;Create create=nullptr;
++ Target queue_enable=nullptr,queue_disable=nullptr,remove=nullptr;
++ Apply apply=nullptr;
++};
++MH g_mh{};
++std::array<void*,17> g_core_targets{};
++void* g_smart_guard_target=nullptr;
++bool g_hooks_created=false;
++bool g_observer_stopped=false;
+ constexpr const char* hook_names[]={
+  "move","attack","allocator","halt","lua_move","lua_attack","publish_move","publish_attack",
+  "writer_begin","writer_finalize","copy","stage","move_handler","attack_handler","selection","free","contact_pair"
+@@ -167,14 +177,21 @@
+ 
+ static std::atomic<bool> g_component_gate{false};
+ static std::atomic<std::uintptr_t> g_component_gate_root{0};
++static std::atomic<std::size_t> g_entity_component_offset{0};
++static std::atomic<std::size_t> g_component_backref_offset{0};
++static std::atomic<std::size_t> g_movement_state_offset{0};
++static std::atomic<unsigned> g_component_layout_method{static_cast<unsigned>(ComponentLayoutMethod::None)};
+ static std::atomic<bool> g_alive_deployment{false};
+ static std::atomic<bool> g_alive_casualty{false};
+ static std::atomic<bool> g_alive_gate{false};
+ static std::atomic<std::uintptr_t> g_alive_gate_root{0};
+-
+ void platform_reset_diagnostic_gates() noexcept{
+  g_component_gate.store(false,std::memory_order_relaxed);
+  g_component_gate_root.store(0,std::memory_order_relaxed);
++ g_entity_component_offset.store(0,std::memory_order_relaxed);
++ g_component_backref_offset.store(0,std::memory_order_relaxed);
++ g_movement_state_offset.store(0,std::memory_order_relaxed);
++ g_component_layout_method.store(static_cast<unsigned>(ComponentLayoutMethod::None),std::memory_order_relaxed);
+  g_alive_deployment.store(false,std::memory_order_relaxed);
+  g_alive_casualty.store(false,std::memory_order_relaxed);
+  g_alive_gate.store(false,std::memory_order_relaxed);
+@@ -199,6 +216,10 @@
+  DiagnosticGateStatus s{};
+  s.component_chain_gate=g_component_gate.load(std::memory_order_relaxed);
+  s.component_gate_root=g_component_gate_root.load(std::memory_order_relaxed);
++ s.entity_component_offset=g_entity_component_offset.load(std::memory_order_relaxed);
++ s.component_backref_offset=g_component_backref_offset.load(std::memory_order_relaxed);
++ s.movement_state_offset=g_movement_state_offset.load(std::memory_order_relaxed);
++ s.component_layout_method=component_layout_method_name(static_cast<ComponentLayoutMethod>(g_component_layout_method.load(std::memory_order_relaxed)));
+  s.alive_deployment_passed=g_alive_deployment.load(std::memory_order_relaxed);
+  s.alive_casualty_passed=g_alive_casualty.load(std::memory_order_relaxed);
+  s.entity_alive_gate=g_alive_gate.load(std::memory_order_relaxed);
+@@ -206,6 +227,51 @@
+  s.build_id=platform_evidence_build_id();
+  s.bridge_version=kDiagnosticBridgeVersion;
+  return s;
++}
++
++static bool validate_component_layout(std::uintptr_t arr,std::uint32_t slot_count,std::size_t sample_limit,
++ std::size_t entity_off,std::size_t back_off,std::size_t state_off,std::size_t& sampled,const char*& reason) noexcept{
++ const std::size_t limit=sample_limit>0?sample_limit:static_cast<std::size_t>(slot_count);
++ if(limit<slot_count){reason="COMPONENT_SAMPLE_INCOMPLETE";return false;}
++ sampled=0;
++ for(std::size_t i=0;i<slot_count;++i){
++  if(arr>UINTPTR_MAX-i*sizeof(std::uintptr_t)){reason="SOLDIER_ARRAY_RANGE_OVERFLOW";return false;}
++  std::uintptr_t entity=0;
++  if(!platform_read(arr+i*sizeof(std::uintptr_t),&entity,sizeof entity)){reason="ENTITY_SLOT_READ_FAILED";return false;}
++  if(!entity){reason="NULL_ENTITY_IN_CHAIN";return false;}
++  if(entity>UINTPTR_MAX-entity_off){reason="ENTITY_POINTER_OVERFLOW";return false;}
++  std::uintptr_t vt=0,alive_fn=0;
++  const auto image_base=platform_image_base();const auto image_size=platform_image_size();
++  if(!image_base||!image_size||!platform_read(entity,&vt,sizeof vt)||!vt||vt<image_base||vt>=image_base+image_size||
++     vt>UINTPTR_MAX-0x630||!platform_read(vt+0x630,&alive_fn,sizeof alive_fn)||!alive_fn||alive_fn<image_base||alive_fn>=image_base+image_size||
++     !platform_executable_address(alive_fn)){reason="ENTITY_VTABLE_OR_ALIVE_SLOT_INVALID";return false;}
++  std::uintptr_t comp=0;
++  if(!platform_read(entity+entity_off,&comp,sizeof comp)||!comp){reason="NULL_MOVEMENT_COMPONENT";return false;}
++  const auto max_off=std::max(back_off,state_off);
++  if(comp>UINTPTR_MAX-max_off){reason="COMPONENT_POINTER_OVERFLOW";return false;}
++  std::uintptr_t backref=0;
++  if(!platform_read(comp+back_off,&backref,sizeof backref)||backref!=entity){reason="MOVEMENT_BACKREF_MISMATCH";return false;}
++  std::uint32_t movement_state=0xFFFFFFFFU;
++  if(!platform_read(comp+state_off,&movement_state,sizeof movement_state)||movement_state>2){reason="INVALID_MOVEMENT_STATE";return false;}
++  ++sampled;
++ }
++ if(sampled!=slot_count){reason="COMPONENT_SAMPLE_INCOMPLETE";return false;}
++ reason="NONE";return true;
++}
++
++static void copy_layout_diagnostics(DiagnosticChainResult& r,const ComponentLayoutScanResult& d) noexcept{
++ r.entity_component_offset=d.entity_component_offset;
++ r.component_backref_offset=d.component_backref_offset;
++ r.movement_state_offset=d.movement_state_offset;
++ r.layout_pair_candidate_count=d.pair_candidate_count;
++ r.layout_state_candidate_count=d.state_candidate_count;
++ r.layout_pair_reported=d.pair_reported;
++ r.layout_state_reported=d.state_reported;
++ for(std::size_t i=0;i<r.layout_pairs.size()&&i<d.pairs.size();++i){
++  r.layout_pairs[i]={d.pairs[i].entity_component_offset,d.pairs[i].component_backref_offset};
++ }
++ r.layout_state_offsets=d.states;
++ r.layout_method=component_layout_method_name(d.method);
+ }
+ 
+ static bool call_entity_alive_virtual_internal(std::uintptr_t entity,bool* alive=nullptr) noexcept{
+@@ -240,32 +306,37 @@
+  if(!root){r.failure_reason="NULL_ROOT";return r;}
+  if(root>UINTPTR_MAX-0x118){r.failure_reason="ROOT_POINTER_OVERFLOW";return r;}
+  std::uint32_t slot_count=0;
+- if(!platform_read(root+0x114,&slot_count,sizeof slot_count)){platform_reset_diagnostic_gates();r.failure_reason="COUNT_READ_FAILED";return r;}
++ if(!platform_read(root+0x114,&slot_count,sizeof slot_count)){r.failure_reason="COUNT_READ_FAILED";return r;}
+  r.slot_count=slot_count;
+- if(slot_count<1||slot_count>300){platform_reset_diagnostic_gates();r.failure_reason="COUNT_OUT_OF_RANGE";return r;}
++ if(slot_count<1||slot_count>300){r.failure_reason="COUNT_OUT_OF_RANGE";return r;}
+  std::uintptr_t arr=0;
+- if(!platform_read(root+0x118,&arr,sizeof arr)||!arr){platform_reset_diagnostic_gates();r.failure_reason="NULL_SOLDIER_ARRAY";return r;}
+- if(slot_count>0&&arr>UINTPTR_MAX-(static_cast<std::uintptr_t>(slot_count)-1)*sizeof(std::uintptr_t)){platform_reset_diagnostic_gates();r.failure_reason="SOLDIER_ARRAY_RANGE_OVERFLOW";return r;}
+- const std::size_t limit=sample_limit>0?sample_limit:static_cast<std::size_t>(slot_count);
+- if(limit<slot_count){platform_reset_diagnostic_gates();r.failure_reason="COMPONENT_SAMPLE_INCOMPLETE";return r;}
+- std::size_t sampled=0;
+- for(std::size_t i=0;i<slot_count;++i){
+-  std::uintptr_t entity=0;
+-  if(!platform_read(arr+i*8,&entity,sizeof entity)){platform_reset_diagnostic_gates();r.failure_reason="ENTITY_SLOT_READ_FAILED";return r;}
+-  if(!entity){platform_reset_diagnostic_gates();r.failure_reason="NULL_ENTITY_IN_CHAIN";return r;}
+-  if(entity>UINTPTR_MAX-0x18){platform_reset_diagnostic_gates();r.failure_reason="ENTITY_POINTER_OVERFLOW";return r;}
+-  std::uintptr_t comp=0;
+-  if(!platform_read(entity+0x18,&comp,sizeof comp)||!comp){platform_reset_diagnostic_gates();r.failure_reason="NULL_MOVEMENT_COMPONENT";return r;}
+-  if(comp>UINTPTR_MAX-0x8b0){platform_reset_diagnostic_gates();r.failure_reason="COMPONENT_POINTER_OVERFLOW";return r;}
+-  std::uintptr_t backref=0;
+-  if(!platform_read(comp+0x4a0,&backref,sizeof backref)||backref!=entity){platform_reset_diagnostic_gates();r.failure_reason="MOVEMENT_BACKREF_MISMATCH";return r;}
+-  std::uint32_t movement_state=0xFFFFFFFF;
+-  if(!platform_read(comp+0x8b0,&movement_state,sizeof movement_state)||movement_state>2){platform_reset_diagnostic_gates();r.failure_reason="INVALID_MOVEMENT_STATE";return r;}
+-  ++sampled;
+- }
+- r.sampled_count=sampled;
+- if(sampled!=slot_count){platform_reset_diagnostic_gates();r.failure_reason="COMPONENT_SAMPLE_INCOMPLETE";return r;}
+- r.passed=true;r.failure_reason="NONE";g_component_gate_root.store(root,std::memory_order_relaxed);g_component_gate.store(true,std::memory_order_release);return r;
++ if(!platform_read(root+0x118,&arr,sizeof arr)||!arr){r.failure_reason="NULL_SOLDIER_ARRAY";return r;}
++ if(slot_count>0&&arr>UINTPTR_MAX-(static_cast<std::uintptr_t>(slot_count)-1)*sizeof(std::uintptr_t)){r.failure_reason="SOLDIER_ARRAY_RANGE_OVERFLOW";return r;}
++ std::size_t sampled=0;const char* legacy_reason="NONE";
++ if(validate_component_layout(arr,slot_count,sample_limit,0x18,0x4a0,0x8b0,sampled,legacy_reason)){
++  r.sampled_count=sampled;r.entity_component_offset=0x18;r.component_backref_offset=0x4a0;r.movement_state_offset=0x8b0;
++  r.layout_method="LEGACY_EXACT";r.failure_reason="NONE";r.passed=true;
++  g_component_gate_root.store(root,std::memory_order_relaxed);
++  g_entity_component_offset.store(0x18,std::memory_order_relaxed);
++  g_component_backref_offset.store(0x4a0,std::memory_order_relaxed);
++  g_movement_state_offset.store(0x8b0,std::memory_order_relaxed);
++  g_component_layout_method.store(static_cast<unsigned>(ComponentLayoutMethod::LegacyExact),std::memory_order_relaxed);
++  g_component_gate.store(true,std::memory_order_release);return r;
++ }
++ const auto discovered=scan_component_layout(platform_read,arr,slot_count);copy_layout_diagnostics(r,discovered);
++ if(!discovered.passed){r.failure_reason=discovered.failure_reason;return r;}
++ sampled=0;const char* discovered_reason="NONE";
++ if(!validate_component_layout(arr,slot_count,sample_limit,discovered.entity_component_offset,discovered.component_backref_offset,
++     discovered.movement_state_offset,sampled,discovered_reason)){
++  r.sampled_count=sampled;r.failure_reason=discovered_reason;return r;
++ }
++ r.sampled_count=sampled;r.passed=true;r.failure_reason="NONE";
++ g_component_gate_root.store(root,std::memory_order_relaxed);
++ g_entity_component_offset.store(discovered.entity_component_offset,std::memory_order_relaxed);
++ g_component_backref_offset.store(discovered.component_backref_offset,std::memory_order_relaxed);
++ g_movement_state_offset.store(discovered.movement_state_offset,std::memory_order_relaxed);
++ g_component_layout_method.store(static_cast<unsigned>(discovered.method),std::memory_order_relaxed);
++ g_component_gate.store(true,std::memory_order_release);return r;
+ }
+ 
+ DiagnosticAliveResult platform_probe_entity_alive(std::uintptr_t root,std::uint32_t lua_men_alive) noexcept{
+@@ -299,12 +370,17 @@
+   // Revalidate the read-only component chain immediately before the first
+   // untrusted Entity virtual call. The earlier gate proves the layout, but the
+   // soldier array/entity pointers must not be allowed to change underneath it.
+-  if(entity>UINTPTR_MAX-0x18)return fail_component("ENTITY_POINTER_OVERFLOW");
+-  std::uintptr_t comp=0,backref=0;std::uint32_t movement_state=0xFFFFFFFF;
+-  if(!platform_read(entity+0x18,&comp,sizeof comp)||!comp)return fail_component("COMPONENT_CHAIN_CHANGED_NULL_COMPONENT");
+-  if(comp>UINTPTR_MAX-0x8b0)return fail_component("COMPONENT_POINTER_OVERFLOW");
+-  if(!platform_read(comp+0x4a0,&backref,sizeof backref)||backref!=entity)return fail_component("COMPONENT_CHAIN_CHANGED_BACKREF");
+-  if(!platform_read(comp+0x8b0,&movement_state,sizeof movement_state)||movement_state>2)return fail_component("COMPONENT_CHAIN_CHANGED_STATE");
++  const auto entity_off=g_entity_component_offset.load(std::memory_order_acquire);
++  const auto back_off=g_component_backref_offset.load(std::memory_order_acquire);
++  const auto state_off=g_movement_state_offset.load(std::memory_order_acquire);
++  if(g_component_layout_method.load(std::memory_order_acquire)==static_cast<unsigned>(ComponentLayoutMethod::None))return fail_component("COMPONENT_LAYOUT_NOT_PUBLISHED");
++  if(entity>UINTPTR_MAX-entity_off)return fail_component("ENTITY_POINTER_OVERFLOW");
++  std::uintptr_t comp=0,backref=0;std::uint32_t movement_state=0xFFFFFFFFU;
++  if(!platform_read(entity+entity_off,&comp,sizeof comp)||!comp)return fail_component("COMPONENT_CHAIN_CHANGED_NULL_COMPONENT");
++  const auto max_component_off=std::max(back_off,state_off);
++  if(comp>UINTPTR_MAX-max_component_off)return fail_component("COMPONENT_POINTER_OVERFLOW");
++  if(!platform_read(comp+back_off,&backref,sizeof backref)||backref!=entity)return fail_component("COMPONENT_CHAIN_CHANGED_BACKREF");
++  if(!platform_read(comp+state_off,&movement_state,sizeof movement_state)||movement_state>2)return fail_component("COMPONENT_CHAIN_CHANGED_STATE");
+   bool is_alive=false;
+   if(!call_entity_alive_virtual_internal(entity,&is_alive))return fail_alive("VIRTUAL_CALL_EXCEPTION_OR_INVALID");
+   if(is_alive)++native_alive;
+@@ -369,7 +445,7 @@
+ bool platform_hooks_installed() noexcept {std::lock_guard<std::mutex> l(install_mu);return installed;}
+ const char* platform_last_error() noexcept {std::lock_guard<std::mutex> l(install_mu);return error_storage.c_str();}
+ bool platform_evidence_build_verified() noexcept {std::lock_guard<std::mutex> l(install_mu);return installed;}
+-const char* platform_evidence_build_id() noexcept {return "WH3_6C104A63AACC4D86_DIAGNOSTIC_RC6_ROOT";}
++const char* platform_evidence_build_id() noexcept {return "WH3_6C104A63AACC4D86_DIAGNOSTIC_RC7_COMPONENT_LAYOUT_SAFE_STOP";}
+ std::uint64_t platform_tick_ms() noexcept{return GetTickCount64();}
+ extern "C" void wh3_contact_pair_observer(void* result_record) noexcept {
+  if(!result_record)return;
+@@ -388,8 +464,11 @@
+ const char* platform_start_observer(){
+  std::lock_guard<std::mutex> lock(install_mu);
+  if(installed)return nullptr;
+- if(attempted)return error_storage.c_str();
+- attempted=true;
++ if(attempted){
++  if(g_observer_stopped)error_storage="OBSERVER_ALREADY_STOPPED_PROCESS_RESTART_REQUIRED";
++  return error_storage.c_str();
++ }
++ attempted=true;g_observer_stopped=false;
+  try{
+   const auto base=platform_image_base();std::string sha;
+   if(!hash_file(path(nullptr),sha)){error_storage="HOST_HASH_READ_FAILED";return error_storage.c_str();}
+@@ -412,34 +491,35 @@
+   }
+   backend=LoadLibraryExW(p.c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
+   if(!backend){error_storage="MINHOOK_BACKEND_MISSING";return error_storage.c_str();}
+-  MH mh;
+-  if(!symbol(backend,"MH_Initialize",mh.init)||!symbol(backend,"MH_CreateHook",mh.create)||
+-     !symbol(backend,"MH_QueueEnableHook",mh.queue)||!symbol(backend,"MH_ApplyQueued",mh.apply)||
+-     !symbol(backend,"MH_RemoveHook",mh.remove)){
++  g_mh={};
++  if(!symbol(backend,"MH_Initialize",g_mh.init)||!symbol(backend,"MH_CreateHook",g_mh.create)||
++     !symbol(backend,"MH_QueueEnableHook",g_mh.queue_enable)||!symbol(backend,"MH_QueueDisableHook",g_mh.queue_disable)||
++     !symbol(backend,"MH_ApplyQueued",g_mh.apply)||!symbol(backend,"MH_RemoveHook",g_mh.remove)){
+    error_storage="MINHOOK_EXPORT_MISSING";return error_storage.c_str();
+   }
+   // Do not take ownership of somebody else's already-initialized backend.
+-  const int init_status=mh.init();
++  const int init_status=g_mh.init();
+   if(init_status!=0){
+    char buf[160]{};
+    std::snprintf(buf,sizeof buf,"MINHOOK_INITIALIZE_NOT_FRESH_status=%d_%s",init_status,mh_status_name(init_status));
+    error_storage=buf;return error_storage.c_str();
+   }
+-  std::array<void*,17> targets{},tramp{};
++  g_core_targets.fill(nullptr);g_smart_guard_target=nullptr;g_hooks_created=false;
++  std::array<void*,17> tramp{};
+   const std::array<void*,17> detours={pointer(move_hook),pointer(attack_hook),pointer(allocator_hook),pointer(halt_hook),
+    pointer(lua_move_hook),pointer(lua_attack_hook),pointer(publish_move_hook),pointer(publish_attack_hook),pointer(writer_begin_hook),pointer(writer_finalize_hook),
+    pointer(copy_hook),pointer(stage_hook),pointer(move_handler_hook),pointer(attack_handler_hook),pointer(selection_hook),pointer(free_hook),
+    pointer(wh3_contact_pair_detour_stub)};
+   auto create_all=[&](bool retried)->int{
+    std::size_t created=0;
+-   for(std::size_t i=0;i<targets.size();++i){
+-    targets[i]=reinterpret_cast<void*>(base+guards[i].rva);
++   for(std::size_t i=0;i<g_core_targets.size();++i){
++    g_core_targets[i]=reinterpret_cast<void*>(base+guards[i].rva);
+     tramp[i]=nullptr;
+-    const int create_result=mh.create(targets[i],detours[i],&tramp[i]);
++    const int create_result=g_mh.create(g_core_targets[i],detours[i],&tramp[i]);
+     if(create_result!=0||!tramp[i]){
+      const bool null_tramp=!tramp[i];
+-     if(create_result==0)mh.remove(targets[i]);
+-     for(std::size_t j=0;j<created;++j)mh.remove(targets[j]);
++     if(create_result==0)g_mh.remove(g_core_targets[i]);
++     for(std::size_t j=0;j<created;++j)g_mh.remove(g_core_targets[j]);
+      error_storage=create_failure(i,create_result,null_tramp,retried);
+      return create_result==0?-1000:create_result;
+     }
+@@ -455,6 +535,7 @@
+    create_status=create_all(true);
+   }
+   if(create_status!=0)return error_storage.c_str();
++  g_hooks_created=true;
+   g_wh3_contact_pair_trampoline=tramp[16];
+   NativeFunctions n{function<NativeOrderFn>(tramp[0]),function<NativeOrderFn>(tramp[1]),
+                     function<NativeAllocatorFn>(tramp[2]),function<NativeHaltFn>(tramp[3])};
+@@ -463,20 +544,20 @@
+    function<NativePacketHandlerFn>(tramp[12]),function<NativePacketHandlerFn>(tramp[13]),
+    function<NativeSelectionFn>(tramp[14]),function<NativeFreeFn>(tramp[15])};
+   if(!host().set_native_functions(n)||!host().set_adapter_functions(a)){
+-   for(auto t:targets)mh.remove(t);
++   for(auto t:g_core_targets)if(t)g_mh.remove(t);g_hooks_created=false;
+    error_storage="TRAMPOLINE_PUBLICATION_FAILED";return error_storage.c_str();
+   }
+-  for(std::size_t i=0;i<targets.size();++i){
+-   const int q=mh.queue(targets[i]);
++  for(std::size_t i=0;i<g_core_targets.size();++i){
++   const int q=g_mh.queue_enable(g_core_targets[i]);
+    if(q!=0){
+-    for(auto old:targets)mh.remove(old);
++    for(auto old:g_core_targets)if(old)g_mh.remove(old);g_hooks_created=false;
+     char buf[192]{};
+     std::snprintf(buf,sizeof buf,"MINHOOK_QUEUE_FAILED_hook=%s_idx=%zu_rva=0x%llx_status=%d_%s",
+      hook_names[i],i,static_cast<unsigned long long>(guards[i].rva),q,mh_status_name(q));
+     error_storage=buf;return error_storage.c_str();
+    }
+   }
+-  const int apply_status=mh.apply();
++  const int apply_status=g_mh.apply();
+   if(apply_status!=0){
+    // Apply can partially succeed. Keep module/backend/trampolines resident;
+    // never remove a trampoline while any game thread may be executing it.
+@@ -515,7 +596,7 @@
+   }
+   void* sg_target=reinterpret_cast<void*>(base+smart_guard_guard.rva);
+   void* sg_tramp=nullptr;
+-  const int sg_create=mh.create(sg_target,pointer(state_transition_hook),&sg_tramp);
++  const int sg_create=g_mh.create(sg_target,pointer(state_transition_hook),&sg_tramp);
+   if(sg_create!=0||!sg_tramp){
+    host().set_smart_guard_installed(false);
+    host().set_smart_guard_runtime_enabled(false);
+@@ -523,17 +604,18 @@
+    return nullptr;
+   }
+   g_wh3_state_transition_trampoline=sg_tramp;
++  g_smart_guard_target=sg_target;
+   host().set_state_transition_trampoline(function<NativeTransitionFn>(sg_tramp));
+-  const int sg_queue=mh.queue(sg_target);
++  const int sg_queue=g_mh.queue_enable(sg_target);
+   if(sg_queue!=0){
+-   mh.remove(sg_target);
++   g_mh.remove(sg_target);g_smart_guard_target=nullptr;
+    g_wh3_state_transition_trampoline=nullptr;
+    host().set_smart_guard_installed(false);
+    host().set_smart_guard_runtime_enabled(false);
+    error_storage="SMART_GUARD_FAIL_DISABLED_QUEUE_FAILED";
+    return nullptr;
+   }
+-  const int sg_apply=mh.apply();
++  const int sg_apply=g_mh.apply();
+   if(sg_apply!=0){
+    host().set_smart_guard_installed(false);
+    host().set_smart_guard_runtime_enabled(false);
+@@ -547,4 +629,42 @@
+   return nullptr;
+  }catch(...){error_storage="OBSERVER_INSTALL_CPP_EXCEPTION";return error_storage.c_str();}
+ }
+-}
++
++const char* platform_stop_observer(){
++ std::lock_guard<std::mutex> lock(install_mu);
++ try{
++  // The bridge DLL is deliberately pinned for process lifetime. Safe stop only
++  // restores every hooked target to its original entry bytes; trampolines, the
++  // MinHook backend and this DLL remain resident. This avoids both teardown-time
++  // interception and use-after-free of an in-flight trampoline.
++  if(!attempted){error_storage="OK_NOT_STARTED";return nullptr;}
++  if(g_observer_stopped){error_storage="OK_STOPPED";return nullptr;}
++  if(!g_hooks_created){
++   installed=false;g_observer_stopped=true;host().authorize_validated_issue(false);
++   host().set_smart_guard_runtime_enabled(false);g_wh3_smart_guard_runtime_enabled.store(false,std::memory_order_release);
++   platform_reset_diagnostic_gates();error_storage="OK_STOPPED_NO_HOOKS";return nullptr;
++  }
++  if(!g_mh.queue_disable||!g_mh.apply){error_storage="OBSERVER_DISABLE_BACKEND_NOT_READY_PROCESS_RESTART_REQUIRED";return error_storage.c_str();}
++  // This MinHook backend must have been freshly initialized by us; therefore
++  // MH_ALL_HOOKS (nullptr) refers only to hooks created by this bridge instance.
++  const int queue_status=g_mh.queue_disable(nullptr);
++  if(queue_status!=0&&queue_status!=6){
++   char buf[176]{};
++   std::snprintf(buf,sizeof buf,"MINHOOK_QUEUE_DISABLE_FAILED_status=%d_%s_PROCESS_RESTART_REQUIRED",queue_status,mh_status_name(queue_status));
++   error_storage=buf;return error_storage.c_str();
++  }
++  const int apply_status=g_mh.apply();
++  if(apply_status!=0){
++   char buf[176]{};
++   std::snprintf(buf,sizeof buf,"MINHOOK_DISABLE_APPLY_FAILED_status=%d_%s_PROCESS_RESTART_REQUIRED",apply_status,mh_status_name(apply_status));
++   error_storage=buf;return error_storage.c_str();
++  }
++  installed=false;g_observer_stopped=true;
++  host().authorize_validated_issue(false);
++  host().set_smart_guard_runtime_enabled(false);host().set_smart_guard_installed(false);
++  g_wh3_smart_guard_runtime_enabled.store(false,std::memory_order_release);
++  platform_reset_diagnostic_gates();
++  error_storage="OK_STOPPED";return nullptr;
++ }catch(...){error_storage="OBSERVER_DISABLE_CPP_EXCEPTION_PROCESS_RESTART_REQUIRED";return error_storage.c_str();}
++}
++}
+--- a/src/native_bridge/tests/test_component_layout.cpp
++++ b/src/native_bridge/tests/test_component_layout.cpp
+@@ -0,0 +1,145 @@
++#include "wh3/component_layout.hpp"
++#include <cstdint>
++#include <cstring>
++#include <iostream>
++#include <map>
++#include <stdexcept>
++#include <vector>
++
++using namespace wh3;
++#define CK(x) do { if (!(x)) throw std::runtime_error(#x); } while(false)
++
++namespace {
++std::map<std::uintptr_t, std::vector<unsigned char>> mem;
++
++void block(std::uintptr_t base, std::size_t n) { mem[base] = std::vector<unsigned char>(n); }
++
++template<class T>
++void put(std::uintptr_t base, std::size_t off, T value) {
++    auto& b = mem.at(base);
++    CK(off + sizeof(T) <= b.size());
++    std::memcpy(b.data() + off, &value, sizeof(T));
++}
++
++bool rd(std::uintptr_t addr, void* out, std::size_t n) noexcept {
++    for (const auto& kv : mem) {
++        const auto base = kv.first;
++        const auto& b = kv.second;
++        if (addr >= base && addr + n >= addr && addr + n <= base + b.size()) {
++            std::memcpy(out, b.data() + (addr - base), n);
++            return true;
++        }
++    }
++    return false;
++}
++
++struct Fixture {
++    std::uintptr_t arr{0x200000};
++    std::vector<std::uintptr_t> entities;
++    std::vector<std::uintptr_t> components;
++};
++
++Fixture setup(std::size_t count, std::size_t entity_off, std::size_t back_off, std::size_t state_off, std::uint32_t state = 1) {
++    mem.clear();
++    Fixture f;
++    block(f.arr, count * sizeof(std::uintptr_t));
++    for (std::size_t i = 0; i < count; ++i) {
++        const auto e = 0x400000 + i * 0x4000;
++        const auto c = 0x800000 + i * 0x4000;
++        block(e, 0x400);
++        block(c, 0xC00);
++        put<std::uintptr_t>(e, entity_off, c);
++        put<std::uintptr_t>(c, back_off, e);
++        put<std::uint32_t>(c, state_off, state);
++        f.entities.push_back(e);
++        f.components.push_back(c);
++        put<std::uintptr_t>(f.arr, i * sizeof(std::uintptr_t), e);
++    }
++    return f;
++}
++}
++
++int main() {
++    int pass = 0, fail = 0;
++    auto test = [&](const char* name, auto fn) {
++        try { fn(); ++pass; std::cout << "PASS " << name << "\n"; }
++        catch (const std::exception& e) { ++fail; std::cout << "FAIL " << name << ": " << e.what() << "\n"; }
++    };
++
++    test("discovers legacy pair with live legacy state", [] {
++        auto f = setup(4, 0x18, 0x4A0, 0x8B0, 1);
++        const auto r = scan_component_layout(rd, f.arr, 4);
++        CK(r.passed);
++        CK(r.pair_candidate_count == 1);
++        CK(r.entity_component_offset == 0x18);
++        CK(r.component_backref_offset == 0x4A0);
++        CK(r.movement_state_offset == 0x8B0);
++        CK(r.method == ComponentLayoutMethod::DiscoveredPairLegacyState);
++    });
++
++    test("discovers relocated entity/component pair without guessing root equality", [] {
++        auto f = setup(4, 0x28, 0x4B8, 0x8B0, 2);
++        const auto r = scan_component_layout(rd, f.arr, 4);
++        CK(r.passed);
++        CK(r.entity_component_offset == 0x28);
++        CK(r.component_backref_offset == 0x4B8);
++        CK(r.movement_state_offset == 0x8B0);
++    });
++
++    test("ambiguous component pairs fail closed", [] {
++        auto f = setup(4, 0x18, 0x4A0, 0x8B0, 1);
++        for (std::size_t i = 0; i < f.entities.size(); ++i) {
++            const auto c2 = 0xC00000 + i * 0x4000;
++            block(c2, 0xC00);
++            put<std::uintptr_t>(f.entities[i], 0x28, c2);
++            put<std::uintptr_t>(c2, 0x4B8, f.entities[i]);
++            put<std::uint32_t>(c2, 0x8B0, 1);
++        }
++        const auto r = scan_component_layout(rd, f.arr, 4);
++        CK(!r.passed);
++        CK(r.pair_candidate_count == 2);
++        CK(std::string(r.failure_reason) == "COMPONENT_LAYOUT_PAIR_AMBIGUOUS");
++    });
++
++    test("unique fallback state offset can be discovered", [] {
++        auto f = setup(4, 0x28, 0x4B8, 0x8C4, 1);
++        for (auto c : f.components) put<std::uint32_t>(c, 0x8B0, 9);
++        const auto r = scan_component_layout(rd, f.arr, 4);
++        CK(r.passed);
++        CK(r.movement_state_offset == 0x8C4);
++        CK(r.state_candidate_count == 1);
++        CK(r.method == ComponentLayoutMethod::DiscoveredPairDiscoveredState);
++    });
++
++    test("zero-filled legacy state slot is not accepted as live evidence", [] {
++        auto f = setup(4, 0x28, 0x4B8, 0x8C4, 2);
++        for (auto c : f.components) put<std::uint32_t>(c, 0x8B0, 0);
++        const auto r = scan_component_layout(rd, f.arr, 4);
++        CK(r.passed);
++        CK(r.movement_state_offset == 0x8C4);
++        CK(r.state_candidate_count == 1);
++        CK(r.method == ComponentLayoutMethod::DiscoveredPairDiscoveredState);
++    });
++
++    test("ambiguous fallback state offsets fail closed", [] {
++        auto f = setup(4, 0x28, 0x4B8, 0x8C4, 1);
++        for (auto c : f.components) {
++            put<std::uint32_t>(c, 0x8B0, 9);
++            put<std::uint32_t>(c, 0x900, 2);
++        }
++        const auto r = scan_component_layout(rd, f.arr, 4);
++        CK(!r.passed);
++        CK(r.state_candidate_count == 2);
++        CK(std::string(r.failure_reason) == "MOVEMENT_STATE_CANDIDATE_AMBIGUOUS");
++    });
++
++    test("fewer than three entities does not establish layout", [] {
++        auto f = setup(2, 0x18, 0x4A0, 0x8B0, 1);
++        const auto r = scan_component_layout(rd, f.arr, 2);
++        CK(!r.passed);
++        CK(std::string(r.failure_reason) == "COMPONENT_LAYOUT_NEEDS_3_ENTITIES");
++    });
++
++    std::cout << "SUMMARY pass=" << pass << " fail=" << fail << "\n";
++    return fail ? 1 : 0;
++}
+--- a/src/native_bridge/tests/test_diagnostic_gates.cpp
++++ b/src/native_bridge/tests/test_diagnostic_gates.cpp
+@@ -76,7 +76,7 @@
+ bool platform_hooks_installed() noexcept { return true; }
+ const char* platform_last_error() noexcept { return "NONE"; }
+ bool platform_evidence_build_verified() noexcept { return true; }
+-const char* platform_evidence_build_id() noexcept { return "WH3_6C104A63AACC4D86_DIAGNOSTIC_RC6_ROOT"; }
++const char* platform_evidence_build_id() noexcept { return "WH3_6C104A63AACC4D86_DIAGNOSTIC_RC7_COMPONENT_LAYOUT_SAFE_STOP"; }
+ std::uint64_t platform_tick_ms() noexcept { return 1000; }
+ 
+ void platform_reset_diagnostic_gates() noexcept {
+--- a/src/native_bridge/tests/test_lua_exports.cpp
++++ b/src/native_bridge/tests/test_lua_exports.cpp
+@@ -66,6 +66,7 @@
+  if(address==0x103ea0&&size==4){Id uid=1001;std::memcpy(out,&uid,4);return true;}return false;
+ }
+ const char* platform_start_observer(){return "TEST_BACKEND_NOT_GAME";}
++const char* platform_stop_observer(){return nullptr;}
+ bool platform_hooks_installed() noexcept{return false;}
+ bool platform_evidence_build_verified() noexcept{return false;}
+ const char* platform_evidence_build_id() noexcept{return "TEST_UNAVAILABLE";}
+@@ -79,6 +80,10 @@
+     DiagnosticGateStatus s{};
+     s.component_chain_gate = true;
+     s.component_gate_root = 0;
++    s.entity_component_offset = 0x18;
++    s.component_backref_offset = 0x4a0;
++    s.movement_state_offset = 0x8b0;
++    s.component_layout_method = "LEGACY_EXACT";
+     s.alive_deployment_passed = true;
+     s.alive_casualty_passed = true;
+     s.entity_alive_gate = true;
+@@ -94,6 +99,10 @@
+     r.passed = true;
+     r.slot_count = 10;
+     r.sampled_count = 10;
++    r.entity_component_offset = 0x18;
++    r.component_backref_offset = 0x4a0;
++    r.movement_state_offset = 0x8b0;
++    r.layout_method = "LEGACY_EXACT";
+     r.failure_reason = "NONE";
+     return r;
+ }
+@@ -125,7 +134,7 @@
+   L.stack=in;int z=module->fields.at(key).fn(&L);CK(z>=0&&z<=top(&L));return std::vector<Value>(L.stack.end()-z,L.stack.end());
+  };
+  int pass=0,fail=0;auto test=[&](const char* label,auto fn){fake_alive_allowed=true;try{fn();++pass;std::cout<<"PASS "<<label<<"\n";}catch(const std::exception& e){fake_alive_allowed=true;++fail;std::cout<<"FAIL "<<label<<": "<<e.what()<<"\n";}};
+- test("actual Lua export creates full method table",[&]{CK(module->fields.size()==39);for(auto& x:module->fields)CK(x.second.tag==6&&x.second.fn);});
++ test("actual Lua export creates full method table",[&]{CK(module->fields.size()==40);for(auto& x:module->fields)CK(x.second.tag==6&&x.second.fn);});
+  test("version matches diagnostic gated constant",[&]{auto r=call("version");CK(r.size()==1&&r[0].text==wh3::kDiagnosticBridgeVersion);});
+  test("bridge version identity consistent",[&]{
+   auto r_ver=call("version");
+@@ -135,7 +144,7 @@
+   CK(r_ver[0].text==stat_ver);
+   CK(stat_ver==wh3::kDiagnosticBridgeVersion);
+  });
+- test("diagnostic exports callable and return expected tables",[&]{CK(module->fields.count("diagnostic_bind_evidence_unit_v3")==1&&module->fields.count("diagnostic_command_root_v3")==1);
++ test("diagnostic exports callable and return expected tables",[&]{CK(module->fields.count("diagnostic_bind_evidence_unit_v3")==1&&module->fields.count("diagnostic_command_root_v3")==1&&module->fields.count("stop_observer")==1);
+   auto r1=call("diagnostic_gate_status");
+   CK(r1.size()==1&&r1[0].table);
+   CK(r1[0].table->fields.at("component_chain_gate").boolean);
+--- a/tools/prebuild_contract_check.py
++++ b/tools/prebuild_contract_check.py
+@@ -1,11 +1,11 @@
+ #!/usr/bin/env python3
+-"""RC4 prebuild contract checker. No EXE access and no source mutation."""
++"""RC7 prebuild contract checker. No EXE access and no source mutation."""
+ from __future__ import annotations
+ from pathlib import Path
+ import importlib.util, re, sys
+ ROOT=Path(__file__).resolve().parents[1]
+-VER='1.0.16-diagnostic-wh3-update-gated-rc6-root-discovery'
+-BUILD='WH3_6C104A63AACC4D86_DIAGNOSTIC_RC6_ROOT'
++VER='1.0.16-diagnostic-wh3-update-gated-rc7-component-layout-safe-stop'
++BUILD='WH3_6C104A63AACC4D86_DIAGNOSTIC_RC7_COMPONENT_LAYOUT_SAFE_STOP'
+ EXE_SHA='6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297'
+ 
+ EXPECTED_CORE = {
+@@ -37,6 +37,7 @@
+ pw=text('src/native_bridge/src/platform_windows.cpp')
+ bh=text('src/native_bridge/src/bridge_host.cpp')
+ ev=text('src/native_bridge/src/evidence_probe.cpp')
++cl=text('src/native_bridge/src/component_layout.cpp')
+ hdr=text('src/native_bridge/include/wh3/bridge_host.hpp')
+ lua=text('clients/diagnostic/bsc_wh3_update_diagnostic.lua')
+ builder=text('release_tools/build_bsc_gate_diagnostic.py')
+@@ -66,14 +67,41 @@
+ need(helper is not None and '0x88' in helper.group(0) and '0x90' in helper.group(0),'pre-gate position validation missing')
+ 
+ 
+-# RC6 root discovery must not collapse command and evidence roots.
+-need('diagnostic_bind_evidence' in bh,'RC6 diagnostic evidence resolver missing')
++# RC6+ root discovery must not collapse command and evidence roots.
++need('diagnostic_bind_evidence' in bh,'root-discovery diagnostic evidence resolver missing')
+ need('COMMAND_ROOT_DIRECT' in bh and 'COMMAND_ROOT_GRAPH' in bh,'command-root read-only graph fallback missing')
+ need('expected_count' in bh,'expected soldier-count discriminator missing')
+ need('diagnostic_command_root_v3' in text('src/native_bridge/src/lua_module.cpp'),'command-root diagnostic Lua export missing')
+ need('diagnostic_bind_evidence_unit_v3' in text('src/native_bridge/src/lua_module.cpp'),'root-discovery Lua export missing')
+ need('DIAG_WAITING_FOR_COMMAND_ROOT' in lua,'harness command-root fallback missing')
+ need('pcall(bridge.bind_evidence_unit_v3' not in lua,'diagnostic harness must not call stale strict userdata binder')
++
++
++# RC7 component-layout discovery must remain bounded, read-only, unique-candidate and fail-closed.
++for token in [
++    'scan_component_layout', 'COMPONENT_LAYOUT_PAIR_NOT_FOUND', 'COMPONENT_LAYOUT_PAIR_AMBIGUOUS',
++    'MOVEMENT_STATE_CANDIDATE_AMBIGUOUS', 'ENTITY_VTABLE_OR_ALIVE_SLOT_INVALID',
++    'g_entity_component_offset', 'g_component_backref_offset', 'g_movement_state_offset',
++    'DISCOVERED_PAIR_LEGACY_STATE', 'DISCOVERED_PAIR_DISCOVERED_STATE'
++]:
++    need(token in pw or token in cl,f'RC7 component-layout safety token missing: {token}')
++need('for (std::size_t entity_off = 0; entity_off < kEntityScanEnd' in cl,'RC7 bounded entity-offset scan missing')
++need('kEntityScanEnd = 0x200' in cl and 'kComponentScanEnd = 0xC00' in cl,'RC7 layout scan bounds drifted')
++need('state_valid(0x8B0, true)' in cl,'RC7 discovered legacy-state preference must require live non-zero evidence')
++need('layout_pair_candidate_count' in text('src/native_bridge/src/lua_module.cpp'),'RC7 layout candidate diagnostics not exported')
++need('pair_report=' in lua and 'state_report=' in lua,'RC7 layout candidate diagnostics not logged')
++
++# RC7 observer safe-stop: disable detours but keep DLL/backend/trampolines resident.
++for token in ['MH_QueueDisableHook','platform_stop_observer','g_mh.queue_disable(nullptr)','OK_STOPPED']:
++    need(token in pw or token in hdr,f'RC7 observer safe-stop token missing: {token}')
++stop_body=re.search(r'const char\* platform_stop_observer\(\).*?\n}',pw,re.S)
++need(stop_body is not None,'platform_stop_observer body missing')
++need('FreeLibrary' not in stop_body.group(0) and 'MH_Uninitialize' not in stop_body.group(0),'safe stop must not unload native code')
++need('remove(' not in stop_body.group(0),'safe stop must not remove/free trampolines')
++lua_module=text('src/native_bridge/src/lua_module.cpp')
++need('REG("stop_observer",stop_observer)' in lua_module,'stop_observer Lua export missing')
++for token in ['DIAG_OBSERVER_STOP','QUIT_WINDOWS_CLICK','button_windows','stop_native_observer_if_needed']:
++    need(token in lua,f'RC7 harness safe-stop token missing: {token}')
+ 
+ # Runtime gate safety / root identity.
+ need('g_component_gate_root' in pw,'component gate root identity missing')

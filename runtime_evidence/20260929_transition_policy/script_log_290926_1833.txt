@@ -1,0 +1,174 @@
+
+creating logfile script_log_290926_1833.txt
+
+[out] <0.0s>     battle_scripted.lua loaded: a new battle is being initialised
+[out] <0.0s>     
+*************************************************************************************************************
+*************************************************************************************************************
+[out] <32.0s>    lib_header.lua :: script libraries reloaded in battle configuration
+[out] <32.0s>    	loading took 0.13499450683594s
+[out] <32.0s>    	Lua version is Lua 5.1
+[out] <32.0s>    
+<32.0s><100ms> battle_manager created, script path of battle script is script\battle\default_battle\battle_start.lua
+<32.1s><100ms> battle_manager: constructed 37 script_unit objects
+<32.1s><100ms> alliance 1 army 1:
+<32.1s><100ms> 	sunits_generated_1_1_main created with 17 units
+<32.1s><100ms> alliance 2 army 1:
+<32.1s><100ms> 	sunits_generated_2_1_main created with 20 units
+[help_pages] <32.1s>    
+[help_pages] <32.1s>    
+[help_pages] <32.1s>    
+[help_pages] <32.1s>    *** help page system initialising ***
+[help_pages] <32.1s>    
+[help_pages] <32.1s>    
+[help_pages] <32.1s>    ***
+[help_pages] <32.1s>    *** setup_battle_help_pages() called
+[help_pages] <32.1s>    ***
+[ui] <32.1s>    *** output_uicomponent_on_click() called ***
+<32.1s><100ms> 
+<32.1s><100ms> ****************************
+<32.1s><100ms> Loading Mods
+<32.1s><100ms> 	Loading mod file [script\_lib\mod\!!!!!chee_logger.lua]
+<32.1s><100ms> 	Mod [script\_lib\mod\!!!!!chee_logger.lua] loaded successfully
+<32.1s><100ms> 	Loading mod file [script\_lib\mod\!glib_init.lua]
+<32.1s><100ms> 		MCT.Init
+<32.2s><100ms> 		Done loading mods!
+<32.2s><100ms> 	Mod [script\_lib\mod\!glib_init.lua] loaded successfully
+<32.2s><100ms> 	Loading mod file [script\_lib\mod\_helpers.klissan.lua]
+<32.3s><100ms> 	Mod [script\_lib\mod\_helpers.klissan.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\context_functions.klissan.lua]
+<32.3s><100ms> 	Mod [script\_lib\mod\context_functions.klissan.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\debugging_helpers.lua]
+<32.3s><100ms> 		qa_console.lua loaded
+<32.3s><100ms> 	Mod [script\_lib\mod\debugging_helpers.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\demo_uimf.lua]
+<32.3s><100ms> 	Mod [script\_lib\mod\demo_uimf.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\memreader.lua]
+<32.3s><100ms> 	Mod [script\_lib\mod\memreader.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\mixer_lib.lua]
+<32.3s><100ms> 	Mod [script\_lib\mod\mixer_lib.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\mixer_lib_campaign.lua]
+<32.3s><100ms> 	Mod [script\_lib\mod\mixer_lib_campaign.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\mixer_lib_frontend.lua]
+<32.3s><100ms> 	Mod [script\_lib\mod\mixer_lib_frontend.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\omlette_ries.lua]
+<32.3s><100ms> 	Mod [script\_lib\mod\omlette_ries.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\pj_error_wrapping.lua]
+<32.3s><100ms> 	Mod [script\_lib\mod\pj_error_wrapping.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\qa_console.lua]
+<32.3s><100ms> 		qa_console.lua loaded
+<32.3s><100ms> 	Mod [script\_lib\mod\qa_console.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\table_fatigue.klissan.lua]
+<32.3s><100ms> 	Mod [script\_lib\mod\table_fatigue.klissan.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\table_kv_rules.klissan.lua]
+<32.3s><100ms> 	Mod [script\_lib\mod\table_kv_rules.klissan.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\test_script_here.lua]
+<32.3s><100ms> 		
+<32.3s><100ms> 		*** test_script_here.lua loaded - if you want to add test scripts to campaign, battle or the frontend, see the lua file working_data\script\_lib\mod\test_script_here.lua ***
+<32.3s><100ms> 		
+<32.3s><100ms> 	Mod [script\_lib\mod\test_script_here.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\_lib\mod\uimf_init.lua]
+<32.3s><100ms> 	Mod [script\_lib\mod\uimf_init.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\battle\mod\battle_hui.klissan.lua]
+<32.3s><100ms> 	Mod [script\battle\mod\battle_hui.klissan.lua] loaded successfully
+<32.3s><100ms> 	Loading mod file [script\battle\mod\better_shift_command.lua]
+<32.4s><100ms> 		[BETTER_SHIFT_COMMAND] ENTER version=1.2.2-corepath-rc8 run=V1_2_2_COREPATH_RC8 phase=P2B build=BETTER_SHIFT_COMMAND_V1.2.2_COREPATH_RC8 debug_telemetry=false physical_evidence=QUARANTINED
+<32.4s><100ms> 		[BETTER_SHIFT_COMMAND] BRIDGE_OK version=1.0.17-corepath-wh3-6c104-movevtfix
+<32.4s><100ms> 	Mod [script\battle\mod\better_shift_command.lua] loaded successfully
+<32.4s><100ms> 	Loading mod file [script\battle\mod\data_handler.klissan.lua]
+<32.4s><100ms> 		[Battle Data Dumper Mod] loaded
+<32.4s><100ms> 	Mod [script\battle\mod\data_handler.klissan.lua] loaded successfully
+<32.4s><100ms> 	Loading mod file [script\battle\mod\pj_formations.lua]
+<32.4s><100ms> 	Mod [script\battle\mod\pj_formations.lua] loaded successfully
+<32.4s><100ms> 	Loading mod file [script\battle\mod\pj_formations\json.lua]
+<32.4s><100ms> 		Failed to load mod file [script\battle\mod\pj_formations\json.lua], error is: cannot open json: No such file or directory. Will attempt to require() this file to generate a more meaningful error message:
+<32.4s><100ms> 			module 'json' not found:jsonno field package.preload['json']no file '/script/battle/mod/json.lua'no file 'script/uimf/json.lua'no file '/script/_lib/mod/json.lua'no file '.\json.lua'no file 'C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\lua\json.lua'no file 'C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\lua\json\init.lua'no file 'C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\json.lua'no file 'C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\json\init.lua'no file 'data/script/_lib/json.lua'no file 'data/script/battle/json.lua'no file '.\json.dll'no file 'C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\json.dll'no file 'C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\loadall.dll'
+<32.4s><100ms> 	Failed to load mod: [script\battle\mod\pj_formations\json.lua]
+<32.4s><100ms> 	Loading mod file [script\battle\mod\zzz_cbfm_cacophonous_assault.lua]
+<32.4s><100ms> 	Mod [script\battle\mod\zzz_cbfm_cacophonous_assault.lua] loaded successfully
+<32.4s><100ms> ****************************
+<32.4s><100ms> 
+<32.5s><100ms> Saved profiles table is table: 000000012E8B49B8
+<32.5s><100ms> Saved profiles string is {
+}
+<32.5s><100ms> 
+<32.5s><100ms> * No battle script defined - default script loaded *
+<32.5s><100ms> 
+<32.5s><100ms> 	Not loading advice
+<32.5s><100ms> ********************************************************************
+<32.5s><100ms> *** loaded collapse composite scene script
+<32.5s><100ms> ********************************************************************
+<32.5s><100ms> 
+<32.5s><100ms> wh2_intro_battle.lua loaded
+[scripted_tours] <32.5s>    
+[scripted_tours] <32.5s>    Battle Fundamentals scripted tour is working out what units/battlefield area to use
+[scripted_tours] <32.5s>    	player sunits:
+[scripted_tours] <32.5s>    		1: 1003 of type wh_dlc04_emp_inf_sigmars_sons_0 at position [65.931709289551, 30.265514373779, -271.4524230957] with strategic value 700
+[scripted_tours] <32.5s>    		2: 1002 of type wh_main_emp_inf_swordsmen at position [34.516254425049, 26.751873016357, -270.91925048828] with strategic value 400
+[scripted_tours] <32.5s>    	
+[scripted_tours] <32.5s>    	enemy sunits:
+[scripted_tours] <32.5s>    		1: 1020 of type wh3_main_cth_inf_jade_warriors_0 at position [-174.29592895508, 29.980823516846, 30.971841812134] with strategic value 550
+[scripted_tours] <32.5s>    		2: 1031 of type wh3_main_cth_cav_peasant_horsemen_0 at position [-49.632312774658, 56.146423339844, 163.28649902344] with strategic value 550
+[scripted_tours] <32.5s>    	suitability score for obb at [52.384990692139, 39.958290100098, -187.46051025391] with bearing 0.9722900390625 (deg), width 68.200004577637 and depth 220 is [93.75]
+[scripted_tours] <32.5s>    Chosen this straight-ahead-from-player-start bounding box position as the tour combat area
+[ui] <32.5s>    Panel opened finish_deployment
+[ui] <32.5s>    Panel closed winds_of_magic_gambler
+<32.5s><200ms> 	Battle is now entering phase: Startup
+<32.6s><300ms> 	Battle is now entering phase: PrebattleWeather
+<32.6s><500ms> 	Battle is now entering phase: PrebattleCinematic
+<32.8s><700ms> 	Battle is now entering phase: Deployment
+<32.8s><700ms> Entering init
+<32.8s><700ms> not a replay battle
+<32.9s><700ms> [Battle Data Dumper Mod]: Entering init
+<32.9s><700ms> [Battle Data Dumper Mod]: not a replay battle
+[ui] <45.5s>    
+[ui] <45.5s>    uicomponent root
+[ui] <45.5s>    	path from root:	root
+[ui] <45.5s>    	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <45.5s>    
+[ui] <47.9s>    
+[ui] <47.9s>    uicomponent button_battle_start
+[ui] <47.9s>    	path from root:	root > finish_deployment > deployment_end_sp > button_battle_start
+[ui] <47.9s>    	position on screen: [857, 131], size: [271, 87], state: [inactive], visible: [true], priority: [60], interactive: [true]
+[ui] <47.9s>    
+<48.0s><15900ms> 	Battle is now entering phase: Deployed
+[ui] <48.4s>    Panel closed finish_deployment
+[ui] <48.7s>    
+[ui] <48.7s>    uicomponent root
+[ui] <48.7s>    	path from root:	root
+[ui] <48.7s>    	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <48.7s>    
+[ui] <51.8s>    
+[ui] <51.8s>    uicomponent ffwd
+[ui] <51.8s>    	path from root:	root > hud_battle > radar_holder > speed_controls > speed_buttons > ffwd
+[ui] <51.8s>    	position on screen: [1887, 1], size: [40, 40], state: [down], visible: [true], priority: [0], interactive: [true]
+[ui] <51.8s>    
+<58.3s><45400ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1004 gen=4 action=1 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_FUTURE_OVERRUN model_ms=45400 preserved_tail=true semantic_success=false native_tail_restored=false
+<58.3s><45400ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1004 gen=4 action=1 blocked_successor=3 future_index=3 active_kind=MOVE active_engine_seq=1632 provider=V3 route_reason=CANONICAL_INTERMEDIATE_ACTIONS_OWED remaining_budget=3 model_ms=45400 preserved_tail=true shared_budget=true
+[ui] <67.2s>    
+[ui] <67.2s>    uicomponent button_cheat_sheet
+[ui] <67.2s>    	path from root:	root > esc_menu > main > menu_left > menu_buttons > frame_options > button_cheat_sheet
+[ui] <67.2s>    	position on screen: [210, 477], size: [100, 96], state: [selected], visible: [true], priority: [100], interactive: [true]
+[ui] <67.2s>    
+[ui] <67.2s>    Panel opened esc_menu
+[ui] <68.0s>    
+[ui] <68.0s>    uicomponent button_windows
+[ui] <68.0s>    	path from root:	root > esc_menu > main > menu_left > menu_buttons > frame_quit > button_windows
+[ui] <68.0s>    	position on screen: [50, 738], size: [186, 100], state: [hover], visible: [false], priority: [100], interactive: [true]
+[ui] <68.0s>    
+<68.0s><81200ms> [BETTER_SHIFT_COMMAND] SESSION_END run=V1_2_2_COREPATH_RC8 reason=QUIT_WINDOWS_CLICK route_passes=0 cancel_passes=0
+<68.1s><81200ms> [BETTER_SHIFT_COMMAND] OBSERVER_SAFE_STOP reason=QUIT_WINDOWS_CLICK result=true detail=true
+[ui] <69.1s>    Panel closed esc_menu
+[ui] <69.1s>    
+[ui] <69.1s>    uicomponent button_tick
+[ui] <69.1s>    	path from root:	dialogue_box > both_group > button_tick
+[ui] <69.1s>    	position on screen: [936, 625], size: [56, 56], state: [down_off], visible: [false], priority: [250], interactive: [true]
+[ui] <69.1s>    
+<69.2s><81200ms> 
+<69.2s><81200ms> ********************************************************************************
+<69.2s><81200ms> event has occurred:: UIDestroyed
+<69.2s><81200ms> ********************************************************************************
+<69.2s><81200ms> ********************************************************************************
+<69.2s><81200ms> 
+
+*** clear_battle_event_callbacks() called, 27 callbacks cleared ***

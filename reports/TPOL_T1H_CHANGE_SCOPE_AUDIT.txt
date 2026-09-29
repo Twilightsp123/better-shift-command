@@ -1,0 +1,10 @@
+BASE=BSC_TRANSITION_POLICY_ARCHITECTURE_D1.zip
+changed_existing=26
+added=34
+missing=0
+runtime_changed:
+source/better_shift_command.lua
+src/better_shift_command.lua
+src/better_shift_command_selfcontained.template.lua
+native_changed=False
+RESULT=PASS

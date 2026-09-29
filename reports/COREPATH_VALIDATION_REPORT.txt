@@ -1,0 +1,62 @@
+BSC COREPATH RC8 PREBUILD VALIDATION REPORT
+===========================================
+Date: 2026-09-27
+Artifact status: PREBUILD_CANDIDATE_NOT_FOR_RELEASE
+
+TARGET
+------
+WH3 expected SHA256:
+6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297
+
+Controller:
+1.2.2-corepath-rc8 / V1_2_2_COREPATH_RC8
+Native Bridge:
+1.0.16-corepath-wh3-6c104-rc8
+Build ID:
+WH3_6C104A63AACC4D86_COREPATH_RC8
+
+ARCHITECTURE CONTRACT
+---------------------
+Mandatory core hooks: 16
+Optional static sites: 2 (ContactPair, Smart Guard)
+ContactPair runtime: STAGED_DISABLED
+Smart Guard runtime: STAGED_DISABLED
+Physical Entity/Component/Alive/ContactPair production evidence: QUARANTINED
+Command execution identity: CORE / build-locked
+Desktop quit safe-stop: PRESENT; runtime re-test pending
+
+OFFLINE / PORTABLE RESULTS
+--------------------------
+maintenance_tools/run_checks_corepath_rc8.py: PASS
+  jobs: 19/19 PASS
+  mutation gate: 40/40 CAUGHT
+maintenance_tools/check_corepath_rc8.py: PASS
+maintenance_tools/audit_evidence_wiring.py: PASS
+tools/prebuild_contract_check.py: PASS
+  core_hooks=16
+  optional_sites=2
+
+Portable Native CTest: 13/13 PASS
+ASan/UBSan Native CTest: 13/13 PASS
+
+PROVENANCE
+----------
+Upstream GitHub behavior baseline:
+Twilightsp123/better-shift-command
+commit 0b690d59940e23e475de332a82cfecf072961977
+release v1.2.2
+Exact upstream controller/modules preserved and SHA-checked under archive/upstream_v1.2.2/.
+RC7 source/archive and exact RC7->RC8 native patch are retained.
+Pre-CorePath physical-specific tests are archived unchanged.
+
+NOT YET CLAIMED / PENDING
+-------------------------
+- Windows VS2019 v142 + MASM compile
+- Windows CTest/backend/module/mid-function hook smoke
+- PE linker/toolchain verification
+- Current Warhammer3.exe pre/post build inspect 16/16 core
+- Candidate pack build and embedded SHA verification
+- WH3 in-game CorePath behavior smoke
+- Quit-to-Windows CorePath safe-stop runtime confirmation
+
+No statement in this report should be read as runtime proof of Entity/MovementComponent/is_alive semantics.

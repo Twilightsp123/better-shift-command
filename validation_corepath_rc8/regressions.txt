@@ -1,0 +1,16 @@
+$ /usr/bin/texlua tests/test_regressions_v104.lua source/better_shift_command.lua tests/fixture.lua
+PASS temporary hidden target preserves Attack and never queries hidden position
+PASS routing is still an Attack, not death or zero-hold completion
+PASS one-tick death signal cannot skip Attack
+PASS confirmed death releases a known tail only after confirmation
+PASS future unavailable Attack preserves earlier Move prefix and suffix
+PASS out-of-order ACKs remain recipient-local
+PASS first pure Shift during startup delay uses pre-input cold-idle certificate
+PASS startup never fabricates cold-idle predecessor for a moving unit
+PASS late accepted old-generation ACK updates ledger but never revives old plan
+PASS more than 256 historical nodes compact without cancelling live generation
+PASS missing math.huge host field does not disable controller
+PASS paused callbacks do not credit Attack hold time
+PASS observation gaps do not backfill Attack credit
+ACTUAL_INTERPRETER=Lua 5.3; explicit engine doubles, not WH3
+TOTAL 13 PASS 0 FAIL

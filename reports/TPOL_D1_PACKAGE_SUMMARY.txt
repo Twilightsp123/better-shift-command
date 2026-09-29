@@ -1,0 +1,29 @@
+BSC-TPOL-D1 PACKAGE SUMMARY
+
+STATUS=APPROVED_DESIGN_NOT_IMPLEMENTED
+RUNTIME_BASELINE=CorePath RC8 Move VTable Fix / Native 1.0.17
+DEFAULT_POLICY=SMOOTH
+RUNTIME_CODE_CHANGED=NO
+NEW_EXE_REVERSE_ENGINEERING_REQUIRED=NO
+
+KEY_CURRENT_LIMITATIONS:
+- Move->Attack strict semantic_done boundary can cause arrival braking / stop
+- SC6 rolls back immediate future MOVE instead of applying Move->Move policy
+
+KEY_D1_CHANGES_DESIGNED:
+- shared TransitionPolicy evaluator
+- bounded Move->Attack terminal handoff
+- immediate future MOVE adopt / soft-adopt
+- bounded issue/adopt hysteresis
+- Smooth/Balanced/Precise/Custom MCT profiles
+- hard invariants non-configurable
+
+IMPLEMENTATION_ORDER=T1 -> T2 -> T3 -> T4
+LIFECYCLE_TEARDOWN=SEPARATE_STREAM
+
+VALIDATION:
+- runtime/code integrity: PASS (83 files unchanged; pycache excluded)
+- CorePath contract: PASS
+- Evidence wiring: PASS
+- Documentation contract: PASS
+- existing controller checks: PASS

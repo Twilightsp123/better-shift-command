@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "design_stream": "BSC-TPOL-D1",
+  "status": "APPROVED_DESIGN_NOT_IMPLEMENTED",
+  "runtime_baseline": {
+    "controller": "1.2.2-corepath-rc8",
+    "native_bridge": "1.0.17-corepath-wh3-6c104-movevtfix",
+    "target_wh3_sha256": "6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297"
+  },
+  "product_default": "SMOOTH",
+  "hard_invariants_configurable": false,
+  "new_reverse_engineering_dependency": false,
+  "implementation_stages": ["T1_BEHAVIOR_NEUTRAL_REFACTOR", "T2_SMOOTH_DEFAULT", "T3_MCT", "T4_ATTACK_EXIT_TUNING"],
+  "separate_streams": ["BATTLE_LIFECYCLE_TEARDOWN"],
+  "design_documents": [
+    "docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md",
+    "docs/design/MCT_POLICY_SCHEMA_D1.md",
+    "docs/design/TRANSITION_DECISION_TABLE_D1.md",
+    "docs/design/TRANSITION_POLICY_MIGRATION_D1.md",
+    "docs/design/TRANSITION_POLICY_TEST_PLAN_D1.md"
+  ]
+}

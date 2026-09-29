@@ -1,0 +1,48 @@
+{
+  "schema": 2,
+  "project": "Better Shift Command",
+  "artifact_status": "PREBUILD_CANDIDATE_NOT_FOR_RELEASE",
+  "candidate": "CorePath RC8 Move VTable Fix",
+  "controller_version": "1.2.2-corepath-rc8",
+  "run_id": "V1_2_2_COREPATH_RC8",
+  "build_marker": "BETTER_SHIFT_COMMAND_V1.2.2_COREPATH_RC8",
+  "native_bridge": "1.0.17-corepath-wh3-6c104-movevtfix",
+  "platform": "Windows x64",
+  "target_wh3_sha256": "6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297",
+  "upstream_behavior_baseline": {
+    "repository": "Twilightsp123/better-shift-command",
+    "commit": "0b690d59940e23e475de332a82cfecf072961977",
+    "release": "v1.2.2",
+    "parent_behavior_release": "v1.2.1 SC6 V3 Execution Identity Reconciliation"
+  },
+  "native_policy": {
+    "mandatory_core_hooks": 16,
+    "optional_static_sites": [
+      "contact_pair",
+      "smart_guard"
+    ],
+    "contact_pair_runtime": "STAGED_DISABLED",
+    "smart_guard_runtime": "STAGED_DISABLED",
+    "physical_evidence": "QUARANTINED",
+    "safe_stop": "QUIT_TO_WINDOWS_ONLY"
+  },
+  "portable_validation": {
+    "controller_jobs": "19/19 PASS",
+    "mutations": "40/40 CAUGHT",
+    "native_ctest": "13/13 PASS",
+    "asan_ubsan_ctest": "13/13 PASS",
+    "prebuild_contract": "PASS"
+  },
+  "pending": [
+    "Windows VS2019 v142 x64 + MASM build",
+    "Windows CTest including mid_function_hook_smoke",
+    "pre/post-build current EXE inspect 16/16 core",
+    "PE toolchain verification",
+    "deterministic candidate pack build/embedded SHA check",
+    "WH3 CorePath runtime behavior and Quit-to-Windows smoke"
+  ],
+  "publish_allowed": false,
+  "documentation_revision": "DOCS_R2_20260929_MOVE_VTABLE_FIX",
+  "documentation_entrypoint": "README_FIRST.md -> docs/MAINTAINER_INDEX.md",
+  "documentation_policy": "CURRENT_STATE_DOCS_OVERRIDE_HISTORY"
+}

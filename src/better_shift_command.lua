@@ -1,16 +1,18 @@
--- Better Shift Command v1.2.2 production controller. SC1-SC6 movement/exit/execution-identity fixes retained.
--- Command identity/ACK remains native-authoritative. V3 EntitySnapshot/ContactPair evidence
--- supports bounded exit recovery while route semantics remain controller-authoritative.
+-- Better Shift Command v1.3.0. SC1-SC6 behavior baseline retained; hidden Transition Policy/MCT scaffold present; unverified physical Entity evidence quarantined.
+-- Command identity/ACK remains native-authoritative. EntitySnapshot/Component/Alive/ContactPair
+-- is quarantined research evidence and is not a release/runtime prerequisite.
 -- Post-exit A2 uses route semantic completion + post-ACK fresh-mode FEG.
-local RUN_ID = "V1_2_2"
+local RUN_ID = "V1_3_0"
 local TEST_PROFILE = "ROUTE_ONLY" -- Compatibility label only; never changes motion.
 local CONTROLLER_PHASE = "P2B" -- Installer can select P1E for terminal-only regression.
-local CONTROLLER_VERSION = "1.2.2"
+local CONTROLLER_VERSION = "1.3.0"
 local TAG = "[BETTER_SHIFT_COMMAND] "
 -- Production default: high-frequency diagnostics are disabled. Tests may explicitly re-enable them.
 local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.2.2 debug_telemetry=" .. tostring(DEBUG_TELEMETRY))
+local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
+local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1H_HIDDEN")
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -836,6 +838,57 @@ end
 -- R1: faults are per-action records, NOT st.blocked. Input draining/observations
 -- remain live and suffixes are preserved. A safe failure is not semantic completion.
 local R1={}
+
+-- TPOL-T1H hidden policy scaffold.
+-- No MCT page is registered in this runtime stage.  The schema/profile compiler is
+-- intentionally present now so a future MCT adapter can provide values without
+-- rewriting gameplay state.  Only engagement_hold_seconds is wired in T1H, and its
+-- built-in 3.0 s value is byte-for-behaviour equivalent to the legacy attack_hold_ms=3000.
+R1.Policy=(function()
+    local P={VERSION="TPOL_T1H_1",SCHEMA=1,UI_EXPOSED=false}
+    P.schema={
+        behavior_preset={kind="enum",values={"SMOOTH","BALANCED","PRECISE","CUSTOM"}},
+        movement_cornering={kind="number",min=0,max=100,step=5},
+        attack_handoff={kind="number",min=0,max=100,step=5},
+        route_fidelity={kind="number",min=0,max=100,step=5},
+        native_successor_tolerance={kind="number",min=0,max=100,step=5},
+        engagement_hold_seconds={kind="number",min=0.5,max=10.0,step=0.5},
+        disengage_priority={kind="number",min=0,max=100,step=5}}
+    P.presets={
+        SMOOTH={movement_cornering=85,attack_handoff=80,route_fidelity=45,native_successor_tolerance=85,disengage_priority=80},
+        BALANCED={movement_cornering=65,attack_handoff=60,route_fidelity=65,native_successor_tolerance=65,disengage_priority=65},
+        PRECISE={movement_cornering=35,attack_handoff=25,route_fidelity=90,native_successor_tolerance=35,disengage_priority=55}}
+    P.defaults={behavior_preset="SMOOTH",engagement_hold_seconds=3.0}
+    local function bounded(v,lo,hi,fallback)
+        v=tonumber(v)
+        if not finite(v) then return fallback end
+        return clamp(v,lo,hi)
+    end
+    function P.compile(values,source)
+        values=type(values)=="table" and values or {}
+        local preset=tostring(values.behavior_preset or P.defaults.behavior_preset):upper()
+        local base=P.presets[preset] or P.presets.SMOOTH
+        local hold=bounded(values.engagement_hold_seconds,P.schema.engagement_hold_seconds.min,
+            P.schema.engagement_hold_seconds.max,P.defaults.engagement_hold_seconds)
+        return {schema=P.SCHEMA,policy_version=P.VERSION,source=source or "BUILTIN_HIDDEN",ui_exposed=false,
+            behavior_preset=preset,
+            movement_cornering=bounded(values.movement_cornering,0,100,base.movement_cornering),
+            attack_handoff=bounded(values.attack_handoff,0,100,base.attack_handoff),
+            route_fidelity=bounded(values.route_fidelity,0,100,base.route_fidelity),
+            native_successor_tolerance=bounded(values.native_successor_tolerance,0,100,base.native_successor_tolerance),
+            engagement_hold_seconds=hold,engagement_hold_ms=math.floor(hold*1000+0.5),
+            disengage_priority=bounded(values.disengage_priority,0,100,base.disengage_priority),
+            runtime_wired={engagement_hold_seconds=true,movement_cornering=false,attack_handoff=false,
+                route_fidelity=false,native_successor_tolerance=false,disengage_priority=false}}
+    end
+    -- Future MCT adapter boundary: collect UI values into a plain table and call this.
+    -- T1H intentionally does not query the MCT runtime, registers no mod/options, and never exposes UI.
+    function P.from_mct_values(values) return P.compile(values,"MCT_FUTURE") end
+    function P.snapshot_hidden() return P.compile(nil,"BUILTIN_HIDDEN") end
+    return P
+end)()
+R1.Policy.active=R1.Policy.snapshot_hidden()
+CFG.attack_hold_ms=R1.Policy.active.engagement_hold_ms
 function R1.fault(st,a,code,reason,now)
     if not a then return end
     local rt=a.runtime or {};a.runtime=rt
@@ -1014,6 +1067,7 @@ function Core.valid_entity_snapshot_v3(e,now)
     return true
 end
 function R1.v3_refresh_physical(st,now)
+    if not physical_evidence_enabled() then st.r1_v3_entity=nil;st.r1_v3_entity_reason="COREPATH_PHYSICAL_EVIDENCE_QUARANTINED";return end
     local caps=S.evidence_v3_caps or {}
     if caps.entity_snapshot~=true or type(bridge.read_entity_snapshot_v3)~="function" then st.r1_v3_entity=nil;st.r1_v3_entity_reason="CAPABILITY_UNAVAILABLE";return end
     local ok,e,provider_reason=pcall(bridge.read_entity_snapshot_v3,st.uid,now)
@@ -1082,6 +1136,7 @@ function R1.v3_update_exit_candidate(st,now)
     end
 end
 function R1.v3_drain_contacts(now)
+    if not physical_evidence_enabled() then S.v3_contact_healthy=false;return true,"COREPATH_PHYSICAL_EVIDENCE_QUARANTINED" end
     local caps=S.evidence_v3_caps or {}
     if caps.contact_pairs~=true or type(bridge.read_contact_events_v3)~="function" then S.v3_contact_healthy=false;return true,"CONTACT_CAPABILITY_UNAVAILABLE" end
     local ok,events,meta=pcall(bridge.read_contact_events_v3,S.v3_contact_cursor.after,128)
@@ -1403,6 +1458,7 @@ function Core.detach_skipped_attack_block(st,index,attack_id)
     if old_id~=new_id and st.block_state then st.block_state[old_id]=nil end
 end
 local function bind_evidence_unit(u,unit,label)
+    if not physical_evidence_enabled() then return false end
     if not u or not unit or not bridge or type(bridge.bind_evidence_unit_v3)~="function" then return false end
     local now=clock();local retry=S.evidence_bind_retry and S.evidence_bind_retry[u]
     if retry and now<(retry.next_ms or 0) then return false end
@@ -3052,20 +3108,27 @@ function Core.maybe_reassert_exit(st,now)
     local required_stall=CFG.exit_reassert_stall_ms
     local v3why="UNUSED"
     if (S.evidence_v3_caps or {}).execution_identity==true then
-        -- Prefer exact V3 body/order evidence whenever it is live. SC5 adds one
-        -- narrow fallback for the live failure seen at 10:44: the exact Exit MOVE
-        -- ACK was known, but the EntitySnapshot aged out (ENTITY_STALE) while a
-        -- positive global enemy contact and near-zero locomotion were still visible.
-        -- Positive contact is used only as evidence that the body is still physically
-        -- pinned; sticky melee=true or contact absence can never trigger this path.
-        local status,why=R1.v3_exit_body_status(st,a,now);v3why=why or "OK"
-        if status then
-            confirmed_candidate=status.progressing_majority~=true
-            evidence_mode="V3_BODY_NOT_PROGRESSING"
-        elseif why=="ENTITY_STALE" then
+        local caps=S.evidence_v3_caps or {}
+        if physical_evidence_enabled() and caps.entity_snapshot==true and caps.contact_pairs==true then
+            -- Optional physical path. It may refine SC5 recovery, but it is never
+            -- allowed to become a prerequisite for command identity or dispatch.
+            local status,why=R1.v3_exit_body_status(st,a,now);v3why=why or "OK"
+            if status then
+                confirmed_candidate=status.progressing_majority~=true
+                evidence_mode="V3_BODY_NOT_PROGRESSING"
+            elseif why=="ENTITY_STALE" then
+                required_stall=CFG.exit_contact_fallback_stall_ms
+                confirmed_candidate=contact_fresh
+                evidence_mode="V3_ENTITY_STALE_CONTACT_FALLBACK"
+            end
+        else
+            -- RC8 core path: exact current Exit MOVE identity has already been checked
+            -- above. Positive enemy proximity/contact + near-zero locomotion + bounded
+            -- stall is sufficient for a recovery reassert without touching Entity data.
             required_stall=CFG.exit_contact_fallback_stall_ms
             confirmed_candidate=contact_fresh
-            evidence_mode="V3_ENTITY_STALE_CONTACT_FALLBACK"
+            evidence_mode="COREPATH_POSITIVE_CONTACT_FALLBACK"
+            v3why="PHYSICAL_EVIDENCE_QUARANTINED"
         end
     else
         confirmed_candidate=contact_fresh
@@ -3521,6 +3584,13 @@ local function stop(reason)
     if bridge then
         pcall(bridge.arm_verified_issue,false)
         if S.epoch then pcall(bridge.end_battle,S.epoch) end
+        -- Production observer hooks stay resident across normal battle transitions.
+        -- Only an explicit Quit-to-Windows click disables the process-wide detours;
+        -- platform_stop_observer is intentionally one-shot until process restart.
+        if reason=="QUIT_WINDOWS_CLICK" and type(bridge.stop_observer)=="function" then
+            local sok,sr,se=pcall(bridge.stop_observer)
+            log("OBSERVER_SAFE_STOP reason=QUIT_WINDOWS_CLICK result="..tostring(sok and sr==true).." detail="..clean(se or sr or "OK"))
+        end
     end
     S.started=false; S.closed=true; S.pending_by_uid={}; S.pending_by_issue={}; S.pending_count=0
 end
@@ -3540,6 +3610,13 @@ local function prepare()
     if type(bridge.r1_evidence_capabilities_v3)=="function" then
         local v3ok,v3=pcall(bridge.r1_evidence_capabilities_v3)
         if v3ok and type(v3)=="table" and v3.schema==3 and v3.game_build_verified==true then S.evidence_v3_caps=v3 end
+    end
+    if not physical_evidence_enabled() then
+        S.evidence_v3_caps.entity_snapshot=false
+        S.evidence_v3_caps.combat_groups=false
+        S.evidence_v3_caps.contact_pairs=false
+        S.evidence_v3_caps.target_specific_physical_contact=false
+        S.evidence_v3_caps.physical_evidence_mode="QUARANTINED"
     end
     S.evidence_caps={game_build_verified=false,execution_identity=false,entity_snapshot=false,combat_groups=false,fresh_engagement=false}
     if type(bridge.r1_evidence_capabilities_v2)=="function" then
@@ -3610,14 +3687,14 @@ function Core.boot()
     if not bok or type(module)~="table" then error("DLL_INIT "..clean(be or module)) end
     bridge=module
     for _,k in ipairs({"version","number_abi_probe","exact_id_probe","get_status","start_observer","begin_battle","end_battle",
-        "get_unit_revision","arm_verified_issue","issue_verified_command","cancel_pending_issue","read_journal","acknowledge",
-        "r1_evidence_capabilities_v3","bind_evidence_unit_v3","read_active_order_identity_v3","read_entity_snapshot_v3","read_combat_groups_v3","read_contact_events_v3","contact_owner_ready_v3"}) do
+        "get_unit_revision","stop_observer","arm_verified_issue","issue_verified_command","cancel_pending_issue","read_journal","acknowledge",
+        "r1_evidence_capabilities_v3","read_active_order_identity_v3"}) do
         if type(bridge[k])~="function" then error("MISSING_BRIDGE_API "..k) end
     end
-    if bridge.version()~="1.0.15-r4-evidence-v3-validated-userdata-root" then error("WRONG_BRIDGE_VERSION") end
+    if bridge.version()~="1.0.17-corepath-wh3-6c104-movevtfix" then error("WRONG_BRIDGE_VERSION") end
     local n,f=bridge.number_abi_probe(); local a,c=bridge.exact_id_probe()
     if n~=16777215 or f~=1.5 or a~="4294967295" or c~="16777217" then error("BRIDGE_ABI_SELFTEST") end
-    log("BRIDGE_OK version=1.0.15-r4-evidence-v3-validated-userdata-root")
+    log("BRIDGE_OK version=1.0.17-corepath-wh3-6c104-movevtfix")
     if DEBUG_TELEMETRY then log("FEG_CONFIG version="..FEG.VERSION.." enabled=true confirmation_ms="..FEG.DEFAULTS.confirm_ms..
         " close_confirmation_ms="..FEG.DEFAULTS.close_confirm_ms.." sample_window_ms="..FEG.DEFAULTS.window_ms..
         " sustained_contact_ms="..FEG.DEFAULTS.contact_confirm_ms.." geometry_confirm_ms="..FEG.DEFAULTS.geometry_confirm_ms.." hold_ms="..CFG.attack_hold_ms.." charging_required=false native_changed=true max_inflight="..CFG.max_inflight) end
@@ -3634,6 +3711,22 @@ function Core.boot()
     bmgr:register_phase_change_callback("Deployed",checked(schedule))
     bmgr:register_phase_change_callback("VictoryCountdown",function() stop("VictoryCountdown") end)
     bmgr:register_phase_change_callback("Complete",function() stop("Complete") end)
+    -- Quit-to-Windows can destroy battle UI before a normal phase callback fires.
+    -- Stop native detours on the desktop-quit button only; normal battle Complete
+    -- keeps the observer resident so later battles in the same WH3 process still work.
+    local core_ok,core_obj=pcall(function() return core end)
+    if core_ok and core_obj and type(core_obj.add_listener)=="function" then
+        pcall(function()
+            core_obj:add_listener("BSC_COREPATH_SAFE_STOP_QUIT_WINDOWS","ComponentLClickUp",
+                function(context)
+                    local ok,v=pcall(function() return context.string end)
+                    if ok and v=="button_windows" then return true end
+                    ok,v=pcall(function() return context:string() end)
+                    return ok and v=="button_windows"
+                end,
+                function() stop("QUIT_WINDOWS_CLICK") end,true)
+        end)
+    end
     local phase=bmgr:get_current_phase_name()
     S.late_start=(phase=="Deployed")
     if DEBUG_TELEMETRY then dlog("LOADED phase="..clean(phase).." run="..RUN_ID) end

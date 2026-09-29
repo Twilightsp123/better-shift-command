@@ -1,0 +1,58 @@
+--- /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/archive/legacy_physical_tests/test_v109_regressions.pre_corepath.lua	2026-09-27 13:31:53.342173892 +0000
++++ /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/tests/test_v109_regressions.lua	2026-09-27 13:31:53.809678429 +0000
+@@ -130,19 +130,23 @@
+  assert(f.issued>=1 and f.commands[1].draft.kind=='MOVE')
+  assert(not f:has('POST_EXIT_FRESH_ENGAGEMENT_UNAVAILABLE'))
+ end)
+-T('R08 unfinished Exit requires majority CA pathing, not merely absence of majority melee lock',function()
+- local f,e2=setup({extra=true,evidence=true});f.unit.target=e2;f.unit.melee=true;e2.x=-30
+- f.locked_entities={'s1','s2','s3'};f.pathing_count=0;f.halted_count=57;f.combat_targets={'2002'}
+- tick(f,6200,8100,-30,true)
+- assert(not f:has('EXIT_PERMISSION_READY'),'halted majority before route completion is not an operable exiting body')
+- f.pathing_count=57;f.halted_count=3;tick(f,8200,9000,-30,true)
+- assert(f:has('EXIT_PERMISSION_READY'),'resumed majority pathing may establish current Exit permission')
+-end)
+-T('R10 residual stragglers alone do not reassert a stalled Exit under V2 evidence',function()
+- local f,e2=setup({extra=true,evidence=true,exit_x=-100});f.unit.target=e2;f.unit.melee=true;e2.x=-12
+- f.locked_entities={'s1','s2','s3'};f.pathing_count=57;f.state3_count=0;f.combat_targets={'2002'}
++T('COREPATH quarantined physical majority samples cannot veto route-complete Exit to A2',function()
++ local f,e2=setup({extra=true,evidence=true,exit_x=-28});
++ -- Deliberately inject the old physical facts in their worst state. RC8 must ignore them.
++ f.locked_entities={'s1','s2','s3'};f.pathing_count=0;f.halted_count=60;f.combat_targets={'2002'}
++ f.unit.target=nil;f.unit.melee=false;f.enemy.x=400;e2.x=400
++ tick(f,6200,9000,-28,true)
++ assert(not f:has('code=BLOCKED_EVIDENCE'),'quarantined Entity/Component evidence may not veto controller route semantics')
++ assert(attacks(f)>=1,'route-complete Exit must reach A2 without a physical-majority permit')
++end)
++T('COREPATH residual physical straggler fixtures do not reassert without positive live contact',function()
++ local f,e2=setup({extra=true,evidence=true,exit_x=-100});
++ -- Old synthetic Entity/Combat evidence claims residual contact, while the live geometry is clear.
++ f.locked_entities={'s1','s2','s3'};f.pathing_count=0;f.halted_count=60;f.combat_targets={'2002'}
++ f.unit.target=nil;f.unit.melee=true;f.enemy.x=400;e2.x=400
+  tick(f,6200,11000,-12,true)
+- assert(f:count('EXIT_BLOCK_REASSERT')==0,'minor residual contact must not trigger recovery of an otherwise operable body')
++ assert(f:count('EXIT_BLOCK_REASSERT')==0,'quarantined physical samples must never manufacture a recovery contact')
++ assert(not f:has('evidence=COREPATH_POSITIVE_CONTACT_FALLBACK'),'fallback requires positive live contact/proximity')
+  assert(attacks(f)==0)
+ end)
+ T('N02 decision only exact native sequence adopts without a duplicate command',function()
+@@ -197,11 +201,14 @@
+  assert(f.pending_count==5,'the widened pipeline must carry the four existing issues plus the attack tail')
+  healthy(f)
+ end)
+-T('R09/R11 previously valid body permit is revoked when samples stop refreshing',function()
+- local f,e2=setup({extra=true,evidence=true});f.unit.target=nil;f.unit.melee=true;f.locked_entities={'e1'};f.combat_targets={'2002'};e2.x=-30
+- tick(f,6200,8100,-30);assert(f:has('EXIT_PERMISSION_READY'))
+- f.frozen_ms=8100;tick(f,8200,9400,-30)
+- assert(f:has('EXIT_PERMISSION_REVOKED') and attacks(f)==0)
++T('COREPATH stale physical samples cannot revoke or gate a route-complete A2 transition',function()
++ local f,e2=setup({extra=true,evidence=true,exit_x=-28});
++ f.locked_entities={'e1'};f.pathing_count=57;f.combat_targets={'2002'};f.frozen_ms=6200
++ -- Make the controller-observable battlefield clear; only the archived synthetic physical producer is stale.
++ f.unit.target=nil;f.unit.melee=false;f.enemy.x=400;e2.x=400
++ tick(f,6200,9000,-28)
++ assert(not f:has('code=BLOCKED_EVIDENCE'),'stale quarantined physical samples cannot become a behavior veto')
++ assert(attacks(f)>=1,'A2 transition remains route/execution-authoritative when physical evidence is stale')
+ end)
+ T('R11 missing incomplete evidence never overrides a known active Move via stale target',function()
+  local f=setup({evidence=true});f.unit.target=f.enemy;f.unit.melee=false

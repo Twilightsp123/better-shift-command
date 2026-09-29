@@ -1,0 +1,10 @@
+$ /usr/bin/texlua tests/test_exec_identity_v3.lua source/better_shift_command.lua tests/fixture.lua
+PASS SC6 V3_ONLY_SUCCESSOR_READY adopts exact immediate Attack
+PASS SC6 V3_ONLY_SUCCESSOR_EARLY_ROLLBACK restores unfinished current Move
+PASS SC6 V3_FUTURE_OVERRUN_ROLLBACK never skips canonical intermediates
+PASS SC6 V3_IDENTITY_MISMATCH_NO_FALSE_ADOPT ignores semantic current_target without exact identity
+PASS SC6 SC5_REASSERT_REQUIRES_CURRENT_EXECUTION does not physical-reassert over future Attack
+PASS SC6 NONCANONICAL_ACTIVE_ORDER blocks SC5 physical recovery
+PASS SC6 V2_COMPAT_FALLBACK works only when V3 is unavailable
+ACTUAL_INTERPRETER=Lua 5.3; SC6 execution identity regressions; V3-authoritative plus explicit V2 fallback
+TOTAL 7 PASS 0 FAIL

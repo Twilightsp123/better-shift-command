@@ -1,6 +1,20 @@
+# Better Shift Command — Development & Maintenance History
+
+> **HISTORICAL DOCUMENT — NOT CURRENT AUTHORITY.** This file preserves what was understood at each stage, including assumptions later superseded or retracted. For current architecture/status, read `MAINTAINER_INDEX.md`, `ARCHITECTURE_STATUS_20260927.md`, `OPEN_ISSUES.md`, `ASSUMPTION_LEDGER.md`, and `TEST_MATRIX.md` first.
+
+## 2026-09-27 — CorePath RC8 maintenance decision
+
+The current upstream behavior baseline remains v1.2.2, but WH3 9.0.1 required a new native map. During NATIVE-MAP-RC5–RC7 runtime gating, the inherited physical Evidence V3 model was re-audited. `Entity+0x18 = MovementComponent*` was retracted as a false attribution, and NATIVE-MAP-RC7 found no valid component/back-reference pair on a 60-member physical candidate.
+
+COREPATH-RC8 therefore quarantines EntitySnapshot/Component/Alive/ContactPair production evidence and separates the hook tiers: 16 mandatory command/packet hooks, optional ContactPair, optional Smart Guard. Command ACK and V3 exact active-order identity remain authoritative. SC5 uses an exact-current-Exit + positive-contact bounded fallback. NATIVE-MAP-RC7 safe-stop is retained only for explicit Quit-to-Windows so normal battle completion does not disable later battles in the same process.
+
+Historical physical source/tests are preserved under `archive/`; their presence is not a proof of current WH3 semantics. See the Assumption Ledger and Decision Log.
+
+---
+
 # Better Shift Command — 开发与维护总记录
 
-这份文档是 **v1.2.2 之后的长期工程记录**。它取代过去散落在根目录和 `docs/` 中的 R3/R4、SC1～SC6、诊断、BuildOnly、Package Check、Smoke Test 等阶段文档。
+这份文档是长期工程历史记录。它汇总 R3/R4、BSC-CONV-RC1/RC2、SC1～SC6、发布与诊断阶段，但**历史正文中的“当前”“已验证”“正式基线”等词只代表当时阶段**。RC8 当前事实以 `MAINTAINER_INDEX.md` 指向的 current-state 文档为准。
 
 目标不是保存每一次实验输出，而是保存真正需要长期继承的内容：
 
@@ -12,29 +26,19 @@
 
 ---
 
-## 1. 当前正式基线
+## 1. 当前维护基线（CorePath RC8）
 
-- **Release:** Better Shift Command `v1.2.2`
-- **Controller:** `1.2.2`
-- **Run ID:** `V1_2_2`
-- **Build marker:** `BETTER_SHIFT_COMMAND_V1.2.2`
-- **Native Bridge ABI:** `1.0.15-r4-evidence-v3-validated-userdata-root`
+- **Upstream behavior release:** Better Shift Command `v1.2.2`
+- **Current formal Mod/controller version:** `v1.3.0`
+- **Current Run ID:** `V1_3_0`
+- **Current build marker:** `BETTER_SHIFT_COMMAND_V1.3.0`
+- **Native Bridge candidate:** `1.0.17-corepath-wh3-6c104-movevtfix`
+- **Artifact status:** PREBUILD, not install-ready
 - **Platform:** Windows x64
 
+`v1.2.2` 是 `v1.2.1` SC6 行为上的 Lua `math.huge` 兼容修复。下面关于 `v1.2.1` / `v1.2.0` / 旧 Native ABI 的内容保留为**历史阶段说明**，不代表 RC8 当前 production evidence policy。
 
-v1.2.2 保留 v1.2.1 的完整 SC6 行为基线，只增加 Lua 数值兼容修复。v1.2.1 在 v1.2.0 的 SC1～SC5 行为基线上增加 **SC6 V3 Execution Identity Reconciliation**：当 CA Native active order 提前跳到 future canonical action 时，控制器使用 V3 exact execution identity 决定 adopt / rollback，并要求 SC5 physical recovery 只在当前 Exit MOVE 仍是 exact Native active execution 时运行。Native ABI 字符串继续保持 `1.0.15-r4-evidence-v3-validated-userdata-root`；旧 V2 evidence reader 导出仅保留兼容名称并 fail closed。
-
-### v1.2.2 compatibility release — missing `math.huge`
-
-2026-09-20 的实机日志显示，某个 WH3 Lua 环境中 `math.huge` 为 `nil`。旧代码的 `finite()` 在 `-math.huge` 处直接抛出 Lua 错误，先出现 `EARLY_BASELINE_UNAVAILABLE`，随后在正式 `start()` 的 `collections() -> clock() -> finite()` 路径进入 `CONTROLLER_FAIL`；此时 Controller 尚未处理任何 Shift/Move/Attack 计划。
-
-修复严格限定在 Lua 数值兼容层：增加本地 `BSC_HUGE`，优先沿用可用的 `math.huge`，否则使用 `1e300` 作为仅用于有限数检查与“无限优先级/容差”哨兵的后备值，并把运行时直接 `math.huge` 引用改为该本地常量。SC1～SC6、Native Bridge、17 个 hook、ContactPair 与 Native ABI 均未修改。
-
-回归套件加入“host `math.huge` 缺失时 Controller 仍能启动并处理基础 Move 队列”的案例；当前 v1.2.2 source gate 为 **19/19 jobs PASS**，mutation gate 为 **40/40 CAUGHT**。
-
-**实机闭环：** `script_log_200926_1849.txt` 在此前会触发该问题的 WH3 环境中验证通过：进入 `Deployed` 后不再出现 `EARLY_BASELINE_UNAVAILABLE` 或 `CONTROLLER_FAIL`，Controller 随后实际进入 SC6 的 `NATIVE_FUTURE_OVERRUN` / `NATIVE_SUCCESSOR_ROLLBACK` 路径。因此这次 `math.huge` 兼容问题已经完成“现场失败 → 最小修复 → 自动回归 → WH3 实机 PASS”的闭环。
-
-这次 v1.2.2 收尾**没有重新编译 Native Bridge，也没有构建/安装新的 `.pack`**；原因是 Native source、Hook、ASM、MinHook 和 ABI 均未改变。只有在发布可安装的 v1.2.2 `.pack` 时，才需要重新执行 Windows Build + CTest + deterministic pack verify。
+v1.2.1 在 v1.2.0 的 SC1～SC5 行为基线上增加 **SC6 V3 Execution Identity Reconciliation**：当 CA Native active order 提前跳到 future canonical action 时，控制器使用 V3 exact execution identity 决定 adopt / rollback，并要求 SC5 physical recovery 只在当前 Exit MOVE 仍是 exact Native active execution 时运行。Native ABI 字符串继续保持 `1.0.15-r4-evidence-v3-validated-userdata-root`；旧 V2 evidence reader 导出仅保留兼容名称并 fail closed。
 
 v1.2.0 的行为基线就是最后验证通过的 **SC5 EXIT REASSERT**。正式版收尾没有再改路线算法、接战算法或 Native 行为，只做了：
 
@@ -65,13 +69,15 @@ Lua Controller 负责的是**命令语义和队列状态机**：
 
 ### 2.2 Native Bridge
 
-Windows Native Bridge 负责：
+RC8 当前 production Native Bridge 负责：
 
 - 观察原生命令；
 - 识别我们的命令 ACK；
-- 提供 execution identity；
-- 提供 EntitySnapshot / ContactPair 等物理证据；
-- 向 WH3 提交 Controller 需要的原生 Move/Attack。
+- 提供 exact execution identity；
+- 向 WH3 提交 Controller 需要的原生 Move/Attack；
+- 在 Quit-to-Windows 路径执行安全的 observer disable。
+
+历史 EntitySnapshot / Component / ContactPair 研究代码仍保留，但 RC8 production capability 明确为 quarantined/staged-disabled，**不再是 CorePath 授权职责**。后文 R3/R4/SC5 对这些 API 的描述属于当时架构。
 
 正式 Windows 构建使用：
 
@@ -82,7 +88,7 @@ Windows Native Bridge 负责：
 
 ContactPair 使用专门的 **mid-function hook**，对应 `contact_pair_hook_x64.asm`。这条路径和普通 MinHook 函数入口 hook 不是一回事，因此 Windows Build + CTest 必须继续覆盖 MASM assemble/link 和 mid-function smoke。
 
-### 2.3 Command root ≠ Evidence root
+### 2.3 历史物理研究原则：Command root ≠ Evidence root（RC8 非 release gate）
 
 R4 最重要的架构结论之一：
 
@@ -104,9 +110,9 @@ R4 最重要的架构结论之一：
 5. 无效 rebind 不能覆盖已经验证过的有效 root；
 6. command lifetime 改变时，旧 physical root / owner generation 必须退休。
 
-### 2.4 ContactPair 才是接触证据；`melee=true` 不是
+### 2.4 历史 Evidence V3 接触语义（RC8 production 已不依赖 ContactPair）
 
-目标特定的物理接触使用 ContactPair 两端 Entity，再通过 EntityOwnerIndex 映射回 Unit。
+在 R4～v1.2.1 的历史 Evidence V3 架构中，目标特定的物理接触曾使用 ContactPair 两端 Entity，再通过 EntityOwnerIndex 映射回 Unit。RC8 已把该链路移出 production CorePath。
 
 这套证据是：
 
@@ -124,7 +130,7 @@ R4 最重要的架构结论之一：
 
 ---
 
-## 3. R3：第二次 Attack / Exit body cohort
+## 3. R3：第二次 Attack / Exit body cohort（历史物理架构）
 
 实机失败链曾经是：
 
@@ -178,9 +184,9 @@ main function has more than 200 local variables
 
 ---
 
-## 5. R4 Evidence V3：验证过的物理证据
+## 5. R4 Evidence V3：历史上曾作为生产物理证据（RC8 已部分撤回/隔离）
 
-R4 实机审计确认：Native Move/Attack issuing 本身不是全局死亡，真正的问题是 Evidence V3 的 physical root 没有被可靠证明。
+R4 当时的实机审计确认：Native Move/Attack issuing 本身不是全局死亡，问题集中在 Evidence V3 physical root。R4 随后建立了一套当时认为可用的物理证据架构；**RC5–RC8 的重新审计后来证明其中关键语义没有达到 release-gate 级别，尤其 `Entity+0x18 = MovementComponent*` 的旧证明已被撤回。**
 
 典型表现是：
 
@@ -189,7 +195,7 @@ R4 实机审计确认：Native Move/Attack issuing 本身不是全局死亡，�
 - 但 `V3_EXIT_BODY_STATUS` 大量 `ENTITY_STALE`；
 - 旧 userdata offset 假设无法稳定形成 EntitySnapshot / EntityOwnerIndex。
 
-R4 因此形成目前的物理证据架构：
+R4 当时因此形成以下物理证据架构（历史记录；RC8 production 不再使用它作为 release gate）：
 
 - validated userdata evidence-root resolver；
 - 完整 EntitySnapshot 验证以后才发布 evidence root；
@@ -204,13 +210,13 @@ Route debt 也从短时间固定 deadline 改为基于实际 progress 的 stall 
 
 ---
 
-## 6. 被放弃的 RC1 / RC2 convergence 线
+## 6. 被放弃的 BSC-CONV-RC1 / BSC-CONV-RC2 convergence 线
 
 曾经尝试过一次大范围 convergence / cleanup：同时删除或修改多个 runtime 模块、hook、packaging/maintenance 路径。
 
 结果是实机 regression 出现以后无法进行可靠单变量归因。
 
-RC2 诊断线还出现：
+BSC-CONV-RC2 诊断线还出现：
 
 - `MODEL_TIME_UNAVAILABLE`；
 - Battle Manager model time 异常；
@@ -221,7 +227,7 @@ RC2 诊断线还出现：
 
 最终结论：
 
-> RC1/RC2 不是长期 baseline。以后行为修改必须尽量单变量，并由实机日志证明因果链。
+> BSC-CONV-RC1/RC2 不是长期 baseline。以后行为修改必须尽量单变量，并由实机日志证明因果链。
 
 ---
 
@@ -310,7 +316,7 @@ SC4 增加 `TURN_CORRIDOR_STALL_ESCAPE`：
 
 ---
 
-## 11. SC5 EXIT REASSERT：ACK 不等于真的脱战
+## 11. SC5 EXIT REASSERT：ACK 不等于真的脱战（v1.2.0/1.2.1 历史实现）
 
 1044 实机又暴露一个与 waypoint 无关的问题：
 
@@ -341,6 +347,8 @@ SC5 只补这一洞：
 - `contacts=0` 时不重发。
 
 这样补上了“命令被接受”到“实体真的离开接触”的闭环，同时避免每帧重复 `goto_location()`。
+
+**RC8 更新：** 上述 `ENTITY_STALE → ContactPair fallback` 是历史 SC5 实现。CorePath RC8 保留“ACK 不等于实际脱战”和 bounded reassert 的行为目标，但 production SC5 不再依赖 EntitySnapshot/ContactPair gate；当前条件见 `ARCHITECTURE_STATUS_20260927.md` 与 `OPEN_ISSUES.md`。
 
 ---
 
@@ -391,21 +399,27 @@ Windows 正式发布仍必须在 Windows 上使用现有 VS2019 v142 x64 + MASM 
 
 ---
 
-## 14. 后续维护不可随便破坏的不变量
+## 14. 后续维护不可随便破坏的不变量（历史集合；以当前 Ledger/Decision 为准）
 
-1. **Command identity 与 physical evidence 必须分离。**
+1. **Command identity 与 physical research 必须分离。** RC8 中 physical evidence 已退出 release-critical path。
 2. **不能用 sticky `melee=true` 单独证明当前真实接触。**
 3. **Native ACK 不能当成 physical disengagement 已完成。**
 4. **不能为了顺滑直接删除 route debt。** 只有 successor path 仍尊重旧 corridor 时才允许 soft continuation。
 5. **Move→Attack 必须比纯 Move→Move 更严格。**
 6. **短 leg / 相邻 waypoint cap 必须继续限制 steering / stall escape。**
-7. **ContactPair 必须 target/sequence/generation specific。**
-8. **缺失或歧义 physical evidence 保持 fail-closed。**
+7. **若未来重新启用 ContactPair 研究/生产路径，其证据必须 target/sequence/generation specific。** RC8 当前 staged disabled。
+8. **RC8 production physical APIs 保持 fail-closed/quarantined。** 不得因 research provider 缺失而阻断 CorePath。
 9. **避免继续增加 Lua main chunk 长期 top-level locals。**
 10. **实机行为改动优先单变量。**
 11. **Native ABI 只在 Native contract/behavior 真变化时改。**
 12. **Production telemetry 默认保持关闭，并且关闭时避免字符串格式化开销。**
 13. **Windows MASM mid-function hook 必须继续参加真实 Build/CTest。**
+
+---
+
+## 14.1 RC8 对历史不变量的覆盖规则
+
+如果本节与 `ASSUMPTION_LEDGER.md` / `DECISION_LOG.md` 冲突，必须以当前 Ledger/Decision 为准。特别是历史章节中的 `Entity`、`MovementComponent`、`validated physical evidence`、ContactPair production 依赖，不得被当成 RC8 当前证明。
 
 ---
 
@@ -511,3 +525,50 @@ mutation gate 从 37 扩展到 **40/40 caught**，新增专门防止：
 16. **Execution identity recovery 必须先于 physical recovery。** 若 Native active action 都不是当前 Exit MOVE，不能把问题当作“MOVE active 但脱战慢”交给 SC5。
 17. **semantic state 不能替代 execution identity。** `current_target()`、`melee`、UI command line、destination 等可用于诊断/physical evidence，但不能授权 canonical cursor 跳转。
 
+
+
+---
+
+## 18. 2026-09-29 — Move VTable closure reveals transition-policy limitations
+
+After current-build static audit proved that hooked top-level Move uses Full Move constructor `0x0300B094` / VTable `0x03910AA8`, the production outcome/active-execution readers were corrected and Windows/WH3 smoke could proceed without the old universal Move outcome failure.
+
+Once Native capture became usable, runtime logs exposed two independent Lua policy behaviors that had previously been masked:
+
+1. `route_handoff_ready()` intentionally keeps Move→Attack outside SC1 and returns `ATTACK_REQUIRES_ROUTE_COMPLETE` until current Move `semantic_done`. This can let CA enter arrival braking before Attack handoff.
+2. SC6 exact reconciliation only recognizes an immediate future ATTACK as potentially adoptable. Exact Native execution of an immediate future MOVE is classified as `NATIVE_FUTURE_OVERRUN` and reasserts the current Move, which can create an avoidable stop/reset.
+
+These observations do **not** invalidate SC1–SC6 identity/route principles. They show that transition timing policy is split across multiple call sites and is too binary at the boundary.
+
+### BSC-TPOL-D1 design
+
+A new, not-yet-implemented architecture was approved:
+
+- canonical ordering/target identity/manual override become explicit hard invariants;
+- a shared TransitionPolicy evaluator decides immediate edges for both proactive dispatch and SC6;
+- Move→Attack gains a bounded terminal handoff corridor;
+- exact immediate future MOVE may be adopted if Move→Move semantics permit;
+- a bounded adopt-only hysteresis band avoids Native-advance/Lua-rollback thrashing;
+- Smooth is default; MCT tunes only bounded soft policy through immutable per-battle profiles;
+- implementation is staged T1→T4 to preserve single-variable attribution.
+
+Design docs live under `docs/design/`. Runtime source in the D1 package is unchanged from the Move-VTable-fix baseline.
+
+---
+
+## 19. 2026-09-29 — TPOL-T1H hidden MCT/profile scaffold
+
+The first D1 implementation step intentionally avoided changing transition behavior.
+
+- Added `R1.Policy` schema/profile compiler.
+- Added Smooth/Balanced/Precise preset data and a future MCT adapter function, but no `get_mct()` call or visible MCT registration.
+- Split the old proposed `Attack Commitment` concept into:
+  - direct **Minimum Engagement Time** (`engagement_hold_seconds`), default 3.0 s;
+  - separate **Disengage Priority**, reserved for later T4 tuning.
+- Routed the existing 3000 ms Attack hold through the profile without changing the default value.
+- Left Move→Attack strictness, SC6 immediate-MOVE handling, and all other D1 gameplay changes untouched for T2.
+
+
+## 20. 2026-09-29 — Formal version normalization to v1.3.0
+
+The maintained project version is normalized to **v1.3.0**. Internal labels (`COREPATH-RC8`, `BSC-TPOL-D1`, `BSC-TPOL-T1H`, Native `movevtfix`) remain preserved as engineering history/provenance only. The canonical Steam pack filename is fixed as `zzz_better_shift_command_steam.pack`. Historical logs, patches and archived source retain their original version strings.

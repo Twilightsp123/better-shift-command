@@ -1,0 +1,426 @@
+--- a/README.md
++++ b/README.md
+@@ -13,9 +13,10 @@
+ - Controller: `1.2.2-corepath-rc8`
+ - Run ID: `V1_2_2_COREPATH_RC8`
+ - Build marker: `BETTER_SHIFT_COMMAND_V1.2.2_COREPATH_RC8`
+-- Native Bridge: `1.0.16-corepath-wh3-6c104-rc8`
++- Native Bridge: `1.0.17-corepath-wh3-6c104-movevtfix`
+ - Target WH3 SHA256: `6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297`
+ - Platform: Windows x64, VS2019 / MSVC v142 / MASM
++- 2026-09-29 source correction: top-level Full Move VTable `0x03910AA8`; historical `0x0390E248` is Simple/Intercept only.
+ 
+ ## Current architecture
+ 
+--- a/README_FIRST.md
++++ b/README_FIRST.md
+@@ -27,7 +27,7 @@
+ 
+ - Upstream behavior baseline: **BSC v1.2.2**.
+ - Controller candidate: `1.2.2-corepath-rc8`.
+-- Native Bridge candidate: `1.0.16-corepath-wh3-6c104-rc8`.
++- Native Bridge candidate: `1.0.17-corepath-wh3-6c104-movevtfix`.
+ - Target WH3 SHA256: `6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297`.
+ - Mandatory native set: **16 command/packet hooks**.
+ - ContactPair: optional static research site, **STAGED_DISABLED**.
+@@ -35,6 +35,8 @@
+ - EntitySnapshot / MovementComponent / Entity Alive / ContactPair physical evidence: **QUARANTINED** in production.
+ - SC1–SC6 command/route behavior remains the gameplay baseline.
+ - RC7 safe-stop is retained only for explicit **Quit to Windows**.
++- 2026-09-29 static outcome audit: top-level Full Move VTable is **`0x03910AA8`**; prior `0x0390E248` top-level claim is retracted (it is Simple/Intercept Move).
++- Allocator return ABI is proven unchanged: RAX = exact `slot_base`; R1/R2/R3 experimental outcome resolvers are withdrawn.
+ 
+ ## Why RC8 exists
+ 
+--- a/RELEASE_MANIFEST.json
++++ b/RELEASE_MANIFEST.json
+@@ -6,7 +6,7 @@
+   "controller_version": "1.2.2-corepath-rc8",
+   "run_id": "V1_2_2_COREPATH_RC8",
+   "build_marker": "BETTER_SHIFT_COMMAND_V1.2.2_COREPATH_RC8",
+-  "native_bridge": "1.0.16-corepath-wh3-6c104-rc8",
++  "native_bridge": "1.0.17-corepath-wh3-6c104-movevtfix",
+   "platform": "Windows x64",
+   "target_wh3_sha256": "6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297",
+   "upstream_behavior_baseline": {
+--- a/ANTIGRAVITY_BUILD_ONLY.txt
++++ b/ANTIGRAVITY_BUILD_ONLY.txt
+@@ -14,7 +14,7 @@
+ 6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297
+ 
+ Expected bridge version:
+-1.0.16-corepath-wh3-6c104-rc8
++1.0.17-corepath-wh3-6c104-movevtfix
+ Expected build id:
+ WH3_6C104A63AACC4D86_COREPATH_RC8
+ 
+--- a/docs/ASSUMPTION_LEDGER.md
++++ b/docs/ASSUMPTION_LEDGER.md
+@@ -6,8 +6,10 @@
+ |---|---|---|
+ | WH3 EXE SHA `6c104a63...3297` | build identity lock | mandatory |
+ | 16 command/packet hook RVAs + guards | statically re-audited for current build; Windows/runtime candidate build still pending | mandatory |
+-| Move VTable `0x0390E248` | statically revalidated | command identity |
++| Full Move VTable `0x03910AA8` for hooked top-level `issue_move` | **LEVEL-1 static dataflow verified 2026-09-29** | command outcome + SC6 execution identity |
++| Simple/Intercept Move VTable `0x0390E248` | verified sibling/internal constructor; prior use as the sole/top-level Move VTable was **RETRACTED** | not valid for BSC top-level Move outcome |
+ | Attack VTable `0x03910228` | statically revalidated | command identity |
++| allocator `0x02F5248C` returns exact `slot_base` in RAX | **LEVEL-1 static dataflow verified 2026-09-29** | core outcome capture |
+ | Order slot `root+0x288`, stride `0x120` | statically verified | core |
+ | engine sequence `slot+0x20` | statically verified | SC6 core |
+ | MOVE payload `+0x58/+0x5C/+0x60` | statically verified | core |
+--- a/docs/CURRENT_BUILD_MAP.md
++++ b/docs/CURRENT_BUILD_MAP.md
+@@ -30,7 +30,13 @@
+ | ContactPair | `0x030A3859` | staged disabled / physical research only |
+ | Smart Guard state transition | `0x030E2524` | staged disabled |
+ 
+-Move VTable: `0x0390E248`  
++Full Move VTable (top-level `Order::issue_move`): `0x03910AA8`  
++Simple/Intercept Move VTable (internal sibling constructor, **not** the BSC top-level outcome type): `0x0390E248`  
+ Attack VTable: `0x03910228`
+ 
+ The exact byte guards live in `src/native_bridge/src/platform_windows.cpp` and are checked by `tools/prebuild_contract_check.py` and `tools/inspect_exe.py`. This document is descriptive; source + checker are authoritative.
++
++
++## 2026-09-29 outcome dataflow correction
++
++A direct current-EXE disassembly audit closed the top-level Move/Attack allocator→constructor→slot dataflow. The prior single “Move VTable = `0x0390E248`” entry was wrong: `0x0390E248` belongs to the sibling Simple/Intercept Move constructor `0x0300B038`, while the hooked player/top-level Move path `0x030344D4` calls Full Move constructor `0x0300B094`, which installs `0x03910AA8`. See `docs/static_audit_20260929/`.
+--- a/docs/DECISION_LOG.md
++++ b/docs/DECISION_LOG.md
+@@ -30,3 +30,12 @@
+ **Reason:** this package contains multiple independent RC number lines and historical sections whose terminology (`validated Entity`, old Native ABI, ContactPair production role) was later superseded. Reading only a portion of the history can therefore produce a technically plausible but current-state-wrong conclusion.
+ 
+ **Consequence:** `MAINTAINER_INDEX.md`, `VERSION_LINEAGE.md`, `OPEN_ISSUES.md`, `HISTORY_COVERAGE.md`, and `MAINTENANCE_PROTOCOL.md` are part of the required handoff surface. Historical text is preserved rather than rewritten as if it never happened.
++
++
++## D-20260929-01 — Correct Full Move VTable; reject historical sole-VTable assumption
++
++**Decision:** the CorePath top-level Move outcome and active-execution identity use Full Move VTable `0x03910AA8`. `0x0390E248` is retained only as the documented sibling Simple/Intercept Move VTable and must not authorize a top-level BSC Move outcome.
++
++**Evidence:** direct disassembly of the locked EXE SHA `6c104a63...3297` proves allocator `0x02F5248C` returns `slot_base`, top-level Move `0x030344D4` passes `slot_base+0x18` to Full Move constructor `0x0300B094`, and that constructor installs `0x03910AA8`. Attack remains `0x03910228`. The prior current-state docs conflated `0x0300B038` / `0x0390E248` (Simple/Intercept Move) with the hooked top-level Move path.
++
++**Consequence:** R1 allocator-index, R2 container-scan, and R3 constructor-witness experimental branches are withdrawn; the allocator ABI itself was not the fault. Core fixtures are corrected so portable PASS can no longer be obtained by modeling the wrong Move VTable. Per-kind native calibration is also hardened so a partial/no-sequence outcome cannot count as successful calibration.
+--- a/docs/OPEN_ISSUES.md
++++ b/docs/OPEN_ISSUES.md
+@@ -1,6 +1,8 @@
+ # Open Issues — CorePath RC8
+ 
+ This file contains **only current unresolved work and accepted current trade-offs**. Historical failures belong in `DEVELOPMENT_HISTORY.md` / archives, not here.
++
++**2026-09-29 current source note:** the locked EXE outcome dataflow audit proved the prior top-level Move VTable map was wrong. This tree contains the source correction (`0x03910AA8`) and therefore requires a fresh Windows BuildOnly/candidate before runtime. The older Windows DLL/candidate must not be reused.
+ 
+ ## A. Release-blocking pending gates
+ 
+@@ -56,3 +58,8 @@
+ - Physical evidence failure does not by itself block BSC CorePath release.
+ 
+ Update this file whenever a release blocker is opened/closed. Do not leave a closed item here merely for history; move the outcome to `DEVELOPMENT_HISTORY.md` / `DECISION_LOG.md` instead.
++
++
++## E. Static-audit caveat retained intentionally
++
++The supplied 2026-09-29 disassembly reports prove allocator return ABI, top-level constructors, VTables, slot geometry, sequence write, and payload locations. However their prose has one unresolved control-flow inconsistency: both Move and Attack reports show the queued-count `>= 40` branch targeting an address later labeled `AL=1`, while the narrative calls it rejection and the sequence report claims accepted-without-sequence is impossible. CorePath therefore **retains `ACCEPTED_NO_SLOT` as a valid fail-safe state** and does not delete that contract based on the report summary. This caveat is not a blocker for the Move-VTable correction.
+--- a/docs/TEST_MATRIX.md
++++ b/docs/TEST_MATRIX.md
+@@ -9,6 +9,7 @@
+ | Portable Native CTest | 13/13 PASS | Linux portable fixtures |
+ | ASan/UBSan CTest | 13/13 PASS | no sanitizer finding in portable fixtures |
+ | Source prebuild contract | PASS | 16 mandatory + 2 optional static sites, quarantine markers, provenance |
++| 2026-09-29 top-level Move/Attack outcome dataflow audit | PASS (with report-control-flow caveat retained) | allocator ABI + exact top-level constructors + Full Move VTable `0x03910AA8` + Attack VTable `0x03910228` verified; queue-full/`ACCEPTED_NO_SLOT` remains intentionally supported because the supplied report contains a branch/return inconsistency |
+ | Windows VS2019 v142 + MASM | PENDING | must be performed by BuildOnly agent |
+ | Windows CTest + mid-hook smoke | PENDING | must pass before candidate pack |
+ | Current EXE inspect | PENDING ON WINDOWS | must show SHA match and 16/16 core |
+--- a/docs/MAINTAINER_INDEX.md
++++ b/docs/MAINTAINER_INDEX.md
+@@ -22,7 +22,7 @@
+ 
+ - upstream gameplay behavior baseline: **v1.2.2**;
+ - candidate controller: `1.2.2-corepath-rc8`;
+-- native candidate: `1.0.16-corepath-wh3-6c104-rc8`;
++- native candidate: `1.0.17-corepath-wh3-6c104-movevtfix`;
+ - target WH3 SHA: `6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297`;
+ - mandatory hooks: **16**;
+ - physical Evidence V3 production gate: **QUARANTINED**;
+--- a/docs/DEVELOPMENT_HISTORY.md
++++ b/docs/DEVELOPMENT_HISTORY.md
+@@ -32,7 +32,7 @@
+ - **Current controller candidate:** `1.2.2-corepath-rc8`
+ - **Run ID:** `V1_2_2_COREPATH_RC8`
+ - **Build marker:** `BETTER_SHIFT_COMMAND_V1.2.2_COREPATH_RC8`
+-- **Native Bridge candidate:** `1.0.16-corepath-wh3-6c104-rc8`
++- **Native Bridge candidate:** `1.0.17-corepath-wh3-6c104-movevtfix`
+ - **Artifact status:** PREBUILD, not install-ready
+ - **Platform:** Windows x64
+ 
+--- a/docs/VERSION_LINEAGE.md
++++ b/docs/VERSION_LINEAGE.md
+@@ -10,7 +10,7 @@
+ | BSC convergence experiment | RC1, RC2 | broad cleanup/convergence branch | **abandoned**, not a baseline |
+ | Steering / command behavior | SC1–SC6 | single-problem gameplay fixes | SC1–SC6 behavior forms the modern gameplay lineage |
+ | Public BSC releases | v1.2.0, v1.2.1, v1.2.2 | released controller behavior | upstream behavior baseline = **v1.2.2** |
+-| Native Bridge versions | 0.1.1, 0.4.x, 0.5.x, 1.0.x | native observer/identity/issuing/evidence evolution | current candidate = `1.0.16-corepath-wh3-6c104-rc8` |
++| Native Bridge versions | 0.1.1, 0.4.x, 0.5.x, 1.0.x | native observer/identity/issuing/evidence evolution | current candidate = `1.0.17-corepath-wh3-6c104-movevtfix` |
+ | WH3 current-build remap/diagnostic | RC4, RC5, RC6, RC7, RC8 | native map/runtime-gate work for WH3 9.0.1 current EXE | current = **CorePath RC8** |
+ | Smart Guard diagnostics | its own RC labels | separate optional Smart Guard investigation | staged disabled; never identify by bare `RCx` in shared docs |
+ 
+@@ -75,7 +75,7 @@
+ - v1.0.3, v1.0.7, v1.0.11, v1.0.13, v1.0.14: later BSC/native version locks and evidence evolution; see Native changelog.
+ - `1.0.15-r4-evidence-v3-validated-userdata-root`: historical pre-CorePath ABI used by v1.2.0/v1.2.1-era documentation.
+ - `1.0.16` current-build diagnostics: WH3 9.0.1 remap/gating line.
+-- `1.0.16-corepath-wh3-6c104-rc8`: current PREBUILD candidate.
++- `1.0.17-corepath-wh3-6c104-movevtfix`: current PREBUILD candidate.
+ 
+ ## 4. WH3 9.0.1 current-build map line
+ 
+--- a/maintenance_tools/check_corepath_rc8.py
++++ b/maintenance_tools/check_corepath_rc8.py
+@@ -32,7 +32,7 @@
+     if token in required: fail('physical API leaked into boot hard requirements: '+token)
+ for token in ('r1_evidence_capabilities_v3','read_active_order_identity_v3','stop_observer'):
+     if token not in required: fail('core evidence API missing from boot requirements: '+token)
+-need(boot,'bridge.version()~="1.0.16-corepath-wh3-6c104-rc8"')
++need(boot,'bridge.version()~="1.0.17-corepath-wh3-6c104-movevtfix"')
+ need(controller,'BSC_COREPATH_SAFE_STOP_QUIT_WINDOWS')
+ need(controller,'OBSERVER_SAFE_STOP reason=QUIT_WINDOWS_CLICK')
+ # Quarantined binder must short-circuit before touching userdata/native physical API.
+@@ -63,7 +63,7 @@
+ need(host,'bool BridgeHost::issue_ready()const noexcept{return v3_issue_calibration_ready();}')
+ if 'DIAGNOSTIC_RUNTIME_GATES_NOT_READY' in host: fail('physical diagnostic gate still vetoes core issue path')
+ hdr=(ROOT/'src/native_bridge/include/wh3/bridge_host.hpp').read_text(encoding='utf-8')
+-need(hdr,'1.0.16-corepath-wh3-6c104-rc8')
++need(hdr,'1.0.17-corepath-wh3-6c104-movevtfix')
+ for token in ('PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8','physical_evidence_quarantined','COREPATH_EXECUTION_IDENTITY_ONLY'):
+     need(lua,token)
+ # Production physical capability bits must be false while execution identity follows the build lock.
+--- a/tools/prebuild_contract_check.py
++++ b/tools/prebuild_contract_check.py
+@@ -31,7 +31,7 @@
+     if t not in CPP: fail('missing '+t)
+ if 'bool BridgeHost::issue_ready()const noexcept{return v3_issue_calibration_ready();}' not in HOST: fail('core issue readiness depends on non-command gate')
+ if 'DIAGNOSTIC_RUNTIME_GATES_NOT_READY' in HOST: fail('diagnostic gates still veto issue')
+-if '1.0.16-corepath-wh3-6c104-rc8' not in HDR: fail('missing bridge version')
++if '1.0.17-corepath-wh3-6c104-movevtfix' not in HDR: fail('missing bridge version')
+ for t in ('COREPATH_EXECUTION_IDENTITY_ONLY','PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8'):
+     if t not in LUA: fail('missing '+t)
+ print('PASS')
+--- a/controller_tools/pack_tools.py
++++ b/controller_tools/pack_tools.py
+@@ -7,7 +7,7 @@
+ BRIDGE_PATH = r'script\better_shift_command\bin\bridge_Windows_NT-x64.lua'
+ MINHOOK_PATH = r'script\better_shift_command\bin\minhook_Windows_NT-x64.lua'
+ MINHOOK_SHA256 = 'df452eacdb076c35a80c795df920fd3c6f128faa3e0bccb0b7490e95f8659d54'
+-BRIDGE_VERSION = b'1.0.16-corepath-wh3-6c104-rc8'
++BRIDGE_VERSION = b'1.0.17-corepath-wh3-6c104-movevtfix'
+ 
+ def sha(data: bytes) -> str:
+     return hashlib.sha256(data).hexdigest()
+@@ -85,4 +85,4 @@
+         (MINHOOK_PATH,encode_payload('minhook.x64.dll',minhook)),
+         (r'script\better_shift_command\licenses\MINHOOK_LICENSE.txt',(root/'baseline/MINHOOK_LICENSE.txt').read_bytes()),
+         (r'script\better_shift_command\licenses\THIRD_PARTY_NOTICES.txt',
+-         b'Better Shift Command v1.2.2 CorePath RC8 PREBUILD candidate. Native Bridge 1.0.16-corepath-wh3-6c104-rc8; physical Entity evidence quarantined; frozen MinHook runtime. See MINHOOK_LICENSE.txt.\n')])
++         b'Better Shift Command v1.2.2 CorePath RC8 PREBUILD candidate. Native Bridge 1.0.17-corepath-wh3-6c104-movevtfix; physical Entity evidence quarantined; frozen MinHook runtime. See MINHOOK_LICENSE.txt.\n')])
+--- a/tests/fixture.lua
++++ b/tests/fixture.lua
+@@ -131,7 +131,7 @@
+  function bm:get_player_army() return player_army end
+  function bm:get_scriptunit_for_unit(bu) return find_su(bu) end
+  local B={}
+- function B.version()return f.cfg.wrong_version and "0.1.1" or "1.0.16-corepath-wh3-6c104-rc8" end
++ function B.version()return f.cfg.wrong_version and "0.1.1" or "1.0.17-corepath-wh3-6c104-movevtfix" end
+ 
+  local function mirror_v2_order_to_v3(e)
+   if type(e)~="table" then return e end
+--- a/source/better_shift_command.lua
++++ b/source/better_shift_command.lua
+@@ -3640,10 +3640,10 @@
+         "r1_evidence_capabilities_v3","read_active_order_identity_v3"}) do
+         if type(bridge[k])~="function" then error("MISSING_BRIDGE_API "..k) end
+     end
+-    if bridge.version()~="1.0.16-corepath-wh3-6c104-rc8" then error("WRONG_BRIDGE_VERSION") end
++    if bridge.version()~="1.0.17-corepath-wh3-6c104-movevtfix" then error("WRONG_BRIDGE_VERSION") end
+     local n,f=bridge.number_abi_probe(); local a,c=bridge.exact_id_probe()
+     if n~=16777215 or f~=1.5 or a~="4294967295" or c~="16777217" then error("BRIDGE_ABI_SELFTEST") end
+-    log("BRIDGE_OK version=1.0.16-corepath-wh3-6c104-rc8")
++    log("BRIDGE_OK version=1.0.17-corepath-wh3-6c104-movevtfix")
+     if DEBUG_TELEMETRY then log("FEG_CONFIG version="..FEG.VERSION.." enabled=true confirmation_ms="..FEG.DEFAULTS.confirm_ms..
+         " close_confirmation_ms="..FEG.DEFAULTS.close_confirm_ms.." sample_window_ms="..FEG.DEFAULTS.window_ms..
+         " sustained_contact_ms="..FEG.DEFAULTS.contact_confirm_ms.." geometry_confirm_ms="..FEG.DEFAULTS.geometry_confirm_ms.." hold_ms="..CFG.attack_hold_ms.." charging_required=false native_changed=true max_inflight="..CFG.max_inflight) end
+--- a/src/better_shift_command.lua
++++ b/src/better_shift_command.lua
+@@ -3640,10 +3640,10 @@
+         "r1_evidence_capabilities_v3","read_active_order_identity_v3"}) do
+         if type(bridge[k])~="function" then error("MISSING_BRIDGE_API "..k) end
+     end
+-    if bridge.version()~="1.0.16-corepath-wh3-6c104-rc8" then error("WRONG_BRIDGE_VERSION") end
++    if bridge.version()~="1.0.17-corepath-wh3-6c104-movevtfix" then error("WRONG_BRIDGE_VERSION") end
+     local n,f=bridge.number_abi_probe(); local a,c=bridge.exact_id_probe()
+     if n~=16777215 or f~=1.5 or a~="4294967295" or c~="16777217" then error("BRIDGE_ABI_SELFTEST") end
+-    log("BRIDGE_OK version=1.0.16-corepath-wh3-6c104-rc8")
++    log("BRIDGE_OK version=1.0.17-corepath-wh3-6c104-movevtfix")
+     if DEBUG_TELEMETRY then log("FEG_CONFIG version="..FEG.VERSION.." enabled=true confirmation_ms="..FEG.DEFAULTS.confirm_ms..
+         " close_confirmation_ms="..FEG.DEFAULTS.close_confirm_ms.." sample_window_ms="..FEG.DEFAULTS.window_ms..
+         " sustained_contact_ms="..FEG.DEFAULTS.contact_confirm_ms.." geometry_confirm_ms="..FEG.DEFAULTS.geometry_confirm_ms.." hold_ms="..CFG.attack_hold_ms.." charging_required=false native_changed=true max_inflight="..CFG.max_inflight) end
+--- a/src/better_shift_command_selfcontained.template.lua
++++ b/src/better_shift_command_selfcontained.template.lua
+@@ -3704,10 +3704,10 @@
+         "r1_evidence_capabilities_v3","read_active_order_identity_v3"}) do
+         if type(bridge[k])~="function" then error("MISSING_BRIDGE_API "..k) end
+     end
+-    if bridge.version()~="1.0.16-corepath-wh3-6c104-rc8" then error("WRONG_BRIDGE_VERSION") end
++    if bridge.version()~="1.0.17-corepath-wh3-6c104-movevtfix" then error("WRONG_BRIDGE_VERSION") end
+     local n,f=bridge.number_abi_probe(); local a,c=bridge.exact_id_probe()
+     if n~=16777215 or f~=1.5 or a~="4294967295" or c~="16777217" then error("BRIDGE_ABI_SELFTEST") end
+-    log("BRIDGE_OK version=1.0.16-corepath-wh3-6c104-rc8")
++    log("BRIDGE_OK version=1.0.17-corepath-wh3-6c104-movevtfix")
+     if DEBUG_TELEMETRY then log("FEG_CONFIG version="..FEG.VERSION.." enabled=true confirmation_ms="..FEG.DEFAULTS.confirm_ms..
+         " close_confirmation_ms="..FEG.DEFAULTS.close_confirm_ms.." sample_window_ms="..FEG.DEFAULTS.window_ms..
+         " sustained_contact_ms="..FEG.DEFAULTS.contact_confirm_ms.." geometry_confirm_ms="..FEG.DEFAULTS.geometry_confirm_ms.." hold_ms="..CFG.attack_hold_ms.." charging_required=false native_changed=true max_inflight="..CFG.max_inflight) end
+--- a/src/native_bridge/CMakeLists.txt
++++ b/src/native_bridge/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ cmake_minimum_required(VERSION 3.16)
+-project(wh3_bridge_host VERSION 1.0.16 LANGUAGES CXX)
++project(wh3_bridge_host VERSION 1.0.17 LANGUAGES CXX)
+ set(CMAKE_CXX_STANDARD 17)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+--- a/src/native_bridge/CHANGELOG.md
++++ b/src/native_bridge/CHANGELOG.md
+@@ -1,4 +1,14 @@
+ > **NATIVE-BRIDGE HISTORY ONLY.** This changelog has its own Native version/RC stream and does not define the current BSC Controller release. For current package status and RC disambiguation, read `../../docs/MAINTAINER_INDEX.md` and `../../docs/VERSION_LINEAGE.md`. Historical entries may contain physical-evidence claims later quarantined by CorePath RC8.
++
++# CorePath RC8 Move-VTable correction — 2026-09-29
++
++- Direct current-EXE dataflow audit proves top-level `Order::issue_move` (`0x030344D4`) calls Full Move constructor `0x0300B094`, installing VTable `0x03910AA8`.
++- Historical/current-map `0x0390E248` is the sibling Simple/Intercept Move constructor VTable and is retracted as the top-level Move outcome identity.
++- `BridgeHost::outcome()` and CorePath active execution identity now use `0x03910AA8`; Attack remains `0x03910228`.
++- Allocator ABI is explicitly vindicated: `0x02F5248C` returns exact `slot_base` in RAX; no allocator-index/container-scan/constructor-witness replacement is used.
++- Per-kind accepted calibration now requires a complete slot-bearing native outcome so a partial decoder result cannot authorize the first owned issue.
++- Core fixtures are corrected to use the full Move VTable and include a regression that the old Simple/Intercept VTable cannot calibrate the top-level Move path.
++- `ACCEPTED_NO_SLOT` remains supported; the supplied static report contains an unresolved queue-full branch/return contradiction and does not justify deleting the historical no-slot contract.
+ 
+ # CorePath RC8 maintenance candidate — 2026-09-27
+ 
+--- a/src/native_bridge/include/wh3/bridge_host.hpp
++++ b/src/native_bridge/include/wh3/bridge_host.hpp
+@@ -340,7 +340,7 @@
+  std::uint64_t next_client_id_{0};
+  std::atomic<bool> smart_guard_client_active_{false};
+ };
+-static constexpr const char* kDiagnosticBridgeVersion = "1.0.16-corepath-wh3-6c104-rc8";
++static constexpr const char* kDiagnosticBridgeVersion = "1.0.17-corepath-wh3-6c104-movevtfix";
+ 
+ struct DiagnosticLayoutPair {
+     std::size_t entity_component_offset{0};
+--- a/src/native_bridge/src/bridge_host.cpp
++++ b/src/native_bridge/src/bridge_host.cpp
+@@ -284,7 +284,7 @@
+  if(f.slot<first||(f.slot-first)%0x120||(f.slot-first)/0x120>=40){complete=false;return n;}
+  std::array<unsigned char,0x120> s{};if(!get(f.slot,0,s.data(),s.size())){complete=false;return n;}
+  std::uint64_t vt=0;std::memcpy(&vt,s.data()+0x18,8);
+- if(vt!=base_+(f.kind==Kind::Move?0x0390E248:0x03910228)){complete=false;return n;}
++ if(vt!=base_+(f.kind==Kind::Move?0x03910AA8:0x03910228)){complete=false;return n;}
+  Id seq=0;std::memcpy(&seq,s.data()+0x20,4);n.engine_seq=seq;
+  if(f.kind==Kind::Move){float xyz[3];std::memcpy(xyz,s.data()+0x58,12);for(float x:xyz)if(!std::isfinite(x)){complete=false;return n;}o.x=xyz[0];o.y=xyz[1];o.z=xyz[2];}
+  else{std::uintptr_t t=0;Id uid=0;std::memcpy(&t,s.data()+0x58,8);if(!get(t,0x3ea0,&uid,4)){complete=false;return n;}o.target_root=t;o.target_uid=uid;o.raw70=s[0x70];o.raw71=s[0x71];o.raw72=s[0x72];o.raw78=s[0x78];}
+@@ -362,14 +362,17 @@
+  if(packet&&packet->owned){
+   if(!complete||packet->root!=f.root){disarm("OWNED_RECIPIENT_NOT_VERIFIED");return 0;}
+   auto d=gate_.dispatch_owned(packet->key,o,original);packet->consumed=true;++mapped_;++native_packet_mapped_;last_path_stage_="OWNED_NATIVE_PACKET_MAPPED";
+-  if(d.native_outcome&&d.native_outcome->accepted){if(k==Kind::Move)accepted_move_seen_=true;else if(k==Kind::Attack)accepted_attack_seen_=true;remember_accepted(o,f.root,*d.native_outcome,d.serial);}
++  if(d.native_outcome&&complete&&d.status!=Status::Indeterminate&&d.native_outcome->accepted&&d.native_outcome->engine_seq){
++   if(k==Kind::Move)accepted_move_seen_=true;else if(k==Kind::Attack)accepted_attack_seen_=true;
++   remember_accepted(o,f.root,*d.native_outcome,d.serial);
++  }
+   retire_pending(packet);
+   gate_.retire_stream(packet->stream);
+   if(!d.native_called)return 0;
+   if(!complete||d.status==Status::Indeterminate)disarm("OWNED_OUTCOME_INDETERMINATE");return result;
+  }
+  original();
+- if(n.accepted){if(k==Kind::Move)accepted_move_seen_=true;else if(k==Kind::Attack)accepted_attack_seen_=true;
++ if(complete&&n.accepted&&n.engine_seq){if(k==Kind::Move)accepted_move_seen_=true;else if(k==Kind::Attack)accepted_attack_seen_=true;
+   if(v3_issue_calibration_ready()&&!armed_)adapter_error_="V3_ACCEPTED_KIND_CALIBRATION_READY";}
+  try{
+   if(!o.recipient.lifetime){Id uid=0;if(!get(f.root,0x3ea0,&uid,4)){note_capture("EXTERNAL_UID_UNREADABLE");return result;}o.recipient=track(uid,f.root);o.kind=k;o.queued=q!=0;}
+--- a/src/native_bridge/src/evidence_probe.cpp
++++ b/src/native_bridge/src/evidence_probe.cpp
+@@ -29,7 +29,7 @@
+ constexpr Id kMaxEntities=300;
+ constexpr Id kMaxGroups=128;
+ constexpr Id kMaxOrders=40;
+-constexpr std::uintptr_t kMoveVtableRva=0x0390E248;
++constexpr std::uintptr_t kMoveVtableRva=0x03910AA8;
+ constexpr std::uintptr_t kAttackVtableRva=0x03910228;
+ constexpr std::uint64_t kMaxMotionGapMs=2000;
+ inline bool finite(float v){return std::isfinite(v);}
+--- a/src/native_bridge/tests/test_host.cpp
++++ b/src/native_bridge/tests/test_host.cpp
+@@ -28,7 +28,7 @@
+   auto c=reinterpret_cast<void*>(root+(mode==5?0x300:0x278));
+   void* s=h->allocate(c,mode==4?std::uint32_t(q)^1:q);CK(s==reinterpret_cast<void*>(root+0x288));
+   if(mode==2)h->allocate(c,q);
+-  auto vt=base+(kind==Kind::Move?0x0390E248:0x03910228);if(mode==3)++vt;
++  auto vt=base+(kind==Kind::Move?0x03910AA8:0x03910228);if(mode==3)++vt;if(mode==10&&kind==Kind::Move)vt=base+0x0390E248;
+   wr(0x288+0x18,std::uint64_t(vt));wr(0x288+0x20,seq);wr(0x2f88,std::uint32_t(1));wr(0x2f8c,std::uint32_t(0));
+   if(kind==Kind::Move){wr(0x288+0x58,mode==7?std::numeric_limits<float>::quiet_NaN():12.5f);wr(0x288+0x5c,2.0f);wr(0x288+0x60,-5.0f);}
+   else{wr(0x288+0x58,std::uint64_t(mode==6?0xdeadbeef:target));unit[0x288+0x70]=1;unit[0x288+0x71]=2;unit[0x288+0x72]=3;unit[0x288+0x78]=4;}
+@@ -49,11 +49,12 @@
+ }
+ int main(){int passed=0,failed=0;auto test=[&](const char* n,auto f){try{f();++passed;std::cout<<"PASS "<<n<<"\n";}catch(const std::exception& e){++failed;std::cout<<"FAIL "<<n<<": "<<e.what()<<"\n";}};
+  test("forwards all four parameters and full EAX",[]{Fixture f;ret=0x12345678;CK(f.send()==ret);CK(calls==1&&argument==0xabcdef12&&payload==reinterpret_cast<void*>(0x1234)&&queue==0);});
+- test("seq zero and finite slot geometry",[]{Fixture f;f.send();auto e=f.page().events.at(0);CK(e.engine_seq&&*e.engine_seq==0&&e.order.x==12.5f&&e.order.z==-5.0f);});
++ test("seq zero and finite slot geometry",[]{Fixture f;f.send();auto e=f.page().events.at(0);auto st=f.host.status();CK(e.engine_seq&&*e.engine_seq==0&&e.order.x==12.5f&&e.order.z==-5.0f&&st.accepted_move_seen);});
+  test("append/replace preserved without source invention",[]{Fixture f;f.send(true);seq=62;f.send(false);auto p=f.page();CK(p.events.size()==2&&*p.events[0].order.queued&&!*p.events[1].order.queued);CK(p.events[1].revision==2&&p.events[0].source==Source::Unknown);});
+  test("attack pointer uid raw flags decoded",[]{Fixture f;kind=Kind::Attack;seq=1450;f.send(true);auto e=f.page().events.at(0);CK(e.order.target_uid==1008&&e.order.target_root==target&&e.order.raw78==4&&e.order.raw71==2);});
+  test("native failure preserves return and has no phantom seq",[]{Fixture f;ret=0;CK(f.send()==0);auto e=f.page().events.at(0);CK(e.status==Status::NativeRejected&&!e.engine_seq&&e.revision==0);});
+  test("accepted no slot explicit, advances revision",[]{Fixture f;mode=1;f.send();auto e=f.page().events.at(0);CK(e.status==Status::AcceptedNoSlot&&!e.engine_seq&&!e.order.x&&e.revision==1);CK(f.host.status().capture_errors==1&&f.host.status().fatal_errors==0&&f.host.status().gate_fault==Error::Ok);});
++ test("historical simple-move vtable is not full-move outcome and cannot calibrate",[]{Fixture f;mode=10;seq=55;f.send();auto e=f.page().events.at(0);auto st=f.host.status();CK(e.status==Status::AcceptedNoSlot&&!e.engine_seq&&st.capture_errors==1&&!st.accepted_move_seen&&st.fatal_errors==0&&st.gate_fault==Error::Ok);});
+  for(int bad:{2,3,4,5})test(("invalid slot evidence mode "+std::to_string(bad)).c_str(),[bad]{Fixture f;mode=bad;f.send();auto e=f.page().events.at(0);CK(!e.engine_seq&&e.status==Status::AcceptedNoSlot&&calls==1);});
+  test("unreadable target cannot be guessed",[]{Fixture f;mode=6;kind=Kind::Attack;f.send();auto e=f.page().events.at(0);CK(!e.order.target_uid&&!e.order.target_root&&e.engine_seq);CK(f.host.status().capture_errors==1&&f.host.status().fatal_errors==0&&f.host.status().gate_fault==Error::Ok);});
+  test("NaN geometry not published as coordinates",[]{Fixture f;mode=7;f.send();auto e=f.page().events.at(0);CK(!e.order.x&&e.engine_seq);});
+--- a/src/native_bridge/tests/test_dual_root.cpp
++++ b/src/native_bridge/tests/test_dual_root.cpp
+@@ -16,7 +16,7 @@
+ bool alive(std::uintptr_t e,bool* out) noexcept{if(!out)return false;int hp=0;if(!rd(e+0xb1c,&hp,4))return false;*out=hp>0;return true;}
+ bool groupq(std::uintptr_t g,bool* melee,std::uintptr_t* target) noexcept{std::uint32_t m=0;std::uintptr_t t=0;if(!melee||!target||!rd(g+0x10,&m,4)||!rd(g+0x18,&t,8))return false;*melee=m!=0;*target=t;return true;}
+ void* alloc(void*,std::uint32_t){return reinterpret_cast<void*>(cmd+0x288);}
+-std::uint32_t move(void* u,std::uint32_t,void*,std::uint8_t q){CK(reinterpret_cast<std::uintptr_t>(u)==cmd);H->allocate(reinterpret_cast<void*>(cmd+0x278),q);put(cmd,0x2f88,std::uint32_t(1));put(cmd,0x2f8c,std::uint32_t(0));put(cmd,0x288+0x18,std::uint64_t(base+0x0390E248));put(cmd,0x288+0x20,std::uint32_t(77));put(cmd,0x288+0x58,12.0f);put(cmd,0x288+0x5c,0.0f);put(cmd,0x288+0x60,-4.0f);return 1;}
++std::uint32_t move(void* u,std::uint32_t,void*,std::uint8_t q){CK(reinterpret_cast<std::uintptr_t>(u)==cmd);H->allocate(reinterpret_cast<void*>(cmd+0x278),q);put(cmd,0x2f88,std::uint32_t(1));put(cmd,0x2f8c,std::uint32_t(0));put(cmd,0x288+0x18,std::uint64_t(base+0x03910AA8));put(cmd,0x288+0x20,std::uint32_t(77));put(cmd,0x288+0x58,12.0f);put(cmd,0x288+0x5c,0.0f);put(cmd,0x288+0x60,-4.0f);return 1;}
+ void halt(void*,std::uint32_t){}
+ void setup(){mem.clear();block(cmd,0x5000);block(phys,0x5000);block(target_phys,0x5000);block(arr,3*8);block(target_arr,8);block(squad,0x1000);block(group,0x100);
+  put(cmd,0x3ea0,std::uint32_t(1001));put(cmd,0x500,std::uintptr_t(phys));
+--- a/src/native_bridge/tests/test_evidence_probe.cpp
++++ b/src/native_bridge/tests/test_evidence_probe.cpp
+@@ -21,7 +21,7 @@
+  return true;
+ }
+ constexpr std::uintptr_t image=0x140000000ULL;
+-constexpr std::uintptr_t move_vt=image+0x0390E248;
++constexpr std::uintptr_t move_vt=image+0x03910AA8;
+ bool alive_cb(std::uintptr_t entity,bool* alive) noexcept{int hp=0;if(!alive||!raw_rd(entity+0xb1c,&hp,4))return false;*alive=hp>0;return true;}
+ bool group_cb(std::uintptr_t group,bool* melee,std::uintptr_t* target) noexcept{
+  std::uint32_t m=0;std::uintptr_t t=0;if(!melee||!target||!raw_rd(group+0x10,&m,4)||!raw_rd(group+0x18,&t,8))return false;*melee=m!=0;*target=t;
+--- a/src/native_bridge/tests/test_integrated_host.cpp
++++ b/src/native_bridge/tests/test_integrated_host.cpp
+@@ -19,7 +19,7 @@
+ bool active(const FrameIdentity& f)noexcept{return frame&&f.function==1&&f.establisher==2&&f.return_pc==3;}
+ void* allocator(void* base,std::uint32_t){return reinterpret_cast<void*>(reinterpret_cast<std::uintptr_t>(base)+0x10);}
+ std::uint32_t native_order(void* unit,std::uint32_t,void* p,std::uint8_t q){++native_calls;auto u=reinterpret_cast<std::uintptr_t>(unit);CK(u==U||u==U2||u==U3||u==U4||u==U5);h->allocate(reinterpret_cast<void*>(u+0x278),q);
+- set(u+0x288+0x18,std::uint64_t(0x140000000ULL+(current==Kind::Move?0x0390E248:0x03910228)));set(u+0x288+0x20,seq++);
++ set(u+0x288+0x18,std::uint64_t(0x140000000ULL+(current==Kind::Move?0x03910AA8:0x03910228)));set(u+0x288+0x20,seq++);
+  if(current==Kind::Move){float xyz[3];CK(rd(reinterpret_cast<std::uintptr_t>(p),xyz,12));CK(wr(u+0x288+0x58,xyz,12));}
+  else{std::uintptr_t target=0;CK(rd(reinterpret_cast<std::uintptr_t>(p),&target,8));set(u+0x288+0x58,std::uint64_t(target));}return 1;}
+ void halt(void*,std::uint32_t){++native_calls;}
+--- a/src/native_bridge/tests/test_smart_guard.cpp
++++ b/src/native_bridge/tests/test_smart_guard.cpp
+@@ -13,7 +13,7 @@
+ 
+ constexpr std::uintptr_t kBase = 0x140000000ULL;
+ constexpr std::uintptr_t kAttackOrderVtable = kBase + 0x03910228;
+-constexpr std::uintptr_t kMoveOrderVtable = kBase + 0x0390E248;
++constexpr std::uintptr_t kMoveOrderVtable = kBase + 0x03910AA8;
+ constexpr std::uintptr_t kSubOrderVtableA = kBase + 0x037B10C8;
+ constexpr std::uintptr_t kSubOrderVtableB = kBase + 0x037B0DB0;
+ constexpr std::uintptr_t kPursueObj = kBase + 0x03BB70C8;

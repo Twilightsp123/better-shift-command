@@ -25,7 +25,8 @@ Result<Id> BridgeHost::begin(const std::string& s){std::lock_guard<std::recursiv
  if(s.empty()||s.size()>64||s.find('\0')!=std::string::npos||recording_)return {{},Error::Invalid};
  if(control_.active||publication_)return {{},Error::Reentrant};
  for(auto* q=current_;q;q=q->previous)if(q->owner==this)return {{},Error::Reentrant};
- auto r=gate_.begin_battle();if(!r)return r;epoch_=r.value;session_=s;units_.clear();evidence_roots_.clear();evidence_uid_by_root_.clear();tracker_.clear();contacts_.clear();readers_.clear();accepted_evidence_.clear();evidence_probe_.clear();
+ platform_reset_diagnostic_gates();
+ auto r=gate_.begin_battle();if(!r)return r;epoch_=r.value;session_=s;units_.clear();evidence_roots_.clear();evidence_uid_by_root_.clear();tracker_.clear();contacts_.clear();readers_.clear();accepted_evidence_.clear();evidence_probe_.clear();smart_guard_queue_.clear();smart_guard_allowlist_.clear();
  control_={};pending_by_uid_.clear();errors_=0;fatal_errors_=0;mapped_=unmapped_=0;move_seen_=attack_seen_=armed_=false;
  last_recoverable_uid_=0;last_recoverable_error_="NONE";last_fatal_error_="NONE";
  publish_seen_=publish_parsed_=publish_unparsed_=0;writer_begin_seen_=writer_finalize_seen_=writer_committed_=0;
@@ -33,11 +34,16 @@ Result<Id> BridgeHost::begin(const std::string& s){std::lock_guard<std::recursiv
  last_issue_bindings_=last_issue_published_=last_issue_depth_=0;last_issue_error_.clear();
  last_reader_data_=last_reader_a_=last_reader_b_=last_reader_cursor_=last_reader_end_=0;
  last_reader_lineage_bytes_=last_reader_lineage_fragments_=0;
+ smart_guard_hook17_calls_=0;smart_guard_target_pursue_seen_=0;smart_guard_target_takeup_seen_=0;
+ smart_guard_unit_resolved_=0;smart_guard_unit_resolve_failed_=0;smart_guard_active_probe_ok_=0;smart_guard_active_probe_failed_=0;
+ smart_guard_active_attack_matched_=0;smart_guard_active_not_attack_=0;smart_guard_local_rejected_=0;smart_guard_ranged_rejected_=0;smart_guard_guard_rejected_=0;
+ smart_guard_enqueue_ok_=0;smart_guard_enqueue_fail_=0;
  handler_move_seen_=handler_attack_seen_=false;accepted_move_seen_=accepted_attack_seen_=false;recording_=true;adapter_error_=native_issue_authorized_?"V3_WAITING_FOR_ACCEPTED_CALIBRATION":"V3_NATIVE_ISSUE_NOT_AUTHORIZED";last_path_stage_="WAIT_PUBLISH";return r;}
 Error BridgeHost::end(Id e){std::lock_guard<std::recursive_mutex> l(mutex_);
  if(control_.active||publication_)return Error::Reentrant;
  for(auto* q=current_;q;q=q->previous)if(q->owner==this)return Error::Reentrant;
- auto r=gate_.end_battle(e);if(r==Error::Ok){recording_=armed_=false;tracker_.clear();readers_.clear();pending_by_uid_.clear();accepted_evidence_.clear();evidence_roots_.clear();evidence_uid_by_root_.clear();contacts_.clear();evidence_probe_.clear();}return r;}
+ platform_reset_diagnostic_gates();
+ auto r=gate_.end_battle(e);if(r==Error::Ok){recording_=armed_=false;tracker_.clear();readers_.clear();pending_by_uid_.clear();accepted_evidence_.clear();evidence_roots_.clear();evidence_uid_by_root_.clear();contacts_.clear();evidence_probe_.clear();smart_guard_queue_.clear();smart_guard_allowlist_.clear();}return r;}
 bool BridgeHost::adapter_ready()const noexcept{return recording_&&adapter_connected_&&move_seen_&&attack_seen_&&!tracker_.faulted()&&fatal_errors_.load()==0;}
 bool BridgeHost::handler_calibration_ready()const noexcept{return recording_&&adapter_connected_&&handler_move_seen_&&handler_attack_seen_&&fatal_errors_.load()==0;}
 bool BridgeHost::v3_issue_calibration_ready()const noexcept{return native_issue_authorized_&&recording_&&adapter_connected_&&handler_seen_>0&&(accepted_move_seen_||accepted_attack_seen_)&&fatal_errors_.load()==0&&gate_.fault()==Error::Ok&&!tracker_.faulted();}
@@ -69,7 +75,32 @@ HostStatus BridgeHost::status()const{std::lock_guard<std::recursive_mutex> l(mut
  s.last_reader_data=last_reader_data_;s.last_reader_a=last_reader_a_;s.last_reader_b=last_reader_b_;
  s.last_reader_cursor=last_reader_cursor_;s.last_reader_end=last_reader_end_;
  s.last_reader_lineage_bytes=last_reader_lineage_bytes_;s.last_reader_lineage_fragments=last_reader_lineage_fragments_;
- s.adapter_error=adapter_error_;s.last_recoverable_error=last_recoverable_error_;s.last_fatal_error=last_fatal_error_;s.last_path_stage=last_path_stage_;return s;}
+ s.adapter_error=adapter_error_;s.last_recoverable_error=last_recoverable_error_;s.last_fatal_error=last_fatal_error_;s.last_path_stage=last_path_stage_;
+ s.smart_guard_installed=smart_guard_installed_;
+ s.smart_guard_enabled=smart_guard_runtime_enabled_.load(std::memory_order_relaxed);
+ s.smart_guard_local_units=smart_guard_allowlist_.size();
+ s.smart_guard_intercepted=smart_guard_intercepted_.load(std::memory_order_relaxed);
+ s.smart_guard_suppressed=smart_guard_suppressed_.load(std::memory_order_relaxed);
+ s.smart_guard_duplicates=smart_guard_duplicates_.load(std::memory_order_relaxed);
+ s.smart_guard_overflows=smart_guard_overflows_.load(std::memory_order_relaxed);
+ s.smart_guard_drained=smart_guard_drained_.load(std::memory_order_relaxed);
+ s.smart_guard_hook17_calls=smart_guard_hook17_calls_.load(std::memory_order_relaxed);
+ s.smart_guard_target_pursue_seen=smart_guard_target_pursue_seen_.load(std::memory_order_relaxed);
+ s.smart_guard_target_takeup_seen=smart_guard_target_takeup_seen_.load(std::memory_order_relaxed);
+ s.smart_guard_unit_resolved=smart_guard_unit_resolved_.load(std::memory_order_relaxed);
+ s.smart_guard_unit_resolve_failed=smart_guard_unit_resolve_failed_.load(std::memory_order_relaxed);
+ s.smart_guard_active_probe_ok=smart_guard_active_probe_ok_.load(std::memory_order_relaxed);
+ s.smart_guard_active_probe_failed=smart_guard_active_probe_failed_.load(std::memory_order_relaxed);
+ s.smart_guard_active_attack_matched=smart_guard_active_attack_matched_.load(std::memory_order_relaxed);
+ s.smart_guard_active_not_attack=smart_guard_active_not_attack_.load(std::memory_order_relaxed);
+ s.smart_guard_local_rejected=smart_guard_local_rejected_.load(std::memory_order_relaxed);
+ s.smart_guard_ranged_rejected=smart_guard_ranged_rejected_.load(std::memory_order_relaxed);
+ s.smart_guard_guard_rejected=smart_guard_guard_rejected_.load(std::memory_order_relaxed);
+ s.smart_guard_enqueue_ok=smart_guard_enqueue_ok_.load(std::memory_order_relaxed);
+ s.smart_guard_enqueue_fail=smart_guard_enqueue_fail_.load(std::memory_order_relaxed);
+ s.active_clients=clients_.size();
+ s.smart_guard_client_active=smart_guard_client_active_.load(std::memory_order_relaxed);
+ return s;}
 Result<Page> BridgeHost::read(Id e,Id a,std::size_t n){std::lock_guard<std::recursive_mutex> l(mutex_);return gate_.read(e,a,n);}
 Error BridgeHost::acknowledge(Id e,Id a){std::lock_guard<std::recursive_mutex> l(mutex_);return gate_.acknowledge(e,a);}
 Result<Snapshot> BridgeHost::unit_snapshot(Id u)const{std::lock_guard<std::recursive_mutex> l(mutex_);auto i=units_.find(u);if(i==units_.end())return {{},Error::Missing};return gate_.snapshot(i->second.first);}
@@ -107,9 +138,24 @@ Error BridgeHost::bind_evidence_root(Id uid,std::uintptr_t root){
 Result<std::uintptr_t> BridgeHost::evidence_root(Id uid) const{
  std::lock_guard<std::recursive_mutex> l(mutex_);auto it=evidence_roots_.find(uid);if(it==evidence_roots_.end()||!it->second)return {0,Error::Missing};return {it->second,Error::Ok};
 }
+Result<std::uintptr_t> BridgeHost::observed_command_root(Id uid) const{
+ std::lock_guard<std::recursive_mutex> l(mutex_);auto it=units_.find(uid);if(it==units_.end()||!it->second.second)return {0,Error::Missing};return {it->second.second,Error::Ok};
+}
 bool BridgeHost::contact_owner_ready(Id uid) const{
  std::lock_guard<std::recursive_mutex> l(mutex_);return contacts_.owner_ready(uid);
 }
+bool BridgeHost::readonly_evidence_root_valid(std::uintptr_t root,std::optional<std::size_t> expected_count) const noexcept{
+ if(!root)return false;
+ const auto idx=evidence_probe_.entity_index(root);
+ if(!idx.complete||idx.slot_count<1||idx.slot_count>300||idx.entities.empty())return false;
+ if(expected_count&&idx.slot_count!=*expected_count)return false;
+ for(auto entity:idx.entities){
+  float x=0,z=0;
+  if(!get(entity,0x88,&x,4)||!get(entity,0x90,&z,4)||!std::isfinite(x)||!std::isfinite(z))return false;
+ }
+ return true;
+}
+
 Result<std::uintptr_t> BridgeHost::resolve_evidence_userdata(Id uid,std::uintptr_t userdata_block){
  std::lock_guard<std::recursive_mutex> l(mutex_);if(!uid||!userdata_block||!memory_)return {0,Error::Invalid};
  const auto plausible=[](std::uintptr_t p) noexcept{return p>=0x10000ULL&&p<=0x00007FFFFFFFFFFFULL;};
@@ -127,15 +173,59 @@ Result<std::uintptr_t> BridgeHost::resolve_evidence_userdata(Id uid,std::uintptr
    std::uintptr_t q=0;if(get(p,off,&q,sizeof q)&&plausible(q))add_unique(candidates,q);
   }
  }
- for(auto p:candidates){const auto snap=evidence_probe_.entity_snapshot(p,0);evidence_probe_.reset(p);if(snap.complete)add_unique(valid,p);}
+ for(auto p:candidates)if(readonly_evidence_root_valid(p))add_unique(valid,p);
  if(valid.size()>1)return {0,Error::BindingMismatch};
  if(valid.empty()){
   // Preserve a previously proven physical root across a transient userdata read
-  // failure, but only while that old root still validates structurally.
-  auto old=evidence_roots_.find(uid);if(old!=evidence_roots_.end()&&evidence_probe_.entity_index(old->second).complete)return {old->second,Error::Ok};
+  // failure, but only while that old root still passes the same pre-gate-safe
+  // read-only validation.
+  auto old=evidence_roots_.find(uid);if(old!=evidence_roots_.end()&&readonly_evidence_root_valid(old->second))return {old->second,Error::Ok};
   return {0,Error::Missing};
  }
  const auto e=bind_evidence_root(uid,valid.front());if(e!=Error::Ok)return {0,e};return {valid.front(),Error::Ok};
+}
+DiagnosticEvidenceBindResult BridgeHost::diagnostic_bind_evidence(Id uid,std::uintptr_t userdata_block,std::size_t userdata_size,std::size_t expected_count){
+ std::lock_guard<std::recursive_mutex> l(mutex_);DiagnosticEvidenceBindResult out{};out.userdata_size=userdata_size;
+ if(!uid||!memory_||expected_count<1||expected_count>300){out.failure_reason="INVALID_ARGUMENT";return out;}
+ const auto plausible=[](std::uintptr_t p) noexcept{return p>=0x10000ULL&&p<=0x00007FFFFFFFFFFFULL&&(p%alignof(void*)==0);};
+ std::map<std::uintptr_t,const char*> candidates;
+ auto consider=[&](std::uintptr_t p,const char* method){if(!plausible(p))return;if(readonly_evidence_root_valid(p,expected_count)&&!candidates.count(p))candidates.emplace(p,method);};
+ struct Node{std::uintptr_t p;unsigned depth;};
+ auto graph_scan=[&](const std::vector<std::uintptr_t>& seeds,unsigned max_depth,std::size_t max_nodes,const char* method){
+  std::vector<Node> q;std::set<std::uintptr_t> seen;
+  auto push=[&](std::uintptr_t p,unsigned depth){if(!plausible(p)||seen.count(p)||q.size()>=max_nodes)return;seen.insert(p);q.push_back({p,depth});};
+  for(auto p:seeds)push(p,0);
+  for(std::size_t qi=0;qi<q.size()&&qi<max_nodes;++qi){const auto n=q[qi];++out.nodes_scanned;consider(n.p,method);if(n.depth>=max_depth)continue;
+   for(std::size_t off=0;off<0x80;off+=sizeof(std::uintptr_t)){std::uintptr_t next=0;if(get(n.p,off,&next,sizeof next))push(next,n.depth+1);}
+  }
+ };
+ // First search the actual Lua full-userdata payload, then a bounded three-hop wrapper graph.
+ if(userdata_block){
+  consider(userdata_block,"USERDATA_INLINE");
+  const std::size_t scan_size=userdata_size?std::min<std::size_t>(userdata_size,128):24;std::vector<std::uintptr_t> seeds;
+  for(std::size_t off=0;off+sizeof(std::uintptr_t)<=scan_size;off+=sizeof(std::uintptr_t)){std::uintptr_t p=0;if(get(userdata_block,off,&p,sizeof p)&&plausible(p))seeds.push_back(p);}
+  graph_scan(seeds,3,128,"USERDATA_GRAPH");
+ }
+ // Native order entry supplies an independently trustworthy UID->command-root witness.
+ // Command root and physical/evidence root are deliberately NOT assumed identical.
+ auto ui=units_.find(uid);if(ui!=units_.end()&&ui->second.second){
+  out.command_root=ui->second.second;Id observed_uid=0;
+  if(get(out.command_root,0x3ea0,&observed_uid,4)&&observed_uid==uid){
+   consider(out.command_root,"COMMAND_ROOT_SELF");
+   std::vector<std::uintptr_t> direct;direct.reserve(256);
+   std::array<unsigned char,0x400> chunk{};
+   for(std::size_t base_off=0;base_off<0x4000;base_off+=chunk.size()){
+    if(!get(out.command_root,base_off,chunk.data(),chunk.size()))continue;
+    for(std::size_t off=0;off+sizeof(std::uintptr_t)<=chunk.size();off+=sizeof(std::uintptr_t)){std::uintptr_t p=0;std::memcpy(&p,chunk.data()+off,sizeof p);if(!plausible(p))continue;consider(p,"COMMAND_ROOT_DIRECT");if(direct.size()<256)direct.push_back(p);}
+   }
+   if(candidates.empty())graph_scan(direct,1,256,"COMMAND_ROOT_GRAPH");
+  }
+ }
+ out.candidate_count=candidates.size();
+ if(candidates.empty()){out.failure_reason=out.command_root?"NO_EVIDENCE_ROOT_CANDIDATE":"COMMAND_ROOT_NOT_OBSERVED_AND_USERDATA_GRAPH_MISS";return out;}
+ if(candidates.size()!=1){out.failure_reason="EVIDENCE_ROOT_AMBIGUOUS";return out;}
+ const auto root=candidates.begin()->first;const auto bind=bind_evidence_root(uid,root);if(bind!=Error::Ok){out.failure_reason="EVIDENCE_ROOT_BIND_FAILED";return out;}
+ out.passed=true;out.root=root;out.method=candidates.begin()->second;out.failure_reason="NONE";return out;
 }
 Result<EntitySnapshot> BridgeHost::entity_snapshot(Id uid,std::uint64_t model_ms){
  std::lock_guard<std::recursive_mutex> l(mutex_);EntitySnapshot out;auto it=evidence_roots_.find(uid);if(it==evidence_roots_.end())return {out,Error::Missing};
@@ -194,7 +284,7 @@ NativeOutcome BridgeHost::outcome(const Scope& f,std::uint32_t result,Order& o,b
  if(f.slot<first||(f.slot-first)%0x120||(f.slot-first)/0x120>=40){complete=false;return n;}
  std::array<unsigned char,0x120> s{};if(!get(f.slot,0,s.data(),s.size())){complete=false;return n;}
  std::uint64_t vt=0;std::memcpy(&vt,s.data()+0x18,8);
- if(vt!=base_+(f.kind==Kind::Move?0x37b31c8:0x37b2540)){complete=false;return n;}
+ if(vt!=base_+(f.kind==Kind::Move?0x03910AA8:0x03910228)){complete=false;return n;}
  Id seq=0;std::memcpy(&seq,s.data()+0x20,4);n.engine_seq=seq;
  if(f.kind==Kind::Move){float xyz[3];std::memcpy(xyz,s.data()+0x58,12);for(float x:xyz)if(!std::isfinite(x)){complete=false;return n;}o.x=xyz[0];o.y=xyz[1];o.z=xyz[2];}
  else{std::uintptr_t t=0;Id uid=0;std::memcpy(&t,s.data()+0x58,8);if(!get(t,0x3ea0,&uid,4)){complete=false;return n;}o.target_root=t;o.target_uid=uid;o.raw70=s[0x70];o.raw71=s[0x71];o.raw72=s[0x72];o.raw78=s[0x78];}
@@ -272,14 +362,17 @@ std::uint32_t BridgeHost::order(Kind k,void* u,std::uint32_t a,void* payload,std
  if(packet&&packet->owned){
   if(!complete||packet->root!=f.root){disarm("OWNED_RECIPIENT_NOT_VERIFIED");return 0;}
   auto d=gate_.dispatch_owned(packet->key,o,original);packet->consumed=true;++mapped_;++native_packet_mapped_;last_path_stage_="OWNED_NATIVE_PACKET_MAPPED";
-  if(d.native_outcome&&d.native_outcome->accepted){if(k==Kind::Move)accepted_move_seen_=true;else if(k==Kind::Attack)accepted_attack_seen_=true;remember_accepted(o,f.root,*d.native_outcome,d.serial);}
+  if(d.native_outcome&&complete&&d.status!=Status::Indeterminate&&d.native_outcome->accepted&&d.native_outcome->engine_seq){
+   if(k==Kind::Move)accepted_move_seen_=true;else if(k==Kind::Attack)accepted_attack_seen_=true;
+   remember_accepted(o,f.root,*d.native_outcome,d.serial);
+  }
   retire_pending(packet);
   gate_.retire_stream(packet->stream);
   if(!d.native_called)return 0;
   if(!complete||d.status==Status::Indeterminate)disarm("OWNED_OUTCOME_INDETERMINATE");return result;
  }
  original();
- if(n.accepted){if(k==Kind::Move)accepted_move_seen_=true;else if(k==Kind::Attack)accepted_attack_seen_=true;
+ if(complete&&n.accepted&&n.engine_seq){if(k==Kind::Move)accepted_move_seen_=true;else if(k==Kind::Attack)accepted_attack_seen_=true;
   if(v3_issue_calibration_ready()&&!armed_)adapter_error_="V3_ACCEPTED_KIND_CALIBRATION_READY";}
  try{
   if(!o.recipient.lifetime){Id uid=0;if(!get(f.root,0x3ea0,&uid,4)){note_capture("EXTERNAL_UID_UNREADABLE");return result;}o.recipient=track(uid,f.root);o.kind=k;o.queued=q!=0;}
@@ -305,6 +398,9 @@ const char* BridgeHost::arm(bool ack){std::lock_guard<std::recursive_mutex> l(mu
  if(!v3_issue_calibration_ready())return "V3_CALIBRATION_NOT_READY";
  if(gate_.set_issue_enabled(true)!=Error::Ok)return "GATE_FAULT";armed_=true;adapter_error_="ARMED_V3_VALIDATED_PER_KIND_CALIBRATION";return nullptr;}
 IssueResult BridgeHost::begin_issue(Kind k,bool q,Id uid,Id rev,void* L,std::optional<std::array<float,3>> move_destination){std::lock_guard<std::recursive_mutex> l(mutex_);
+ // RC8 core-path: command issue is authorized only by the command/handler/ACK
+ // calibration contract. Unverified physical Entity/Component gates are quarantined
+ // and cannot veto a verified Move/Attack issue.
  if(!armed_||!issue_ready())return {0,"ADAPTER_NOT_READY"};
  if(native_issue_authorized_){
   if(k==Kind::Move&&!accepted_move_seen_)return {0,"MOVE_CALIBRATION_NOT_READY"};
@@ -480,9 +576,204 @@ void* BridgeHost::selection(void* out,void* reader,FrameIdentity){std::lock_guar
 }
 void BridgeHost::release_memory(void* ptr){
  {std::lock_guard<std::recursive_mutex> l(mutex_);auto p=reinterpret_cast<std::uintptr_t>(ptr);if(recording_){tracker_.release(p);
-  for(auto it=units_.begin();it!=units_.end();){if(it->second.second==p){const auto uid=it->first;contacts_.bind_command_root(uid,0);clear_command_evidence(p);clear_evidence_binding(uid);gate_.retire_unit(it->second.first);it=units_.erase(it);}else ++it;}}}
+  for(auto it=units_.begin();it!=units_.end();){if(it->second.second==p){const auto uid=it->first;smart_guard_allowlist_.unregister_unit(uid);contacts_.bind_command_root(uid,0);clear_command_evidence(p);clear_evidence_binding(uid);gate_.retire_unit(it->second.first);it=units_.erase(it);}else ++it;}}}
  // Do not keep our mutex locked while forwarding a process-wide allocator call.
  adapter_.free_memory(ptr);
+}
+void BridgeHost::set_state_transition_trampoline(NativeTransitionFn fn) noexcept {
+ std::lock_guard<std::recursive_mutex> l(mutex_);
+ native_transition_ = fn;
+}
+void BridgeHost::set_smart_guard_installed(bool installed) noexcept {
+ std::lock_guard<std::recursive_mutex> l(mutex_);
+ smart_guard_installed_ = installed;
+}
+void BridgeHost::set_smart_guard_runtime_enabled(bool enabled) noexcept {
+ smart_guard_runtime_enabled_.store(enabled, std::memory_order_release);
+}
+bool BridgeHost::smart_guard_register_local_unit(Id uid) noexcept {
+ return smart_guard_allowlist_.register_unit(uid);
+}
+bool BridgeHost::smart_guard_unregister_local_unit(Id uid) noexcept {
+ return smart_guard_allowlist_.unregister_unit(uid);
+}
+void BridgeHost::smart_guard_clear_local_units() noexcept {
+ smart_guard_allowlist_.clear();
+}
+std::vector<SmartGuardCancelRequest> BridgeHost::drain_smart_guard_cancel_requests() {
+ auto reqs = smart_guard_queue_.drain();
+ smart_guard_drained_.fetch_add(reqs.size(), std::memory_order_relaxed);
+ return reqs;
+}
+Result<std::pair<std::string, Id>> BridgeHost::acquire_client(const std::string& name, const std::string& session_key) {
+ std::lock_guard<std::recursive_mutex> l(mutex_);
+ if (name.empty()) return {{}, Error::Invalid};
+ if (!recording_) {
+  auto r = begin(session_key.empty() ? ("shared_" + name) : session_key);
+  if (!r) return {{}, r.error};
+ }
+ const std::string token = name + "_" + std::to_string(++next_client_id_);
+ clients_[token] = ClientSession{token, name, session_key, true, false};
+ return {std::make_pair(token, epoch_), Error::Ok};
+}
+Error BridgeHost::release_client(const std::string& token) {
+ std::lock_guard<std::recursive_mutex> l(mutex_);
+ auto it = clients_.find(token);
+ if (it == clients_.end()) return Error::Missing;
+ const bool had_sg = it->second.smart_guard_enabled;
+ clients_.erase(it);
+ bool any_sg = false;
+ for (const auto& kv : clients_) {
+  if (kv.second.smart_guard_enabled) {
+   any_sg = true;
+   break;
+  }
+ }
+ smart_guard_client_active_.store(any_sg, std::memory_order_release);
+ if (had_sg && !any_sg) {
+  smart_guard_clear_local_units();
+ }
+ if (clients_.empty() && recording_) {
+  end(epoch_);
+ }
+ return Error::Ok;
+}
+Result<bool> BridgeHost::smart_guard_enable(const std::string& token, bool enable) {
+ std::lock_guard<std::recursive_mutex> l(mutex_);
+ auto it = clients_.find(token);
+ if (it == clients_.end()) return {{}, Error::Missing};
+ if (it->second.name != "TRUE_GUARD") {
+  return {{}, Error::BindingMismatch};
+ }
+ it->second.smart_guard_enabled = enable;
+ bool any_sg = false;
+ for (const auto& kv : clients_) {
+  if (kv.second.smart_guard_enabled) {
+   any_sg = true;
+   break;
+  }
+ }
+ smart_guard_client_active_.store(any_sg, std::memory_order_release);
+ if (!enable && !any_sg) {
+  smart_guard_clear_local_units();
+ }
+ return {true, Error::Ok};
+}
+bool BridgeHost::smart_guard_client_active() const noexcept {
+ return smart_guard_client_active_.load(std::memory_order_acquire);
+}
+std::size_t BridgeHost::active_clients() const noexcept {
+ std::lock_guard<std::recursive_mutex> l(mutex_);
+ return clients_.size();
+}
+void BridgeHost::state_transition(void* target_state, void* order, std::uint8_t flag) {
+ smart_guard_hook17_calls_.fetch_add(1, std::memory_order_relaxed);
+ auto pass_through = [this, target_state, order, flag]() {
+  if (native_transition_) native_transition_(target_state, order, flag);
+ };
+ if (!smart_guard_client_active_.load(std::memory_order_acquire) ||
+     !smart_guard_runtime_enabled_.load(std::memory_order_acquire)) {
+  pass_through();
+  return;
+ }
+ if (!target_state || !order) {
+  pass_through();
+  return;
+ }
+
+ // RC2: RDX may be a tactical child/sub-order context. Classify the requested
+ // pre-movement target first; never require the context vtable to be AttackOrder.
+ constexpr std::uintptr_t kPursueObjRva = 0x03BB70C8;
+ constexpr std::uintptr_t kPursueVtableRva = 0x037E9298;
+ constexpr std::uintptr_t kTakeUpObjRva = 0x03BB69D8;
+ constexpr std::uintptr_t kTakeUpVtableRva = 0x037E6318;
+ const auto target_addr = reinterpret_cast<std::uintptr_t>(target_state);
+ SmartGuardCancelReason reason = SmartGuardCancelReason::None;
+ if (target_addr == base_ + kPursueObjRva) {
+  reason = SmartGuardCancelReason::Pursue;
+  smart_guard_target_pursue_seen_.fetch_add(1, std::memory_order_relaxed);
+ } else if (target_addr == base_ + kTakeUpObjRva) {
+  reason = SmartGuardCancelReason::TakeUpPositions;
+  smart_guard_target_takeup_seen_.fetch_add(1, std::memory_order_relaxed);
+ } else {
+  pass_through();
+  return;
+ }
+ std::uintptr_t target_vtable = 0;
+ if (!get(target_addr, 0, &target_vtable, sizeof(target_vtable))) {
+  pass_through();
+  return;
+ }
+ if (reason == SmartGuardCancelReason::Pursue && target_vtable != base_ + kPursueVtableRva) {
+  pass_through();
+  return;
+ }
+ if (reason == SmartGuardCancelReason::TakeUpPositions && target_vtable != base_ + kTakeUpVtableRva) {
+  pass_through();
+  return;
+ }
+
+ const auto order_addr = reinterpret_cast<std::uintptr_t>(order);
+ std::uintptr_t unit_addr = 0;
+ if (!get(order_addr, 0x18, &unit_addr, sizeof(unit_addr)) || !unit_addr) {
+  smart_guard_unit_resolve_failed_.fetch_add(1, std::memory_order_relaxed);
+  pass_through();
+  return;
+ }
+ smart_guard_unit_resolved_.fetch_add(1, std::memory_order_relaxed);
+ Id unit_uid = 0;
+ if (!get(unit_addr, 0x3EA0, &unit_uid, sizeof(unit_uid)) || !unit_uid) {
+  smart_guard_unit_resolve_failed_.fetch_add(1, std::memory_order_relaxed);
+  pass_through();
+  return;
+ }
+ bool is_local = false;
+ if (!smart_guard_allowlist_.try_contains(unit_uid, is_local) || !is_local) {
+  smart_guard_local_rejected_.fetch_add(1, std::memory_order_relaxed);
+  pass_through();
+  return;
+ }
+ std::uint32_t capability_flags = 0;
+ if (!get(unit_addr, 0x108, &capability_flags, sizeof(capability_flags)) || !(capability_flags & 0x10)) {
+  smart_guard_ranged_rejected_.fetch_add(1, std::memory_order_relaxed);
+  pass_through();
+  return;
+ }
+ std::uint32_t behaviour_bits = 0;
+ if (!get(unit_addr, 0x3D1C, &behaviour_bits, sizeof(behaviour_bits)) || !(behaviour_bits & 1)) {
+  smart_guard_guard_rejected_.fetch_add(1, std::memory_order_relaxed);
+  pass_through();
+  return;
+ }
+
+ // Resolve the TOP-LEVEL native active order from the owning Unit root. The
+ // transition context's own vtable/seq are not authoritative for ownership.
+ const auto active = evidence_probe_.active_order(unit_addr);
+ if (!active.complete) {
+  smart_guard_active_probe_failed_.fetch_add(1, std::memory_order_relaxed);
+  pass_through();
+  return;
+ }
+ smart_guard_active_probe_ok_.fetch_add(1, std::memory_order_relaxed);
+ if (!active.active || active.kind != Kind::Attack) {
+  smart_guard_active_not_attack_.fetch_add(1, std::memory_order_relaxed);
+  pass_through();
+  return;
+ }
+ smart_guard_active_attack_matched_.fetch_add(1, std::memory_order_relaxed);
+ smart_guard_intercepted_.fetch_add(1, std::memory_order_relaxed);
+
+ const Id engine_seq = active.engine_seq; // zero is valid.
+ bool was_duplicate = false;
+ if (!smart_guard_queue_.try_enqueue(unit_uid, engine_seq, reason, was_duplicate)) {
+  smart_guard_enqueue_fail_.fetch_add(1, std::memory_order_relaxed);
+  smart_guard_overflows_.fetch_add(1, std::memory_order_relaxed); // legacy aggregate
+  pass_through();
+  return;
+ }
+ smart_guard_enqueue_ok_.fetch_add(1, std::memory_order_relaxed);
+ if (was_duplicate) smart_guard_duplicates_.fetch_add(1, std::memory_order_relaxed);
+ smart_guard_suppressed_.fetch_add(1, std::memory_order_relaxed);
 }
 BridgeHost& host(){static BridgeHost h(platform_read,platform_image_base(),platform_write,platform_frame_active,false,platform_entity_alive,platform_combat_group_query);return h;}
 }

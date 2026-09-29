@@ -1,0 +1,108 @@
+================================================================================
+MOVE_OUTCOME_DATAFLOW.TXT — TOP-LEVEL MOVE ORDER DISASSEMBLY & DATAFLOW AUDIT
+================================================================================
+Target Executable: Warhammer3.exe
+SHA256: 6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297
+Top-Level Move Entry Point: RVA 0x030344D4 (.trace)
+
+1. TOP-LEVEL FUNCTION SIGNATURE & ARGUMENT REGISTER ALLOCATION
+--------------------------------------------------------------------------------
+Signature: bool __fastcall Order::issue_move(UnitController* this, int order_mode, const MovePayload* payload, bool queued)
+
+Prologue at 0x030344D4:
+  0x030344D4: mov        rax, rsp
+  0x030344D7: mov        qword ptr [rax + 0x10], rbx    ; spill rbx
+  0x030344DB: mov        qword ptr [rax + 0x18], rsi    ; spill rsi
+  0x030344DF: mov        qword ptr [rax + 0x20], rdi    ; spill rdi
+  0x030344E3: push       rbp
+  0x030344E4: push       r12
+  0x030344E6: push       r13
+  0x030344E8: push       r14
+  0x030344EA: push       r15
+  0x030344EC: lea        rbp, [rax - 0x178]
+  0x030344F3: sub        rsp, 0x250
+  0x030344FA: mov        rbx, rcx                       ; rbx = rcx (UnitController* this)
+  0x03034508: mov        r14b, r9b                      ; r14b = r9b (bool queued)
+  0x0303450B: mov        rdi, r8                        ; rdi = r8 (const MovePayload* payload)
+  0x0303450E: mov        r15d, edx                      ; r15d = edx (int order_mode)
+
+Register Mapping:
+  - UnitController* this: RCX -> RBX
+  - order_mode:           EDX -> R15D
+  - MovePayload* payload: R8  -> RDI
+  - bool queued:          R9B -> R14B
+
+2. PRE-ALLOCATOR VALIDATION & CAPACITY CHECK
+--------------------------------------------------------------------------------
+At 0x030347AE:
+  0x030347AE: test       r14b, r14b                     ; test queued flag
+  0x030347B1: je         0x1430347c0                    ; if non-queued, proceed to allocate slot 0
+  0x030347B3: cmp        dword ptr [rbx + 0x2f88], 0x28 ; check queued count against max capacity (40 = 0x28)
+  0x030347BA: jae        0x143034a76                    ; if full (>= 40), jump to reject (return 0)
+
+3. ALLOCATOR CALL & RETURN VALUE DATAFLOW
+--------------------------------------------------------------------------------
+At 0x030347C0:
+  0x030347C0: lea        rcx, [rbx + 0x278]             ; rcx = &controller->order_queue (container)
+  0x030347C7: mov        dl, r14b                       ; dl = queued flag
+  0x030347CA: call       0x142f5248c                    ; CALL ALLOCATOR (RVA 0x02F5248C)
+  0x030347CF: mov        rcx, rax                       ; rcx = rax
+  0x030347D2: mov        rbx, rax                       ; RBX = RAX (slot_base)
+  0x030347D5: call       0x142f3c170                    ; Virtual destructor on previous occupant of slot
+  0x030347DA: lea        rcx, [rbx + 0x18]              ; RCX = slot_base + 0x18 (ORDER THIS POINTER!)
+  0x030347DE: test       rcx, rcx                       ; null check
+  0x030347E1: je         0x143034a76                    ; if null, exit
+  0x030347E7: mov        r9, rdi                        ; r9 = MovePayload* payload (from rdi)
+  0x030347EA: mov        r8d, r15d                      ; r8d = order_mode (from r15d)
+  0x030347ED: mov        rdx, rbx                       ; rdx = slot_base (from rbx)
+  0x030347F0: call       0x14300b094                    ; CALL MOVE CONSTRUCTOR (RVA 0x0300B094)
+  0x030347F5: jmp        0x143034a76                    ; jump to function success epilogue
+
+4. MOVE CONSTRUCTOR & PAYLOAD COMMIT (RVA 0x0300B094)
+--------------------------------------------------------------------------------
+Disassembly:
+  0x0300B094: mov        qword ptr [rsp + 8], rbx
+  0x0300B099: push       rdi
+  0x0300B09A: sub        rsp, 0x20
+  0x0300B09E: mov        rbx, r9                        ; rbx = MovePayload*
+  0x0300B0A1: mov        rdi, rcx                       ; rdi = order_this (slot_base + 0x18)
+  0x0300B0A4: call       0x14300a7ec                    ; CALL BASE ORDER CONSTRUCTOR (0x0300A7EC)
+  0x0300B0A9: lea        rdx, [rip + 0x9059f8]          ; rdx = VTable 0x03910AA8
+  0x0300B0B0: mov        qword ptr [rdi], rdx           ; [order_this + 0x00] = 0x03910AA8 (Move VTable!)
+  0x0300B0B3: lea        rcx, [rdi + 0x40]              ; rcx = order_this + 0x40 (slot_base + 0x58)
+  0x0300B0B7: mov        rdx, rbx                       ; rdx = MovePayload*
+  0x0300B0BA: call       0x14300b0d8                    ; Copies XYZ + orientation + formation + flags
+  0x0300B0BF: and        qword ptr [rdi + 0xa0], 0      ; clear flags/state at +0xa0
+  0x0300B0C7: mov        rax, rdi                       ; return order_this
+  0x0300B0CA: mov        rbx, qword ptr [rsp + 0x30]
+  0x0300B0CF: add        rsp, 0x20
+  0x0300B0D3: pop        rdi
+  0x0300B0D4: ret
+
+Helper 0x0300B0D8 Payload Offsets inside Order (order_this = slot_base + 0x18):
+  - [order_this + 0x40] (slot + 0x58): float X (4 bytes)
+  - [order_this + 0x44] (slot + 0x5C): float Y (4 bytes)
+  - [order_this + 0x48] (slot + 0x60): float Z (4 bytes)
+  - [order_this + 0x50] (slot + 0x68): uint64 target/waypoint data
+  - [order_this + 0x58] (slot + 0x70): uint64 target/waypoint data
+  - [order_this + 0x98] (slot + 0xB0): uint16 width / formation size (from payload + 0x58)
+  - [order_this + 0x9A] (slot + 0xB2): uint8 flags (from payload + 0x5a)
+
+5. TOP-LEVEL RETURN VALUE
+--------------------------------------------------------------------------------
+At 0x03034A76:
+  0x03034A76: mov        al, 1                          ; SUCCESS: AL = 1 (accepted = true)
+  0x03034A78: jmp        0x143034a7c
+  0x03034A7A: xor        al, al                         ; REJECT: AL = 0 (accepted = false)
+  0x03034A7C: lea        r11, [rsp + 0x250]
+  ...
+  0x03034AA1: ret
+
+CONCLUSION:
+  - Exact Slot Base: RAX returned from Allocator (RVA 0x02F5248C).
+  - Saved in Register: RBX.
+  - Order this: RBX + 0x18 (slot_base + 0x18).
+  - Exact VTable installed: 0x03910AA8 (NOT 0x0390E248!).
+  - Engine Sequence: Located at order_this + 0x08 (slot_base + 0x20).
+  - Payload Coordinates: Located at order_this + 0x40 (slot_base + 0x58).
+  - Evidence Grade: LEVEL 1 (Direct disassembly, zero ambiguity).

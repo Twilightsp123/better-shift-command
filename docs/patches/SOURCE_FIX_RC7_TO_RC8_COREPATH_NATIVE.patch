@@ -1,0 +1,328 @@
+diff -ruN /mnt/data/bsc_core_work/rc7_extract/native_bridge_diagnostic_rc7_COMPONENT_LAYOUT_SAFE_STOP_PREBUILD/src/native_bridge/include/wh3/bridge_host.hpp /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/src/native_bridge/include/wh3/bridge_host.hpp
+--- /mnt/data/bsc_core_work/rc7_extract/native_bridge_diagnostic_rc7_COMPONENT_LAYOUT_SAFE_STOP_PREBUILD/src/native_bridge/include/wh3/bridge_host.hpp	2026-09-27 15:15:00.000000000 +0000
++++ /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/src/native_bridge/include/wh3/bridge_host.hpp	2026-09-27 13:25:55.564512829 +0000
+@@ -340,7 +340,7 @@
+  std::uint64_t next_client_id_{0};
+  std::atomic<bool> smart_guard_client_active_{false};
+ };
+-static constexpr const char* kDiagnosticBridgeVersion = "1.0.16-diagnostic-wh3-update-gated-rc7-component-layout-safe-stop";
++static constexpr const char* kDiagnosticBridgeVersion = "1.0.16-corepath-wh3-6c104-rc8";
+ 
+ struct DiagnosticLayoutPair {
+     std::size_t entity_component_offset{0};
+diff -ruN /mnt/data/bsc_core_work/rc7_extract/native_bridge_diagnostic_rc7_COMPONENT_LAYOUT_SAFE_STOP_PREBUILD/src/native_bridge/src/bridge_host.cpp /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/src/native_bridge/src/bridge_host.cpp
+--- /mnt/data/bsc_core_work/rc7_extract/native_bridge_diagnostic_rc7_COMPONENT_LAYOUT_SAFE_STOP_PREBUILD/src/native_bridge/src/bridge_host.cpp	2026-09-27 15:15:00.000000000 +0000
++++ /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/src/native_bridge/src/bridge_host.cpp	2026-09-27 13:25:55.564722254 +0000
+@@ -47,7 +47,7 @@
+ bool BridgeHost::adapter_ready()const noexcept{return recording_&&adapter_connected_&&move_seen_&&attack_seen_&&!tracker_.faulted()&&fatal_errors_.load()==0;}
+ bool BridgeHost::handler_calibration_ready()const noexcept{return recording_&&adapter_connected_&&handler_move_seen_&&handler_attack_seen_&&fatal_errors_.load()==0;}
+ bool BridgeHost::v3_issue_calibration_ready()const noexcept{return native_issue_authorized_&&recording_&&adapter_connected_&&handler_seen_>0&&(accepted_move_seen_||accepted_attack_seen_)&&fatal_errors_.load()==0&&gate_.fault()==Error::Ok&&!tracker_.faulted();}
+-bool BridgeHost::issue_ready()const noexcept{return v3_issue_calibration_ready()&&platform_component_chain_gate_passed()&&platform_entity_alive_gate_passed();}
++bool BridgeHost::issue_ready()const noexcept{return v3_issue_calibration_ready();}
+ HostStatus BridgeHost::status()const{std::lock_guard<std::recursive_mutex> l(mutex_);HostStatus s;
+  s.epoch=epoch_;s.recording=recording_;s.capture_errors=errors_.load();s.fatal_errors=fatal_errors_.load();s.gate_fault=gate_.fault();
+  s.last_recoverable_uid=last_recoverable_uid_;
+@@ -391,15 +391,13 @@
+  }catch(...){if(gate_.fault()==Error::Ok)note_capture("HALT_OBSERVER_EXCEPTION");else disarm("HALT_OBSERVER_EXCEPTION");}}
+ const char* BridgeHost::arm(bool ack){std::lock_guard<std::recursive_mutex> l(mutex_);
+  if(!ack){armed_=false;gate_.set_issue_enabled(false);return nullptr;}
+- if(!platform_component_chain_gate_passed()||!platform_entity_alive_gate_passed())return "DIAGNOSTIC_RUNTIME_GATES_NOT_READY";
+  if(!native_issue_authorized_)return "V3_NATIVE_ISSUE_NOT_AUTHORIZED";
+  if(!v3_issue_calibration_ready())return "V3_CALIBRATION_NOT_READY";
+  if(gate_.set_issue_enabled(true)!=Error::Ok)return "GATE_FAULT";armed_=true;adapter_error_="ARMED_V3_VALIDATED_PER_KIND_CALIBRATION";return nullptr;}
+ IssueResult BridgeHost::begin_issue(Kind k,bool q,Id uid,Id rev,void* L,std::optional<std::array<float,3>> move_destination){std::lock_guard<std::recursive_mutex> l(mutex_);
+- // Runtime proofs may be revoked after arm() by a later diagnostic recheck.
+- // Re-check at the final issue boundary so a stale armed_ flag can never bypass
+- // fail-closed Component/Alive gates.
+- if(!platform_component_chain_gate_passed()||!platform_entity_alive_gate_passed())return {0,"DIAGNOSTIC_RUNTIME_GATES_NOT_READY"};
++ // RC8 core-path: command issue is authorized only by the command/handler/ACK
++ // calibration contract. Unverified physical Entity/Component gates are quarantined
++ // and cannot veto a verified Move/Attack issue.
+  if(!armed_||!issue_ready())return {0,"ADAPTER_NOT_READY"};
+  if(native_issue_authorized_){
+   if(k==Kind::Move&&!accepted_move_seen_)return {0,"MOVE_CALIBRATION_NOT_READY"};
+diff -ruN /mnt/data/bsc_core_work/rc7_extract/native_bridge_diagnostic_rc7_COMPONENT_LAYOUT_SAFE_STOP_PREBUILD/src/native_bridge/src/lua_module.cpp /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/src/native_bridge/src/lua_module.cpp
+--- /mnt/data/bsc_core_work/rc7_extract/native_bridge_diagnostic_rc7_COMPONENT_LAYOUT_SAFE_STOP_PREBUILD/src/native_bridge/src/lua_module.cpp	2026-09-27 15:15:00.000000000 +0000
++++ /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/src/native_bridge/src/lua_module.cpp	2026-09-27 13:26:33.164699642 +0000
+@@ -31,7 +31,7 @@
+     if(A.type(L,i)!=4)return {{},Error::Invalid};std::size_t n=0;const char* s=A.tolstring(L,i,&n);
+     if(!s||n>10)return {{},Error::Invalid};return parse_id(std::string(s,n));
+ }
+-static bool read_u64(lua_State* L,int i,std::uint64_t& out){
++[[maybe_unused]] static bool read_u64(lua_State* L,int i,std::uint64_t& out){
+     if(A.type(L,i)!=4)return false;std::size_t n=0;const char* s=A.tolstring(L,i,&n);if(!s||n==0||n>20)return false;
+     std::uint64_t v=0;for(std::size_t k=0;k<n;++k){if(s[k]<'0'||s[k]>'9')return false;const auto d=static_cast<unsigned>(s[k]-'0');if(v>(std::numeric_limits<std::uint64_t>::max()-d)/10)return false;v=v*10+d;}out=v;return true;
+ }
+@@ -56,20 +56,19 @@
+ // R1 Evidence V3. Native exposes only build-locked facts; Lua owns R1 verdicts.
+ static int evidence_caps(lua_State* L){
+  const bool build_ok=platform_hooks_installed();
+- const bool physical_ok=build_ok&&platform_component_chain_gate_passed()&&platform_entity_alive_gate_passed();
+- A.createtable(L,0,14);
++ A.createtable(L,0,16);
+  num(L,"schema",3);
+  bit(L,"game_build_verified",build_ok);
+  bit(L,"execution_identity",build_ok);
+- bit(L,"entity_snapshot",physical_ok);
+- bit(L,"combat_groups",physical_ok);
+- bit(L,"contact_pairs",physical_ok);
+- bit(L,"target_specific_physical_contact",physical_ok);
++ bit(L,"entity_snapshot",false);
++ bit(L,"combat_groups",false);
++ bit(L,"contact_pairs",false);
++ bit(L,"target_specific_physical_contact",false);
++ bit(L,"physical_evidence_quarantined",true);
+  bit(L,"state74_runtime_melee",false);
+  fld(L,"build_id",platform_evidence_build_id());
+- fld(L,"evidence_method","R1_RAW_EVIDENCE_V3_CONTACT_PAIR");
+- const char* reason = !build_ok ? "BUILD_NOT_VERIFIED" : (!physical_ok ? "RUNTIME_EVIDENCE_GATES_PENDING" : "OK");
+- fld(L,"reason",reason);
++ fld(L,"evidence_method","COREPATH_EXECUTION_IDENTITY_ONLY");
++ fld(L,"reason",build_ok?"OK_COREPATH_PHYSICAL_QUARANTINED":"BUILD_NOT_VERIFIED");
+  return 1;
+ }
+ static int evidence_caps_v2_retired(lua_State* L){A.createtable(L,0,10);num(L,"schema",2);bit(L,"game_build_verified",false);bit(L,"execution_identity",false);bit(L,"entity_snapshot",false);bit(L,"combat_groups",false);bit(L,"fresh_engagement",false);fld(L,"build_id",platform_evidence_build_id());fld(L,"evidence_method","RETIRED_RE07_STATE74_INVALID");fld(L,"reason","V2_RETIRED_USE_V3");return 1;}
+@@ -86,14 +85,11 @@
+   else {optnum(L,"dest_x",e.dest_x);optnum(L,"dest_z",e.dest_z);}}
+  return 1;}
+ static void ptr_id(lua_State* L,std::uintptr_t p){char b[32]{};std::snprintf(b,sizeof b,"%llu",static_cast<unsigned long long>(p));str(L,b);}
+-static const char* evidence_bind_error(Error e) noexcept{
++[[maybe_unused]] static const char* evidence_bind_error(Error e) noexcept{
+  switch(e){case Error::Missing:return "EVIDENCE_ROOT_NOT_FOUND";case Error::BindingMismatch:return "EVIDENCE_ROOT_AMBIGUOUS_OR_CONFLICT";
+   case Error::Capacity:return "ENTITY_OWNER_INDEX_BIND_FAILED";case Error::Invalid:return "EVIDENCE_USERDATA_INVALID";default:return name(e);}
+ }
+-static int bind_evidence_unit(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
+- if(A.type(L,2)!=7)return fail(L,"BATTLE_UNIT_USERDATA_REQUIRED");void* raw=A.touserdata(L,2);if(!raw)return fail(L,"BATTLE_UNIT_USERDATA_NULL");
+- const auto r=host().resolve_evidence_userdata(u.value,reinterpret_cast<std::uintptr_t>(raw));if(!r)return fail(L,evidence_bind_error(r.error));
+- A.pushboolean(L,1);ptr_id(L,r.value);return 2;}
++static int bind_evidence_unit(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");return fail(L,"PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");}
+ static int diagnostic_command_root(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
+  const auto r=host().observed_command_root(u.value);if(!r){A.pushboolean(L,0);str(L,"COMMAND_ROOT_NOT_OBSERVED");return 2;}A.pushboolean(L,1);ptr_id(L,r.value);return 2;}
+ static int diagnostic_bind_evidence(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
+@@ -105,26 +101,10 @@
+  A.createtable(L,0,10);bit(L,"passed",r.passed);if(r.passed)ptr_id(L,r.root),A.setfield(L,-2,"root");
+  bit(L,"command_root_seen",r.command_root!=0);if(r.command_root)ptr_id(L,r.command_root),A.setfield(L,-2,"command_root");
+  num(L,"userdata_size",static_cast<float>(r.userdata_size));num(L,"nodes_scanned",static_cast<float>(r.nodes_scanned));num(L,"candidate_count",static_cast<float>(r.candidate_count));fld(L,"method",r.method);fld(L,"reason",r.failure_reason);return 1;}
+-static int contact_owner_ready(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");A.pushboolean(L,host().contact_owner_ready(u.value)?1:0);return 1;}
+-static int entity_snapshot_read(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");
+- if(A.gettop(L)<2||A.type(L,2)!=3)return fail(L,"MODEL_MS_NUMBER_REQUIRED");const float f=A.tonumber(L,2);if(!std::isfinite(f)||f<0)return fail(L,"MODEL_MS_INVALID");
+- auto r=host().entity_snapshot(u.value,static_cast<std::uint64_t>(f));if(!r)return fail(L,name(r.error));const auto& e=r.value;
+- A.createtable(L,0,22);num(L,"schema",3);bit(L,"complete",e.complete);fld(L,"probe_reason",name(e.probe_reason));num(L,"model_ms",f);
+- num(L,"slot_count",static_cast<float>(e.slot_count));num(L,"live_count",static_cast<float>(e.live_count));num(L,"dead_count",static_cast<float>(e.dead_count));
+- num(L,"movement_idle_count",static_cast<float>(e.movement_idle_count));num(L,"movement_pathing_count",static_cast<float>(e.movement_pathing_count));num(L,"movement_halted_count",static_cast<float>(e.movement_halted_count));
+- num(L,"median_x",e.median_x);num(L,"median_z",e.median_z);bit(L,"motion_complete",e.motion_complete);num(L,"motion_matched_count",static_cast<float>(e.motion_matched_count));
+- if(e.motion_complete){num(L,"previous_model_ms",static_cast<float>(e.previous_model_ms));num(L,"median_vx",e.median_vx);num(L,"median_vz",e.median_vz);}
+- A.createtable(L,static_cast<int>(e.entities.size()),0);int i=0;for(const auto& v:e.entities){A.createtable(L,0,9);ptr_id(L,v.entity);A.setfield(L,-2,"entity");num(L,"x",v.x);num(L,"z",v.z);num(L,"movement_state",static_cast<float>(v.movement_state));bit(L,"motion_complete",v.motion_complete);if(v.motion_complete){num(L,"vx",v.vx);num(L,"vz",v.vz);}A.rawseti(L,-2,++i);}A.setfield(L,-2,"entities");
+- return 1;}
+-static int combat_snapshot_read(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");auto r=host().combat_snapshot(u.value);if(!r)return fail(L,name(r.error));const auto& e=r.value;
+- A.createtable(L,0,10);num(L,"schema",3);bit(L,"complete",e.complete);fld(L,"probe_reason",name(e.probe_reason));
+- num(L,"coarse_contact_count",static_cast<float>(e.coarse_contact_count));num(L,"group_count",static_cast<float>(e.group_count));num(L,"active_melee_group_count",static_cast<float>(e.active_melee_group_count));
+- A.createtable(L,static_cast<int>(e.active_target_uids.size()),0);int i=0;for(auto uid:e.active_target_uids){str(L,format_id(uid));A.rawseti(L,-2,++i);}A.setfield(L,-2,"active_target_uids");return 1;}
+-static int contact_events_read(lua_State* L){std::uint64_t after=0;if(A.gettop(L)>=1&&!read_u64(L,1,after))return fail(L,"AFTER_SERIAL_DECIMAL_STRING_REQUIRED");
+- std::size_t n=128;if(A.gettop(L)>=2){if(A.type(L,2)!=3)return fail(L,"COUNT_NUMBER_REQUIRED");const float f=A.tonumber(L,2);if(!std::isfinite(f)||f<1||f>512||std::floor(f)!=f)return fail(L,"COUNT_RANGE_1_TO_512");n=static_cast<std::size_t>(f);}
+- const auto p=host().contact_events(after,n);const auto now=platform_tick_ms();A.createtable(L,static_cast<int>(p.events.size()),0);int i=0;
+- for(const auto& e:p.events){A.createtable(L,0,16);u64str(L,"serial",e.serial);u64str(L,"tick_ms",e.tick_ms);num(L,"age_ms",now>=e.tick_ms?static_cast<float>(now-e.tick_ms):0.0f);fld(L,"uid_a",format_id(e.uid_a));fld(L,"uid_b",format_id(e.uid_b));ptr_id(L,e.entity_a);A.setfield(L,-2,"entity_a");ptr_id(L,e.entity_b);A.setfield(L,-2,"entity_b");bit(L,"active_a",e.active_a);bit(L,"active_b",e.active_b);if(e.active_a)fld(L,"active_engine_seq_a",format_id(e.active_engine_seq_a));if(e.active_b)fld(L,"active_engine_seq_b",format_id(e.active_engine_seq_b));A.rawseti(L,-2,++i);}
+- A.createtable(L,0,10);num(L,"schema",3);u64str(L,"next_after",p.next_after);u64str(L,"newest",p.newest);u64str(L,"oldest",p.oldest);u64str(L,"dropped",p.dropped);u64str(L,"read_tick_ms",now);bit(L,"gap",p.gap);bit(L,"complete",!p.gap);num(L,"count",static_cast<float>(p.events.size()));return 2;}
++static int contact_owner_ready(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");A.pushboolean(L,0);return 1;}
++static int entity_snapshot_read(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");return fail(L,"PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");}
++static int combat_snapshot_read(lua_State* L){auto u=read_id(L,1);if(!u)return fail(L,"UNIT_UID_DECIMAL_STRING_REQUIRED");return fail(L,"PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");}
++static int contact_events_read(lua_State* L){return fail(L,"PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");}
+ static int numbers(lua_State* L){A.pushnumber(L,16777215.0f);A.pushnumber(L,1.5f);return 2;}
+ static int ids(lua_State* L){str(L,"4294967295");str(L,"16777217");return 2;}
+ static int status(lua_State* L){auto s=host().status();A.createtable(L,0,8);
+diff -ruN /mnt/data/bsc_core_work/rc7_extract/native_bridge_diagnostic_rc7_COMPONENT_LAYOUT_SAFE_STOP_PREBUILD/src/native_bridge/src/platform_windows.cpp /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/src/native_bridge/src/platform_windows.cpp
+--- /mnt/data/bsc_core_work/rc7_extract/native_bridge_diagnostic_rc7_COMPONENT_LAYOUT_SAFE_STOP_PREBUILD/src/native_bridge/src/platform_windows.cpp	2026-09-27 15:15:00.000000000 +0000
++++ /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/src/native_bridge/src/platform_windows.cpp	2026-09-27 13:25:55.565396279 +0000
+@@ -43,9 +43,9 @@
+  {0x02ecf0e0,"48895c241048897c242055488d6c24a94881ec00010000488bfa488bd9488bd1"},
+  {0x02ecebac,"488bc448895810555657488d68a84881ec40010000488bf20f2970d8488bd148"},
+  {0x02f042d4,"40555356574157488d6c24c94881ecc00000004533ff4c8d456f488bda44897d"},
+- {0x0052f770,"4883ec584885c90f8412010000f6054caaa30302"},
+- {0x030a3859,"488b47184885c07418488b88e8020000"}
++ {0x0052f770,"4883ec584885c90f8412010000f6054caaa30302"}
+ };
++constexpr Guard contact_pair_guard{0x030a3859,"488b47184885c07418488b88e8020000"};
+ using Init=int(WINAPI*)();using Create=int(WINAPI*)(void*,void*,void**);
+ using Target=int(WINAPI*)(void*);using Apply=int(WINAPI*)();
+ struct MH {
+@@ -54,13 +54,13 @@
+  Apply apply=nullptr;
+ };
+ MH g_mh{};
+-std::array<void*,17> g_core_targets{};
++std::array<void*,16> g_core_targets{};
+ void* g_smart_guard_target=nullptr;
+ bool g_hooks_created=false;
+ bool g_observer_stopped=false;
+ constexpr const char* hook_names[]={
+  "move","attack","allocator","halt","lua_move","lua_attack","publish_move","publish_attack",
+- "writer_begin","writer_finalize","copy","stage","move_handler","attack_handler","selection","free","contact_pair"
++ "writer_begin","writer_finalize","copy","stage","move_handler","attack_handler","selection","free"
+ };
+ const char* mh_status_name(int s) noexcept {
+  switch(s){
+@@ -445,7 +445,7 @@
+ bool platform_hooks_installed() noexcept {std::lock_guard<std::mutex> l(install_mu);return installed;}
+ const char* platform_last_error() noexcept {std::lock_guard<std::mutex> l(install_mu);return error_storage.c_str();}
+ bool platform_evidence_build_verified() noexcept {std::lock_guard<std::mutex> l(install_mu);return installed;}
+-const char* platform_evidence_build_id() noexcept {return "WH3_6C104A63AACC4D86_DIAGNOSTIC_RC7_COMPONENT_LAYOUT_SAFE_STOP";}
++const char* platform_evidence_build_id() noexcept {return "WH3_6C104A63AACC4D86_COREPATH_RC8";}
+ std::uint64_t platform_tick_ms() noexcept{return GetTickCount64();}
+ extern "C" void wh3_contact_pair_observer(void* result_record) noexcept {
+  if(!result_record)return;
+@@ -505,11 +505,10 @@
+    error_storage=buf;return error_storage.c_str();
+   }
+   g_core_targets.fill(nullptr);g_smart_guard_target=nullptr;g_hooks_created=false;
+-  std::array<void*,17> tramp{};
+-  const std::array<void*,17> detours={pointer(move_hook),pointer(attack_hook),pointer(allocator_hook),pointer(halt_hook),
++  std::array<void*,16> tramp{};
++  const std::array<void*,16> detours={pointer(move_hook),pointer(attack_hook),pointer(allocator_hook),pointer(halt_hook),
+    pointer(lua_move_hook),pointer(lua_attack_hook),pointer(publish_move_hook),pointer(publish_attack_hook),pointer(writer_begin_hook),pointer(writer_finalize_hook),
+-   pointer(copy_hook),pointer(stage_hook),pointer(move_handler_hook),pointer(attack_handler_hook),pointer(selection_hook),pointer(free_hook),
+-   pointer(wh3_contact_pair_detour_stub)};
++   pointer(copy_hook),pointer(stage_hook),pointer(move_handler_hook),pointer(attack_handler_hook),pointer(selection_hook),pointer(free_hook)};
+   auto create_all=[&](bool retried)->int{
+    std::size_t created=0;
+    for(std::size_t i=0;i<g_core_targets.size();++i){
+@@ -536,7 +535,7 @@
+   }
+   if(create_status!=0)return error_storage.c_str();
+   g_hooks_created=true;
+-  g_wh3_contact_pair_trampoline=tramp[16];
++  g_wh3_contact_pair_trampoline=nullptr;
+   NativeFunctions n{function<NativeOrderFn>(tramp[0]),function<NativeOrderFn>(tramp[1]),
+                     function<NativeAllocatorFn>(tramp[2]),function<NativeHaltFn>(tramp[3])};
+   AdapterFunctions a{function<NativeBindingFn>(tramp[4]),function<NativeBindingFn>(tramp[5]),function<NativePublishFn>(tramp[6]),function<NativePublishFn>(tramp[7]),
+@@ -566,7 +565,7 @@
+    error_storage=buf;return error_storage.c_str();
+   }
+   // Production V3 issuing is authorized only after all of these have succeeded:
+-  // exact host EXE SHA256, every guarded hook-site byte check, all 17 trampoline
++  // exact host EXE SHA256, every mandatory guarded hook-site byte check, all 16 core trampoline
+   // creations, queueing, and MinHook's final enable/apply step. No CMake switch can
+   // bypass this runtime proof.
+   if(!host().authorize_validated_issue(true)){
+@@ -574,7 +573,14 @@
+    return error_storage.c_str();
+   }
+   installed=true;
+-  // Phase B — Optional Smart Guard (Hook index 17).
++  // RC8 physical-evidence quarantine. ContactPair remains statically mapped for
++  // future research, but it is NOT created/enabled and is not part of core BSC
++  // authorization. Entity/Component/Alive assumptions are likewise non-gating.
++  constexpr bool g_wh3_physical_evidence_staged_disabled = true;
++  (void)contact_pair_guard;
++  if(g_wh3_physical_evidence_staged_disabled)g_wh3_contact_pair_trampoline=nullptr;
++
++  // Phase B — Optional Smart Guard (independent optional hook).
+   // If any Smart Guard-specific operation fails:
+   // CORE BETTER SHIFT REMAINS ACTIVE; SMART GUARD DISABLED.
+   constexpr Guard smart_guard_guard{0x030e2524,"48895c24084889742410574883ec20488b02488bf1488bca418af8488bdaff90"};
+diff -ruN /mnt/data/bsc_core_work/rc7_extract/native_bridge_diagnostic_rc7_COMPONENT_LAYOUT_SAFE_STOP_PREBUILD/src/native_bridge/tests/test_diagnostic_gates.cpp /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/src/native_bridge/tests/test_diagnostic_gates.cpp
+--- /mnt/data/bsc_core_work/rc7_extract/native_bridge_diagnostic_rc7_COMPONENT_LAYOUT_SAFE_STOP_PREBUILD/src/native_bridge/tests/test_diagnostic_gates.cpp	2026-09-27 15:15:00.000000000 +0000
++++ /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/src/native_bridge/tests/test_diagnostic_gates.cpp	2026-09-27 13:27:44.116148558 +0000
+@@ -468,12 +468,12 @@
+         CK(!platform_entity_alive_gate_passed());
+     });
+ 
+-    test("K: arm fails when diagnostic gates are not passed", [&] {
++    test("K: physical diagnostic gates do not veto core command arming", [&] {
+         platform_reset_diagnostic_gates();
+         host.begin("SCENARIO_K");
+         const char* err = host.arm(true);
+         CK(err != nullptr);
+-        CK(std::string(err) == "DIAGNOSTIC_RUNTIME_GATES_NOT_READY");
++        CK(std::string(err) == "V3_CALIBRATION_NOT_READY");
+         host.end(host.status().epoch);
+     });
+ 
+diff -ruN /mnt/data/bsc_core_work/rc7_extract/native_bridge_diagnostic_rc7_COMPONENT_LAYOUT_SAFE_STOP_PREBUILD/src/native_bridge/tests/test_lua_exports.cpp /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/src/native_bridge/tests/test_lua_exports.cpp
+--- /mnt/data/bsc_core_work/rc7_extract/native_bridge_diagnostic_rc7_COMPONENT_LAYOUT_SAFE_STOP_PREBUILD/src/native_bridge/tests/test_lua_exports.cpp	2026-09-27 15:15:00.000000000 +0000
++++ /mnt/data/bsc_core_work/BSC_COREPATH_MAINTENANCE_20260927_PREBUILD/src/native_bridge/tests/test_lua_exports.cpp	2026-09-27 13:27:44.115991432 +0000
+@@ -156,8 +156,8 @@
+   CK(!fields.at("game_build_verified").boolean&&!fields.at("execution_identity").boolean&&!fields.at("entity_snapshot").boolean&&!fields.at("combat_groups").boolean&&!fields.at("fresh_engagement").boolean);
+   CK(fields.at("reason").text=="V2_RETIRED_USE_V3"&&fields.at("evidence_method").text=="RETIRED_RE07_STATE74_INVALID");
+  });
+- test("R1 V3 capabilities expose contact-pair model without state74 melee claim",[&]{
+-  auto r=call("r1_evidence_capabilities_v3");CK(r.size()==1&&r[0].table);auto f=r[0].table->fields;CK(f.at("schema").number==3);CK(!f.at("state74_runtime_melee").boolean);CK(!f.at("game_build_verified").boolean);CK(f.at("evidence_method").text=="R1_RAW_EVIDENCE_V3_CONTACT_PAIR");
++ test("R1 V3 capabilities expose core execution identity and quarantine physical evidence",[&]{
++  auto r=call("r1_evidence_capabilities_v3");CK(r.size()==1&&r[0].table);auto f=r[0].table->fields;CK(f.at("schema").number==3);CK(!f.at("state74_runtime_melee").boolean);CK(!f.at("game_build_verified").boolean);CK(f.at("evidence_method").text=="COREPATH_EXECUTION_IDENTITY_ONLY");CK(f.at("physical_evidence_quarantined").boolean);CK(!f.at("entity_snapshot").boolean&&!f.at("combat_groups").boolean&&!f.at("contact_pairs").boolean&&!f.at("target_specific_physical_contact").boolean);
+  });
+  test("R1 V2 readers validate arguments and then fail explicitly retired",[&]{
+   auto bad_order=call("read_active_order_identity_v2",{n(1001)});CK(bad_order.size()==2&&bad_order[0].tag==0&&bad_order[1].text=="UNIT_UID_DECIMAL_STRING_REQUIRED");
+@@ -166,37 +166,37 @@
+   auto retired_entity=call("read_entity_snapshot_v2",{s("1001"),n(100)});CK(retired_entity.size()==2&&retired_entity[0].tag==0&&retired_entity[1].text=="V2_RETIRED_USE_V3");
+   auto bad_combat=call("read_combat_groups_v2",{n(1001)});CK(bad_combat.size()==2&&bad_combat[0].tag==0&&bad_combat[1].text=="UNIT_UID_DECIMAL_STRING_REQUIRED");
+   auto retired_combat=call("read_combat_groups_v2",{s("1001")});CK(retired_combat.size()==2&&retired_combat[0].tag==0&&retired_combat[1].text=="V2_RETIRED_USE_V3");
+-  auto bad_contact=call("read_contact_events_v3",{n(0)});CK(bad_contact.size()==2&&bad_contact[0].tag==0&&bad_contact[1].text=="AFTER_SERIAL_DECIMAL_STRING_REQUIRED");
++  auto bad_contact=call("read_contact_events_v3",{n(0)});CK(bad_contact.size()==2&&bad_contact[0].tag==0&&bad_contact[1].text=="PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");
+  });
+  test("evidence root resolver follows Lua userdata -> CA wrapper -> BattleUnit +8",[&]{
+   std::memset(fake_wrapper,0,sizeof fake_wrapper);fake_mem.clear();fake_entities.clear();
+   const std::uintptr_t ca=0xC0000,root=0xD0000,arr=0xD1000,entity=0xD2000,component=0xD3000;fake_block(ca,0x20);fake_block(root,0x200);fake_block(arr,0x10);fake_entity(entity,component);
+   std::uintptr_t p=ca;std::memcpy(fake_wrapper,&p,8);fake_put(ca,8,root);wh3::Id one=1;fake_put(root,0x114,one);fake_put(root,0x118,arr);fake_put(arr,0,entity);
+-  auto r=call("bind_evidence_unit_v3",{s("1001"),ud(fake_wrapper)});CK(r.size()==2&&r[0].tag==1&&r[0].boolean&&r[1].text==std::to_string(root));
++  auto r=call("bind_evidence_unit_v3",{s("1001"),ud(fake_wrapper)});CK(r.size()==2&&r[0].tag==0&&r[1].text=="PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");
+  });
+  test("evidence root resolver supports CA wrapper +16",[&]{
+   std::memset(fake_wrapper,0,sizeof fake_wrapper);fake_mem.clear();fake_entities.clear();
+   const std::uintptr_t ca=0xE0000,root=0xF0000,arr=0xF1000,entity=0xF2000,component=0xF3000;fake_block(ca,0x20);fake_block(root,0x200);fake_block(arr,0x10);fake_entity(entity,component);
+   std::uintptr_t p=ca;std::memcpy(fake_wrapper,&p,8);fake_put(ca,16,root);wh3::Id one=1;fake_put(root,0x114,one);fake_put(root,0x118,arr);fake_put(arr,0,entity);
+-  auto r=call("bind_evidence_unit_v3",{s("1002"),ud(fake_wrapper)});CK(r.size()==2&&r[0].tag==1&&r[0].boolean&&r[1].text==std::to_string(root));
++  auto r=call("bind_evidence_unit_v3",{s("1002"),ud(fake_wrapper)});CK(r.size()==2&&r[0].tag==0&&r[1].text=="PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");
+  });
+  test("evidence root resolver is pre-gate-safe and never calls alive virtual",[&]{
+   std::memset(fake_wrapper,0,sizeof fake_wrapper);fake_mem.clear();fake_entities.clear();fake_alive_calls=0;fake_alive_allowed=false;
+   const std::uintptr_t ca=0x1010000,root=0x1020000,arr=0x1021000,entity=0x1022000,component=0x1023000;fake_block(ca,0x20);fake_block(root,0x200);fake_block(arr,0x10);fake_entity(entity,component);
+   std::uintptr_t p=ca;std::memcpy(fake_wrapper,&p,8);fake_put(ca,8,root);wh3::Id one=1;fake_put(root,0x114,one);fake_put(root,0x118,arr);fake_put(arr,0,entity);
+-  auto r=call("bind_evidence_unit_v3",{s("1003"),ud(fake_wrapper)});CK(r.size()==2&&r[0].tag==1&&r[0].boolean&&r[1].text==std::to_string(root));CK(fake_alive_calls==0);fake_alive_allowed=true;
++  auto r=call("bind_evidence_unit_v3",{s("1003"),ud(fake_wrapper)});CK(r.size()==2&&r[0].tag==0&&r[1].text=="PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");CK(fake_alive_calls==0);fake_alive_allowed=true;
+  });
+  test("evidence root resolver rejects ambiguous valid candidates",[&]{
+   std::memset(fake_wrapper,0,sizeof fake_wrapper);fake_mem.clear();fake_entities.clear();
+   const std::uintptr_t r1=0x110000,r2=0x120000,a1=0x111000,a2=0x121000,e1=0x112000,e2=0x122000,c1=0x113000,c2=0x123000;for(auto x:{r1,r2})fake_block(x,0x200);fake_block(a1,0x10);fake_block(a2,0x10);fake_entity(e1,c1);fake_entity(e2,c2);
+   std::memcpy(fake_wrapper+8,&r1,8);std::memcpy(fake_wrapper+16,&r2,8);wh3::Id one=1;fake_put(r1,0x114,one);fake_put(r1,0x118,a1);fake_put(a1,0,e1);fake_put(r2,0x114,one);fake_put(r2,0x118,a2);fake_put(a2,0,e2);
+-  auto r=call("bind_evidence_unit_v3",{s("3003"),ud(fake_wrapper)});CK(r.size()==2&&r[0].tag==0&&r[1].text=="EVIDENCE_ROOT_AMBIGUOUS_OR_CONFLICT");
++  auto r=call("bind_evidence_unit_v3",{s("3003"),ud(fake_wrapper)});CK(r.size()==2&&r[0].tag==0&&r[1].text=="PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");
+  });
+- test("evidence root resolver rejects missing candidates without inventing a root",[&]{std::memset(fake_wrapper,0,sizeof fake_wrapper);fake_mem.clear();fake_entities.clear();auto r=call("bind_evidence_unit_v3",{s("4004"),ud(fake_wrapper)});CK(r.size()==2&&r[0].tag==0&&r[1].text=="EVIDENCE_ROOT_NOT_FOUND");});
++ test("evidence root resolver rejects missing candidates without inventing a root",[&]{std::memset(fake_wrapper,0,sizeof fake_wrapper);fake_mem.clear();fake_entities.clear();auto r=call("bind_evidence_unit_v3",{s("4004"),ud(fake_wrapper)});CK(r.size()==2&&r[0].tag==0&&r[1].text=="PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");});
+ test("evidence root resolver rejects shallow container lookalike with unverified entity objects",[&]{
+   std::memset(fake_wrapper,0,sizeof fake_wrapper);fake_mem.clear();fake_entities.clear();
+   const std::uintptr_t root=0x130000,arr=0x131000,bogus=0x132000;fake_block(root,0x200);fake_block(arr,0x10);fake_block(bogus,0x20);std::memcpy(fake_wrapper+8,&root,8);wh3::Id one=1;fake_put(root,0x114,one);fake_put(root,0x118,arr);fake_put(arr,0,bogus);
+-  auto r=call("bind_evidence_unit_v3",{s("5005"),ud(fake_wrapper)});CK(r.size()==2&&r[0].tag==0&&r[1].text=="EVIDENCE_ROOT_NOT_FOUND");
++  auto r=call("bind_evidence_unit_v3",{s("5005"),ud(fake_wrapper)});CK(r.size()==2&&r[0].tag==0&&r[1].text=="PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");
+  });
+  test("diagnostic resolver follows deeper userdata pointer graph and expected men",[&]{
+   std::memset(fake_wrapper,0,sizeof fake_wrapper);fake_mem.clear();fake_entities.clear();
+@@ -212,7 +212,7 @@
+   const std::uintptr_t ca=0x140000,root=0x150000,arr=0x151000,entity=0x152000,component=0x153000;
+   fake_block(ca,0x20);fake_block(root,0x200);fake_block(arr,0x10);fake_entity(entity,component);
+   std::uintptr_t pca=ca;std::memcpy(fake_wrapper,&pca,8);fake_put(ca,8,root);wh3::Id one=1;fake_put(root,0x114,one);fake_put(root,0x118,arr);fake_put(arr,0,entity);
+-  auto bound=call("bind_evidence_unit_v3",{s("6006"),ud(fake_wrapper)});CK(bound.size()==2&&bound[0].tag==1&&bound[0].boolean);
++  auto bound=call("diagnostic_bind_evidence_unit_v3",{s("6006"),ud(fake_wrapper),n(1)});CK(bound.size()==1&&bound[0].table&&bound[0].table->fields.at("passed").boolean);
+   auto comp=call("diagnostic_probe_component_chain",{s("6006")});CK(comp.size()==1&&comp[0].table);auto cf=comp[0].table->fields;
+   CK(diag_component_sample_limit==300);
+   for(auto key:{"passed","slot_count","sampled_count","reason"})CK(cf.count(key)==1);
+@@ -233,18 +233,8 @@
+  std::string epoch;
+  test("begin returns one epoch string, not bool+epoch",[&]{auto r=call("begin_battle",{s("fixture")});CK(r.size()==1&&r[0].tag==4);epoch=r[0].text;});
+  test("duplicate begin refuses reset",[&]{auto r=call("begin_battle",{s("fixture")});CK(r.size()==2&&r[0].tag==0);});
+- test("V3 contact events export exact pair ownership and native tick",[&]{
+-  const std::uintptr_t rootA=0xA0000,arrA=0xA1000,entityA=0xA2000,rootB=0xB0000,arrB=0xB1000,entityB=0xB2000;
+-  fake_block(rootA,0x200);fake_block(arrA,0x20);fake_block(rootB,0x200);fake_block(arrB,0x20);
+-  wh3::Id one=1;fake_put(rootA,0x114,one);fake_put(rootA,0x118,arrA);fake_put(arrA,0,entityA);
+-  fake_put(rootB,0x114,one);fake_put(rootB,0x118,arrB);fake_put(arrB,0,entityB);
+-  auto& h=wh3::host();CK(h.bind_evidence_root(1001,rootA)==wh3::Error::Ok);CK(h.bind_evidence_root(2002,rootB)==wh3::Error::Ok);
+-  h.observe_contact_pair(entityA,entityB,120000);
+-  auto r=call("read_contact_events_v3",{s("0"),n(16)});CK(r.size()==2&&r[0].tag==5&&r[1].tag==5);
+-  auto ev=r[0].table->array.at(1).table->fields;CK(ev.at("uid_a").text=="1001"&&ev.at("uid_b").text=="2002");
+-  CK(ev.at("entity_a").text==std::to_string(entityA)&&ev.at("entity_b").text==std::to_string(entityB));CK(ev.at("tick_ms").text=="120000");
+-  CK(!ev.at("active_a").boolean&&!ev.at("active_b").boolean);
+-  auto meta=r[1].table->fields;CK(meta.at("count").number==1&&meta.at("next_after").text=="1"&&!meta.at("gap").boolean);
++ test("V3 contact events are quarantined from production API",[&]{
++  auto r=call("read_contact_events_v3",{s("0"),n(16)});CK(r.size()==2&&r[0].tag==0&&r[1].text=="PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8");
+  });
+  test("journal returns array and metadata separately",[&]{auto r=call("read_journal",{s(epoch),s("0"),n(64)});CK(r.size()==2&&r[0].tag==5&&r[1].tag==5);CK(r[1].table->fields.at("next_after").text=="0");});
+  test("numeric epoch is not silently rounded",[&]{auto r=call("read_journal",{n(1),s("0")});CK(r.size()==2&&r[0].tag==0);});

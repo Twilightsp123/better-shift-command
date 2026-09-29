@@ -1,0 +1,111 @@
+RC7 COMPONENT-LAYOUT / ALIVE / SAFE-STOP RUNTIME TEST INSTRUCTIONS
+=====================================================================
+
+Target EXE SHA256:
+6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297
+
+Bridge Version:
+1.0.16-diagnostic-wh3-update-gated-rc7-component-layout-safe-stop
+Build ID:
+WH3_6C104A63AACC4D86_DIAGNOSTIC_RC7_COMPONENT_LAYOUT_SAFE_STOP
+
+PURPOSE
+-------
+RC7 keeps the verified 17-core-hook / 2-VTable map unchanged. It tests two unresolved runtime items only:
+1. discover/verify the current MovementComponent chain after RC6 failed MOVEMENT_BACKREF_MISMATCH;
+2. disable all bridge detours before WH3 teardown without unloading DLL/backend/trampolines.
+
+FIRST-TEST HYGIENE
+------------------
+- Start a completely fresh WH3 process.
+- Enable only the RC7 diagnostic pack among packs that load wh3_native_bridge.dll or minhook.x64.dll.
+- Keep Smart Guard / True Guard / release BSC native packs disabled for this run.
+- Diagnostic never issues BSC commands itself.
+
+EXPECTED ROOT DISCOVERY
+-----------------------
+RC7 inherits RC6 root discovery.
+If Lua userdata misses, expect:
+  DIAG_WAITING_FOR_COMMAND_ROOT instruction=issue_one_normal_move_order_to_any_local_unit_with_20plus_models
+
+Give ordinary right-click MOVE orders, one eligible local unit at a time. Do not Shift-queue. A successful bind looks like:
+  DIAG_COMMAND_ROOT_OBSERVED uid=...
+  DIAG_ROOT_DISCOVERY_AFTER_COMMAND ... passed=true ... candidate_count=1 ...
+  DIAG_UNIT_BOUND ...
+
+EXPECTED COMPONENT PROBE
+------------------------
+Immediately after a unique physical root binds, inspect DIAG_COMPONENT.
+
+A valid discovered layout must show:
+  passed=true
+  slot_count=N
+  sampled_count=N
+  reason=NONE
+  layout_method=LEGACY_EXACT or DISCOVERED_PAIR_LEGACY_STATE or DISCOVERED_PAIR_DISCOVERED_STATE
+  entity_component_offset=<number>
+  component_backref_offset=<number>
+  movement_state_offset=<number>
+
+If it fails, preserve the complete line. RC7 now reports:
+  pair_candidates=<count>
+  pair_report=[entityOffset:backrefOffset,...]
+  state_candidates=<count>
+  state_report=[offset,...]
+  reason=<specific failure>
+
+Important fail-closed meanings:
+- COMPONENT_LAYOUT_PAIR_NOT_FOUND: no stable Entity/component/backref pair in the bounded scan.
+- COMPONENT_LAYOUT_PAIR_AMBIGUOUS: multiple structural pairs fit; RC7 refuses to guess.
+- MOVEMENT_STATE_CANDIDATE_NOT_FOUND: pair found, no acceptable live state field.
+- MOVEMENT_STATE_CANDIDATE_AMBIGUOUS: pair found, multiple state fields fit; RC7 refuses to guess.
+- ENTITY_VTABLE_OR_ALIVE_SLOT_INVALID: layout may look structural, but one Entity/vt+0x630 target failed the read-only executable precheck.
+
+EXPECTED ALIVE GATES
+--------------------
+Only after Component Gate PASS may RC7 call Entity vt+0x630.
+At pristine deployment expect:
+  DIAG_ALIVE_DEPLOYMENT ... match=true deployment_passed=true casualty_passed=false gate_passed=false reason=NONE
+  DIAG_WAITING_FOR_CASUALTY ...
+
+Let that exact selected unit lose at least one model. Then expect:
+  DIAG_CASUALTY_DETECTED ...
+  DIAG_ALIVE_CASUALTY ... match=true deployment_passed=true casualty_passed=true gate_passed=true reason=NONE
+  DIAG_STATUS ... fully_gated=true ...
+  DIAG_ALL_GATES_PASS
+
+EXPECTED SAFE STOP
+------------------
+Every fatal stop, successful all-gates stop, VictoryCountdown/Complete, or detected Quit-to-Windows click should end with:
+  DIAG_SESSION_END result=PASS epoch=...
+  DIAG_OBSERVER_STOP result=PASS hooks_disabled=true dll_pinned=true trampolines_resident=true
+  DIAG_STOPPED reason=...
+
+After DIAG_OBSERVER_STOP PASS, exit WH3 to Windows. Record whether the process exits normally. RC7 must NOT be called shutdown-fixed until both the PASS marker and a normal process exit are observed.
+
+If the user clicks Quit to Windows before the diagnostic has otherwise stopped, expect:
+  DIAG_STOPPING reason=QUIT_WINDOWS_CLICK
+  ...
+  DIAG_OBSERVER_STOP result=PASS ...
+
+STOP / PRESERVE FULL LOG IF ANY APPEAR
+--------------------------------------
+HOST_EXE_SHA256_MISMATCH
+HOOK_BYTES_MISMATCH
+MINHOOK_*
+EVIDENCE_ROOT_AMBIGUOUS
+COMPONENT_LAYOUT_PAIR_NOT_FOUND
+COMPONENT_LAYOUT_PAIR_AMBIGUOUS
+MOVEMENT_STATE_CANDIDATE_NOT_FOUND
+MOVEMENT_STATE_CANDIDATE_AMBIGUOUS
+ENTITY_VTABLE_OR_ALIVE_SLOT_INVALID
+COMPONENT_GATE_FAIL
+VIRTUAL_CALL_EXCEPTION_OR_INVALID
+DEPLOYMENT_COUNT_MISMATCH
+CASUALTY_COUNT_MISMATCH
+DIAG_OBSERVER_STOP result=FAIL
+DIAG_ABORT
+
+PRODUCTION WARNING
+------------------
+RC7 is diagnostic-only. A discovered non-legacy MovementComponent layout is not automatically a production release migration. evidence_probe.cpp and ContactPair remain deliberately unchanged until the runtime result is reviewed and separately reconciled.

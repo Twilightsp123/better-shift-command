@@ -21,7 +21,7 @@ bool rd(std::uintptr_t a,void* out,std::size_t n) noexcept{
  return true;
 }
 constexpr std::uintptr_t image=0x140000000ULL;
-constexpr std::uintptr_t move_vt=image+0x37b31c8;
+constexpr std::uintptr_t move_vt=image+0x03910AA8;
 bool alive_cb(std::uintptr_t entity,bool* alive) noexcept{int hp=0;if(!alive||!raw_rd(entity+0xb1c,&hp,4))return false;*alive=hp>0;return true;}
 bool group_cb(std::uintptr_t group,bool* melee,std::uintptr_t* target) noexcept{
  std::uint32_t m=0;std::uintptr_t t=0;if(!melee||!target||!raw_rd(group+0x10,&m,4)||!raw_rd(group+0x18,&t,8))return false;*melee=m!=0;*target=t;
@@ -36,11 +36,36 @@ void setup_unit(std::uintptr_t root,std::uintptr_t arr,std::size_t count,float s
 std::uintptr_t entity_at(std::uintptr_t root,std::size_t i){std::uintptr_t arr=0,e=0;raw_rd(root+0x118,&arr,8);raw_rd(arr+i*8,&e,8);return e;}
 void movement_state(std::uintptr_t root,std::size_t i,std::uint32_t state){auto e=entity_at(root,i);std::uintptr_t c=0;raw_rd(e+0x18,&c,8);put(c,0x8b0,state);}
 void shift_entities(std::uintptr_t root,float dx,float dz,std::size_t first=0){std::uintptr_t arr=0;std::uint32_t count=0;raw_rd(root+0x118,&arr,8);raw_rd(root+0x114,&count,4);for(std::size_t i=first;i<count;++i){std::uintptr_t e=0;raw_rd(arr+i*8,&e,8);float x=0,z=0;raw_rd(e+0x88,&x,4);raw_rd(e+0x90,&z,4);x+=dx;z+=dz;put(e,0x88,x);put(e,0x90,z);}}
-void set_move(std::uintptr_t root,std::uint32_t seq,float x,float z){std::uint32_t count=1,head=0;put(root,0x2f88,count);put(root,0x2f8c,head);put(root,0x288+0x18,move_vt);put(root,0x288+0x20,seq);put(root,0x288+0x58,x);put(root,0x288+0x68,z);}
+void set_move(std::uintptr_t root,std::uint32_t seq,float x,float z){
+ std::uint32_t count=1,head=0;
+ put(root,0x2f88,count);
+ put(root,0x2f8c,head);
+ put(root,0x288+0x18,move_vt);
+ put(root,0x288+0x20,seq);
+ put(root,0x288+0x58,x);
+ float y=7.0f;
+ put(root,0x288+0x5c,y);
+ put(root,0x288+0x60,z);
+ uint64_t orientation_sentinel=0x4A4B4C4D4E4F5051ULL;
+ put(root,0x288+0x68,orientation_sentinel);
+}
 std::uintptr_t setup_groups(std::uintptr_t root,const std::vector<std::pair<bool,std::uintptr_t>>& groups){auto squad=root+0x9000;block(squad,0x1200);put(root,0x32f8,squad);std::uint32_t n=static_cast<std::uint32_t>(groups.size());put(squad,0x8c8,n);std::uint32_t coarse=0;for(std::size_t i=0;i<groups.size();++i){auto g=root+0x600000+i*0x1000;block(g,0x100);std::uintptr_t target=groups[i].second;std::uint32_t melee=groups[i].first?1:0;put(g,0x10,melee);put(g,0x18,target);put(squad,0x848+i*0x10,g);if(melee)++coarse;}put(root,0x34b8,coarse);return squad;}
 }
 int main(){int pass=0,fail=0;auto test=[&](const char* n,auto f){try{mem.clear();reset_mode();f();++pass;std::cout<<"PASS "<<n<<"\n";}catch(const std::exception& e){++fail;std::cout<<"FAIL "<<n<<": "<<e.what()<<"\n";}};
- test("active head exposes exact stable order id",[]{auto root=0x100000ULL,arr=0x200000ULL;setup_unit(root,arr,10,0,0);set_move(root,77,100,0);EvidenceProbe p(rd,alive_cb,group_cb,image);auto a=p.active_order(root);CK(a.complete&&a.active&&a.engine_seq==77&&a.kind==Kind::Move&&a.dest_x&&*a.dest_x==100);});
+ test("active head exposes exact stable order id",[]{auto root=0x100000ULL,arr=0x200000ULL;setup_unit(root,arr,10,0,0);set_move(root,77,100,50);EvidenceProbe p(rd,alive_cb,group_cb,image);auto a=p.active_order(root);CK(a.complete&&a.active&&a.engine_seq==77&&a.kind==Kind::Move&&a.dest_x&&*a.dest_x==100&&a.dest_z&&*a.dest_z==50);});
+ test("active move reads Z from payload not orientation",[]{
+  auto root=0x1500000ULL,arr=0x1600000ULL;setup_unit(root,arr,5,0,0);
+  set_move(root,99,123.0f,456.0f);
+  EvidenceProbe p(rd,alive_cb,group_cb,image);
+  auto a=p.active_order(root);
+  CK(a.complete&&a.active);
+  CK(a.dest_x&&*a.dest_x==123.0f);
+  CK(a.dest_z&&*a.dest_z==456.0f);
+  float orientation_float=0.0f;
+  uint64_t orientation_sentinel=0x4A4B4C4D4E4F5051ULL;
+  std::memcpy(&orientation_float,&orientation_sentinel,4);
+  CK(*a.dest_z!=orientation_float);
+ });
  test("N01 active order replacement during read is incomplete",[]{auto root=0x2100000ULL,arr=0x2200000ULL;setup_unit(root,arr,3,0,0);set_move(root,77,100,0);mode=Mode::MutateOrderAfterPayload;mutate_root=root;EvidenceProbe p(rd,alive_cb,group_cb,image);auto a=p.active_order(root);CK(!a.complete||(a.active&&a.engine_seq==88&&a.dest_x&&*a.dest_x==900.0f));});
  test("dead retained pointers are skipped by authoritative alive callback",[]{auto root=0x300000ULL,arr=0x400000ULL;setup_unit(root,arr,6,0,0);auto dead=entity_at(root,4);int hp=0;put(dead,0xb1c,hp);EvidenceProbe p(rd,alive_cb,group_cb,image);auto s=p.entity_snapshot(root,1000);CK(s.complete&&s.slot_count==6&&s.live_count==5&&s.dead_count==1&&s.entities.size()==5);});
  test("null fixed deployment slot is structural invalidity",[]{auto root=0x500000ULL,arr=0x600000ULL;setup_unit(root,arr,6,0,0);std::uintptr_t nil=0;std::memcpy(mem[arr].data()+5*8,&nil,8);EvidenceProbe p(rd,alive_cb,group_cb,image);auto s=p.entity_snapshot(root,1000);CK(!s.complete&&s.probe_reason==EntityProbeReason::NullEntitySlot);});

@@ -1,0 +1,23 @@
+$ /usr/bin/texlua tests/test_gate_v103.lua source/fresh_engagement_gate.lua
+PASS matched target with melee false requires warmup plus 1500ms geometry dwell
+PASS nil target after a verified intended match can qualify
+PASS nil target with no prior intended match cannot invent a contact
+PASS explicitly different target never qualifies even with overlapping boxes
+PASS a different target revokes matching evidence for later nil samples
+PASS close centers with non-touching boxes never qualify fallback
+PASS overlapping boxes with a distant main position never qualify fallback
+PASS unknown bbox cannot be treated as zero
+PASS negative and NaN bbox are rejected
+PASS dead or unknown alive state never qualifies fallback
+PASS brief near passage never meets contact dwell
+PASS short near-band crossing cannot complete geometry dwell
+PASS moving actor and target together may qualify without being stationary
+PASS sample gaps cannot backfill geometry dwell
+PASS input backlog resets geometry confirmation
+PASS pause does not count as elapsed contact time
+PASS touching box loss suspends open geometry path immediately
+PASS separation relocks fallback and old credit
+PASS new Attack creates fresh fallback evidence
+PASS 500ms and 1000ms model cadences obey full dwell
+ACTUAL_INTERPRETER=Lua 5.3
+TOTAL 20 PASS 0 FAIL
