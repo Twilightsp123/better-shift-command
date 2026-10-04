@@ -3,15 +3,15 @@
   "project": "Better Shift Command",
   "formal_version": "1.3.0",
   "version_tag": "v1.3.0",
-  "artifact_status": "GITHUB_MAINTENANCE_ARCHIVE",
+  "artifact_status": "WH3_9_0_2_NATIVE_MAP_BUILD_CANDIDATE",
   "canonical_pack_name": "zzz_better_shift_command_steam.pack",
   "pack_generated_in_this_archive": false,
   "controller_version": "1.3.0",
   "run_id": "V1_3_0",
   "build_marker": "BETTER_SHIFT_COMMAND_V1.3.0",
-  "native_bridge_compatibility_id": "1.0.17-corepath-wh3-6c104-movevtfix",
+  "native_bridge_compatibility_id": "1.0.18-corepath-wh3-fec656f4-map902",
   "platform": "Windows x64",
-  "target_wh3_sha256": "6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297",
+  "target_wh3_sha256": "fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785",
   "upstream_behavior_baseline": {
     "repository": "Twilightsp123/better-shift-command",
     "commit": "0b690d59940e23e475de332a82cfecf072961977",
@@ -34,18 +34,32 @@
     "implemented_internal_stage": "BSC-TPOL-T1H",
     "mct_ui": "NOT_REGISTERED",
     "default_policy": "SMOOTH_HIDDEN",
-    "minimum_engagement_time_seconds": 3.0,
+    "minimum_engagement_time_seconds": 3,
     "movement_policy_fields": "RESERVED_NOT_RUNTIME_WIRED"
   },
   "validation": {
-    "controller_jobs": "19/19 PASS",
-    "mutations": "40/40 CAUGHT",
-    "portable_native_ctest": "13/13 PASS",
-    "asan_ubsan_ctest": "13/13 PASS",
-    "windows_native_ctest": "14/14 PASS",
-    "mandatory_guards": "16/16 PASS"
+    "prior_9_0_1_runtime_baseline": {
+      "controller_jobs": "19/19 PASS",
+      "mutations": "40/40 CAUGHT",
+      "portable_native_ctest": "13/13 PASS",
+      "asan_ubsan_ctest": "13/13 PASS",
+      "windows_native_ctest": "14/14 PASS",
+      "mandatory_guards": "16/16 PASS",
+      "wh3_runtime": "PASS ENOUGH TO CONTINUE GAMEPLAY WORK"
+    },
+    "wh3_9_0_2_candidate": {
+      "address_pipeline_stages_1_to_6": "PASS",
+      "mandatory_guards": "16/16 BYTE_EXACT",
+      "optional_guards": "2/2 BYTE_EXACT",
+      "move_attack_constructor_vtable_dataflow": "PASS STATIC",
+      "windows_v142_masm_build": "NOT RUN",
+      "windows_native_ctest": "NOT RUN",
+      "wh3_runtime_smoke": "NOT RUN",
+      "release_authorized": false
+    }
   },
   "current_open_work": [
+    "WH3 9.0.2 Windows v142/MASM build + Native CTest + runtime smoke",
     "Move-to-Attack terminal handoff",
     "SC6 immediate-successor MOVE adopt/soft-adopt",
     "transition hysteresis",
@@ -53,5 +67,11 @@
     "separate battle lifecycle/teardown closure"
   ],
   "archive_policy": "CURRENT_DOCS_OVERRIDE_HISTORY; archives and runtime logs preserve original historical version strings",
-  "documentation_entrypoint": "README_FIRST.md"
+  "documentation_entrypoint": "README_FIRST.md",
+  "address_maintenance": {
+    "current_map": "native_maps/wh3_9.0.2_fec656f4.json",
+    "pipeline": "docs/NATIVE_ADDRESS_MAINTENANCE_PIPELINE.md",
+    "last_runtime_validated_map": "WH3 9.0.1 / 6c104a63...",
+    "candidate_map": "WH3 9.0.2 / fec656f4..."
+  }
 }
