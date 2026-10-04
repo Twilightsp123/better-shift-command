@@ -10,7 +10,7 @@ def read(rel):
     return p.read_text(encoding='utf-8')
 required=[
  'README_FIRST.md','VERSION','PACK_NAME','DESIGN_MANIFEST.json','docs/VERSION_POLICY.md','docs/MAINTAINER_INDEX.md','docs/ARCHITECTURE_STATUS_20260929.md',
- 'docs/OPEN_ISSUES.md','docs/ASSUMPTION_LEDGER.md','docs/TEST_MATRIX.md','docs/CURRENT_BUILD_MAP.md',
+ 'docs/OPEN_ISSUES.md','docs/ASSUMPTION_LEDGER.md','docs/TEST_MATRIX.md','docs/CURRENT_BUILD_MAP.md','docs/NATIVE_ADDRESS_MAINTENANCE_PIPELINE.md',
  'docs/DECISION_LOG.md','docs/VERSION_LINEAGE.md','docs/PROVENANCE.md','docs/HISTORY_COVERAGE.md',
  'docs/DEVELOPMENT_HISTORY.md','docs/MAINTENANCE_PROTOCOL.md','docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md',
  'docs/design/HIDDEN_MCT_INTERFACE_T1H.md','docs/design/MCT_POLICY_SCHEMA_D1.md','docs/design/TRANSITION_DECISION_TABLE_D1.md',
@@ -46,6 +46,14 @@ for token in ('O-08 — Move→Attack','O-09 — SC6 rolls back immediate future
 matrix=read('docs/TEST_MATRIX.md')
 for token in ('Windows Native CTest | 14/14 PASS','T1H hidden PolicyProfile/MCT scaffold | PASS','T1 shared behavior-neutral evaluator refactor | NOT RUN','T2 Move→Attack terminal handoff | NOT RUN','T3 visible MCT adapter/UI wiring | NOT RUN'):
     if token not in matrix: fail('TEST_MATRIX missing gate: '+token)
+pipeline=read('docs/NATIVE_ADDRESS_MAINTENANCE_PIPELINE.md')
+for token in ('Source of truth','Exact relocation','Normalized relocation','.pdata fingerprint','Relationship resolution','Ghidra/BinDiff fallback','Promotion gates'):
+    if token not in pipeline: fail('NATIVE_ADDRESS_MAINTENANCE_PIPELINE missing stage/rule: '+token)
+build_map=read('docs/CURRENT_BUILD_MAP.md')
+for token in ('WH3 9.0.2','fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785','static relocation/dataflow PASS','Windows v142/MASM build','WH3 runtime smoke'):
+    if token not in build_map: fail('CURRENT_BUILD_MAP missing 9.0.2 candidate state: '+token)
+if 'last runtime-validated build remains WH3 9.0.1' not in build_map:
+    fail('CURRENT_BUILD_MAP must preserve 9.0.1 as last runtime-validated baseline')
 ledger=read('docs/ASSUMPTION_LEDGER.md')
 if '`Entity +0x18 = MovementComponent*` | **RETRACTED**' not in ledger: fail('Assumption ledger lost retracted Entity+0x18 status')
 lineage=read('docs/VERSION_LINEAGE.md')
