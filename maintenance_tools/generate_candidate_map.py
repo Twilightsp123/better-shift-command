@@ -89,6 +89,9 @@ def derive_order_identity(mm: mmap.mmap, pe: PE, native_map: dict, resolved: dic
     if simple_base == move_base:
         simple_vt = ctor_vtable(mm, pe, simple_ctor)
 
+    if simple_vt is None:
+        raise ValueError("simple/intercept Move sibling could not be re-derived")
+
     return {
         "base_constructor": f"0x{move_base:08X}",
         "full_move_constructor": f"0x{move_ctor:08X}",
@@ -104,6 +107,16 @@ def derive_order_identity(mm: mmap.mmap, pe: PE, native_map: dict, resolved: dic
         "proof": "ALLOCATOR_TO_CONSTRUCTOR_TO_VTABLE_STATIC_DATAFLOW",
     }
 
+
+
+def proof_level(method: str) -> str:
+    if method == "EXACT_UNIQUE":
+        return "L1_BYTE_MATCH"
+    if method == "NORMALIZED_UNIQUE":
+        return "L2_NORMALIZED_MATCH"
+    if method in ("EXACT_RELATION_RESOLVED", "NORMALIZED_RELATION_RESOLVED"):
+        return "L3_STRUCTURAL_MATCH"
+    return "UNRESOLVED"
 
 def generate(exe: Path, map_path: Path, game_version: str) -> dict:
     source = load_map(map_path)
@@ -128,6 +141,12 @@ def generate(exe: Path, map_path: Path, game_version: str) -> dict:
             "release_authorized": False,
             "source_map_id": source["map_id"],
             "source_sha256": source["game"]["sha256"],
+            "proof_levels": {
+                "L1_BYTE_MATCH": "exact unique guard",
+                "L2_NORMALIZED_MATCH": "unique relocation-normalized guard",
+                "L3_STRUCTURAL_MATCH": "ambiguous guard resolved by declared relationships/callgraph",
+                "L4_DATAFLOW_DERIVED": "constructor/VTable identity re-derived from current EXE",
+            },
             "required_next_gates": [
                 "source/runtime map generation",
                 "prebuild contract",
@@ -145,11 +164,15 @@ def generate(exe: Path, map_path: Path, game_version: str) -> dict:
                 raise ValueError(f"{name}: cannot read new guard")
             spec["rva"] = f"0x{new_rva:08X}"
             spec["guard"] = actual.hex()
+            relation_row = relation_report["core"][name]
+            method = relation_row["method"]
             spec["relocation"] = {
-                "method": relation_report["core"][name]["method"],
-                "source_rva": relation_report["core"][name]["old_rva"],
-                "relationship_resolved": True,
+                "method": method,
+                "source_rva": relation_row["old_rva"],
+                "initial_candidate_count": relation_row["initial_candidate_count"],
+                "relationship_resolved": relation_row["relationship_resolved"],
             }
+            spec["proof_level"] = proof_level(method)
             fingerprints[name] = function_fingerprint(mm, pe, new_rva)
 
         for name, spec in out.get("optional", {}).items():
@@ -161,11 +184,13 @@ def generate(exe: Path, map_path: Path, game_version: str) -> dict:
                 spec["rva"] = f"0x{new_rva:08X}"
                 spec["guard"] = actual.hex() if actual else spec["guard"]
                 spec["relocation_status"] = "EXACT_UNIQUE_RELOCATED"
+                spec["proof_level"] = "L1_BYTE_MATCH"
             else:
                 spec["relocation_status"] = (
                     "EXACT_NOT_FOUND" if not matches else "EXACT_AMBIGUOUS"
                 )
                 spec["runtime"] = "STAGED_DISABLED_UNRESOLVED"
+                spec["proof_level"] = "UNRESOLVED"
 
         identity = derive_order_identity(mm, pe, source, resolved)
         out["derived"]["order_constructors"] = {
@@ -175,16 +200,16 @@ def generate(exe: Path, map_path: Path, game_version: str) -> dict:
             "attack": identity["attack_constructor"],
         }
         out["derived"]["full_move_vtable"]["rva"] = identity["full_move_vtable"]
-        out["derived"]["full_move_vtable"]["proof"] = "LEVEL-1_STATIC_DATAFLOW_CANDIDATE"
+        out["derived"]["full_move_vtable"]["proof"] = "L4_DATAFLOW_DERIVED_CANDIDATE"
         out["derived"]["attack_vtable"]["rva"] = identity["attack_vtable"]
-        out["derived"]["attack_vtable"]["proof"] = "LEVEL-1_STATIC_DATAFLOW_CANDIDATE"
+        out["derived"]["attack_vtable"]["proof"] = "L4_DATAFLOW_DERIVED_CANDIDATE"
         if identity["simple_intercept_move_vtable"] is not None:
             out["derived"]["simple_intercept_move_vtable"]["rva"] = identity[
                 "simple_intercept_move_vtable"
             ]
             out["derived"]["simple_intercept_move_vtable"][
                 "proof"
-            ] = "SIBLING_CONSTRUCTOR_STATIC_CANDIDATE"
+            ] = "L4_SIBLING_CONSTRUCTOR_DERIVED_CANDIDATE"
 
         out["candidate"]["order_identity"] = identity
         out["candidate"]["function_fingerprints"] = fingerprints

@@ -211,12 +211,23 @@ def run(exe: Path, map_path: Path) -> dict:
 
         rows = {}
         for name, values in candidates.items():
+            resolved_now = len(values) == 1
+            relationship_resolved = resolved_now and initial_counts[name] != 1
+            if relationship_resolved:
+                final_method = methods[name] + "_RELATION_RESOLVED"
+            elif resolved_now and initial_counts[name] == 1:
+                final_method = methods[name] + "_UNIQUE"
+            else:
+                final_method = methods[name]
             rows[name] = {
-                "method": methods[name],
+                "method": final_method,
+                "base_method": methods[name],
                 "old_rva": f"0x{parse_rva(native_map['core'][name]['rva']):08X}",
+                "initial_candidate_count": initial_counts[name],
                 "candidates": [f"0x{x:08X}" for x in values],
-                "resolved_rva": f"0x{values[0]:08X}" if len(values) == 1 else None,
-                "resolved": len(values) == 1,
+                "resolved_rva": f"0x{values[0]:08X}" if resolved_now else None,
+                "resolved": resolved_now,
+                "relationship_resolved": relationship_resolved,
             }
 
         resolved = sum(row["resolved"] for row in rows.values())

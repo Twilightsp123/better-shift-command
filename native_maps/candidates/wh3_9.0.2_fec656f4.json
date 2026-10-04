@@ -26,7 +26,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "EXACT_RELATION_RESOLVED"
-      }
+      },
+      "proof_level": "L3_STRUCTURAL_MATCH"
     },
     "attack": {
       "rva": "0x03033544",
@@ -37,7 +38,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "EXACT_UNIQUE"
-      }
+      },
+      "proof_level": "L1_BYTE_MATCH"
     },
     "allocator": {
       "rva": "0x02F53128",
@@ -48,7 +50,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "EXACT_UNIQUE"
-      }
+      },
+      "proof_level": "L1_BYTE_MATCH"
     },
     "halt": {
       "rva": "0x0301C5E0",
@@ -69,7 +72,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "NORMALIZED_UNIQUE"
-      }
+      },
+      "proof_level": "L2_NORMALIZED_MATCH"
     },
     "lua_move": {
       "rva": "0x02ED6404",
@@ -80,7 +84,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "EXACT_RELATION_RESOLVED"
-      }
+      },
+      "proof_level": "L3_STRUCTURAL_MATCH"
     },
     "lua_attack": {
       "rva": "0x02ED5C9C",
@@ -91,7 +96,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "EXACT_UNIQUE"
-      }
+      },
+      "proof_level": "L1_BYTE_MATCH"
     },
     "publish_move": {
       "rva": "0x01CAFDDC",
@@ -116,7 +122,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "NORMALIZED_RELATION_RESOLVED"
-      }
+      },
+      "proof_level": "L3_STRUCTURAL_MATCH"
     },
     "publish_attack": {
       "rva": "0x02DF3410",
@@ -141,7 +148,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "NORMALIZED_RELATION_RESOLVED"
-      }
+      },
+      "proof_level": "L3_STRUCTURAL_MATCH"
     },
     "writer_begin": {
       "rva": "0x01BCBE28",
@@ -152,7 +160,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "EXACT_UNIQUE"
-      }
+      },
+      "proof_level": "L1_BYTE_MATCH"
     },
     "writer_finalize": {
       "rva": "0x01BCF144",
@@ -163,7 +172,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "EXACT_UNIQUE"
-      }
+      },
+      "proof_level": "L1_BYTE_MATCH"
     },
     "copy": {
       "rva": "0x01BACFB4",
@@ -174,7 +184,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "EXACT_UNIQUE"
-      }
+      },
+      "proof_level": "L1_BYTE_MATCH"
     },
     "stage": {
       "rva": "0x01BAE7B8",
@@ -185,7 +196,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "EXACT_UNIQUE"
-      }
+      },
+      "proof_level": "L1_BYTE_MATCH"
     },
     "move_handler": {
       "rva": "0x02ECFCD0",
@@ -196,7 +208,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "EXACT_RELATION_RESOLVED"
-      }
+      },
+      "proof_level": "L3_STRUCTURAL_MATCH"
     },
     "attack_handler": {
       "rva": "0x02ECF79C",
@@ -207,7 +220,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "EXACT_UNIQUE"
-      }
+      },
+      "proof_level": "L1_BYTE_MATCH"
     },
     "selection": {
       "rva": "0x02F04F70",
@@ -218,7 +232,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "EXACT_UNIQUE"
-      }
+      },
+      "proof_level": "L1_BYTE_MATCH"
     },
     "free": {
       "rva": "0x00537420",
@@ -243,7 +258,8 @@
         "source_build": "9.0.1",
         "source_rva": "recorded_in_parent_map",
         "method": "NORMALIZED_UNIQUE"
-      }
+      },
+      "proof_level": "L2_NORMALIZED_MATCH"
     }
   },
   "optional": {
@@ -253,7 +269,8 @@
       "role": "physical_research",
       "required": false,
       "runtime": "STAGED_DISABLED",
-      "relocation_status": "EXACT_UNIQUE_RELOCATED"
+      "relocation_status": "EXACT_UNIQUE_RELOCATED",
+      "proof_level": "L1_BYTE_MATCH"
     },
     "smart_guard": {
       "rva": "0x030E319C",
@@ -261,24 +278,25 @@
       "role": "smart_guard",
       "required": false,
       "runtime": "STAGED_DISABLED",
-      "relocation_status": "EXACT_UNIQUE_RELOCATED"
+      "relocation_status": "EXACT_UNIQUE_RELOCATED",
+      "proof_level": "L1_BYTE_MATCH"
     }
   },
   "derived": {
     "full_move_vtable": {
       "rva": "0x03913618",
-      "proof": "LEVEL-1_STATIC_DATAFLOW_CANDIDATE",
+      "proof": "L4_DATAFLOW_DERIVED_CANDIDATE",
       "note": "Top-level Order::issue_move outcome type"
     },
     "simple_intercept_move_vtable": {
       "rva": "0x03910438",
-      "proof": "SIBLING_CONSTRUCTOR_STATIC_CANDIDATE",
+      "proof": "L4_SIBLING_CONSTRUCTOR_DERIVED_CANDIDATE",
       "release_use": false,
       "note": "Explicitly not the BSC top-level Move outcome type"
     },
     "attack_vtable": {
       "rva": "0x03912988",
-      "proof": "LEVEL-1_STATIC_DATAFLOW_CANDIDATE"
+      "proof": "L4_DATAFLOW_DERIVED_CANDIDATE"
     },
     "order_constructors": {
       "base": "0x0300B518",
@@ -412,6 +430,12 @@
       "Windows v142/MASM build",
       "Windows Native CTest",
       "WH3 native smoke"
-    ]
+    ],
+    "proof_levels": {
+      "L1_BYTE_MATCH": "exact unique guard",
+      "L2_NORMALIZED_MATCH": "unique relocation-normalized guard",
+      "L3_STRUCTURAL_MATCH": "ambiguous guard resolved by declared relationships/callgraph",
+      "L4_DATAFLOW_DERIVED": "constructor/VTable identity re-derived from current EXE"
+    }
   }
 }

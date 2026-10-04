@@ -134,10 +134,16 @@ def main() -> None:
     )
 
     candidate = None
+    verification = None
     if relations["all_core_resolved"]:
         candidate = generate_candidate(args.exe, args.map, args.game_version)
         (out_dir / "candidate_map.json").write_text(
             json.dumps(candidate, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        verification = verify_candidate(args.exe, candidate)
+        (out_dir / "candidate_static_verification.json").write_text(
+            json.dumps(verification, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
 
