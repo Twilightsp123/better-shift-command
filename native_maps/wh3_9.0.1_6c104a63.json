@@ -39,7 +39,17 @@
       "rva": "0x0301B890",
       "guard": "48895c24084889742410574883ec20488bf18ada4881c188020000e88007f2ff",
       "role": "order_core",
-      "required": true
+      "required": true,
+      "normalization": {
+        "kind": "relocation_mask",
+        "mask_ranges": [
+          [
+            28,
+            32
+          ]
+        ],
+        "note": "mask CALL rel32 displacement"
+      }
     },
     "lua_move": {
       "rva": "0x02ED5808",
@@ -57,13 +67,41 @@
       "rva": "0x01CB1DC8",
       "guard": "48895c2418574883ec408b0524c53b02488bd9488d4c245089442450488bfae8",
       "role": "command_publication",
-      "required": true
+      "required": true,
+      "normalization": {
+        "kind": "relocation_mask",
+        "mask_ranges": [
+          [
+            12,
+            16
+          ]
+        ],
+        "rip_target": {
+          "disp_offset": 12,
+          "instruction_end_offset": 16
+        },
+        "note": "mask first RIP-relative global displacement"
+      }
     },
     "publish_attack": {
       "rva": "0x02DF28BC",
       "guard": "48895c2418574883ec408b0504b92701488bd9488d4c245089442450488bfae8",
       "role": "command_publication",
-      "required": true
+      "required": true,
+      "normalization": {
+        "kind": "relocation_mask",
+        "mask_ranges": [
+          [
+            12,
+            16
+          ]
+        ],
+        "rip_target": {
+          "disp_offset": 12,
+          "instruction_end_offset": 16
+        },
+        "note": "mask first RIP-relative global displacement"
+      }
     },
     "writer_begin": {
       "rva": "0x01BCE174",
@@ -111,7 +149,21 @@
       "rva": "0x0052F770",
       "guard": "4883ec584885c90f8412010000f6054caaa30302",
       "role": "packet_pipeline",
-      "required": true
+      "required": true,
+      "normalization": {
+        "kind": "relocation_mask",
+        "mask_ranges": [
+          [
+            9,
+            13
+          ],
+          [
+            15,
+            19
+          ]
+        ],
+        "note": "mask near Jcc rel32 and RIP-relative global displacement"
+      }
     }
   },
   "optional": {
@@ -145,11 +197,97 @@
     "attack_vtable": {
       "rva": "0x03910228",
       "proof": "STATIC_REVALIDATED"
+    },
+    "order_constructors": {
+      "base": "0x0300A7EC",
+      "full_move": "0x0300B094",
+      "simple_intercept_move": "0x0300B038",
+      "attack": "0x0300AB98"
     }
   },
   "source_of_truth": {
     "authoritative_for_address_pipeline": true,
     "origin": "src/native_bridge/src/platform_windows.cpp @ 0bbdd8cef552d9f4e977352a1b38db94a4eefba2",
     "current_build_map": "docs/CURRENT_BUILD_MAP.md"
-  }
+  },
+  "relationships": [
+    {
+      "id": "move_attack_cluster",
+      "type": "rva_delta",
+      "left": "move",
+      "right": "attack",
+      "expected_delta": 7296,
+      "tolerance": 128,
+      "weight": 4
+    },
+    {
+      "id": "lua_pair",
+      "type": "rva_delta",
+      "left": "lua_move",
+      "right": "lua_attack",
+      "expected_delta": 1896,
+      "tolerance": 16,
+      "weight": 6
+    },
+    {
+      "id": "handler_pair",
+      "type": "rva_delta",
+      "left": "move_handler",
+      "right": "attack_handler",
+      "expected_delta": 1332,
+      "tolerance": 16,
+      "weight": 6
+    },
+    {
+      "id": "publish_global_pair",
+      "type": "rip_target_delta",
+      "left": "publish_move",
+      "right": "publish_attack",
+      "expected_delta": 300,
+      "tolerance": 0,
+      "weight": 8
+    },
+    {
+      "id": "move_handler_calls_selection",
+      "type": "calls",
+      "caller": "move_handler",
+      "callee": "selection",
+      "weight": 5
+    },
+    {
+      "id": "attack_handler_calls_selection",
+      "type": "calls",
+      "caller": "attack_handler",
+      "callee": "selection",
+      "weight": 5
+    },
+    {
+      "id": "publish_move_calls_writer_begin",
+      "type": "calls",
+      "caller": "publish_move",
+      "callee": "writer_begin",
+      "weight": 5
+    },
+    {
+      "id": "publish_move_calls_writer_finalize",
+      "type": "calls",
+      "caller": "publish_move",
+      "callee": "writer_finalize",
+      "weight": 5
+    },
+    {
+      "id": "publish_attack_calls_writer_begin",
+      "type": "calls",
+      "caller": "publish_attack",
+      "callee": "writer_begin",
+      "weight": 5
+    },
+    {
+      "id": "publish_attack_calls_writer_finalize",
+      "type": "calls",
+      "caller": "publish_attack",
+      "callee": "writer_finalize",
+      "weight": 5
+    }
+  ]
 }
