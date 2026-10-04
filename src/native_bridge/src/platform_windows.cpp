@@ -6,7 +6,7 @@
 #include <intrin.h>
 #include <bcrypt.h>
 #include "wh3/bridge_host.hpp"
-#include "wh3/component_layout.hpp"
+#include "wh3/component_layout.hpp"\n#include "wh3/generated_native_map.hpp"
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -54,7 +54,7 @@ const char* mh_status_name(int s) noexcept {
 std::string create_failure(std::size_t i,int status,bool null_tramp,bool retried){
  char buf[256]{};
  std::snprintf(buf,sizeof buf,"MINHOOK_CREATE_FAILED_hook=%s_idx=%zu_rva=0x%llx_status=%d_%s_tramp_null=%d_retry=%d",
-  i<(sizeof(hook_names)/sizeof(hook_names[0]))?hook_names[i]:"unknown",i,static_cast<unsigned long long>(guards[i].rva),status,mh_status_name(status),null_tramp?1:0,retried?1:0);
+  i<hook_names.size()?hook_names[i]:"unknown",i,static_cast<unsigned long long>(guards[i].rva),status,mh_status_name(status),null_tramp?1:0,retried?1:0);
  return std::string(buf);
 }
 template<class F> bool symbol(HMODULE m,const char* name,F& f){auto p=GetProcAddress(m,name);if(!p)return false;
