@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""One-command WH3 update triage for Better Shift Command.
+"""One-command WH3 update triage and relocation pipeline for Better Shift Command.
 
-Current implementation covers pipeline stages:
-1. canonical native-map contract input
-2. exact signature relocation
+Implemented stages:
+1. canonical JSON source of truth
+2. exact guard relocation
 3. update classification
+4. relocation-normalized guard matching
+5. .pdata/runtime-function fingerprints
+6. declarative anchor relationship/callgraph resolution + constructor/VTable derivation
 
-Later phases add normalized instruction matching, .pdata fingerprints,
-relationship/callgraph proof, and Ghidra/BinDiff fallback.
+Stage 7 remains an explicit fallback only when Stage 6 cannot close the map.
+Generated maps are never release-authorized automatically.
 """
 from __future__ import annotations
 
@@ -15,7 +18,10 @@ import argparse
 import json
 from pathlib import Path
 
-from relocate_exact import candidate_map, printable, run
+from generate_candidate_map import generate as generate_candidate
+from relocate_exact import printable, run as run_exact
+from relocate_normalized import run as run_normalized
+from resolve_relations import run as run_relations
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,78 +29,78 @@ DEFAULT_MAP = ROOT / "native_maps" / "wh3_9.0.1_6c104a63.json"
 DEFAULT_REPORT_ROOT = ROOT / "reports" / "wh3_updates"
 
 
-def summary_markdown(report: dict) -> str:
+def summary_markdown(exact: dict, normalized: dict, relations: dict, candidate: dict | None) -> str:
+    final_status = (
+        "STRUCTURALLY_RESOLVED_CANDIDATE"
+        if relations["all_core_resolved"]
+        else "MANUAL_REVERSE_ENGINEERING_REQUIRED"
+    )
     lines = [
         "# WH3 Update Triage",
         "",
-        f"- Classification: **{report['classification']}**",
-        f"- Expected SHA256: {report['expected_sha256']}",
-        f"- Actual SHA256: {report['actual_sha256']}",
-        f"- SHA match: {str(report['sha_match']).lower()}",
+        f"- Exact classification: **{exact['classification']}**",
+        f"- Pipeline status: **{final_status}**",
+        f"- Expected SHA256: {exact['expected_sha256']}",
+        f"- Actual SHA256: {exact['actual_sha256']}",
+        f"- Mandatory core resolved after Stage 6: **{relations['resolved_core']}/{relations['core_total']}**",
         "",
-        "## Mandatory core sites",
+        "## Core relocation",
         "",
-        "| Site | Old RVA | Result | Resolved RVA | Matches |",
-        "|---|---:|---|---:|---:|",
+        "| Site | Exact result | Stage-6 resolved RVA | Method |",
+        "|---|---|---:|---|",
     ]
-    for row in report["core"]:
+    exact_by_name = {row["name"]: row for row in exact["core"]}
+    for name, row in relations["core"].items():
+        erow = exact_by_name[name]
         lines.append(
-            f"| {row['name']} | {row['old_rva']} | {row['status']} | "
-            f"{row['resolved_rva'] or '-'} | {len(row['matches'])} |"
+            f"| {name} | {erow['status']} | {row['resolved_rva'] or '-'} | {row['method']} |"
         )
 
-    lines += [
-        "",
-        "## Optional sites",
-        "",
-        "| Site | Old RVA | Result | Resolved RVA | Runtime impact |",
-        "|---|---:|---|---:|---|",
-    ]
-    for row in report["optional"]:
-        lines.append(
-            f"| {row['name']} | {row['old_rva']} | {row['status']} | "
-            f"{row['resolved_rva'] or '-'} | none on CorePath release gate |"
-        )
+    if normalized["core"]:
+        lines += [
+            "",
+            "## Normalized sites",
+            "",
+            "| Site | Result | Candidate count |",
+            "|---|---|---:|",
+        ]
+        for row in normalized["core"]:
+            lines.append(f"| {row['name']} | {row['status']} | {row['match_count']} |")
 
-    s = report["summary"]
-    lines += [
-        "",
-        "## Totals",
-        "",
-        f"- Core same RVA: **{s['core_same_rva']}**",
-        f"- Core exact relocated: **{s['core_exact_relocated']}**",
-        f"- Core ambiguous: **{s['core_ambiguous']}**",
-        f"- Core not found: **{s['core_not_found']}**",
-        f"- Optional resolved: **{s['optional_resolved']}/{s['optional_total']}**",
-        "",
-        "## Next gate",
-        "",
-    ]
-
-    classification = report["classification"]
-    if classification == "CURRENT_BUILD_EXACT":
-        lines.append("No address migration required. Continue normal validation.")
-    elif classification == "HASH_ONLY":
-        lines.append(
-            "All mandatory bytes remain at the same RVAs. Review build identity, then "
-            "promote only after static/runtime validation."
-        )
-    elif classification == "RVA_ONLY":
-        lines.append(
-            "Every mandatory site was exact-relocated without ambiguity. Review the "
-            "candidate map, then continue structural/runtime validation."
-        )
-    elif classification == "PARTIAL_EXACT_AMBIGUOUS":
-        lines.append(
-            "At least one mandatory guard has multiple exact candidates. Do not promote. "
-            "Proceed to normalized and structural matching."
-        )
+    lines += ["", "## Relationship reductions", ""]
+    if relations["relationship_audit"]:
+        for item in relations["relationship_audit"]:
+            lines.append(
+                f"- Round {item['round']}: {item['relationship']} ({item['type']}) reduced candidates."
+            )
     else:
-        lines.append(
-            "At least one mandatory guard was not found exactly. Do not promote. "
-            "Proceed to normalized instruction matching."
-        )
+        lines.append("- No structural reduction was needed.")
 
+    if candidate is not None:
+        identity = candidate["candidate"]["order_identity"]
+        lines += [
+            "",
+            "## Re-derived order identity",
+            "",
+            f"- Base constructor: {identity['base_constructor']}",
+            f"- Full Move constructor: {identity['full_move_constructor']}",
+            f"- Attack constructor: {identity['attack_constructor']}",
+            f"- Full Move VTable: {identity['full_move_vtable']}",
+            f"- Attack VTable: {identity['attack_vtable']}",
+            f"- Simple/Intercept Move constructor: {identity['simple_intercept_move_constructor']}",
+            f"- Simple/Intercept Move VTable: {identity['simple_intercept_move_vtable']}",
+            "",
+            "The generated map is NOT release-authorized. Continue with source generation, "
+            "prebuild checks, Windows native tests, and WH3 runtime smoke.",
+        ]
+    else:
+        lines += [
+            "",
+            "## Next action",
+            "",
+            "Stage 6 did not uniquely resolve every mandatory core site. Produce the evidence "
+            "bundle and use Stage 7 Ghidra/BinDiff fallback only for the remaining sites.",
+        ]
     return "\n".join(lines) + "\n"
 
 
@@ -102,50 +108,57 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exe", required=True, type=Path)
     parser.add_argument("--map", type=Path, default=DEFAULT_MAP)
+    parser.add_argument("--game-version", default="unknown")
     parser.add_argument("--report-root", type=Path, default=DEFAULT_REPORT_ROOT)
     args = parser.parse_args()
 
-    report = run(args.exe, args.map)
-    sha12 = report["actual_sha256"][:12]
+    exact = run_exact(args.exe, args.map)
+    normalized = run_normalized(args.exe, args.map)
+    relations = run_relations(args.exe, args.map)
+
+    sha12 = exact["actual_sha256"][:12]
     out_dir = args.report_root / sha12
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    clean = printable(report)
     (out_dir / "exact_relocation.json").write_text(
-        json.dumps(clean, ensure_ascii=False, indent=2) + "\n",
+        json.dumps(printable(exact), ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    (out_dir / "summary.md").write_text(summary_markdown(report), encoding="utf-8")
+    (out_dir / "normalized_relocation.json").write_text(
+        json.dumps(normalized, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (out_dir / "relation_resolution.json").write_text(
+        json.dumps(relations, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
-    if report["classification"] in {"CURRENT_BUILD_EXACT", "HASH_ONLY", "RVA_ONLY"}:
-        candidate = candidate_map(
-            report["_candidate_map_source"],
-            report["actual_sha256"],
-            report["core"],
-            report["optional"],
-        )
-        (out_dir / "candidate_map_exact.json").write_text(
+    candidate = None
+    if relations["all_core_resolved"]:
+        candidate = generate_candidate(args.exe, args.map, args.game_version)
+        (out_dir / "candidate_map.json").write_text(
             json.dumps(candidate, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
 
-    print("========================================")
-    print(" Better Shift Command WH3 Update Triage")
-    print("========================================")
-    print(f"classification       {report['classification']}")
-    print(f"expected_sha         {report['expected_sha256']}")
-    print(f"actual_sha           {report['actual_sha256']}")
-    print(f"core_same_rva        {report['summary']['core_same_rva']}")
-    print(f"core_exact_relocated {report['summary']['core_exact_relocated']}")
-    print(f"core_ambiguous       {report['summary']['core_ambiguous']}")
-    print(f"core_not_found       {report['summary']['core_not_found']}")
-    print(
-        f"optional_resolved    {report['summary']['optional_resolved']}/"
-        f"{report['summary']['optional_total']}"
+    (out_dir / "summary.md").write_text(
+        summary_markdown(exact, normalized, relations, candidate),
+        encoding="utf-8",
     )
-    print(f"report_dir           {out_dir}")
 
-    if report["classification"] in {"PARTIAL_EXACT_AMBIGUOUS", "CODEGEN_OR_SEMANTIC_DRIFT"}:
+    print("========================================")
+    print(" Better Shift Command WH3 Update Pipeline")
+    print("========================================")
+    print(f"exact_classification  {exact['classification']}")
+    print(f"actual_sha            {exact['actual_sha256']}")
+    print(f"core_stage6           {relations['resolved_core']}/{relations['core_total']}")
+    print(f"candidate_generated   {candidate is not None}")
+    print(f"report_dir             {out_dir}")
+    if candidate is not None:
+        print("release_authorized     false")
+        print("next_gate              GENERATE_SOURCE_AND_VALIDATE")
+    else:
+        print("next_gate              STAGE7_FALLBACK")
         raise SystemExit(2)
 
 
