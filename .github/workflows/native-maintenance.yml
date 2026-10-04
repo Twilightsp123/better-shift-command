@@ -1,0 +1,107 @@
+name: Native maintenance
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'maintenance/**'
+    paths:
+      - 'native_maps/**'
+      - 'maintenance_tools/**'
+      - 'tools/**'
+      - 'src/native_bridge/**'
+      - 'source/**'
+      - 'src/**'
+      - 'tests/**'
+      - 'docs/**'
+      - 'README_FIRST.md'
+      - 'RELEASE_MANIFEST.json'
+      - 'DESIGN_MANIFEST.json'
+      - '.github/workflows/native-maintenance.yml'
+  pull_request:
+    paths:
+      - 'native_maps/**'
+      - 'maintenance_tools/**'
+      - 'tools/**'
+      - 'src/native_bridge/**'
+      - 'source/**'
+      - 'src/**'
+      - 'tests/**'
+      - 'docs/**'
+      - 'README_FIRST.md'
+      - 'RELEASE_MANIFEST.json'
+      - 'DESIGN_MANIFEST.json'
+
+jobs:
+  source-contracts:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Lua 5.1
+        run: sudo apt-get update && sudo apt-get install -y lua5.1
+      - name: Native map contract
+        run: python maintenance_tools/check_native_map_contract.py
+      - name: Prebuild contract
+        run: python tools/prebuild_contract_check.py
+      - name: Documentation contract
+        run: python maintenance_tools/check_documentation_contract.py
+      - name: CorePath offline suite
+        run: python maintenance_tools/run_checks_corepath_rc8.py
+
+  portable-native:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S src/native_bridge -B build-portable -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build-portable --parallel
+      - name: Test
+        run: ctest --test-dir build-portable --output-on-failure
+
+  sanitizer-native:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure ASan/UBSan
+        run: cmake -S src/native_bridge -B build-sanitize -DCMAKE_BUILD_TYPE=Debug -DWH3_SANITIZE=ON
+      - name: Build ASan/UBSan
+        run: cmake --build build-sanitize --parallel
+      - name: Test ASan/UBSan
+        run: ctest --test-dir build-sanitize --output-on-failure
+
+  windows-v142:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify promoted native map
+        shell: pwsh
+        run: |
+          python maintenance_tools/check_native_map_contract.py
+          python tools/prebuild_contract_check.py
+      - name: Configure VS2022 with v142 toolset
+        shell: pwsh
+        run: cmake -S src/native_bridge -B build-win -G "Visual Studio 17 2022" -A x64 -T v142
+      - name: Build Release
+        shell: pwsh
+        run: cmake --build build-win --config Release --parallel
+      - name: Windows Native CTest
+        shell: pwsh
+        run: ctest --test-dir build-win -C Release --output-on-failure
+      - name: Stage native delivery
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path native-delivery | Out-Null
+          Copy-Item build-win/Release/wh3_native_bridge.dll native-delivery/
+          Copy-Item baseline/minhook.x64.dll native-delivery/
+          Copy-Item native_maps/CURRENT native-delivery/
+          Copy-Item src/native_bridge/include/wh3/generated_native_map.hpp native-delivery/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wh3-native-bridge-windows-v142
+          path: native-delivery/
+          if-no-files-found: error
