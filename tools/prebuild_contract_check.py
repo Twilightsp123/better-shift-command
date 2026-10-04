@@ -6,7 +6,8 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'maintenance_tools'))
-from generate_native_header import render\nfrom native_map_config import current_map_path
+from generate_native_header import render
+from native_map_config import current_map_path
 
 CPP=(ROOT/'src/native_bridge/src/platform_windows.cpp').read_text(encoding='utf-8')
 HOST=(ROOT/'src/native_bridge/src/bridge_host.cpp').read_text(encoding='utf-8')
