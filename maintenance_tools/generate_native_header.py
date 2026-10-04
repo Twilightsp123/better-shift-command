@@ -35,6 +35,7 @@ def render(native_map: dict) -> str:
         "    const char* bytes;",
         "};",
         "",
+        f'inline constexpr char kMapId[] = "{native_map["map_id"]}";',
         f'inline constexpr char kExeSha256[] = "{native_map["game"]["sha256"]}";',
         "",
         "inline constexpr std::array<GuardSpec, 16> kCoreGuards{{",
