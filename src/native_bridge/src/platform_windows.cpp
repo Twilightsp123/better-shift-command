@@ -25,27 +25,10 @@ std::mutex install_mu;
 bool installed=false, attempted=false;
 std::string error_storage="NOT_STARTED";
 HMODULE backend=nullptr, resident=nullptr;
-constexpr const char* exe_hash="6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297";
-struct Guard {std::uintptr_t rva;const char* bytes;};
-constexpr Guard guards[]={
- {0x030344d4,"488bc4488958104889701848897820554154415541564157488da888feffff48"},
- {0x03032854,"488bc448895808488968104889701857415641574883ec30498b18488bf1488b"},
- {0x02f5248c,"48895c240855488d6c24c04881ec40010000488bd984d2752083b9102d000000"},
- {0x0301b890,"48895c24084889742410574883ec20488bf18ada4881c188020000e88007f2ff"},
- {0x02ed5808,"488bc44889580848897018488978205541564157488d68d84881ec1001000048"},
- {0x02ed50a0,"48895c240848896c2410488974241857415641574881ecd0000000458af8488b"},
- {0x01cb1dc8,"48895c2418574883ec408b0524c53b02488bd9488d4c245089442450488bfae8"},
- {0x02df28bc,"48895c2418574883ec408b0504b92701488bd9488d4c245089442450488bfae8"},
- {0x01bce174,"48895c24084c8bda488bd94c89590833d2668911418b8300500000894110418b"},
- {0x01bd140c,"8039004c8bc9753180790100752b488b51088b4114440fb7820050000066442b"},
- {0x01baf488,"488bc44889581048897018574883ec20488bfa4c8d40088b920050000033db88"},
- {0x01bb0c94,"48895c24084889742410574883ec20488bd98bf2488b4918498bf8e830330000"},
- {0x02ecf0e0,"48895c241048897c242055488d6c24a94881ec00010000488bfa488bd9488bd1"},
- {0x02ecebac,"488bc448895810555657488d68a84881ec40010000488bf20f2970d8488bd148"},
- {0x02f042d4,"40555356574157488d6c24c94881ecc00000004533ff4c8d456f488bda44897d"},
- {0x0052f770,"4883ec584885c90f8412010000f6054caaa30302"}
-};
-constexpr Guard contact_pair_guard{0x030a3859,"488b47184885c07418488b88e8020000"};
+constexpr const char* exe_hash=native_map::kExeSha256;
+using Guard=native_map::GuardSpec;
+constexpr auto guards=native_map::kCoreGuards;
+constexpr Guard contact_pair_guard=native_map::kContactPairGuard;
 using Init=int(WINAPI*)();using Create=int(WINAPI*)(void*,void*,void**);
 using Target=int(WINAPI*)(void*);using Apply=int(WINAPI*)();
 struct MH {
@@ -58,10 +41,7 @@ std::array<void*,16> g_core_targets{};
 void* g_smart_guard_target=nullptr;
 bool g_hooks_created=false;
 bool g_observer_stopped=false;
-constexpr const char* hook_names[]={
- "move","attack","allocator","halt","lua_move","lua_attack","publish_move","publish_attack",
- "writer_begin","writer_finalize","copy","stage","move_handler","attack_handler","selection","free"
-};
+constexpr auto hook_names=native_map::kHookNames;
 const char* mh_status_name(int s) noexcept {
  switch(s){
   case 0:return "MH_OK";case 1:return "MH_ERROR_ALREADY_INITIALIZED";case 2:return "MH_ERROR_NOT_INITIALIZED";
@@ -445,7 +425,7 @@ void* platform_lua_symbol(const char* s) noexcept {auto p=GetProcAddress(GetModu
 bool platform_hooks_installed() noexcept {std::lock_guard<std::mutex> l(install_mu);return installed;}
 const char* platform_last_error() noexcept {std::lock_guard<std::mutex> l(install_mu);return error_storage.c_str();}
 bool platform_evidence_build_verified() noexcept {std::lock_guard<std::mutex> l(install_mu);return installed;}
-const char* platform_evidence_build_id() noexcept {return "WH3_6C104A63AACC4D86_COREPATH_RC8";}
+const char* platform_evidence_build_id() noexcept {return native_map::kMapId;}
 std::uint64_t platform_tick_ms() noexcept{return GetTickCount64();}
 extern "C" void wh3_contact_pair_observer(void* result_record) noexcept {
  if(!result_record)return;
@@ -583,7 +563,7 @@ const char* platform_start_observer(){
   // Phase B — Optional Smart Guard (independent optional hook).
   // If any Smart Guard-specific operation fails:
   // CORE BETTER SHIFT REMAINS ACTIVE; SMART GUARD DISABLED.
-  constexpr Guard smart_guard_guard{0x030e2524,"48895c24084889742410574883ec20488b02488bf1488bca418af8488bdaff90"};
+  constexpr Guard smart_guard_guard=native_map::kSmartGuardGuard;
   // Current 6c104 build: state-transition hook address/guard is revalidated, but
   // Smart Guard's internal state-object/vtable map is intentionally NOT part of
   // this core runtime-gate diagnostic. Keep optional behavior disabled.
