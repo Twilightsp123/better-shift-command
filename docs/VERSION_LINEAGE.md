@@ -12,7 +12,7 @@ The project has several independent numbering systems. A bare label such as `RC2
 | BSC convergence experiment | RC1, RC2 | broad cleanup/convergence branch | **abandoned**, not a baseline |
 | Steering / command behavior | SC1–SC6 | single-problem gameplay fixes | SC1–SC6 behavior forms the modern gameplay lineage |
 | Public/formal BSC releases | v1.2.0, v1.2.1, v1.2.2, **v1.3.0** | formal Mod version line | current formal maintained version = **v1.3.0**; v1.2.2 remains upstream behavior ancestry |
-| Native Bridge versions | 0.1.1, 0.4.x, 0.5.x, 1.0.x | native observer/identity/issuing/evidence evolution | current candidate = `1.0.17-corepath-wh3-6c104-movevtfix` |
+| Native Bridge versions | 0.1.1, 0.4.x, 0.5.x, 1.0.x | native observer/identity/issuing/evidence evolution | current build candidate = `1.0.18-corepath-wh3-fec656f4-map902`; last runtime baseline = 1.0.17 |
 | WH3 current-build remap/diagnostic | RC4, RC5, RC6, RC7, RC8 | native map/runtime-gate work for WH3 9.0.1 current EXE | current = **CorePath RC8** |
 | Transition-policy architecture | BSC-TPOL-D1 | next gameplay/MCT architecture; no new Native RE | **approved design, not implemented** |
 | Smart Guard diagnostics | its own RC labels | separate optional Smart Guard investigation | staged disabled; never identify by bare `RCx` in shared docs |
@@ -79,15 +79,17 @@ The detailed implementation history is in `src/native_bridge/CHANGELOG.md`; this
 - v1.0.3, v1.0.7, v1.0.11, v1.0.13, v1.0.14: later BSC/native version locks and evidence evolution; see Native changelog.
 - `1.0.15-r4-evidence-v3-validated-userdata-root`: historical pre-CorePath ABI used by v1.2.0/v1.2.1-era documentation.
 - `1.0.16` current-build diagnostics: WH3 9.0.1 remap/gating line.
-- `1.0.17-corepath-wh3-6c104-movevtfix`: current PREBUILD candidate.
+- `1.0.17-corepath-wh3-6c104-movevtfix`: WH3 9.0.1 runtime-validated baseline.
+- `1.0.18-corepath-wh3-fec656f4-map902`: WH3 9.0.2 static-map build candidate; Windows/runtime gates pending.
 
-## 4. WH3 9.0.1 current-build map line
+## 4. WH3 build-map line
 
 - **NATIVE-MAP-RC4:** current-build diagnostic hardening and 17-core-hook-era gate.
 - **NATIVE-MAP-RC5:** current-build static map / first runtime-gate candidate. Patch evidence is preserved inside the RC7 original archive.
 - **NATIVE-MAP-RC6:** command-root-anchored physical-root discovery; established that command root and physical candidate are distinct. Detailed RC6 summary/patch is nested inside the RC7 original archive.
 - **NATIVE-MAP-RC7:** component-layout discovery attempt + safe observer stop. Runtime found the physical candidate (`slot_count=60`) but zero valid component back-reference pairs; safe-stop reported success.
-- **COREPATH-RC8:** removes physical evidence from release-critical authorization, reduces mandatory hooks from 17 to 16, keeps optional ContactPair/Smart Guard static sites staged disabled, and preserves RC7 safe-stop for desktop quit only.
+- **COREPATH-RC8 / WH3 9.0.1:** removes physical evidence from release-critical authorization, reduces mandatory hooks from 17 to 16, keeps optional ContactPair/Smart Guard static sites staged disabled, and preserves RC7 safe-stop for desktop quit only.
+- **WH3 9.0.2 MAP CANDIDATE:** first full use of the seven-stage address-maintenance pipeline; 16/16 mandatory sites statically resolved and Move/Attack identity re-derived, with Windows/runtime validation still pending.
 
 ## 5. Disambiguation examples
 
