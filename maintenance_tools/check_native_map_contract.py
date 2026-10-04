@@ -6,11 +6,11 @@ import argparse
 import json
 from pathlib import Path
 
-from generate_native_header import render
+from generate_native_header import render\nfrom native_map_config import current_map_path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MAP = ROOT / "native_maps" / "wh3_9.0.1_6c104a63.json"
+DEFAULT_MAP = current_map_path()
 DEFAULT_GENERATED = ROOT / "src" / "native_bridge" / "include" / "wh3" / "generated_native_map.hpp"
 DEFAULT_CPP = ROOT / "src" / "native_bridge" / "src" / "platform_windows.cpp"
 DEFAULT_HOST = ROOT / "src" / "native_bridge" / "src" / "bridge_host.cpp"
