@@ -4,8 +4,9 @@
   "status": "T1H_PROFILE_SCAFFOLD_IMPLEMENTED_T2_NOT_IMPLEMENTED",
   "runtime_baseline": {
     "controller": "1.3.0",
-    "native_bridge": "1.0.17-corepath-wh3-6c104-movevtfix",
-    "target_wh3_sha256": "6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297"
+    "native_bridge": "1.0.18-corepath-wh3-fec656f4-map902",
+    "target_wh3_sha256": "fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785",
+    "native_map_state": "WH3_9.0.2_STATIC_VERIFIED_WINDOWS_RUNTIME_PENDING"
   },
   "product_default": "SMOOTH",
   "hard_invariants_configurable": false,
@@ -32,12 +33,13 @@
   "engagement_hold_seconds": {
     "range": [
       0.5,
-      10.0
+      10
     ],
-    "default": 3.0,
+    "default": 3,
     "runtime_wired_in_t1h": true
   },
   "formal_project_version": "1.3.0",
   "formal_version_tag": "v1.3.0",
-  "canonical_pack_name": "zzz_better_shift_command_steam.pack"
+  "canonical_pack_name": "zzz_better_shift_command_steam.pack",
+  "address_maintenance_pipeline": "docs/NATIVE_ADDRESS_MAINTENANCE_PIPELINE.md"
 }
