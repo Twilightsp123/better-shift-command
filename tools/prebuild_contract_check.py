@@ -6,7 +6,7 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'maintenance_tools'))
-from generate_native_header import render
+from generate_native_header import render\nfrom native_map_config import current_map_path
 
 CPP=(ROOT/'src/native_bridge/src/platform_windows.cpp').read_text(encoding='utf-8')
 HOST=(ROOT/'src/native_bridge/src/bridge_host.cpp').read_text(encoding='utf-8')
@@ -14,7 +14,7 @@ LUA=(ROOT/'src/native_bridge/src/lua_module.cpp').read_text(encoding='utf-8')
 HDR=(ROOT/'src/native_bridge/include/wh3/bridge_host.hpp').read_text(encoding='utf-8')
 GEN_PATH=ROOT/'src/native_bridge/include/wh3/generated_native_map.hpp'
 GEN=GEN_PATH.read_text(encoding='utf-8')
-MAP_PATH=ROOT/'native_maps/wh3_9.0.1_6c104a63.json'
+MAP_PATH=current_map_path(ROOT)
 MAP=json.loads(MAP_PATH.read_text(encoding='utf-8'))
 
 def fail(m): print('FAIL:',m); raise SystemExit(1)
