@@ -1,0 +1,82 @@
+name: WH3 Native Candidate
+
+on:
+  push:
+    branches:
+      - maintenance/wh3-address-pipeline-phase1
+    paths:
+      - .github/workflows/native-candidate.yml
+      - native_maps/**
+      - maintenance_tools/**
+      - tools/**
+      - tests/**
+      - src/native_bridge/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-v142-candidate:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Address pipeline regressions
+        shell: pwsh
+        run: |
+          python tests/test_address_pipeline.py
+          python tests/test_candidate_build_lane.py
+          python maintenance_tools/check_native_map_contract.py
+          python tools/prebuild_contract_check.py
+
+      - name: Generate 9.0.2 candidate map overlay
+        shell: pwsh
+        run: |
+          $Map = Join-Path $env:GITHUB_WORKSPACE 'native_maps/candidates/wh3_9.0.2_fec656f4.json'
+          $MapInclude = Join-Path $env:GITHUB_WORKSPACE 'build-map/include'
+          $Generated = Join-Path $MapInclude 'wh3/generated_native_map.hpp'
+          python maintenance_tools/generate_native_header.py --map $Map --out $Generated
+          python maintenance_tools/check_native_map_contract.py --map $Map --generated $Generated
+
+      - name: Configure v142 candidate
+        shell: pwsh
+        run: |
+          $MapInclude = Join-Path $env:GITHUB_WORKSPACE 'build-map/include'
+          cmake -S src/native_bridge -B build/native-candidate -G 'Visual Studio 17 2022' -A x64 -T v142 "-DWH3_NATIVE_MAP_INCLUDE_DIR=$MapInclude"
+
+      - name: Build Release
+        shell: pwsh
+        run: cmake --build build/native-candidate --config Release --parallel
+
+      - name: Native CTest
+        shell: pwsh
+        run: ctest --test-dir build/native-candidate -C Release --output-on-failure
+
+      - name: Record candidate artifact hashes
+        shell: pwsh
+        run: |
+          $Dll = Join-Path $env:GITHUB_WORKSPACE 'build/native-candidate/Release/wh3_native_bridge.dll'
+          if (!(Test-Path $Dll)) { throw "Missing candidate DLL: $Dll" }
+          $Hash = (Get-FileHash $Dll -Algorithm SHA256).Hash.ToLowerInvariant()
+          "bridge_sha256=$Hash" | Tee-Object -FilePath build/native-candidate/candidate_hashes.txt
+          Get-Content native_maps/CURRENT | ForEach-Object { "promoted_current=$_" } | Add-Content build/native-candidate/candidate_hashes.txt
+          "candidate_map=native_maps/candidates/wh3_9.0.2_fec656f4.json" | Add-Content build/native-candidate/candidate_hashes.txt
+
+      - name: Upload candidate DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: wh3-9.0.2-native-candidate-v142
+          if-no-files-found: error
+          path: |
+            build/native-candidate/Release/wh3_native_bridge.dll
+            build/native-candidate/candidate_hashes.txt
+            build-map/include/wh3/generated_native_map.hpp
+            native_maps/candidates/wh3_9.0.2_fec656f4.json
