@@ -1,15 +1,15 @@
-# BSC Assumption Ledger — 2026-09-29
+# BSC Assumption Ledger — WH3 9.0.2 build candidate
 
 This ledger separates facts from inherited names. A future maintainer must update the status here before promoting any reverse-engineered field into a release gate.
 
 | Item | Current status | Release use |
 |---|---|---|
-| WH3 EXE SHA `6c104a63...3297` | build identity lock | mandatory |
-| 16 command/packet hook RVAs + guards | statically re-audited for current build; Windows/runtime candidate build still pending | mandatory |
-| Full Move VTable `0x03910AA8` for hooked top-level `issue_move` | **LEVEL-1 static dataflow verified 2026-09-29** | command outcome + SC6 execution identity |
-| Simple/Intercept Move VTable `0x0390E248` | verified sibling/internal constructor; prior use as the sole/top-level Move VTable was **RETRACTED** | not valid for BSC top-level Move outcome |
-| Attack VTable `0x03910228` | statically revalidated | command identity |
-| allocator `0x02F5248C` returns exact `slot_base` in RAX | **LEVEL-1 static dataflow verified 2026-09-29** | core outcome capture |
+| WH3 9.0.2 EXE SHA `fec656f4...3785` | current build-candidate identity lock; 9.0.1 `6c104a63...3297` retained as last runtime baseline | mandatory |
+| 16 command/packet hook RVAs + guards | **9.0.2 STATIC VERIFIED 16/16 byte-exact**; Windows/runtime candidate build still pending | mandatory |
+| Full Move VTable `0x03913618` for WH3 9.0.2 hooked top-level `issue_move` | **LEVEL-1 static dataflow candidate verified**; prior 9.0.1 value `0x03910AA8` remains historical baseline | command outcome + SC6 execution identity |
+| Simple/Intercept Move VTable `0x03910438` on WH3 9.0.2 | sibling/internal constructor; use as the sole/top-level Move VTable remains **RETRACTED** | not valid for BSC top-level Move outcome |
+| Attack VTable `0x03912988` on WH3 9.0.2 | statically re-derived from Attack constructor | command identity |
+| allocator `0x02F53128` on WH3 9.0.2 | top-level Move/Attack call target; allocator ABI contract inherited pending runtime smoke | core outcome capture |
 | Order slot `root+0x288`, stride `0x120` | statically verified | core |
 | engine sequence `slot+0x20` | statically verified | SC6 core |
 | MOVE payload `+0x58/+0x5C/+0x60` | statically verified | core |
@@ -20,8 +20,8 @@ This ledger separates facts from inherited names. A future maintainer must updat
 | Component `+0x4A0` backref to that Entity | not closed from the member-array path; RC7 found zero pair candidates | quarantined |
 | Component `+0x8B0` movement state for those members | not closed as part of a valid Entity→Component chain | quarantined |
 | `vt+0x630 = Entity::is_alive()` | partial virtual-call evidence only; class/slot semantics not runtime-proven | quarantined |
-| ContactPair site `0x030A3859` | static site/frame work retained | optional, staged disabled |
-| Smart Guard state transition `0x030E2524` | static current-site map retained | optional, staged disabled |
+| ContactPair site `0x030A4505` on WH3 9.0.2 | exact guard relocated; semantics remain research-only | optional, staged disabled |
+| Smart Guard state transition `0x030E319C` on WH3 9.0.2 | exact guard relocated | optional, staged disabled |
 | RC7 `platform_stop_observer()` | implementation present; RC7 runtime logged successful hook disable | retained; RC8 production desktop-quit runtime test pending |
 
 ## Promotion rule
