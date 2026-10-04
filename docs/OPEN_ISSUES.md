@@ -4,18 +4,21 @@ Formal project version: **v1.3.0**. Internal maintenance labels below identify a
 
 This file contains current unresolved work only. Historical failures belong in `DEVELOPMENT_HISTORY.md`.
 
-## A. Current runtime status
+## A. Current Native maintenance status
 
-The Move-VTable correction has been built and exercised in WH3. Native outcome fatal behavior is no longer the primary blocker. The next release candidate is blocked by gameplay smoothness and lifecycle closure, not by the old `0x0390E248` top-level Move assumption.
+WH3 9.0.1 remains the last runtime-validated Native baseline. WH3 9.0.2 is now the active build candidate on this branch. Address relocation itself is no longer the open question: all 16 mandatory sites and both optional sites have been statically relocated and the Move/Attack constructor/VTable chain has been re-derived. The remaining 9.0.2 work is build/runtime validation.
 
 | ID | Status | Evidence / required closure |
 |---|---|---|
-| O-01 Windows v142 + MASM Build | **PASS** | audited Windows delivery for Native `1.0.17` |
-| O-02 Windows Native CTest | **PASS 14/14** | includes backend/module/mid-function smoke |
-| O-03 Current EXE guards | **PASS 16/16** | locked SHA `6c104a63...3297` |
-| O-04 PE/toolchain verification | **PASS** | AMD64 + v142 delivery |
-| O-05 Deterministic candidate pack | **PASS** | Move-VTable-fix candidate built/verified |
-| O-06 WH3 Native outcome smoke | **PASS ENOUGH TO CONTINUE GAMEPLAY WORK** | Bridge `1.0.17` runs; old outcome fatal is absent |
+| O-01 WH3 9.0.2 Windows v142 + MASM Build | **OPEN / NOT RUN** | build Bridge `1.0.18-corepath-wh3-fec656f4-map902` |
+| O-02 WH3 9.0.2 Windows Native CTest | **OPEN / NOT RUN** | run full Windows Native CTest after build |
+| O-03 WH3 9.0.2 Current EXE guards | **STATIC PASS 16/16** | locked SHA `fec656f4...3785`; built-candidate inspect still required |
+| O-04 WH3 9.0.2 order identity dataflow | **STATIC PASS** | allocator → Move/Attack constructors → VTables re-derived |
+| O-05 WH3 9.0.2 deterministic candidate pack | **OPEN** | only after Windows build/tests |
+| O-06 WH3 9.0.2 Native runtime smoke | **OPEN / NOT RUN** | Move, Attack, queued commands, ownership, execution identity, safe-stop |
+| O-07 Last runtime baseline | **WH3 9.0.1 PASS** | Bridge 1.0.17 / SHA 6c104a63 remains proven fallback |
+
+The automated address-maintenance pipeline is documented in `docs/NATIVE_ADDRESS_MAINTENANCE_PIPELINE.md`.
 
 ## B. Gameplay blockers — Transition Policy D1
 
