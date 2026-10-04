@@ -314,6 +314,34 @@
       ],
       "tolerance": 1024,
       "weight": 3
+    },
+    {
+      "id": "move_calls_allocator",
+      "type": "calls",
+      "caller": "move",
+      "callee": "allocator",
+      "weight": 10
+    },
+    {
+      "id": "attack_calls_allocator",
+      "type": "calls",
+      "caller": "attack",
+      "callee": "allocator",
+      "weight": 10
+    },
+    {
+      "id": "lua_move_calls_publish_move",
+      "type": "calls",
+      "caller": "lua_move",
+      "callee": "publish_move",
+      "weight": 10
+    },
+    {
+      "id": "lua_attack_calls_publish_attack",
+      "type": "calls",
+      "caller": "lua_attack",
+      "callee": "publish_attack",
+      "weight": 10
     }
   ]
 }
