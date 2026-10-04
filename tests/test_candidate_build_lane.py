@@ -16,7 +16,7 @@ class TestCandidateBuildLane(unittest.TestCase):
  def test_prepare_script_does_not_write_promoted_header(self):
   s=(ROOT/"maintenance_tools"/"prepare_candidate_build.py").read_text(encoding="utf-8");self.assertNotIn("src/native_bridge/include/wh3/generated_native_map.hpp",s);self.assertIn('out_dir/"include"',s);self.assertIn("CURRENT changed during candidate preparation",s)
  def test_cmake_overlay_contract(self):
-  s=(ROOT/"src/native_bridge/CMakeLists.txt").read_text(encoding="utf-8");self.assertIn("WH3_NATIVE_MAP_INCLUDE_DIR",s);self.assertIn("target_include_directories(wh3_host_core BEFORE",s);self.assertIn("target_include_directories(wh3_native_bridge BEFORE",s);self.assertIn("wh3/generated_native_map.hpp",s)
+  s=(ROOT/"src/native_bridge/CMakeLists.txt").read_text(encoding="utf-8");self.assertIn("WH3_NATIVE_MAP_INCLUDE_DIR",s);self.assertIn("target_include_directories(wh3_host_core BEFORE",s);self.assertIn("target_include_directories(wh3_native_bridge BEFORE",s);self.assertIn("wh3/generated_native_map.hpp",s);self.assertIn("COMPILE_LANGUAGE:CXX",s);self.assertNotIn("target_compile_options(${t} PRIVATE /W4 /WX /EHsc)",s)
  def test_no_api_literal_newline_corruption(self):
   checks={"maintenance_tools/check_native_map_contract.py":"render\\nfrom native_map_config","tools/prebuild_contract_check.py":"render\\nfrom native_map_config","maintenance_tools/wh3_update.py":"generate_candidate\\nfrom native_map_config","maintenance_tools/run_checks_corepath_rc8.py": "),\\n      ('address_pipeline","src/native_bridge/src/bridge_host.cpp":'bridge_host.hpp"\\n#include'}
   for rel,forbidden in checks.items():

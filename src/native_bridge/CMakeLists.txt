@@ -49,7 +49,10 @@ else()
 endif()
 foreach(t wh3_identity_gate wh3_host_core wh3_native_bridge)
  if(MSVC)
-  target_compile_options(${t} PRIVATE /W4 /WX /EHsc)
+  target_compile_options(${t} PRIVATE
+   $<$<COMPILE_LANGUAGE:CXX>:/W4>
+   $<$<COMPILE_LANGUAGE:CXX>:/WX>
+   $<$<COMPILE_LANGUAGE:CXX>:/EHsc>)
  else()
   target_compile_options(${t} PRIVATE -Wall -Wextra -Wpedantic -Werror -Wno-misleading-indentation)
  endif()
