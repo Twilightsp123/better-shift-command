@@ -6,7 +6,8 @@
 #include <intrin.h>
 #include <bcrypt.h>
 #include "wh3/bridge_host.hpp"
-#include "wh3/component_layout.hpp"\n#include "wh3/generated_native_map.hpp"
+#include "wh3/component_layout.hpp"
+#include "wh3/generated_native_map.hpp"
 #include <algorithm>
 #include <array>
 #include <cstring>
