@@ -23,6 +23,7 @@ from native_map_config import current_map_path
 from relocate_exact import printable, run as run_exact
 from relocate_normalized import run as run_normalized
 from resolve_relations import run as run_relations
+from verify_candidate_map import verify as verify_candidate
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -102,7 +103,9 @@ def summary_markdown(exact: dict, normalized: dict, relations: dict, candidate: 
             "Stage 6 did not uniquely resolve every mandatory core site. Produce the evidence "
             "bundle and use Stage 7 Ghidra/BinDiff fallback only for the remaining sites.",
         ]
-    return "\n".join(lines) + "\n"
+    return "
+".join(lines) + "
+"
 
 
 def main() -> None:
@@ -122,15 +125,18 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     (out_dir / "exact_relocation.json").write_text(
-        json.dumps(printable(exact), ensure_ascii=False, indent=2) + "\n",
+        json.dumps(printable(exact), ensure_ascii=False, indent=2) + "
+",
         encoding="utf-8",
     )
     (out_dir / "normalized_relocation.json").write_text(
-        json.dumps(normalized, ensure_ascii=False, indent=2) + "\n",
+        json.dumps(normalized, ensure_ascii=False, indent=2) + "
+",
         encoding="utf-8",
     )
     (out_dir / "relation_resolution.json").write_text(
-        json.dumps(relations, ensure_ascii=False, indent=2) + "\n",
+        json.dumps(relations, ensure_ascii=False, indent=2) + "
+",
         encoding="utf-8",
     )
 
@@ -139,12 +145,14 @@ def main() -> None:
     if relations["all_core_resolved"]:
         candidate = generate_candidate(args.exe, args.map, args.game_version)
         (out_dir / "candidate_map.json").write_text(
-            json.dumps(candidate, ensure_ascii=False, indent=2) + "\n",
+            json.dumps(candidate, ensure_ascii=False, indent=2) + "
+",
             encoding="utf-8",
         )
         verification = verify_candidate(args.exe, candidate)
         (out_dir / "candidate_static_verification.json").write_text(
-            json.dumps(verification, ensure_ascii=False, indent=2) + "\n",
+            json.dumps(verification, ensure_ascii=False, indent=2) + "
+",
             encoding="utf-8",
         )
 

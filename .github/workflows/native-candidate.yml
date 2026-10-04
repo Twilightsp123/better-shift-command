@@ -24,6 +24,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Restore repository text bytes
+        shell: pwsh
+        run: |
+          git config core.autocrlf false
+          git reset --hard HEAD
+
+      - name: Create full source snapshot
+        shell: pwsh
+        run: |
+          $Snapshot = Join-Path $env:RUNNER_TEMP 'better-shift-command-source.zip'
+          $Items = Get-ChildItem -Force | Where-Object { $_.Name -notin @('.git','build','build-map') }
+          Compress-Archive -Path $Items.FullName -DestinationPath $Snapshot -CompressionLevel Optimal
+          "source_snapshot=$Snapshot" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Upload full source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: better-shift-command-source
+          if-no-files-found: error
+          path: ${{ env.source_snapshot }}
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -37,10 +58,11 @@ jobs:
           python maintenance_tools/check_native_map_contract.py
           python tools/prebuild_contract_check.py
 
-      - name: Generate 9.0.2 candidate map overlay
+      - name: Generate staged candidate map overlay
         shell: pwsh
         run: |
-          $Map = Join-Path $env:GITHUB_WORKSPACE 'native_maps/candidates/wh3_9.0.2_fec656f4.json'
+          $CandidateRel = (Get-Content native_maps/CANDIDATE -Raw).Trim()
+          $Map = Join-Path $env:GITHUB_WORKSPACE (Join-Path 'native_maps' $CandidateRel)
           $MapInclude = Join-Path $env:GITHUB_WORKSPACE 'build-map/include'
           $Generated = Join-Path $MapInclude 'wh3/generated_native_map.hpp'
           python maintenance_tools/generate_native_header.py --map $Map --out $Generated
@@ -68,33 +90,18 @@ jobs:
           $Hash = (Get-FileHash $Dll -Algorithm SHA256).Hash.ToLowerInvariant()
           "bridge_sha256=$Hash" | Tee-Object -FilePath build/native-candidate/candidate_hashes.txt
           Get-Content native_maps/CURRENT | ForEach-Object { "promoted_current=$_" } | Add-Content build/native-candidate/candidate_hashes.txt
-          "candidate_map=native_maps/candidates/wh3_9.0.2_fec656f4.json" | Add-Content build/native-candidate/candidate_hashes.txt
-
-      - name: Create full source snapshot
-        if: always()
-        shell: pwsh
-        run: |
-          $Snapshot = Join-Path $env:RUNNER_TEMP 'better-shift-command-source.zip'
-          $Items = Get-ChildItem -Force | Where-Object { $_.Name -notin @('.git','build','build-map') }
-          Compress-Archive -Path $Items.FullName -DestinationPath $Snapshot -CompressionLevel Optimal
-          "source_snapshot=$Snapshot" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Upload full source snapshot
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: better-shift-command-source
-          if-no-files-found: error
-          path: ${{ env.source_snapshot }}
+          $CandidateRel = (Get-Content native_maps/CANDIDATE -Raw).Trim()
+          "candidate_map=native_maps/$CandidateRel" | Add-Content build/native-candidate/candidate_hashes.txt
 
       - name: Upload candidate DLL
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: wh3-9.0.2-native-candidate-v142
+          name: wh3-native-candidate-v142
           if-no-files-found: error
           path: |
             build/native-candidate/Release/wh3_native_bridge.dll
             build/native-candidate/candidate_hashes.txt
             build-map/include/wh3/generated_native_map.hpp
-            native_maps/candidates/wh3_9.0.2_fec656f4.json
+            native_maps/CANDIDATE
+            native_maps/candidates/**

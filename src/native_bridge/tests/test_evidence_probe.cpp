@@ -1,4 +1,5 @@
 #include "wh3/evidence_probe.hpp"
+#include "wh3/generated_native_map.hpp"
 #include <algorithm>
 #include <cstring>
 #include <iostream>
@@ -21,7 +22,7 @@ bool rd(std::uintptr_t a,void* out,std::size_t n) noexcept{
  return true;
 }
 constexpr std::uintptr_t image=0x140000000ULL;
-constexpr std::uintptr_t move_vt=image+0x03910AA8;
+const std::uintptr_t move_vt=image+native_map::kFullMoveVTable;
 bool alive_cb(std::uintptr_t entity,bool* alive) noexcept{int hp=0;if(!alive||!raw_rd(entity+0xb1c,&hp,4))return false;*alive=hp>0;return true;}
 bool group_cb(std::uintptr_t group,bool* melee,std::uintptr_t* target) noexcept{
  std::uint32_t m=0;std::uintptr_t t=0;if(!melee||!target||!raw_rd(group+0x10,&m,4)||!raw_rd(group+0x18,&t,8))return false;*melee=m!=0;*target=t;

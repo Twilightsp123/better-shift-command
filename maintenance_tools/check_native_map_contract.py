@@ -15,6 +15,7 @@ DEFAULT_MAP = current_map_path()
 DEFAULT_GENERATED = ROOT / "src" / "native_bridge" / "include" / "wh3" / "generated_native_map.hpp"
 DEFAULT_CPP = ROOT / "src" / "native_bridge" / "src" / "platform_windows.cpp"
 DEFAULT_HOST = ROOT / "src" / "native_bridge" / "src" / "bridge_host.cpp"
+DEFAULT_EVIDENCE = ROOT / "src" / "native_bridge" / "src" / "evidence_probe.cpp"
 
 
 def fail(message: str) -> None:
@@ -28,12 +29,14 @@ def main() -> None:
     ap.add_argument("--generated", type=Path, default=DEFAULT_GENERATED)
     ap.add_argument("--backend", type=Path, default=DEFAULT_CPP)
     ap.add_argument("--host", type=Path, default=DEFAULT_HOST)
+    ap.add_argument("--evidence", type=Path, default=DEFAULT_EVIDENCE)
     args = ap.parse_args()
 
     native_map = json.loads(args.map.read_text(encoding="utf-8"))
     generated = args.generated.read_text(encoding="utf-8")
     backend = args.backend.read_text(encoding="utf-8")
     host = args.host.read_text(encoding="utf-8")
+    evidence = args.evidence.read_text(encoding="utf-8")
 
     if native_map.get("schema") != 1:
         fail("map schema != 1")
@@ -71,6 +74,17 @@ def main() -> None:
     ):
         if token not in host:
             fail("bridge host missing generated-map binding: " + token)
+
+    for token in (
+        '#include "wh3/generated_native_map.hpp"',
+        "native_map::kFullMoveVTable",
+        "native_map::kAttackVTable",
+    ):
+        if token not in evidence:
+            fail("evidence probe missing generated-map binding: " + token)
+    for forbidden in ("0x03910AA8", "0x03910228", "0x0390E248"):
+        if forbidden in host or forbidden in evidence:
+            fail("runtime source retains hardcoded order VTable: " + forbidden)
 
     derived = native_map["derived"]
     full_move = int(derived["full_move_vtable"]["rva"], 0)

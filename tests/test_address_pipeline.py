@@ -102,6 +102,14 @@ class TestAddressPipeline(unittest.TestCase):
         self.assertEqual(core["lua_move"] - core["lua_attack"], 0x768)
         self.assertEqual(core["move_handler"] - core["attack_handler"], 0x534)
 
+    def test_relation_resolver_tracks_initial_candidate_counts(self):
+        source = (ROOT / "maintenance_tools" / "resolve_relations.py").read_text(encoding="utf-8")
+        definition = "initial_counts = {name: len(values) for name, values in candidates.items()}"
+        use = "relationship_resolved = resolved_now and initial_counts[name] != 1"
+        self.assertIn(definition, source)
+        self.assertIn(use, source)
+        self.assertLess(source.index(definition), source.index(use))
+
     def test_candidate_header_is_not_promoted(self):
         rendered = render(self.cand)
         self.assertIn("fec656f433dd7eb2", rendered)

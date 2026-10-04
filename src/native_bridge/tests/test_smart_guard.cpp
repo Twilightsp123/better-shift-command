@@ -1,6 +1,7 @@
 // Offline synthetic test suite for Smart Guard Pre-Movement Cancel architecture.
 // STRICTLY NO GAME PROCESS / NO RUNTIME WH3 / NO HOOK INJECTION.
 #include "wh3/bridge_host.hpp"
+#include "wh3/generated_native_map.hpp"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -12,8 +13,8 @@ namespace {
 #define CK(x) do{if(!(x))throw std::runtime_error(#x);}while(false)
 
 constexpr std::uintptr_t kBase = 0x140000000ULL;
-constexpr std::uintptr_t kAttackOrderVtable = kBase + 0x03910228;
-constexpr std::uintptr_t kMoveOrderVtable = kBase + 0x03910AA8;
+constexpr std::uintptr_t kAttackOrderVtable = kBase + wh3::native_map::kAttackVTable;
+constexpr std::uintptr_t kMoveOrderVtable = kBase + wh3::native_map::kFullMoveVTable;
 constexpr std::uintptr_t kSubOrderVtableA = kBase + 0x037B10C8;
 constexpr std::uintptr_t kSubOrderVtableB = kBase + 0x037B0DB0;
 constexpr std::uintptr_t kPursueObj = kBase + 0x03BB70C8;

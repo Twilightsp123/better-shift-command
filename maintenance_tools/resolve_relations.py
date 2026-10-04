@@ -174,6 +174,7 @@ def run(exe: Path, map_path: Path) -> dict:
     with exe.open("rb") as f, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
         pe = PE(mm)
         candidates, methods = initial_candidates(mm, pe, native_map)
+        initial_counts = {name: len(values) for name, values in candidates.items()}
         audit: list[dict] = []
 
         for round_no in range(1, 9):
@@ -252,7 +253,8 @@ def main() -> None:
     report = run(args.exe, args.map)
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "
+", encoding="utf-8")
     print(json.dumps({
         "resolved_core": report["resolved_core"],
         "core_total": report["core_total"],

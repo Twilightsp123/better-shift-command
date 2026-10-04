@@ -48,6 +48,7 @@ for forbidden in ('RMB_DIFF_V2','RAW_RMB_DOWN','RMB_EXIT_TRACE','read_input_snap
 cpp=(ROOT/'src/native_bridge/src/platform_windows.cpp').read_text(encoding='utf-8')
 lua=(ROOT/'src/native_bridge/src/lua_module.cpp').read_text(encoding='utf-8')
 host=(ROOT/'src/native_bridge/src/bridge_host.cpp').read_text(encoding='utf-8')
+evidence=(ROOT/'src/native_bridge/src/evidence_probe.cpp').read_text(encoding='utf-8')
 map_path=current_map_path(ROOT)
 native_map=json.loads(map_path.read_text(encoding='utf-8'))
 generated_path=ROOT/'src/native_bridge/include/wh3/generated_native_map.hpp'
@@ -67,6 +68,9 @@ for forbidden in ('constexpr Guard guards[]={','constexpr const char* hook_names
     if forbidden in cpp: fail('duplicate native-map constant remains in backend: '+forbidden)
 for token in ('native_map::kFullMoveVTable','native_map::kAttackVTable'):
     need(host,token)
+    need(evidence,token)
+for forbidden in ('0x03910AA8','0x03910228','0x0390E248'):
+    if forbidden in host or forbidden in evidence: fail('runtime hardcoded order VTable remains: '+forbidden)
 if native_map['derived']['simple_intercept_move_vtable'].get('release_use') is not False:
     fail('Simple/Intercept Move VTable may not become top-level release identity')
 # Core issue authorization must not wait on Component/Alive diagnostics.

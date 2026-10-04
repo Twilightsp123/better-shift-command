@@ -1,4 +1,5 @@
 #include "wh3/evidence_probe.hpp"
+#include "wh3/generated_native_map.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -29,8 +30,8 @@ constexpr std::uintptr_t kGroupStride=0x10;
 constexpr Id kMaxEntities=300;
 constexpr Id kMaxGroups=128;
 constexpr Id kMaxOrders=40;
-constexpr std::uintptr_t kMoveVtableRva=0x03910AA8;
-constexpr std::uintptr_t kAttackVtableRva=0x03910228;
+constexpr std::uintptr_t kMoveVtableRva=native_map::kFullMoveVTable;
+constexpr std::uintptr_t kAttackVtableRva=native_map::kAttackVTable;
 constexpr std::uint64_t kMaxMotionGapMs=2000;
 inline bool finite(float v){return std::isfinite(v);}
 }

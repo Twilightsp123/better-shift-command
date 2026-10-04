@@ -4,8 +4,10 @@ Execution identity is behavior-authoritative. Entity/Component/Alive/ContactPair
 remains archived research and cannot become a production prerequisite.
 """
 from pathlib import Path
-import re
+import json,sys
 ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT/'maintenance_tools'))
+from native_map_config import current_map_path
 s=(ROOT/'source/better_shift_command.lua').read_text(encoding='utf-8')
 def fail(msg): print('FAIL:',msg); raise SystemExit(1)
 def section(a,b):
@@ -25,7 +27,8 @@ for t in ('R1.read_active_execution(st)','R1.execution_matches_action(active,a)'
 # Quarantined physical helpers must visibly short-circuit.
 for fn,needle in (('function R1.v3_refresh_physical(st,now)','if not physical_evidence_enabled() then'),
                   ('function R1.v3_drain_contacts(now)','if not physical_evidence_enabled() then')):
-    chunk=section(fn,'\nend')
+    chunk=section(fn,'
+end')
     if needle not in chunk: fail(fn+' lacks quarantine short-circuit')
 # Boot must not hard-require physical APIs.
 boot=s[s.find('function Core.boot()'):]
@@ -36,9 +39,14 @@ for t in ('bind_evidence_unit_v3','read_entity_snapshot_v3','read_combat_groups_
 cpp=(ROOT/'src/native_bridge/src/lua_module.cpp').read_text(encoding='utf-8')
 for t in ('PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8','COREPATH_EXECUTION_IDENTITY_ONLY'):
     if t not in cpp: fail('native quarantine marker missing '+t)
-# ContactPair remains code/archive but not mandatory core detour.
+# ContactPair remains code/archive but not a mandatory core detour. The canonical
+# JSON map owns membership; platform_windows.cpp consumes generated arrays.
 plat=(ROOT/'src/native_bridge/src/platform_windows.cpp').read_text(encoding='utf-8')
-block=re.search(r'constexpr const char\* hook_names\[\]\s*=\s*\{(.*?)\};',plat,re.S)
-if not block or 'contact_pair' in block.group(1): fail('ContactPair still in mandatory hook_names')
-if 'contact_pair_guard' not in plat or 'g_wh3_physical_evidence_staged_disabled = true' not in plat: fail('optional ContactPair quarantine missing')
+native_map=json.loads(current_map_path(ROOT).read_text(encoding='utf-8'))
+core=native_map.get('core',{})
+optional=native_map.get('optional',{})
+if len(core)!=16 or 'contact_pair' in core: fail('ContactPair still in mandatory core map')
+if 'contact_pair' not in optional: fail('optional ContactPair map entry missing')
+if 'native_map::kCoreGuards' not in plat or 'native_map::kHookNames' not in plat: fail('platform does not consume generated core map')
+if 'native_map::kContactPairGuard' not in plat or 'g_wh3_physical_evidence_staged_disabled = true' not in plat: fail('optional ContactPair quarantine missing')
 print('PASS: command/execution identity is behavior-authoritative; physical Entity/Component/Alive/ContactPair is quarantined and non-gating')

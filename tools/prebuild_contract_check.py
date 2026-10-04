@@ -11,6 +11,7 @@ from native_map_config import current_map_path
 
 CPP=(ROOT/'src/native_bridge/src/platform_windows.cpp').read_text(encoding='utf-8')
 HOST=(ROOT/'src/native_bridge/src/bridge_host.cpp').read_text(encoding='utf-8')
+EVIDENCE=(ROOT/'src/native_bridge/src/evidence_probe.cpp').read_text(encoding='utf-8')
 LUA=(ROOT/'src/native_bridge/src/lua_module.cpp').read_text(encoding='utf-8')
 HDR=(ROOT/'src/native_bridge/include/wh3/bridge_host.hpp').read_text(encoding='utf-8')
 GEN_PATH=ROOT/'src/native_bridge/include/wh3/generated_native_map.hpp'
@@ -43,7 +44,9 @@ for t in ('g_wh3_physical_evidence_staged_disabled = true','g_wh3_smart_guard_st
 
 for t in ('native_map::kFullMoveVTable','native_map::kAttackVTable'):
     if t not in HOST: fail('missing outcome map binding '+t)
-if '0x03910AA8:0x03910228' in HOST: fail('hardcoded outcome VTables remain')
+    if t not in EVIDENCE: fail('missing evidence-probe map binding '+t)
+for forbidden in ('0x03910AA8','0x03910228','0x0390E248'):
+    if forbidden in HOST or forbidden in EVIDENCE: fail('hardcoded outcome VTable remains '+forbidden)
 
 if 'bool BridgeHost::issue_ready()const noexcept{return v3_issue_calibration_ready();}' not in HOST:
     fail('core issue readiness depends on non-command gate')

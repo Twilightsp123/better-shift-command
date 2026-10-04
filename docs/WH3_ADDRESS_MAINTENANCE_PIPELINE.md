@@ -73,3 +73,15 @@ and writes `build_windows_v142.ps1`. CMake consumes that header only when
 The Native Bridge build ID comes from `native_map::kMapId`; therefore a
 candidate DLL identifies the actual map it was built against even while the
 bridge ABI version remains unchanged.
+
+## Candidate pointer and CI
+
+`native_maps/CANDIDATE` selects the staged map for Windows candidate CI. It is
+independent from `native_maps/CURRENT`; changing the candidate pointer never
+promotes a runtime map. The Windows workflow generates a build-local header from
+that candidate, builds with VS2022 + v142, runs Native CTest, and uploads the
+candidate DLL only if the gate passes.
+
+The workflow also emits an early full-source snapshot after forcing
+`core.autocrlf=false` and `git reset --hard HEAD`, so Remote Worktree consumers
+receive repository byte-normalized text rather than Windows CRLF conversions.
