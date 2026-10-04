@@ -53,8 +53,11 @@ jobs:
       - name: Address pipeline regressions
         shell: pwsh
         run: |
+          python -m compileall -q maintenance_tools tests tools
           python tests/test_address_pipeline.py
           python tests/test_candidate_build_lane.py
+          python tests/test_anchor_graph.py
+          python tests/test_reverse_fallback.py
           python maintenance_tools/check_native_map_contract.py
           python tools/prebuild_contract_check.py
 

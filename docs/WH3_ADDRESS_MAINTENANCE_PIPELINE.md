@@ -104,6 +104,11 @@ more domains change:
 resolved regional anchors but cannot by itself convert an ambiguous site into a
 resolved site.
 
+A site that began with multiple candidates is not auto-resolved merely because
+the graph eventually leaves one RVA. It must have at least **two independent
+hard relationship supports** at the fixed point. Exact/normalized sites that
+were unique from the beginning do not need that extra support.
+
 Every hard graph contradiction blocks Stage 6. The report records:
 
 - initial/final domain sizes;
@@ -141,6 +146,9 @@ python maintenance_tools/run_ghidra_fallback.py \
   --out-dir reports/ghidra
 ```
 
+The wrapper verifies the Ghidra-analyzed executable SHA against the Stage-7
+bundle before consuming evidence. A wrong game build fails closed.
+
 `BscRelocationEvidence.py` exports exact Ghidra evidence for anchors/candidates:
 function entry and site offset, instruction/basic-block/edge counts, mnemonic
 histogram, exact callsites/callees, and callers. If Stage 6 produced no byte
@@ -162,6 +170,13 @@ Export the new side from the same analyzed Ghidra project by adding:
 ```
 
 For the old build, produce another BinExport with image-base subtraction enabled.
+The headless wrapper passes BinExport compatibility choices as one semicolon-separated
+script argument (`Subtract Imagebase;Prepend Namespace to Function Names`), matching
+the upstream Ghidra scripting interface. BinExport is optional: if the installed
+BinExport extension is not compatible with the local Ghidra build, keep using the
+core Ghidra evidence path and run BinDiff only in an environment with a compatible
+BinExport/Ghidra pair.
+
 Then run:
 
 ```

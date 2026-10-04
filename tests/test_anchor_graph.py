@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "maintenance_tools"))
 
 import anchor_graph
+from resolve_relations import classify_resolution
 
 
 class FakeCalls:
@@ -47,6 +48,56 @@ class TestAnchorGraph(unittest.TestCase):
         self.assertEqual(result["nodes"]["callee"]["resolved_rva"], "0x00000014")
         self.assertIn("delta", result["nodes"]["caller"]["proof_relations"])
         self.assertIn("call", result["nodes"]["callee"]["proof_relations"])
+
+    def test_single_edge_resolution_is_not_enough_for_stage6_promotion(self):
+        native_map = {
+            "core": {
+                "caller": {"rva": "0x64"},
+                "callee": {"rva": "0x0A"},
+            },
+            "relationships": [
+                {"id": "call", "type": "calls", "caller": "caller", "callee": "callee", "strength": "hard", "weight": 10},
+            ],
+        }
+        domains = {"caller": [100, 200], "callee": [10, 20]}
+        with patch.object(anchor_graph, "CallIndex", FakeCalls):
+            result = anchor_graph.propagate(None, FakePE(), native_map, domains)
+        self.assertEqual(result["nodes"]["caller"]["final_candidate_count"], 2)
+        self.assertEqual(result["nodes"]["callee"]["final_candidate_count"], 2)
+
+    def test_unique_after_one_hard_support_stays_unresolved(self):
+        row = classify_resolution(
+            "EXACT",
+            0x1000,
+            {
+                "initial_candidate_count": 3,
+                "final_candidate_count": 1,
+                "candidates": ["0x00001100"],
+                "resolved_rva": "0x00001100",
+                "proof_relations": ["edge_a"],
+                "support_relations": ["edge_a"],
+            },
+        )
+        self.assertFalse(row["resolved"])
+        self.assertFalse(row["minimum_structural_support_met"])
+        self.assertEqual(row["method"], "EXACT")
+
+    def test_unique_after_two_hard_supports_resolves(self):
+        row = classify_resolution(
+            "EXACT",
+            0x1000,
+            {
+                "initial_candidate_count": 3,
+                "final_candidate_count": 1,
+                "candidates": ["0x00001100"],
+                "resolved_rva": "0x00001100",
+                "proof_relations": ["edge_a", "edge_b"],
+                "support_relations": ["edge_a", "edge_b"],
+            },
+        )
+        self.assertTrue(row["resolved"])
+        self.assertTrue(row["minimum_structural_support_met"])
+        self.assertEqual(row["method"], "EXACT_RELATION_RESOLVED")
 
     def test_hard_contradiction_fails_closed(self):
         native_map = {

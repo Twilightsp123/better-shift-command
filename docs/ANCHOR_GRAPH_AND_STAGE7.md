@@ -33,3 +33,19 @@ proof.
 7. Windows build/CTest and WH3 runtime smoke before promotion.
 
 No Stage-6/7 result writes production addresses into the runtime automatically.
+
+## Resolution gate
+
+If a site starts ambiguous, a single hard edge is insufficient for automatic
+Stage-6 resolution. The fixed-point result must leave one RVA and that RVA must
+be supported by at least two independent hard relationships. Regional shift is
+never counted as hard support.
+
+## Stage-7 roles
+
+Ghidra Headless is the exact-disassembly fallback for the current executable.
+It validates function boundaries, callers/callees, exact callsites and basic-block
+shape, and its evidence is SHA-bound to the Stage-7 bundle. BinDiff is a separate,
+optional cross-build matcher that requires an old executable or old BinExport.
+A BinDiff match is only a candidate source; it must be rechecked with Ghidra/static
+relationships and the normal build/runtime gates before promotion.

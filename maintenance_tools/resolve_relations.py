@@ -17,6 +17,38 @@ from anchor_graph import propagate
 from pe_tools import PE, compile_mask, exact_occurrences, masked_occurrences, parse_rva
 
 
+MIN_STRUCTURAL_SUPPORT = 2
+
+
+def classify_resolution(method: str, old_rva: int, node: dict) -> dict:
+    domain_unique = node["final_candidate_count"] == 1
+    relationship_candidate = domain_unique and node["initial_candidate_count"] != 1
+    support = node.get("support_relations", [])
+    relationship_resolved = relationship_candidate and len(support) >= MIN_STRUCTURAL_SUPPORT
+    resolved_now = domain_unique and (node["initial_candidate_count"] == 1 or relationship_resolved)
+    if relationship_resolved:
+        final_method = method + "_RELATION_RESOLVED"
+    elif resolved_now and node["initial_candidate_count"] == 1:
+        final_method = method + "_UNIQUE"
+    else:
+        final_method = method
+    return {
+        "method": final_method,
+        "base_method": method,
+        "old_rva": f"0x{old_rva:08X}",
+        "initial_candidate_count": node["initial_candidate_count"],
+        "candidates": node["candidates"],
+        "resolved_rva": node["resolved_rva"],
+        "resolved": resolved_now,
+        "relationship_resolved": relationship_resolved,
+        "proof_relations": node["proof_relations"],
+        "support_relations": support,
+        "minimum_structural_support_met": (
+            node["initial_candidate_count"] == 1 or len(support) >= MIN_STRUCTURAL_SUPPORT
+        ),
+    }
+
+
 def load_map(path: Path) -> dict:
     data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("schema") != 1:
@@ -54,31 +86,9 @@ def run(exe: Path, map_path: Path) -> dict:
 
         rows = {}
         for name, node in graph["nodes"].items():
-            domain_unique = node["final_candidate_count"] == 1
-            relationship_candidate = domain_unique and node["initial_candidate_count"] != 1
-            relationship_resolved = relationship_candidate and len(node.get("support_relations", [])) >= 2
-            resolved_now = domain_unique and (node["initial_candidate_count"] == 1 or relationship_resolved)
-            if relationship_resolved:
-                final_method = methods[name] + "_RELATION_RESOLVED"
-            elif resolved_now and node["initial_candidate_count"] == 1:
-                final_method = methods[name] + "_UNIQUE"
-            else:
-                final_method = methods[name]
-            rows[name] = {
-                "method": final_method,
-                "base_method": methods[name],
-                "old_rva": f"0x{parse_rva(native_map['core'][name]['rva']):08X}",
-                "initial_candidate_count": node["initial_candidate_count"],
-                "candidates": node["candidates"],
-                "resolved_rva": node["resolved_rva"],
-                "resolved": resolved_now,
-                "relationship_resolved": relationship_resolved,
-                "proof_relations": node["proof_relations"],
-                "support_relations": node.get("support_relations", []),
-                "minimum_structural_support_met": (
-                    node["initial_candidate_count"] == 1 or len(node.get("support_relations", [])) >= 2
-                ),
-            }
+            rows[name] = classify_resolution(
+                methods[name], parse_rva(native_map["core"][name]["rva"]), node
+            )
 
         resolved = sum(row["resolved"] for row in rows.values())
         all_core_resolved = resolved == len(rows) and graph["consistent"]

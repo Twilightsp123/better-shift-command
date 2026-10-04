@@ -101,8 +101,7 @@ def run(
             "-preScript",
             "BinExport.java",
             str(binexport_out.resolve()),
-            "Subtract Imagebase",
-            "Prepend Namespace to Function Names",
+            "Subtract Imagebase;Prepend Namespace to Function Names",
             "-noanalysis",
         ]
         run_command(export_cmd, out_dir / "ghidra_binexport.log")
@@ -113,6 +112,13 @@ def run(
 
     payload = json.loads(evidence.read_text(encoding="utf-8"))
     bundle_payload = json.loads(unresolved.read_text(encoding="utf-8"))
+    expected_sha = str(bundle_payload.get("manifest", {}).get("exe_sha256") or "").lower()
+    evidence_sha = str(payload.get("exe_sha256") or "").lower()
+    if not expected_sha or not evidence_sha or evidence_sha != expected_sha:
+        raise RuntimeError(
+            "Ghidra evidence EXE SHA mismatch: expected=%s actual=%s"
+            % (expected_sha or "MISSING", evidence_sha or "MISSING")
+        )
     resolution = resolve_evidence(bundle_payload, payload)
     resolution_path = out_dir / "ghidra_resolution.json"
     resolution_path.write_text(json.dumps(resolution, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

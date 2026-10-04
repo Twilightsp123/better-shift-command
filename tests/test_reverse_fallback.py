@@ -81,6 +81,17 @@ class TestReverseFallback(unittest.TestCase):
         ):
             self.assertIn(token, text)
 
+    def test_ghidra_runner_requires_bundle_exe_sha_match(self):
+        text = (ROOT / "maintenance_tools" / "run_ghidra_fallback.py").read_text(encoding="utf-8")
+        self.assertIn("Ghidra evidence EXE SHA mismatch", text)
+        self.assertIn('bundle_payload.get("manifest", {}).get("exe_sha256")', text)
+        self.assertIn('payload.get("exe_sha256")', text)
+
+    def test_binexport_headless_options_are_single_semicolon_argument(self):
+        text = (ROOT / "maintenance_tools" / "run_ghidra_fallback.py").read_text(encoding="utf-8")
+        self.assertIn('"Subtract Imagebase;Prepend Namespace to Function Names"', text)
+        self.assertNotIn('"Subtract Imagebase",\n            "Prepend Namespace to Function Names"', text)
+
     def test_stage7_bundle_declares_no_exe_and_bindiff_requirement(self):
         text = (ROOT / "maintenance_tools" / "export_re_bundle.py").read_text(encoding="utf-8")
         self.assertIn('"exe_included": False', text)
