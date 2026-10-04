@@ -1,4 +1,4 @@
-#include "wh3/bridge_host.hpp"
+#include "wh3/bridge_host.hpp"\n#include "wh3/generated_native_map.hpp"
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -284,7 +284,7 @@ NativeOutcome BridgeHost::outcome(const Scope& f,std::uint32_t result,Order& o,b
  if(f.slot<first||(f.slot-first)%0x120||(f.slot-first)/0x120>=40){complete=false;return n;}
  std::array<unsigned char,0x120> s{};if(!get(f.slot,0,s.data(),s.size())){complete=false;return n;}
  std::uint64_t vt=0;std::memcpy(&vt,s.data()+0x18,8);
- if(vt!=base_+(f.kind==Kind::Move?0x03910AA8:0x03910228)){complete=false;return n;}
+ if(vt!=base_+(f.kind==Kind::Move?native_map::kFullMoveVTable:native_map::kAttackVTable)){complete=false;return n;}
  Id seq=0;std::memcpy(&seq,s.data()+0x20,4);n.engine_seq=seq;
  if(f.kind==Kind::Move){float xyz[3];std::memcpy(xyz,s.data()+0x58,12);for(float x:xyz)if(!std::isfinite(x)){complete=false;return n;}o.x=xyz[0];o.y=xyz[1];o.z=xyz[2];}
  else{std::uintptr_t t=0;Id uid=0;std::memcpy(&t,s.data()+0x58,8);if(!get(t,0x3ea0,&uid,4)){complete=false;return n;}o.target_root=t;o.target_uid=uid;o.raw70=s[0x70];o.raw71=s[0x71];o.raw72=s[0x72];o.raw78=s[0x78];}
