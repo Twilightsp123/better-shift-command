@@ -1,4 +1,5 @@
-#include "wh3/bridge_host.hpp"\n#include "wh3/generated_native_map.hpp"
+#include "wh3/bridge_host.hpp"
+#include "wh3/generated_native_map.hpp"
 #include <cstring>
 #include <cmath>
 #include <algorithm>
