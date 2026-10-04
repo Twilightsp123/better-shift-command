@@ -1,3 +1,16 @@
+# 1.0.18-corepath-wh3-fec656f4-map902 — WH3 9.0.2 static map candidate
+
+- Target EXE SHA256 `fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785`.
+- Migrates Native address ownership to `native_maps/CURRENT` + generated `wh3/generated_native_map.hpp`; runtime C++ no longer owns a second manual RVA table.
+- Seven-stage maintenance pipeline resolved all 16 mandatory hooks and both optional static sites.
+- Normalized relocation was required for halt/free and structural relation resolution for Move/Lua Move/Move handler and publish sites.
+- Re-derived current allocator `0x02F53128`, Full Move constructor `0x0300BDC0`, Attack constructor `0x0300B8C4`, Full Move VTable `0x03913618`, and Attack VTable `0x03912988`.
+- Simple/Intercept sibling remains separate at constructor `0x0300BD64` / VTable `0x03910438`; it is not top-level Move outcome identity.
+- Physical evidence and optional ContactPair/Smart Guard policy are unchanged: quarantined/staged disabled.
+- Status: **STATIC VERIFIED BUILD CANDIDATE**. Windows v142/MASM, Windows Native CTest and WH3 runtime smoke remain pending.
+
+---
+
 > **NATIVE-BRIDGE HISTORY ONLY.** This changelog has its own Native version/RC stream and does not define the current BSC Controller release. For current package status and RC disambiguation, read `../../docs/MAINTAINER_INDEX.md` and `../../docs/VERSION_LINEAGE.md`. Historical entries may contain physical-evidence claims later quarantined by CorePath RC8.
 
 # CorePath RC8 Move-VTable correction — 2026-09-29
