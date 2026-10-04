@@ -24,9 +24,11 @@ Current runtime baseline / design stage:
 - formal maintained Mod version: **v1.3.0**;
 - upstream gameplay behavior ancestry: **v1.2.2**;
 - current controller version: `1.3.0`;
-- native candidate: `1.0.17-corepath-wh3-6c104-movevtfix`;
-- target WH3 SHA: `6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297`;
+- native candidate: `1.0.18-corepath-wh3-fec656f4-map902`;
+- target WH3 SHA: `fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785`;
 - mandatory hooks: **16**;
+- current Native map: **WH3 9.0.2 static-verified build candidate**;
+- last runtime-validated Native map: **WH3 9.0.1 / Bridge 1.0.17**;
 - physical Evidence V3 production gate: **QUARANTINED**;
 - ContactPair runtime: **STAGED_DISABLED**;
 - Smart Guard runtime: **STAGED_DISABLED**;
@@ -49,7 +51,8 @@ Current runtime baseline / design stage:
 | `design/TRANSITION_POLICY_TEST_PLAN_D1.md` | Tests required for D1 promotion | Treating design intent as PASS evidence |
 | `ASSUMPTION_LEDGER.md` | What reverse-engineered fact is proven/unverified/retracted | Gameplay chronology |
 | `TEST_MATRIX.md` | What has actually passed | Inferring semantics from a unit test alone |
-| `CURRENT_BUILD_MAP.md` | Current build-locked RVAs/guards | Other WH3 builds |
+| `CURRENT_BUILD_MAP.md` | Current build-candidate RVAs/guards and validation state | Historical maps |
+| `NATIVE_ADDRESS_MAINTENANCE_PIPELINE.md` | How to relocate addresses after WH3 updates | Runtime gameplay policy |
 | `DECISION_LOG.md` | Why architecture/trade-off decisions were made | Raw version chronology |
 | `VERSION_LINEAGE.md` | Which `RC2`, `SC5`, `v1.0.16`, etc. belongs to which stream | Detailed implementation |
 | `PROVENANCE.md` | Where current baselines/archives came from | Current bug status |
