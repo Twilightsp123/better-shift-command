@@ -18,14 +18,14 @@ import argparse
 import json
 from pathlib import Path
 
-from generate_candidate_map import generate as generate_candidate
+from generate_candidate_map import generate as generate_candidate\nfrom native_map_config import current_map_path
 from relocate_exact import printable, run as run_exact
 from relocate_normalized import run as run_normalized
 from resolve_relations import run as run_relations
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MAP = ROOT / "native_maps" / "wh3_9.0.1_6c104a63.json"
+DEFAULT_MAP = current_map_path()
 DEFAULT_REPORT_ROOT = ROOT / "reports" / "wh3_updates"
 
 
