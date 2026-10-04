@@ -11,7 +11,8 @@ struct GuardSpec {
     const char* bytes;
 };
 
-inline constexpr char kMapId[] = "WH3_9.0.1_6c104a63_COREPATH_RC8";\ninline constexpr char kExeSha256[] = "6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297";
+inline constexpr char kMapId[] = "WH3_9.0.1_6c104a63_COREPATH_RC8";
+inline constexpr char kExeSha256[] = "6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297";
 
 inline constexpr std::array<GuardSpec, 16> kCoreGuards{{
     GuardSpec{0x030344D4, "488bc4488958104889701848897820554154415541564157488da888feffff48"},
