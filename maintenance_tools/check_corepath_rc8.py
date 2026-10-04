@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Fail-closed source contract for Better Shift Command CorePath RC8 PREBUILD."""
 from pathlib import Path
-import hashlib,re
+import hashlib,re,json,sys
 ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT/'maintenance_tools'))
+from native_map_config import current_map_path
+from generate_native_header import render
 
 def fail(msg): print('FAIL:',msg); raise SystemExit(1)
 def need(text,token,label=None):
@@ -45,20 +48,27 @@ for forbidden in ('RMB_DIFF_V2','RAW_RMB_DOWN','RMB_EXIT_TRACE','read_input_snap
 cpp=(ROOT/'src/native_bridge/src/platform_windows.cpp').read_text(encoding='utf-8')
 lua=(ROOT/'src/native_bridge/src/lua_module.cpp').read_text(encoding='utf-8')
 host=(ROOT/'src/native_bridge/src/bridge_host.cpp').read_text(encoding='utf-8')
-for token in ('6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297',
-              'WH3_6C104A63AACC4D86_COREPATH_RC8','std::array<void*,16> g_core_targets','std::array<void*,16> detours',
-              'contact_pair_guard','g_wh3_physical_evidence_staged_disabled = true','platform_stop_observer'):
+map_path=current_map_path(ROOT)
+native_map=json.loads(map_path.read_text(encoding='utf-8'))
+generated_path=ROOT/'src/native_bridge/include/wh3/generated_native_map.hpp'
+generated=generated_path.read_text(encoding='utf-8')
+if native_map.get('schema')!=1: fail('native map schema')
+if len(native_map.get('core',{}))!=16: fail('expected 16 mandatory core hooks in promoted map')
+if set(native_map.get('optional',{}))!={'contact_pair','smart_guard'}: fail('optional site set drift')
+if generated!=render(native_map): fail('generated native map stale')
+for token in (
+              '#include "wh3/generated_native_map.hpp"',
+              'native_map::kExeSha256','native_map::kCoreGuards','native_map::kHookNames',
+              'native_map::kContactPairGuard','native_map::kSmartGuardGuard','native_map::kMapId',
+              'std::array<void*,16> g_core_targets','std::array<void*,16> detours',
+              'g_wh3_physical_evidence_staged_disabled = true','platform_stop_observer'):
     need(cpp,token)
-# Core guard block is exactly 16; contact and smart are separate optional guards.
-m=re.search(r'constexpr\s+Guard\s+guards\[\]\s*=\s*\{(.*?)\};',cpp,re.S)
-if not m: fail('core guards block missing')
-core=re.findall(r'\{\s*(0x[0-9a-fA-F]+)\s*,\s*"([0-9a-fA-F]+)"\s*\}',m.group(1))
-if len(core)!=16: fail(f'expected 16 mandatory core guards, found {len(core)}')
-nm=re.search(r'constexpr const char\* hook_names\[\]\s*=\s*\{(.*?)\};',cpp,re.S)
-if not nm or len(re.findall(r'"([^"]+)"',nm.group(1)))!=16: fail('expected 16 mandatory core hook names')
-if 'contact_pair' in nm.group(1): fail('ContactPair is still mandatory core hook')
-for name in ('contact_pair_guard','smart_guard_guard'):
-    if not re.search(rf'constexpr\s+Guard\s+{name}\s*\{{',cpp): fail('missing optional '+name)
+for forbidden in ('constexpr Guard guards[]={','constexpr const char* hook_names[]={','constexpr const char* exe_hash="'):
+    if forbidden in cpp: fail('duplicate native-map constant remains in backend: '+forbidden)
+for token in ('native_map::kFullMoveVTable','native_map::kAttackVTable'):
+    need(host,token)
+if native_map['derived']['simple_intercept_move_vtable'].get('release_use') is not False:
+    fail('Simple/Intercept Move VTable may not become top-level release identity')
 # Core issue authorization must not wait on Component/Alive diagnostics.
 need(host,'bool BridgeHost::issue_ready()const noexcept{return v3_issue_calibration_ready();}')
 if 'DIAGNOSTIC_RUNTIME_GATES_NOT_READY' in host: fail('physical diagnostic gate still vetoes core issue path')
