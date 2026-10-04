@@ -1,6 +1,8 @@
 # Test Matrix — Better Shift Command v1.3.0
 
-## 1. Corrected CorePath runtime baseline
+## 1. Native build baselines
+
+### 1.1 Last runtime-validated baseline — WH3 9.0.1 / Bridge 1.0.17
 
 | Gate | Result | Meaning |
 |---|---:|---|
@@ -8,11 +10,28 @@
 | Mutation suite | 40/40 CAUGHT | existing invariants |
 | Portable Native CTest | 13/13 PASS | portable native fixtures |
 | ASan/UBSan CTest | 13/13 PASS | sanitizer baseline |
-| Windows VS2019 v142 + MASM | PASS | audited Move-VTable-fix delivery |
+| Windows VS2019 v142 + MASM | PASS | audited 9.0.1 Move-VTable-fix delivery |
 | Windows Native CTest | 14/14 PASS | includes backend/module/mid-function smoke |
-| Current EXE inspect | PASS 16/16 | target build guards |
-| Move/Attack outcome dataflow audit | PASS with queue-full prose caveat | exact allocator/constructors/VTables proven |
-| WH3 Move-VTable fix smoke | PASS ENOUGH TO CONTINUE | Bridge 1.0.17 runs without old outcome fatal |
+| WH3 9.0.1 EXE inspect | PASS 16/16 | SHA 6c104a63...3297 |
+| Move/Attack outcome dataflow audit | PASS | exact allocator/constructors/VTables |
+| WH3 Move-VTable fix smoke | PASS ENOUGH TO CONTINUE | Bridge 1.0.17 ran without old outcome fatal |
+
+### 1.2 Current build candidate — WH3 9.0.2 / Bridge 1.0.18
+
+| Gate | Result | Meaning |
+|---|---:|---|
+| Address pipeline Stages 1–6 | PASS | exact + normalized + .pdata + relationships |
+| Target EXE SHA | PASS | fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785 |
+| Mandatory guards | PASS 16/16 BYTE-EXACT | independent readback from supplied 9.0.2 EXE |
+| Optional guards | PASS 2/2 BYTE-EXACT | ContactPair/Smart Guard remain non-gating |
+| Move/Attack allocator→constructor→VTable | PASS STATIC | re-derived on 9.0.2 EXE |
+| JSON → generated C++ map synchronization | PASS | one maintained address source |
+| Windows VS2019 v142 + MASM | **NOT RUN** | required next gate |
+| Windows Native CTest | **NOT RUN** | required next gate |
+| WH3 9.0.2 EXE inspect from built candidate | **NOT RUN** | must pass 16/16 |
+| WH3 native smoke | **NOT RUN** | required before release authorization |
+
+The 9.0.1 PASS rows are historical/currently proven evidence and must not be read as 9.0.2 validation.
 
 ## 2. Runtime behavior findings that motivate D1
 
