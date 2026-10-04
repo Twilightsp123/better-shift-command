@@ -288,6 +288,32 @@
       "caller": "publish_attack",
       "callee": "writer_finalize",
       "weight": 5
+    },
+    {
+      "id": "publish_move_regional_shift",
+      "type": "regional_shift",
+      "site": "publish_move",
+      "anchors": [
+        "writer_begin",
+        "writer_finalize",
+        "copy",
+        "stage"
+      ],
+      "tolerance": 2048,
+      "weight": 3
+    },
+    {
+      "id": "publish_attack_regional_shift",
+      "type": "regional_shift",
+      "site": "publish_attack",
+      "anchors": [
+        "attack_handler",
+        "lua_attack",
+        "selection",
+        "allocator"
+      ],
+      "tolerance": 1024,
+      "weight": 3
     }
   ]
 }
