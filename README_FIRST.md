@@ -21,9 +21,11 @@ It is historical/reference material and must not be mistaken for the formal v1.3
 
 - Mod/controller version: **v1.3.0**
 - Upstream behavior ancestry: v1.2.2 + SC1–SC6 maintenance line
-- Native Bridge compatibility/build ID: `1.0.17-corepath-wh3-6c104-movevtfix`
-- Target WH3 SHA256: `6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297`
+- Native Bridge compatibility/build ID: `1.0.18-corepath-wh3-fec656f4-map902`
+- Target WH3 SHA256: `fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785`
 - Mandatory Native hooks: 16
+- Native map state: **WH3 9.0.2 STATIC PASS; Windows/runtime validation pending**
+- Last runtime-validated Native baseline: **WH3 9.0.1 / Bridge 1.0.17**
 - Physical evidence: **QUARANTINED**
 - MCT UI: **not exposed yet**
 - Hidden policy/profile interface: present
@@ -42,14 +44,15 @@ The Native Bridge string is an internal compatibility/build identifier, not the 
 7. `docs/ASSUMPTION_LEDGER.md`
 8. `docs/TEST_MATRIX.md`
 9. `docs/CURRENT_BUILD_MAP.md`
-10. `docs/DECISION_LOG.md`
-11. `docs/VERSION_LINEAGE.md`
-12. `docs/PROVENANCE.md`
-13. `docs/HISTORY_COVERAGE.md`
-14. `docs/design/HIDDEN_MCT_INTERFACE_T1H.md`
-15. `docs/design/MCT_POLICY_SCHEMA_D1.md`
-16. `docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md`
-17. `docs/DEVELOPMENT_HISTORY.md` only for historical context
+10. `docs/NATIVE_ADDRESS_MAINTENANCE_PIPELINE.md`
+11. `docs/DECISION_LOG.md`
+12. `docs/VERSION_LINEAGE.md`
+13. `docs/PROVENANCE.md`
+14. `docs/HISTORY_COVERAGE.md`
+15. `docs/design/HIDDEN_MCT_INTERFACE_T1H.md`
+16. `docs/design/MCT_POLICY_SCHEMA_D1.md`
+17. `docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md`
+18. `docs/DEVELOPMENT_HISTORY.md` only for historical context
 
 ## Current architecture status
 
