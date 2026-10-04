@@ -51,3 +51,25 @@ python maintenance_tools/export_re_bundle.py --exe <Warhammer3.exe> --map <curre
 ```
 
 The evidence bundle excludes the EXE. The included Ghidra post-script labels candidate RVAs for manual semantic review.
+
+## Candidate build lane
+
+A newly resolved map must not be promoted just to compile it. Prepare an isolated
+build overlay instead:
+
+```
+python maintenance_tools/prepare_candidate_build.py \
+  --exe <Warhammer3.exe> \
+  --map native_maps/candidates/<candidate>.json \
+  --out build/<candidate>
+```
+
+The command verifies the candidate against the EXE, renders
+`build/<candidate>/include/wh3/generated_native_map.hpp`, records a manifest,
+and writes `build_windows_v142.ps1`. CMake consumes that header only when
+`WH3_NATIVE_MAP_INCLUDE_DIR` is supplied. The checked-in promoted header and
+`native_maps/CURRENT` remain untouched.
+
+The Native Bridge build ID comes from `native_map::kMapId`; therefore a
+candidate DLL identifies the actual map it was built against even while the
+bridge ABI version remains unchanged.

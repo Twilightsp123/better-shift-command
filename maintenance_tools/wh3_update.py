@@ -18,7 +18,8 @@ import argparse
 import json
 from pathlib import Path
 
-from generate_candidate_map import generate as generate_candidate\nfrom native_map_config import current_map_path
+from generate_candidate_map import generate as generate_candidate
+from native_map_config import current_map_path
 from relocate_exact import printable, run as run_exact
 from relocate_normalized import run as run_normalized
 from resolve_relations import run as run_relations

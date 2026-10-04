@@ -6,7 +6,8 @@ import argparse
 import json
 from pathlib import Path
 
-from generate_native_header import render\nfrom native_map_config import current_map_path
+from generate_native_header import render
+from native_map_config import current_map_path
 
 
 ROOT = Path(__file__).resolve().parents[1]

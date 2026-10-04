@@ -11,7 +11,9 @@ def main():
     out=ROOT/'validation_corepath_rc8';out.mkdir(parents=True,exist_ok=True);L=lua_cmd()
     if not L:raise SystemExit('No Lua host found')
     jobs=[
-      ('native_map_contract.txt',[sys.executable,'maintenance_tools/check_native_map_contract.py']),\n      ('address_pipeline.txt',[sys.executable,'tests/test_address_pipeline.py']),
+      ('native_map_contract.txt',[sys.executable,'maintenance_tools/check_native_map_contract.py']),
+      ('address_pipeline.txt',[sys.executable,'tests/test_address_pipeline.py']),
+      ('candidate_build_lane.txt',[sys.executable,'tests/test_candidate_build_lane.py']),
       ('prebuild_contract.txt',[sys.executable,'tools/prebuild_contract_check.py']),
       ('corepath_contract.txt',[sys.executable,'maintenance_tools/check_corepath_rc8.py']),
       ('evidence_wiring_audit.txt',[sys.executable,'maintenance_tools/audit_evidence_wiring.py']),
