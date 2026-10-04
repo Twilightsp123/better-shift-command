@@ -12,12 +12,18 @@ Attack observation/hold remains FEG-based. SC5 still runs only after exact curre
 
 Native identity:
 
-- Bridge `1.0.17-corepath-wh3-6c104-movevtfix`;
+- Bridge `1.0.18-corepath-wh3-fec656f4-map902`;
 - 16 mandatory hooks;
-- Full top-level Move VTable `0x03910AA8`;
-- Attack VTable `0x03910228`.
+- target WH3 9.0.2 SHA `fec656f4...3785`;
+- Full top-level Move VTable `0x03913618`;
+- Attack VTable `0x03912988`;
+- static map/dataflow validation PASS; Windows/runtime validation PENDING.
 
-## 2. Runtime closure achieved on 2026-09-29
+## 2. Native validation state
+
+WH3 9.0.1 / Bridge 1.0.17 remains the last runtime-validated baseline. The current branch carries a WH3 9.0.2 / Bridge 1.0.18 build candidate whose 16 mandatory guards and Move/Attack constructor/VTable dataflow are statically verified. Do not inherit the 9.0.1 Windows/runtime PASS into the 9.0.2 candidate.
+
+### Prior runtime closure achieved on 2026-09-29
 
 The corrected bridge runs in WH3 without the old `OWNED_OUTCOME_INDETERMINATE` failure caused by the wrong top-level Move VTable. This closes the address/outcome blocker sufficiently to expose remaining gameplay policy behavior.
 
