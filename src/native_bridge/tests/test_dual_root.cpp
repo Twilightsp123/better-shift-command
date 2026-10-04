@@ -1,4 +1,5 @@
 #include "wh3/bridge_host.hpp"
+#include "wh3/generated_native_map.hpp"
 #include <cstring>
 #include <iostream>
 #include <map>
@@ -16,7 +17,7 @@ template<class T>void put(std::uintptr_t a,std::size_t o,T v){auto& b=mem.at(a);
 bool alive(std::uintptr_t e,bool* out) noexcept{if(!out)return false;int hp=0;if(!rd(e+0xb1c,&hp,4))return false;*out=hp>0;return true;}
 bool groupq(std::uintptr_t g,bool* melee,std::uintptr_t* target) noexcept{std::uint32_t m=0;std::uintptr_t t=0;if(!melee||!target||!rd(g+0x10,&m,4)||!rd(g+0x18,&t,8))return false;*melee=m!=0;*target=t;return true;}
 void* alloc(void*,std::uint32_t){return reinterpret_cast<void*>(cmd+0x288);}
-std::uint32_t move(void* u,std::uint32_t,void*,std::uint8_t q){CK(reinterpret_cast<std::uintptr_t>(u)==cmd);H->allocate(reinterpret_cast<void*>(cmd+0x278),q);put(cmd,0x2f88,std::uint32_t(1));put(cmd,0x2f8c,std::uint32_t(0));put(cmd,0x288+0x18,std::uint64_t(base+0x03910AA8));put(cmd,0x288+0x20,std::uint32_t(77));put(cmd,0x288+0x58,12.0f);put(cmd,0x288+0x5c,0.0f);put(cmd,0x288+0x60,-4.0f);return 1;}
+std::uint32_t move(void* u,std::uint32_t,void*,std::uint8_t q){CK(reinterpret_cast<std::uintptr_t>(u)==cmd);H->allocate(reinterpret_cast<void*>(cmd+0x278),q);put(cmd,0x2f88,std::uint32_t(1));put(cmd,0x2f8c,std::uint32_t(0));put(cmd,0x288+0x18,std::uint64_t(base+native_map::kFullMoveVTable));put(cmd,0x288+0x20,std::uint32_t(77));put(cmd,0x288+0x58,12.0f);put(cmd,0x288+0x5c,0.0f);put(cmd,0x288+0x60,-4.0f);return 1;}
 void halt(void*,std::uint32_t){}
 void setup(){mem.clear();block(cmd,0x5000);block(phys,0x5000);block(target_phys,0x5000);block(arr,3*8);block(target_arr,8);block(squad,0x1000);block(group,0x100);
  put(cmd,0x3ea0,std::uint32_t(1001));put(cmd,0x500,std::uintptr_t(phys));

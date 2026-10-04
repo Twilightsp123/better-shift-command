@@ -1,4 +1,5 @@
 #include "wh3/bridge_host.hpp"
+#include "wh3/generated_native_map.hpp"
 #include <iostream>
 #include <cstring>
 #include <vector>
@@ -28,7 +29,7 @@ std::uint32_t execute(void* u,std::uint32_t a,void* p,std::uint8_t q){
   auto c=reinterpret_cast<void*>(root+(mode==5?0x300:0x278));
   void* s=h->allocate(c,mode==4?std::uint32_t(q)^1:q);CK(s==reinterpret_cast<void*>(root+0x288));
   if(mode==2)h->allocate(c,q);
-  auto vt=base+(kind==Kind::Move?0x03910AA8:0x03910228);if(mode==3)++vt;if(mode==10&&kind==Kind::Move)vt=base+0x0390E248;
+  auto vt=base+(kind==Kind::Move?native_map::kFullMoveVTable:native_map::kAttackVTable);if(mode==3)++vt;if(mode==10&&kind==Kind::Move)vt=base+native_map::kSimpleInterceptMoveVTable;
   wr(0x288+0x18,std::uint64_t(vt));wr(0x288+0x20,seq);wr(0x2f88,std::uint32_t(1));wr(0x2f8c,std::uint32_t(0));
   if(kind==Kind::Move){wr(0x288+0x58,mode==7?std::numeric_limits<float>::quiet_NaN():12.5f);wr(0x288+0x5c,2.0f);wr(0x288+0x60,-5.0f);}
   else{wr(0x288+0x58,std::uint64_t(mode==6?0xdeadbeef:target));unit[0x288+0x70]=1;unit[0x288+0x71]=2;unit[0x288+0x72]=3;unit[0x288+0x78]=4;}
