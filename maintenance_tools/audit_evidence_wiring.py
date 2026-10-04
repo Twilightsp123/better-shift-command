@@ -27,8 +27,7 @@ for t in ('R1.read_active_execution(st)','R1.execution_matches_action(active,a)'
 # Quarantined physical helpers must visibly short-circuit.
 for fn,needle in (('function R1.v3_refresh_physical(st,now)','if not physical_evidence_enabled() then'),
                   ('function R1.v3_drain_contacts(now)','if not physical_evidence_enabled() then')):
-    chunk=section(fn,'
-end')
+    chunk=section(fn,'\nend')
     if needle not in chunk: fail(fn+' lacks quarantine short-circuit')
 # Boot must not hard-require physical APIs.
 boot=s[s.find('function Core.boot()'):]

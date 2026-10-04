@@ -218,7 +218,8 @@
       "right": "attack",
       "expected_delta": 7296,
       "tolerance": 128,
-      "weight": 4
+      "weight": 4,
+      "strength": "hard"
     },
     {
       "id": "lua_pair",
@@ -227,7 +228,8 @@
       "right": "lua_attack",
       "expected_delta": 1896,
       "tolerance": 16,
-      "weight": 6
+      "weight": 6,
+      "strength": "hard"
     },
     {
       "id": "handler_pair",
@@ -236,7 +238,8 @@
       "right": "attack_handler",
       "expected_delta": 1332,
       "tolerance": 16,
-      "weight": 6
+      "weight": 6,
+      "strength": "hard"
     },
     {
       "id": "publish_global_pair",
@@ -245,49 +248,56 @@
       "right": "publish_attack",
       "expected_delta": 300,
       "tolerance": 0,
-      "weight": 8
+      "weight": 8,
+      "strength": "hard"
     },
     {
       "id": "move_handler_calls_selection",
       "type": "calls",
       "caller": "move_handler",
       "callee": "selection",
-      "weight": 5
+      "weight": 5,
+      "strength": "hard"
     },
     {
       "id": "attack_handler_calls_selection",
       "type": "calls",
       "caller": "attack_handler",
       "callee": "selection",
-      "weight": 5
+      "weight": 5,
+      "strength": "hard"
     },
     {
       "id": "publish_move_calls_writer_begin",
       "type": "calls",
       "caller": "publish_move",
       "callee": "writer_begin",
-      "weight": 5
+      "weight": 5,
+      "strength": "hard"
     },
     {
       "id": "publish_move_calls_writer_finalize",
       "type": "calls",
       "caller": "publish_move",
       "callee": "writer_finalize",
-      "weight": 5
+      "weight": 5,
+      "strength": "hard"
     },
     {
       "id": "publish_attack_calls_writer_begin",
       "type": "calls",
       "caller": "publish_attack",
       "callee": "writer_begin",
-      "weight": 5
+      "weight": 5,
+      "strength": "hard"
     },
     {
       "id": "publish_attack_calls_writer_finalize",
       "type": "calls",
       "caller": "publish_attack",
       "callee": "writer_finalize",
-      "weight": 5
+      "weight": 5,
+      "strength": "hard"
     },
     {
       "id": "publish_move_regional_shift",
@@ -300,7 +310,8 @@
         "stage"
       ],
       "tolerance": 2048,
-      "weight": 3
+      "weight": 3,
+      "strength": "advisory"
     },
     {
       "id": "publish_attack_regional_shift",
@@ -313,35 +324,40 @@
         "allocator"
       ],
       "tolerance": 1024,
-      "weight": 3
+      "weight": 3,
+      "strength": "advisory"
     },
     {
       "id": "move_calls_allocator",
       "type": "calls",
       "caller": "move",
       "callee": "allocator",
-      "weight": 10
+      "weight": 10,
+      "strength": "hard"
     },
     {
       "id": "attack_calls_allocator",
       "type": "calls",
       "caller": "attack",
       "callee": "allocator",
-      "weight": 10
+      "weight": 10,
+      "strength": "hard"
     },
     {
       "id": "lua_move_calls_publish_move",
       "type": "calls",
       "caller": "lua_move",
       "callee": "publish_move",
-      "weight": 10
+      "weight": 10,
+      "strength": "hard"
     },
     {
       "id": "lua_attack_calls_publish_attack",
       "type": "calls",
       "caller": "lua_attack",
       "callee": "publish_attack",
-      "weight": 10
+      "weight": 10,
+      "strength": "hard"
     }
   ]
 }

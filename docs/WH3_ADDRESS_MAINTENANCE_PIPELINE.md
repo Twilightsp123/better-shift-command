@@ -85,3 +85,96 @@ candidate DLL only if the gate passes.
 The workflow also emits an early full-source snapshot after forcing
 `core.autocrlf=false` and `git reset --hard HEAD`, so Remote Worktree consumers
 receive repository byte-normalized text rather than Windows CRLF conversions.
+
+## Stage 6 anchor graph v2
+
+Stage 6 uses a fixed-point constraint graph, not one-way filters. Every mandatory
+site owns a candidate domain. Hard relationships prune both endpoints until no
+more domains change:
+
+- `calls`: caller/callee pairs are kept only when the candidate caller has a
+  direct `E8 rel32` edge to the candidate callee. This is bidirectional: a known
+  caller can locate an ambiguous callee and a known callee can locate an
+  ambiguous caller.
+- `rip_target_delta`: preserves exact relationships between RIP-relative global
+  targets.
+- `rva_delta`: preserves explicitly declared close-family deltas with tolerance.
+
+`regional_shift` is advisory only. It ranks candidates around the median shift of
+resolved regional anchors but cannot by itself convert an ambiguous site into a
+resolved site.
+
+Every hard graph contradiction blocks Stage 6. The report records:
+
+- initial/final domain sizes;
+- the hard relationship(s) that proved each reduction;
+- compatible call/RVA pairs and callsite witnesses;
+- final contradictions;
+- advisory regional rankings.
+
+The lightweight Stage-6 call detector is intentionally labelled
+`E8_REL32_HEURISTIC`; Stage 7 Ghidra evidence is the exact-disassembly fallback
+when byte-level call evidence is insufficient or contradictory.
+
+## Stage 7 Ghidra Headless
+
+Create the fail-closed evidence bundle first:
+
+```
+python maintenance_tools/export_re_bundle.py \
+  --exe <new-Warhammer3.exe> \
+  --map <promoted-map.json> \
+  --out relocation_evidence.zip
+```
+
+The bundle now contains the Stage-6 anchor graph, every already-resolved core
+anchor, unresolved byte candidates, and a projected search window for sites that
+have no byte candidate at all. It never contains the game EXE.
+
+Run Ghidra Headless:
+
+```
+python maintenance_tools/run_ghidra_fallback.py \
+  --ghidra-home <ghidra-dir> \
+  --exe <new-Warhammer3.exe> \
+  --bundle relocation_evidence.zip \
+  --out-dir reports/ghidra
+```
+
+`BscRelocationEvidence.py` exports exact Ghidra evidence for anchors/candidates:
+function entry and site offset, instruction/basic-block/edge counts, mnemonic
+histogram, exact callsites/callees, and callers. If Stage 6 produced no byte
+candidate, it enumerates functions in the projected search window. The wrapper
+then runs `consume_ghidra_evidence.py`, which can reduce domains using exact
+Ghidra callgraph edges. A `GHIDRA_GRAPH_UNIQUE` result is still review evidence,
+not release authorization.
+
+## Optional BinExport / BinDiff fallback
+
+BinDiff is useful when code generation changed enough that no guard/window
+candidate is convincing. It requires the old executable (or an old `.BinExport`)
+in addition to the new build.
+
+Export the new side from the same analyzed Ghidra project by adding:
+
+```
+--binexport-out reports/ghidra/new.BinExport
+```
+
+For the old build, produce another BinExport with image-base subtraction enabled.
+Then run:
+
+```
+python maintenance_tools/run_bindiff_fallback.py \
+  --bindiff <bindiff-executable> \
+  --baseline-binexport old.BinExport \
+  --candidate-binexport new.BinExport \
+  --map <promoted-map.json> \
+  --out-dir reports/bindiff
+```
+
+The wrapper asks BinDiff for both log and binary output, then
+`extract_bindiff_matches.py` discovers the BinDiff SQLite function-match table
+and extracts matches for the old BSC anchor RVAs. BinDiff results are never
+promoted directly: the matched new RVA must be rechecked against Ghidra/static
+relationships and the normal build/runtime gates.

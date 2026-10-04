@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Stage-7 fallback evidence bundle for unresolved WH3 native-map sites.
 
-The ZIP deliberately excludes Warhammer3.exe. It contains only relocation
-metadata, candidate function bytes/fingerprints, and seed RVAs so a maintainer
-can open the local EXE in Ghidra/BinDiff without repeating earlier triage.
+The ZIP deliberately excludes Warhammer3.exe. It contains Stage-6 graph state,
+candidate function bytes/fingerprints, projected Ghidra search windows, and seed
+RVAs. Ghidra/BinDiff remain evidence generators; they never authorize release.
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import argparse
 import hashlib
 import json
 import mmap
-import tempfile
+import statistics
 import zipfile
 from pathlib import Path
 
@@ -20,96 +20,170 @@ from resolve_relations import load_map, run as resolve_run
 
 
 def touched_relationships(native_map: dict, site: str) -> list[dict]:
-    out=[]
-    for rel in native_map.get("relationships",[]):
-        values=[]
-        for key in ("left","right","site","caller","callee"):
+    out = []
+    for rel in native_map.get("relationships", []):
+        values = []
+        for key in ("left", "right", "site", "caller", "callee"):
             if key in rel:
                 values.append(rel[key])
-        values.extend(rel.get("anchors",[]))
+        values.extend(rel.get("anchors", []))
         if site in values:
             out.append(rel)
     return out
 
 
-def build(exe: Path, map_path: Path, out_zip: Path, force: bool=False) -> dict:
-    native_map=load_map(map_path)
-    report=resolve_run(exe,map_path)
-    unresolved=[name for name,row in report["core"].items() if not row["resolved"]]
+def resolved_core(report: dict) -> dict[str, str]:
+    return {
+        name: row["resolved_rva"]
+        for name, row in report["core"].items()
+        if row.get("resolved") and row.get("resolved_rva")
+    }
+
+
+def _anchor_shifts(native_map: dict, report: dict, site: str) -> tuple[list[int], list[str]]:
+    # Prefer a declared regional-shift neighborhood when one exists, otherwise
+    # use every resolved mandatory anchor. This is only for a Ghidra search window.
+    preferred = []
+    for rel in native_map.get("relationships", []):
+        if rel.get("type") == "regional_shift" and rel.get("site") == site:
+            preferred.extend(rel.get("anchors", []))
+    names = preferred or list(report["core"])
+    shifts = []
+    used = []
+    for name in names:
+        row = report["core"].get(name)
+        if not row or not row.get("resolved_rva"):
+            continue
+        old = parse_rva(native_map["core"][name]["rva"])
+        new = parse_rva(row["resolved_rva"])
+        shifts.append(new - old)
+        used.append(name)
+    return shifts, used
+
+
+def search_window(native_map: dict, report: dict, pe: PE, site: str) -> dict:
+    old = parse_rva(native_map["core"][site]["rva"])
+    shifts, used = _anchor_shifts(native_map, report, site)
+    if shifts:
+        center_shift = int(statistics.median(shifts))
+        spread = max(abs(x - center_shift) for x in shifts)
+        radius = max(0x4000, spread * 2 + 0x2000)
+    else:
+        center_shift = 0
+        radius = 0x200000
+    radius = min(radius, 0x200000)
+    projected = max(0, min(pe.image_size - 1, old + center_shift))
+    start = max(0, projected - radius)
+    end = min(pe.image_size - 1, projected + radius)
+    return {
+        "old_rva": f"0x{old:08X}",
+        "projected_rva": f"0x{projected:08X}",
+        "start_rva": f"0x{start:08X}",
+        "end_rva": f"0x{end:08X}",
+        "radius": radius,
+        "shift_median": center_shift,
+        "anchors_used": used,
+        "purpose": "GHIDRA_ENUMERATION_ONLY",
+    }
+
+
+def build(exe: Path, map_path: Path, out_zip: Path, force: bool = False) -> dict:
+    native_map = load_map(map_path)
+    report = resolve_run(exe, map_path)
+    unresolved = [name for name, row in report["core"].items() if not row["resolved"]]
     if not unresolved and not force:
         raise ValueError("Stage 6 resolved every core site; Stage 7 fallback is not needed")
 
-    with exe.open("rb") as f,mmap.mmap(f.fileno(),0,access=mmap.ACCESS_READ) as mm:
-        pe=PE(mm)
-        sha=hashlib.sha256(mm).hexdigest()
-        items={}
+    with exe.open("rb") as f, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
+        pe = PE(mm)
+        sha = hashlib.sha256(mm).hexdigest()
+        items = {}
+        source_fps = native_map.get("candidate", {}).get("function_fingerprints", {})
         for name in unresolved:
-            row=report["core"][name]
-            spec=native_map["core"][name]
-            candidates=[]
+            row = report["core"][name]
+            spec = native_map["core"][name]
+            candidates = []
             for text_rva in row["candidates"]:
-                rva=parse_rva(text_rva)
-                fp=function_fingerprint(mm,pe,rva)
-                fn=pe.runtime_function(rva)
+                rva = parse_rva(text_rva)
+                fp = function_fingerprint(mm, pe, rva)
+                fn = pe.runtime_function(rva)
                 if fn is not None:
-                    raw=pe.read_rva(fn.begin,min(fn.size,4096))
-                    begin=fn.begin
+                    raw = pe.read_rva(fn.begin, min(fn.size, 4096))
+                    begin = fn.begin
                 else:
-                    begin=max(0,rva-128)
-                    raw=pe.read_rva(begin,256)
+                    begin = max(0, rva - 128)
+                    raw = pe.read_rva(begin, 256)
                 candidates.append({
-                    "rva":f"0x{rva:08X}",
-                    "function_fingerprint":fp,
-                    "evidence_begin":f"0x{begin:08X}",
-                    "evidence_bytes":None if raw is None else raw.hex(),
+                    "rva": f"0x{rva:08X}",
+                    "function_fingerprint": fp,
+                    "evidence_begin": f"0x{begin:08X}",
+                    "evidence_bytes": None if raw is None else raw.hex(),
                 })
-            items[name]={
-                "old_rva":spec["rva"],
-                "old_guard":spec["guard"],
-                "normalization":spec.get("normalization"),
-                "relationships":touched_relationships(native_map,name),
-                "method":row["method"],
-                "candidates":candidates,
+            items[name] = {
+                "old_rva": spec["rva"],
+                "old_guard": spec["guard"],
+                "normalization": spec.get("normalization"),
+                "relationships": touched_relationships(native_map, name),
+                "method": row["method"],
+                "proof_relations": row.get("proof_relations", []),
+                "source_function_fingerprint": source_fps.get(name),
+                "candidates": candidates,
+                "search_window": search_window(native_map, report, pe, name),
             }
 
-    manifest={
-        "schema":1,
-        "tool":"export_re_bundle",
-        "source_map_id":native_map["map_id"],
-        "source_map_path":str(map_path),
-        "exe_sha256":sha,
-        "unresolved_sites":unresolved,
-        "exe_included":False,
-        "purpose":"Ghidra/BinDiff fallback only after Stages 1-6 fail to uniquely resolve a mandatory site",
+    manifest = {
+        "schema": 2,
+        "tool": "export_re_bundle",
+        "source_map_id": native_map["map_id"],
+        "source_map_path": str(map_path),
+        "exe_sha256": sha,
+        "unresolved_sites": unresolved,
+        "resolved_core_count": len(resolved_core(report)),
+        "exe_included": False,
+        "purpose": "Ghidra/BinDiff fallback only after Stages 1-6 fail to uniquely resolve a mandatory site",
+        "baseline_for_bindiff": "matching old EXE or old .BinExport required",
     }
-    payload={"manifest":manifest,"sites":items,"relationship_audit":report["relationship_audit"]}
-    seeds=["# site\trva\tlabel"]
-    for name,item in items.items():
-        for i,c in enumerate(item["candidates"],1):
-            seeds.append(f"{name}\t{c['rva']}\tBSC_candidate_{name}_{i}")
+    payload = {
+        "manifest": manifest,
+        "resolved_core": resolved_core(report),
+        "sites": items,
+        "anchor_graph": report.get("anchor_graph"),
+        "relationship_audit": report["relationship_audit"],
+    }
+    seeds = ["# site\trva\tlabel"]
+    for name, item in items.items():
+        for i, candidate in enumerate(item["candidates"], 1):
+            seeds.append(f"{name}\t{candidate['rva']}\tBSC_candidate_{name}_{i}")
+        if not item["candidates"]:
+            seeds.append(
+                f"{name}\t{item['search_window']['projected_rva']}\tBSC_projected_{name}"
+            )
 
-    out_zip.parent.mkdir(parents=True,exist_ok=True)
-    with zipfile.ZipFile(out_zip,"w",compression=zipfile.ZIP_DEFLATED) as z:
-        z.writestr("manifest.json",json.dumps(manifest,ensure_ascii=False,indent=2)+"\n")
-        z.writestr("unresolved.json",json.dumps(payload,ensure_ascii=False,indent=2)+"\n")
-        z.writestr("seeds.tsv","\n".join(seeds)+"\n")
-        z.writestr("README.txt",
-            "Open the matching local Warhammer3.exe in Ghidra.\n"
-            "Run maintenance_tools/ghidra/BscRelocationSeeds.py with unresolved.json as its first script argument.\n"
-            "The script only labels candidate RVAs; semantic approval remains manual.\n")
+    out_zip.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(out_zip, "w", compression=zipfile.ZIP_DEFLATED) as z:
+        z.writestr("manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+        z.writestr("unresolved.json", json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
+        z.writestr("seeds.tsv", "\n".join(seeds) + "\n")
+        z.writestr(
+            "README.txt",
+            "Stage 7 does not authorize runtime addresses.\n"
+            "Ghidra: run maintenance_tools/run_ghidra_fallback.py with this ZIP and the matching new EXE.\n"
+            "The Ghidra script exports exact callers/callees/basic-block evidence and enumerates projected windows when no byte candidate exists.\n"
+            "BinDiff: also provide the old build EXE/BinExport; export both sides with Subtract Imagebase, then run maintenance_tools/run_bindiff_fallback.py.\n",
+        )
     return manifest
 
 
-def main()->None:
-    ap=argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--exe",required=True,type=Path)
-    ap.add_argument("--map",required=True,type=Path)
-    ap.add_argument("--out",required=True,type=Path)
-    ap.add_argument("--force",action="store_true")
-    args=ap.parse_args()
-    result=build(args.exe,args.map,args.out,args.force)
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--exe", required=True, type=Path)
+    ap.add_argument("--map", required=True, type=Path)
+    ap.add_argument("--out", required=True, type=Path)
+    ap.add_argument("--force", action="store_true")
+    args = ap.parse_args()
+    result = build(args.exe, args.map, args.out, args.force)
     print(json.dumps(result))
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()

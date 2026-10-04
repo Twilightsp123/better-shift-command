@@ -45,6 +45,7 @@ def summary_markdown(exact: dict, normalized: dict, relations: dict, candidate: 
         f"- Expected SHA256: {exact['expected_sha256']}",
         f"- Actual SHA256: {exact['actual_sha256']}",
         f"- Mandatory core resolved after Stage 6: **{relations['resolved_core']}/{relations['core_total']}**",
+        f"- Anchor graph: **{relations.get('resolution_engine', 'UNKNOWN')}**, consistent={relations.get('graph_consistent')}",
         "",
         "## Core relocation",
         "",
@@ -103,9 +104,7 @@ def summary_markdown(exact: dict, normalized: dict, relations: dict, candidate: 
             "Stage 6 did not uniquely resolve every mandatory core site. Produce the evidence "
             "bundle and use Stage 7 Ghidra/BinDiff fallback only for the remaining sites.",
         ]
-    return "
-".join(lines) + "
-"
+    return "\n".join(lines) + "\n"
 
 
 def main() -> None:
@@ -125,18 +124,15 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     (out_dir / "exact_relocation.json").write_text(
-        json.dumps(printable(exact), ensure_ascii=False, indent=2) + "
-",
+        json.dumps(printable(exact), ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     (out_dir / "normalized_relocation.json").write_text(
-        json.dumps(normalized, ensure_ascii=False, indent=2) + "
-",
+        json.dumps(normalized, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     (out_dir / "relation_resolution.json").write_text(
-        json.dumps(relations, ensure_ascii=False, indent=2) + "
-",
+        json.dumps(relations, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
 
@@ -145,14 +141,12 @@ def main() -> None:
     if relations["all_core_resolved"]:
         candidate = generate_candidate(args.exe, args.map, args.game_version)
         (out_dir / "candidate_map.json").write_text(
-            json.dumps(candidate, ensure_ascii=False, indent=2) + "
-",
+            json.dumps(candidate, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
         verification = verify_candidate(args.exe, candidate)
         (out_dir / "candidate_static_verification.json").write_text(
-            json.dumps(verification, ensure_ascii=False, indent=2) + "
-",
+            json.dumps(verification, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
 

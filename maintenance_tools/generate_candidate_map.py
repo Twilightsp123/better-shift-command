@@ -136,6 +136,13 @@ def generate(exe: Path, map_path: Path, game_version: str) -> dict:
         out["map_id"] = f"WH3_{game_version}_{actual_sha[:8]}_CANDIDATE"
         out["game"]["version"] = game_version
         out["game"]["sha256"] = actual_sha
+        out["source_of_truth"] = {
+            "authoritative_for_address_pipeline": False,
+            "origin": "generated relocation candidate",
+            "parent_map": str(map_path),
+            "parent_map_id": source["map_id"],
+            "promotion_rule": "becomes authoritative only after static/build/runtime gates pass",
+        }
         out["candidate"] = {
             "status": "STATIC_RELOCATION_CANDIDATE",
             "release_authorized": False,
@@ -144,7 +151,7 @@ def generate(exe: Path, map_path: Path, game_version: str) -> dict:
             "proof_levels": {
                 "L1_BYTE_MATCH": "exact unique guard",
                 "L2_NORMALIZED_MATCH": "unique relocation-normalized guard",
-                "L3_STRUCTURAL_MATCH": "ambiguous guard resolved by declared relationships/callgraph",
+                "L3_STRUCTURAL_MATCH": "ambiguous guard resolved by hard anchor-graph/callgraph constraints",
                 "L4_DATAFLOW_DERIVED": "constructor/VTable identity re-derived from current EXE",
             },
             "required_next_gates": [
@@ -171,6 +178,9 @@ def generate(exe: Path, map_path: Path, game_version: str) -> dict:
                 "source_rva": relation_row["old_rva"],
                 "initial_candidate_count": relation_row["initial_candidate_count"],
                 "relationship_resolved": relation_row["relationship_resolved"],
+                "proof_relations": relation_row.get("proof_relations", []),
+                "support_relations": relation_row.get("support_relations", []),
+                "minimum_structural_support_met": relation_row.get("minimum_structural_support_met", True),
             }
             spec["proof_level"] = proof_level(method)
             fingerprints[name] = function_fingerprint(mm, pe, new_rva)
@@ -214,6 +224,7 @@ def generate(exe: Path, map_path: Path, game_version: str) -> dict:
         out["candidate"]["order_identity"] = identity
         out["candidate"]["function_fingerprints"] = fingerprints
         out["candidate"]["relationship_audit"] = relation_report["relationship_audit"]
+        out["candidate"]["anchor_graph"] = relation_report.get("anchor_graph")
         return out
 
 

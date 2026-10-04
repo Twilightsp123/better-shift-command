@@ -14,6 +14,8 @@ def main():
       ('native_map_contract.txt',[sys.executable,'maintenance_tools/check_native_map_contract.py']),
       ('address_pipeline.txt',[sys.executable,'tests/test_address_pipeline.py']),
       ('candidate_build_lane.txt',[sys.executable,'tests/test_candidate_build_lane.py']),
+      ('anchor_graph.txt',[sys.executable,'tests/test_anchor_graph.py']),
+      ('reverse_fallback.txt',[sys.executable,'tests/test_reverse_fallback.py']),
       ('prebuild_contract.txt',[sys.executable,'tools/prebuild_contract_check.py']),
       ('corepath_contract.txt',[sys.executable,'maintenance_tools/check_corepath_rc8.py']),
       ('evidence_wiring_audit.txt',[sys.executable,'maintenance_tools/audit_evidence_wiring.py']),
