@@ -15,6 +15,18 @@
 - v1.2.2 was a Lua `math.huge` compatibility release over v1.2.1 SC6 behavior.
 - Exact upstream controller/modules are preserved under `archive/upstream_v1.2.2/` and checked by SHA in `maintenance_tools/check_corepath_rc8.py`.
 
+## WH3 9.0.2 native-map candidate provenance
+
+- Supplied EXE SHA256: `fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785`.
+- Parent proven map: WH3 9.0.1 / `native_maps/wh3_9.0.1_6c104a63.json`.
+- Automated maintenance pipeline: `docs/NATIVE_ADDRESS_MAINTENANCE_PIPELINE.md`.
+- Stages 1–6 resolved 16/16 mandatory sites; ContactPair and Smart Guard also exact-relocated but remain non-gating.
+- Independent byte readback against the supplied 9.0.2 EXE confirmed 16/16 mandatory and 2/2 optional guards.
+- Move/Attack allocator→constructor→VTable dataflow was re-derived directly from the 9.0.2 EXE.
+- Build-candidate map: `native_maps/wh3_9.0.2_fec656f4.json`.
+- Native compatibility candidate: `1.0.18-corepath-wh3-fec656f4-map902`.
+- Windows v142/MASM, Windows Native CTest and WH3 runtime smoke are **not yet performed** for 9.0.2. The 9.0.1 Bridge 1.0.17 evidence remains the last runtime-validated Native baseline.
+
 ## Current WH3 maintenance line
 
 - Target EXE SHA256: `6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297`
