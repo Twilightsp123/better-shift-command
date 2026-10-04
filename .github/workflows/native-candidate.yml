@@ -70,7 +70,25 @@ jobs:
           Get-Content native_maps/CURRENT | ForEach-Object { "promoted_current=$_" } | Add-Content build/native-candidate/candidate_hashes.txt
           "candidate_map=native_maps/candidates/wh3_9.0.2_fec656f4.json" | Add-Content build/native-candidate/candidate_hashes.txt
 
+      - name: Create full source snapshot
+        if: always()
+        shell: pwsh
+        run: |
+          $Snapshot = Join-Path $env:RUNNER_TEMP 'better-shift-command-source.zip'
+          $Items = Get-ChildItem -Force | Where-Object { $_.Name -notin @('.git','build','build-map') }
+          Compress-Archive -Path $Items.FullName -DestinationPath $Snapshot -CompressionLevel Optimal
+          "source_snapshot=$Snapshot" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Upload full source snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: better-shift-command-source
+          if-no-files-found: error
+          path: ${{ env.source_snapshot }}
+
       - name: Upload candidate DLL
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: wh3-9.0.2-native-candidate-v142
