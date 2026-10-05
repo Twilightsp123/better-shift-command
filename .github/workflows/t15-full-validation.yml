@@ -1,0 +1,45 @@
+name: BSC T1.5 Full Validation
+
+on:
+  push:
+    branches:
+      - ci/t1.5-full-validation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-maintenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Lua
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3
+
+      - name: Compile Python
+        shell: bash
+        run: python -m compileall -q maintenance_tools tests tools steering_tests
+
+      - name: Documentation contract
+        shell: bash
+        run: python maintenance_tools/check_documentation_contract.py
+
+      - name: Verify archive checksums
+        shell: bash
+        run: sha256sum -c SHA256SUMS.txt
+
+      - name: Full maintenance suite
+        shell: bash
+        run: python maintenance_tools/run_checks_corepath_rc8.py
