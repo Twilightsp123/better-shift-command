@@ -44,7 +44,7 @@ issues=read('docs/OPEN_ISSUES.md')
 for token in ('O-08 — Move→Attack','O-09 — SC6 rolls back immediate future MOVE','O-11 — Battle exit/main-menu/desktop hang','T1.6','T1.7','T2/T3 PENDING','TPOL-T1H / T2 outstanding'):
     if token not in issues: fail('OPEN_ISSUES missing current blocker: '+token)
 matrix=read('docs/TEST_MATRIX.md')
-for token in ('Maintenance jobs | **PENDING T1.7 CI**','Mutation suite | **PASS**','Windows Native CTest | 14/14 PASS','T1H hidden PolicyProfile/MCT scaffold | PASS','T1 shared behavior-neutral evaluator refactor | **PASS**','T1.5 execution-lineage separation | **PASS / BEHAVIOR-NEUTRAL**','T1.6 committed-edge transaction | **PASS / PERMISSION-NEUTRAL**','T1.7 consumer-neutral policy envelopes | **IMPLEMENTED CANDIDATE / CI PENDING**','T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1.7 NOT ACTIVE','T3 visible MCT adapter/UI wiring | NOT RUN'):
+for token in ('Maintenance jobs | **PENDING T1.7 CI**','Mutation suite | **PENDING T1.7 CI**','Windows Native CTest | 14/14 PASS','T1H hidden PolicyProfile/MCT scaffold | PASS','T1 shared behavior-neutral evaluator refactor | **PASS**','T1.5 execution-lineage separation | **PASS / BEHAVIOR-NEUTRAL**','T1.6 committed-edge transaction | **PASS / PERMISSION-NEUTRAL**','T1.7 consumer-neutral policy envelopes | **IMPLEMENTED CANDIDATE / CI PENDING**','T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1.7 NOT ACTIVE','T3 visible MCT adapter/UI wiring | NOT RUN'):
     if token not in matrix: fail('TEST_MATRIX missing gate: '+token)
 ledger=read('docs/ASSUMPTION_LEDGER.md')
 if '`Entity +0x18 = MovementComponent*` | **RETRACTED**' not in ledger: fail('Assumption ledger lost retracted Entity+0x18 status')
