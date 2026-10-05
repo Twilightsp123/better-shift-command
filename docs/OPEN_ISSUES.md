@@ -27,13 +27,17 @@ The strict `ATTACK_REQUIRES_ROUTE_COMPLETE` boundary has been replaced for ordin
 
 Closure evidence: dedicated T2-B suite **9/9 PASS**, mutation protection, Windows CI PASS, and the 2026-10-05 WH3 9.0.2 runtime smoke records repeated smooth `ATTACK_TERMINAL_HANDOFF ... mode=ISSUE_ACK` transitions with the old Attack rollback pattern absent.
 
-### O-09 — SC6 rolls back immediate future MOVE
+### O-09 — Move→Move ownership conflict / destructive rollback
 
-Status: **OFFLINE FIX CANDIDATE / WH3 RUNTIME SMOKE REQUIRED**.
+Status: **NATIVE PASSTHROUGH DIAGNOSTIC / WH3 RUNTIME SMOKE REQUIRED**.
 
-T2-A now permits only an **exact immediate i+1 Native MOVE** to soft-adopt, and only when the current Move is already inside the controller's existing bounded dispatch/steering window. The first implementation is adopt-only: it does not add new proactive Move issue permission. It keeps i+2 overrun rollback, exact execution identity, prior-route-debt blocking, short-leg protection, and Exit-route separation.
+The first T2-A adopt-only candidate exposed a deeper ownership conflict. With a permissive Move→Move gate, Native could start a fold-back early and formations compressed into themselves; tightening the gate then caused repeated `NATIVE_SUCCESSOR_ROLLBACK` / nonqueued Move reasserts, which broke the native Shift queue into stepwise movement. The two symptoms come from the same architecture: BSC was treating disagreement between the Lua cursor and CA's already-running Move queue as a reason to mutate that queue.
 
-Offline evidence: dedicated T2-A suite **11/11 PASS** plus mutation protection for disabled adopt, i+2 skipping, prior-debt bypass, and premature straight-line adoption. WH3 RT-TP-04/05 remains required. The first WH3 fold-back smoke exposed a separate hairpin defect: severe turns could inherit the wide normal `STEERING_CORNER` window and reverse at only 25–40% progress, producing formation self-compression. The current candidate splits >=135° turns into a strict near-waypoint hairpin gate; dedicated hairpin coverage is **5/5 PASS**. A new WH3 fold-back smoke is required.
+Current diagnostic architecture makes **player-native Move chains authoritative**. Pure Move→Move transitions do not proactively dispatch a BSC Move and do not rollback/reassert a Native Move. Exact canonical Native Move execution only advances the Lua shadow cursor; all-Move sampling gaps may fast-forward the shadow cursor; crossings over Attack/Exit semantics yield BSC Move tracking rather than issuing a replacement. Once BSC itself issues a command (for example T2-B Attack or Attack→Exit Move), the generation becomes BSC-owned and existing command/ACK/recovery rules continue to apply.
+
+Offline evidence: native Move passthrough suite **7/7 PASS**, active block suite **19/19 PASS**, contracts **24/24 PASS**, v109 **27/27 PASS**, and mutation protection for ownership disable, proactive Move re-enable, shadow-sync disable, and cross-semantic fast-forward. The previous T2-A/hairpin candidates and SC1–SC4 controller-owned Move scheduler tests are archived under `archive/legacy_move_scheduler_tests/`.
+
+The required WH3 diagnostic smoke is intentionally simple: straight Move chains, 90° corners, and 180° fold-back. If passthrough removes both self-compression and stepwise movement, the ownership diagnosis is confirmed. If native passthrough still self-compresses on fold-back, the remaining problem belongs to CA's native queue behavior and must be solved by a new, non-destructive intervention design rather than rollback/reassert.
 
 ### O-10 — Transition policy/MCT not implemented
 

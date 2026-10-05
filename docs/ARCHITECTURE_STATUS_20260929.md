@@ -27,9 +27,13 @@ The corrected bridge runs in WH3 without the old `OWNED_OUTCOME_INDETERMINATE` f
 
 The strict Move→Attack boundary has been replaced by the bounded `ATTACK_TERMINAL_CORRIDOR`. The 2026-10-05 WH3 9.0.2 runtime smoke records successful `ATTACK_TERMINAL_HANDOFF` events without the old Attack rollback pattern. T2-B is runtime verified.
 
-### 3.2 T2-A immediate-MOVE adopt-only candidate
+### 3.2 Native Move queue ownership diagnostic
 
-`reconcile_native_successor()` now permits an **exact immediate i+1 MOVE** to soft-adopt only when the current Move is already inside the existing bounded dispatch/steering window. The path is adopt-only: it grants no new proactive Move issue permission, keeps i+2+ rollback, exact execution identity, prior route debt, short-leg protection, and Exit-route separation. Offline T2-A is 11/11 PASS plus mutation protection; WH3 RT-TP-04/05 is still pending.
+The T2-A adopt-only/hairpin sequence was retired after WH3 runtime testing exposed a structural ownership conflict. A permissive gate allowed Native fold-back too early and caused formation self-compression; a strict hairpin gate forced repeated nonqueued Move reasserts and produced stepwise movement.
+
+Current diagnostic rule: while a generation remains **player-native Move owned**, BSC never proactively dispatches Move→Move and never rolls back/reasserts a Native Move. Exact canonical Move execution only synchronizes the Lua shadow cursor. If polling skips multiple ordinary Move nodes, the shadow cursor may fast-forward across Move-only nodes. If a sample crosses Attack/Exit semantics or cannot be reconciled canonically, BSC yields Move tracking rather than mutating the native queue. BSC ownership begins only after BSC itself issues a command such as T2-B Attack or an Attack→Exit Move.
+
+This diagnostic preserves the already runtime-verified T2-B Move→Attack path and is explicitly **not** a claim that T2-A is solved. The next WH3 smoke must determine whether native passthrough itself handles 180° fold-back acceptably.
 
 ## 4. Approved architecture — partially implemented
 
@@ -60,5 +64,5 @@ The hidden policy/profile scaffold is implemented, and two bounded gameplay slic
 - built-in hidden source remains authoritative;
 - `engagement_hold_seconds=3.0` is wired to the existing 3000 ms Attack hold requirement;
 - T2-B Move→Attack terminal handoff is WH3 9.0.2 runtime verified;
-- T2-A exact immediate Move reconciliation is an offline-tested adopt-only candidate awaiting RT-TP-04/05;
+- previous T2-A adopt/hairpin candidates are retired; current Move→Move stage is a native-queue passthrough diagnostic awaiting WH3 smoke;
 - movement policy values are still not profile-driven; T1 shared evaluator, T2-C hysteresis and T3 visible MCT remain pending.

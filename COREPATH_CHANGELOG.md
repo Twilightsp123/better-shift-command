@@ -119,3 +119,17 @@ WH3 9.0.2 runtime feedback exposed formation self-compression on fold-back route
 - dedicated hairpin regression coverage is **5/5 PASS** and mutation coverage is **45/45 CAUGHT**.
 
 WH3 runtime smoke remains required before T2-A can be promoted from candidate.
+
+## 2026-10-05 — Native Move queue passthrough diagnostic
+
+WH3 runtime testing showed the prior T2-A/hairpin approach oscillated between two failures: permissive adoption caused fold-back self-compression, while strict gating triggered nonqueued Move rollback/reassert and stepwise movement.
+
+- player-native Move→Move is now Native-owned: no proactive BSC successor Move and no destructive Move rollback/reassert;
+- exact Native Move execution advances only the Lua shadow cursor; Move-only sampling gaps may fast-forward that shadow cursor;
+- cross-semantic sampling gaps yield BSC Move tracking without replacing the native queue;
+- any accepted BSC-issued command switches the generation to BSC-owned for existing ACK/recovery semantics;
+- T2-B Move→Attack remains active and runtime verified;
+- previous T2-A/hairpin tests and controller-owned SC1–SC4 scheduler coverage are archived under `archive/legacy_move_scheduler_tests/`;
+- active passthrough suite is 7/7 PASS and mutation coverage is 34/34 CAUGHT.
+
+This is a diagnostic candidate pending WH3 straight/corner/fold-back smoke, not a final T2-A promotion.

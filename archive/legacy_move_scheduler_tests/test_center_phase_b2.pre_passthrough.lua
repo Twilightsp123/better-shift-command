@@ -71,4 +71,16 @@ T('B2 attack recovery is bounded to two same-action reasserts',function()
  for _,c in ipairs(f.commands) do if c.draft.kind=='ATTACK' then attack_cmds=attack_cmds+1 end end
  assert(attack_cmds==3,'original A2 plus exactly two recovery attacks expected')
 end)
+T('B2 near debt is not killed by an arbitrary stall timer',function()
+ local f=F({debug_source=true});f:start();f.enemy.x=300;f.enemy.z=0
+ f:emit('MOVE',false,100,0);f:emit('MOVE',true,200,0);f:emit('ATTACK',true,nil,nil,'2001')
+ f:tick(100,0,0);f:tick(200,80,0);assert(f.issued==1);f:deliver()
+ f:tick(300,120,50);f:tick(400,200,0)
+ assert(f:has('ROUTE_OBLIGATION_TRANSFERRED'))
+ -- Bring the old debt close to its tolerance, then let formation drift/settle for >8s.
+ for t=500,1600,100 do f:tick(t,106,0) end
+ for t=1700,11000,100 do f:tick(t,105.8,0) end
+ assert(not f:has('ROUTE_UNRECOVERABLE'),'near-tolerance debt must not be declared unreachable solely by time')
+ f:tick(11100,100,0);assert(f:has('ROUTE_OBLIGATION_SATISFIED'))
+end)
 print('TOTAL '..pass..' PASS '..fail..' FAIL');os.exit(fail==0 and 0 or 1)

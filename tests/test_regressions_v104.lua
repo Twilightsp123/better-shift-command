@@ -8,6 +8,10 @@ local function attack(tail)
  local f=F({width=40,debug_source=true});f:start();f.enemy.x=0;f.enemy.z=0;f.unit.x=-8;f.unit.z=0;f.unit.melee=true;f.unit.target=f.enemy
  f:emit('ATTACK',false,nil,nil,'2001');if tail then f:emit('MOVE',true,-80,0)end;f:tick(100);return f
 end
+local function order_v3(f,u)
+ local r=f.evidence_record;if not r or r.unit_uid~=u then return nil,'NO_ORDER' end
+ return {schema=3,epoch='1',unit_uid=u,unit_lifetime=r.unit_lifetime,complete=true,active=true,known=true,accepted_journal_serial=r.serial,active_engine_seq=r.engine_seq,kind=r.order_type,target_uid=r.target_uid,dest_x=r.dest_x,dest_z=r.dest_z}
+end
 T('temporary hidden target preserves Attack and never queries hidden position',function()
  local f=attack(true);ticks(f,200,1000);f.enemy.hidden=true;f.enemy.position_error=true;ticks(f,1100,3000)
  assert(f.issued==0 and f:has('TARGET_TEMPORARILY_UNAVAILABLE') and not f:has('ATTACK_TARGET_ABORT_CONTINUE'));healthy(f)
@@ -24,16 +28,16 @@ T('confirmed death releases a known tail only after confirmation',function()
  local f=attack(true);f.enemy.dead=true;for t=200,800,100 do f:tick(t);assert(f.issued==0)end
  f:tick(900);assert(f.issued==1 and f.commands[1].draft.kind=='MOVE');assert(f:has('reason=TARGET_DEAD'));healthy(f)
 end)
-T('future unavailable Attack preserves earlier Move prefix and suffix',function()
+T('future unavailable Attack preserves native Move prefix and suffix',function()
  local f=F({debug_source=true});f:start();f.enemy.hidden=true;f.enemy.position_error=true
  f:emit('MOVE',false,100,0);f:emit('MOVE',true,200,0);f:emit('ATTACK',true,nil,nil,'2001');f:emit('MOVE',true,300,0)
- f:tick(100,0,0);f:tick(200,80,0);assert(f.issued==1 and not f:has('GEN_CANCEL'));f:deliver();f:tick(300,120,0);healthy(f)
+ f:tick(100,0,0);f:tick(200,80,0);assert(f.issued==0 and not f:has('GEN_CANCEL'));healthy(f)
 end)
 T('out-of-order ACKs remain recipient-local',function()
- local f=F({two_units=true,debug_source=true});f:start();f.enemy.x=300;f.enemy.z=0
- for _,u in ipairs({'1001','1002'})do f:emit('MOVE',false,100,0,nil,u);f:emit('MOVE',true,200,0,nil,u)end
- f:tick(100,0,0);f.unit2.x=80;f:tick(200,80,0);assert(f.issued==2)
- f:deliver('1002');f:deliver('1001');f:tick(300,90,0);assert(f.pending_count==0 and f:count('OWN_MOVE_ACK')==2);healthy(f)
+ local f=F({two_units=true,debug_source=true});f:start();f.enemy.x=100;f.enemy.z=0
+ for _,u in ipairs({'1001','1002'})do f:emit('MOVE',false,20,0,nil,u);f:emit('ATTACK',true,nil,nil,'2001',u)end
+ f:tick(100,0,0);f.unit2.x=18.5;f:tick(200,18.5,0);assert(f.issued==2)
+ f:deliver('1002');f:deliver('1001');f:tick(300,18.5,0);assert(f.pending_count==0 and f:count('OWN_ATTACK_ACK')==2);healthy(f)
 end)
 T('first pure Shift during startup delay uses pre-input cold-idle certificate',function()
  local f=F({cold_idle=true,debug_source=true});f.phase='Deployed';f.callbacks.Deployed();assert(f.recording and #f.delay==1)
@@ -46,17 +50,16 @@ T('startup never fabricates cold-idle predecessor for a moving unit',function()
  assert(f:has('QUEUED_WITHOUT_REPLACE_IGNORED') and not f:has('COLD_IDLE_SEED'));healthy(f)
 end)
 T('late accepted old-generation ACK updates ledger but never revives old plan',function()
- local f=F({debug_source=true});f:start();f:emit('MOVE',false,100,0);f:emit('MOVE',true,200,0);f:tick(100,0,0);f:tick(200,80,0);assert(f.issued==1)
- f:emit('MOVE',false,-100,0);f:tick(300,80,0);f:deliver();f:tick(400,80,0)
- assert(f:has('LATE_OWN_ACK_IGNORED') and not f:has('OWN_MOVE_ACK uid=1001 gen=1'));healthy(f)
+ local f=F({debug_source=true});f:start();f.enemy.x=100;f.enemy.z=0;f:emit('MOVE',false,20,0);f:emit('ATTACK',true,nil,nil,'2001');f:tick(100,0,0);f:tick(200,18.5,0);assert(f.issued==1)
+ f:emit('MOVE',false,-100,0);f:tick(300,18.5,0);f:deliver();f:tick(400,18.5,0)
+ assert(f:has('LATE_OWN_ACK_IGNORED') and not f:has('OWN_ATTACK_ACK uid=1001 gen=1'));healthy(f)
 end)
-T('more than 256 historical nodes compact without cancelling live generation',function()
- local f=F({debug_source=true});f:start();f:emit('MOVE',false,10,0);for i=2,256 do f:emit('MOVE',true,i*10,0)end
+T('more than 256 historical native Move nodes compact without cancelling live generation',function()
+ local f=F({debug_source=true,native_order_evidence_v3=order_v3});f:start();local rows={}
+ rows[1]=f:emit('MOVE',false,10,0);for i=2,256 do rows[i]=f:emit('MOVE',true,i*10,0)end
  f:tick(100,0,0)
- -- Use collinear observations and ACK each handoff to create completed history.
- local t=200
- for i=1,3 do f:tick(t,i*10-1,0);if f.native_pending then f:deliver()end;t=t+100;f:tick(t,i*10,0);t=t+100 end
- f:emit('MOVE',true,3000,0);f:tick(t,30,0)
+ for i=2,4 do f.evidence_record=rows[i];f:tick(100+i*100,(i-1)*10,0) end
+ f:emit('MOVE',true,3000,0);f:tick(600,30,0)
  assert(f:has('ACTION_HISTORY_COMPACTED') and not f:has('GEN_CANCEL'));healthy(f)
 end)
 T('missing math.huge host field does not disable controller',function()

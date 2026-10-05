@@ -108,14 +108,7 @@ T('E08 closed complete block is not reopened by later collision',function()
  f:emit('MOVE',true,-200,0);f:tick(10000,-100,0)
  assert(f.issued==before+1 and f.commands[#f.commands].draft.x==-200,'new route can begin')
 end)
-T('M08/R12 missed prediction has explicit BLOCKED_ROUTE preserving suffix',function()
- local f=F({debug_source=true});f:start();f.enemy.x=300;f.enemy.z=0
- f:emit('MOVE',false,100,0);f:emit('MOVE',true,200,0);f:emit('ATTACK',true,nil,nil,'2001')
- f:tick(100,0,0);f:tick(200,80,0);f:deliver();f:tick(300,120,50);f:tick(400,200,0)
- tick(f,500,10000,200,true)
- assert(f:has('BLOCKED_ROUTE') and f:has('ROUTE_UNRECOVERABLE') and attacks(f)==0)
- assert(not f:has('ROUTE_OBLIGATION_SATISFIED'))
-end)
+-- M08/R12 Move-prediction debt case retired with native Move queue passthrough; archived scheduler tests preserve it.
 -- RE07 formally retracted state74/coarse-contact as per-Entity runtime melee evidence.
 -- R08 residual-contact coverage moved to test_r1_v3_second_charge.lua where it is
 -- expressed with target-specific ContactPair events plus a frozen ExitBodyCohort.
@@ -189,16 +182,17 @@ T('A07 no target no movement after ACK has explicit execution fault',function()
  f.unit.idle=true;f.unit.moving=false;f.unit.melee=false;f.unit.target=nil;tick(f,100,13000,0)
  assert(f:has('ATTACK_ACCEPTED_BUT_NO_EXECUTION_EVIDENCE') and f.issued==0)
 end)
-T('R4 widened dispatch pipeline does not batch an Attack behind four OTHER issues',function()
+T('R4 widened dispatch pipeline carries four BSC-owned Attack issues plus an Attack exit',function()
  local f=F({cold_idle=true,debug_source=true,two_units=true,width=40});local u3=f:add_late_local('1003',0,0);local u4=f:add_late_local('1004',0,0);local u5=f:add_late_local('1005',0,0)
  f:start();f.enemy.x=0;f.enemy.z=0;f.unit.x=-8;f.unit.z=0;f.unit.melee=true;f.unit.target=f.enemy
  f:emit('ATTACK',false,nil,nil,'2001');f:emit('MOVE',true,-100,0)
- for _,u in ipairs({'1002','1003','1004','1005'})do f:emit('MOVE',false,10,0,nil,u);f:emit('MOVE',true,20,0,nil,u)end
- f:tick(100,-8,0);f.unit2.x=10;u3.x=10;u4.x=10;u5.x=10;f:tick(200,-8,0)
+ f.enemy.x=20
+ for _,u in ipairs({'1002','1003','1004','1005'})do f:emit('MOVE',false,20,0,nil,u);f:emit('ATTACK',true,nil,nil,'2001',u)end
+ f:tick(100,-8,0);f.unit2.x=18.5;u3.x=18.5;u4.x=18.5;u5.x=18.5;f:tick(200,-8,0)
  assert(f.pending_count==4);tick(f,300,4900,-8)
  assert(f:has('ATTACK_HOLD_DONE uid=1001'),'attack observation must finish while other units are pending')
- assert(f.native_by_uid['1001'],'R4 must dispatch the attack tail immediately instead of waiting for a four-slot batch to drain')
- assert(f.pending_count==5,'the widened pipeline must carry the four existing issues plus the attack tail')
+ assert(f.native_by_uid['1001'],'R4 must dispatch the attack tail without waiting for four other pending issues')
+ assert(f.pending_count==5,'widened pipeline must carry four pending attacks plus the exit Move')
  healthy(f)
 end)
 T('COREPATH stale physical samples cannot revoke or gate a route-complete A2 transition',function()

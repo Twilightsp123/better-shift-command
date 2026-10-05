@@ -12,7 +12,7 @@ local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
 local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
 local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T2AB_HAIRPIN_CANDIDATE")
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_NATIVE_MOVE_PASSTHROUGH_DIAG")
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -1487,7 +1487,7 @@ end
 function Core.new_state(su,dynamic)
     dynamic=dynamic==true
     return {uid=uid(su.unit),unit=su.unit,uc=su.uc,gen=0,revision=nil,actions={},plan=nil,
-        idx=1,owned=false,terminal=false,blocked=false,require_replace=dynamic,recover_revision=nil,speeds={},pos=nil,prev_pos=nil,last_pos=nil,
+        idx=1,owned=false,move_owner="NATIVE_QUEUE",terminal=false,blocked=false,require_replace=dynamic,recover_revision=nil,speeds={},pos=nil,prev_pos=nil,last_pos=nil,
         last_sample=nil,origin=nil,moves=0,last_wait=-1000000,refused=nil,phase=dynamic and "WAIT_FOR_REPLACE" or "NATIVE_TRACKING",
         attack=nil,model_step_ms=0,cold_seen=dynamic,cold_idle=nil,queue_reset_cert=nil,restart_idle_candidate=nil,restart_idle_cert=nil,
         dynamic=dynamic,last_seen_scan=nil,block_state={},action_serial=0,action_base=0}
@@ -1656,7 +1656,7 @@ cancel=function(st,reason,now,observe)
         end
     end
     st.gen=st.gen+1; st.actions={}; st.plan=nil; st.idx=1; st.origin=nil
-    st.owned=false; st.terminal=false; st.moves=0; st.refused=nil; st.attack=nil; st.phase="CANCELLED"; st.input_gapped=false; st.tail_reached=false; st.recover_revision=nil
+    st.owned=false; st.move_owner="NATIVE_QUEUE"; st.terminal=false; st.moves=0; st.refused=nil; st.attack=nil; st.phase="CANCELLED"; st.input_gapped=false; st.tail_reached=false; st.recover_revision=nil
     st.block_state={};st.action_serial=0;st.action_base=0;st.native_arrival=nil;st.unverified_native_successor=nil
     -- A pending native order is NOT relabelled to the new generation.
 end
@@ -1760,7 +1760,7 @@ function Core.ingest(r,now)
                 and r.unit_revision==st.revision and cmp(st.revision,p.revision)>0
                 and r.order_type==p.kind and r.is_queued==false
                 and (p.kind~="ATTACK" or r.target_uid==p.target_uid) then
-                st.owned=p.previous_owned
+                st.owned=p.previous_owned;st.move_owner=p.previous_move_owner or st.move_owner
                 st.phase=st.attack and (st.attack.previous_eligible and "ATTACK_HOLD" or "ATTACK_APPROACH") or "MOVE_TRACKING"
                 st.input_gapped=true
                 if DEBUG_TELEMETRY then dlog("OWN_STALE_AFTER_APPEND uid="..st.uid.." gen="..st.gen.." issue="..p.issue..
@@ -1822,7 +1822,7 @@ function Core.ingest(r,now)
                 end
             end
         end
-        st.idx=p.idx; st.owned=true
+        st.idx=p.idx; st.owned=true; st.move_owner="BSC"
         if not p.reassert_current then st.origin=p.origin end
         local enter_reason=p.reassert_attack and "CURRENT_ATTACK_REASSERT_ACK" or (p.reassert_current and "CURRENT_MOVE_REASSERT_ACK" or "OWN_ACK")
         enter_action(st,st.plan[p.idx],now,enter_reason)
@@ -2107,7 +2107,7 @@ function Core.activate(st)
     end
     if not first.origin then return end
     -- Each input payload was already copied at admission. The live native queue is NOT consulted.
-    st.plan=st.actions; st.idx=1; st.origin=copy(first.origin)
+    st.plan=st.actions; st.idx=1; st.origin=copy(first.origin);st.move_owner="NATIVE_QUEUE"
     enter_action(st,first,clock(),attack_first and "PLAYER_ATTACK_ADOPTED" or "PLAYER_MOVE_ADOPTED")
     if attack_first then first.seed_mode="PLAYER_ATTACK_REPLACE" end
     st.phase=attack_first and "ATTACK_APPROACH" or "MOVE_TRACKING"
@@ -2859,7 +2859,7 @@ local function dispatch(st,index,reason,g,now,opts)
         revision=rev,target_uid=a.target_uid,started=now,after_attack=after_attack,attack_issue=attack_issue,hold_ms=hold_ms,
         source_attack_target_uid=attack_target_uid,reassert_current=opts.reassert_current==true,
         reassert_attack=opts.reassert_attack==true,previous_origin=copy(st.origin),
-        attack_abort=opts.attack_abort,previous_idx=st.idx,previous_owned=st.owned,action=a,saw_append=false,
+        attack_abort=opts.attack_abort,previous_idx=st.idx,previous_owned=st.owned,previous_move_owner=st.move_owner,action=a,saw_append=false,
         handoff_geometry={cut_tolerance=g.cut_tolerance,cut_error=g.cut_error,remaining=g.remaining,route_reason=g.route_reason,
             route_mode=g.route_mode,progress=g.progress,threshold=g.threshold,attack_min_progress=g.attack_min_progress,
             attack_short_min_progress=g.attack_short_min_progress,attack_terminal_window=g.attack_terminal_window,
@@ -3271,6 +3271,52 @@ function Core.maybe_reassert_exit(st,now)
     return false
 end
 
+local function native_move_passthrough_owned(st)
+    return st and st.move_owner=="NATIVE_QUEUE" and st.owned~=true
+end
+local function native_move_passthrough_range(st,from_i,to_i)
+    if not st or not st.plan then return false,"NO_PLAN" end
+    for i=from_i,to_i do
+        local a=st.plan[i]
+        if not a or a.type~="MOVE" then return false,"SEMANTIC_BOUNDARY" end
+        if a.block_kind=="EXIT_ROUTE" then return false,"EXIT_ROUTE_BOUNDARY" end
+    end
+    return true,"ALL_MOVE"
+end
+local function native_move_passthrough_sync(st,future_index,e,now)
+    local from=st.idx
+    local ok,why=native_move_passthrough_range(st,from,future_index)
+    if not ok then return false,why end
+    for i=from,future_index-1 do
+        local a=st.plan[i]
+        local remaining=st.pos and a.pos and dist(st.pos,a.pos) or nil
+        mark_action_complete(st,a,"NATIVE_QUEUE_SHADOW_ADVANCE",now,remaining)
+    end
+    local future=st.plan[future_index]
+    local previous=st.plan[future_index-1]
+    st.idx=future_index
+    st.origin=(previous and previous.type=="MOVE" and previous.pos) and copy(previous.pos) or copy(st.pos)
+    st.owned=false;st.move_owner="NATIVE_QUEUE";st.tail_reached=false;st.unverified_native_successor=nil
+    enter_action(st,future,now,"NATIVE_MOVE_PASSTHROUGH_SYNC")
+    st.phase="NATIVE_MOVE_PASSTHROUGH"
+    local skipped=future_index-from-1
+    log((skipped>0 and "NATIVE_MOVE_PASSTHROUGH_FAST_FORWARD" or "NATIVE_MOVE_PASSTHROUGH_SYNC")..
+        " uid="..st.uid.." gen="..st.gen.." from_index="..from.." to_index="..future_index..
+        " skipped="..math.max(0,skipped).." action="..clean(future and future.action_id)..
+        " active_engine_seq="..clean(e and e.active_engine_seq).." provider="..clean(e and e.provider)..
+        " policy=NATIVE_QUEUE_OWNED_NO_REISSUE model_ms="..now)
+    return true,"NATIVE_QUEUE_SYNC"
+end
+local function native_move_passthrough_yield(st,cur,future,future_index,e,now,reason)
+    st.unverified_native_successor={gen=st.gen,action=cur and cur.action_id or nil,next_action=future and future.action_id or nil,
+        future_index=future_index,ms=now,exact=e~=nil,provider=e and e.provider or nil,passthrough=true}
+    st.phase="NATIVE_MOVE_PASSTHROUGH_YIELD"
+    log("NATIVE_MOVE_PASSTHROUGH_YIELD uid="..st.uid.." gen="..st.gen.." action="..clean(cur and cur.action_id)..
+        " future_index="..clean(future_index).." future_action="..clean(future and future.action_id)..
+        " active_kind="..clean(e and e.kind).." active_engine_seq="..clean(e and e.active_engine_seq)..
+        " reason="..clean(reason).." policy=PRESERVE_NATIVE_QUEUE_NO_REPLACE model_ms="..now)
+    return false
+end
 local function rollback_native_future_to_current(st,cur,future,future_index,e,now,fault_reason,route_reason,recovery_reason)
     st.unverified_native_successor={gen=st.gen,action=cur.action_id,next_action=future and future.action_id or nil,
         future_index=future_index,ms=now,exact=true,provider=e and e.provider or nil}
@@ -3292,10 +3338,6 @@ function Core.reconcile_native_successor(st,now)
     if not st.plan or st.blocked or S.pending_by_uid[st.uid] then return false end
     local cur=st.plan[st.idx]
     if not cur or cur.type~="MOVE" then return false end
-
-    -- Read the native active execution exactly once. V3 is authoritative in the
-    -- production build; V2 is used only on a genuinely V3-unavailable compatibility
-    -- host. current_target() never authorizes a transition or rollback.
     local e,ewhy=R1.read_active_execution(st)
     if not e or e.active~=true or e.known~=true then
         local nexta=st.plan[st.idx+1]
@@ -3310,42 +3352,45 @@ function Core.reconcile_native_successor(st,now)
         end
         return false
     end
-
     local current_match=R1.execution_matches_action(e,cur)
     if current_match then
         st.unverified_native_successor=nil
         if cur.runtime and cur.runtime.fault and cur.runtime.fault.code=="BLOCKED_EXECUTION_IDENTITY" then R1.clear_fault(st,cur,now) end
         return false
     end
-
-    -- The engine may have promoted any captured future queue item before Lua's
-    -- canonical cursor advanced. Identify the exact future action, but never skip
-    -- intermediate canonical actions just because Native overran them.
     local future_index=nil;local future=nil
     for i=st.idx+1,#st.plan do
-        local match=R1.execution_matches_action(e,st.plan[i])
-        if match then future_index=i;future=st.plan[i];break end
+        if R1.execution_matches_action(e,st.plan[i]) then future_index=i;future=st.plan[i];break end
     end
+    local native_passthrough=native_move_passthrough_owned(st)
     if not future then
+        if native_passthrough and e.kind=="MOVE" then
+            st.unverified_native_successor={gen=st.gen,action=cur.action_id,ms=now,exact=true,provider=e.provider,noncanonical=true,passthrough=true}
+            st.phase="NATIVE_MOVE_PASSTHROUGH_NONCANONICAL"
+            log("NATIVE_MOVE_PASSTHROUGH_NONCANONICAL uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
+                " active_kind="..clean(e.kind).." active_engine_seq="..clean(e.active_engine_seq)..
+                " provider="..clean(e.provider).." policy=OBSERVE_NO_REPLACE model_ms="..now)
+            return false
+        end
         st.unverified_native_successor={gen=st.gen,action=cur.action_id,ms=now,exact=true,provider=e.provider,noncanonical=true}
         R1.fault(st,cur,"BLOCKED_EXECUTION_IDENTITY","ACTIVE_EXECUTION_NOT_CANONICAL",now)
-        if DEBUG_TELEMETRY then dlog("NATIVE_EXECUTION_NOT_CANONICAL uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
-            " active_kind="..clean(e.kind).." active_engine_seq="..clean(e.active_engine_seq).." provider="..clean(e.provider).." model_ms="..now) end
         return false
     end
-
+    if native_passthrough and future.type=="MOVE" then
+        local ok,why=native_move_passthrough_range(st,st.idx,future_index)
+        if ok then return native_move_passthrough_sync(st,future_index,e,now) end
+        return native_move_passthrough_yield(st,cur,future,future_index,e,now,why)
+    end
+    if native_passthrough and future_index~=st.idx+1 then
+        return native_move_passthrough_yield(st,cur,future,future_index,e,now,"SEMANTIC_BOUNDARY_OR_SAMPLING_GAP")
+    end
     if future_index~=st.idx+1 then
         return rollback_native_future_to_current(st,cur,future,future_index,e,now,
             "NATIVE_FUTURE_OVERRUN","CANONICAL_INTERMEDIATE_ACTIONS_OWED","NATIVE_FUTURE_OVERRUN_ROLLBACK_TO_CURRENT_MOVE")
     end
-
     local g=geometry(st,future)
     local route_ok,why=false,"SUCCESSOR_GEOMETRY_UNAVAILABLE"
     if future.type=="MOVE" then
-        -- T2-A is adopt-only. Never grant new proactive Move->Move issue permission here;
-        -- only stop fighting an exact immediate Native successor that is already
-        -- inside the existing bounded steering corridor. Earlier route debt stays
-        -- authoritative and Exit-route semantics remain on their separate policy.
         if g then route_ok,why=native_move_successor_ready(st,g,future) end
     elseif future.type=="ATTACK" then
         if g then g=attack_geometry(st,future,g) end
@@ -3358,19 +3403,11 @@ function Core.reconcile_native_successor(st,now)
         return rollback_native_future_to_current(st,cur,future,future_index,e,now,
             "NATIVE_ADVANCED_BEFORE_PERMISSION",why,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE")
     end
-
     if future.type=="MOVE" then
         if not action_runtime(cur).semantic_done then
             mark_action_complete(st,cur,"MOVE_STEERING_HANDOFF",now,g and g.remaining)
             Core.mark_handoff_committed(st,cur,future,"MOVE_STEERING_HANDOFF",now,g)
         end
-        log("MOVE_STEERING_HANDOFF uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
-            " successor="..future.action_id.." mode=NATIVE_ADOPT remaining="..num_or_nil(g and g.remaining)..
-            " progress="..num_or_nil(g and g.progress).." route_mode="..clean(g and g.route_mode)..
-            " route_reason="..clean(why).." adopt_gate="..clean(g and g.native_move_adopt_gate)..
-            " threshold="..num_or_nil(g and g.threshold).." corner_window="..num_or_nil(g and g.corner_window)..
-            " cut_error="..num_or_nil(g and g.cut_error).." cut_tolerance="..num_or_nil(g and g.cut_tolerance)..
-            " model_ms="..now)
     elseif why=="ATTACK_TERMINAL_CORRIDOR" and not action_runtime(cur).semantic_done then
         mark_action_complete(st,cur,"ATTACK_TERMINAL_HANDOFF",now,g and g.remaining)
         Core.mark_handoff_committed(st,cur,future,"ATTACK_TERMINAL_HANDOFF",now,g)
@@ -3390,12 +3427,10 @@ function Core.reconcile_native_successor(st,now)
             " provider="..clean(e.provider).." route_reason="..clean(why).." model_ms="..now) end
     else
         st.phase="MOVE_TRACKING"
-        log("NATIVE_MOVE_SUCCESSOR_ADOPTED uid="..st.uid.." gen="..st.gen.." action="..future.action_id..
-            " previous_action="..cur.action_id.." active_engine_seq="..e.active_engine_seq..
-            " provider="..clean(e.provider).." route_reason="..clean(why).." model_ms="..now)
     end
     return true
 end
+
 local function advance(st,now)
     if not st.plan or st.terminal or st.blocked then return end
     if S.pending_by_uid[st.uid] then return end
@@ -3413,6 +3448,10 @@ local function advance(st,now)
         and st.unverified_native_successor.action==cur.action_id and st.unverified_native_successor.ms==now then return end
     local rt=action_runtime(cur)
     local nexta=st.plan[st.idx+1]
+    if nexta and nexta.type=="MOVE" and native_move_passthrough_owned(st) then
+        st.phase="NATIVE_MOVE_PASSTHROUGH"
+        return
+    end
     if not nexta then
         if rt.semantic_done then
             local route_clear,b=block_route_clear(st,cur)
@@ -3589,6 +3628,9 @@ function Core.handoff_urgency(st,now)
     end
     local rt=action_runtime(cur)
     local nexta=st.plan[st.idx+1]
+    if nexta and nexta.type=="MOVE" and native_move_passthrough_owned(st) then
+        return BSC_HUGE,"NATIVE_MOVE_PASSTHROUGH"
+    end
     if not nexta then
         if rt.semantic_done then return -100,"MOVE_COMPLETE_NO_SUCCESSOR" end
         return BSC_HUGE,"NO_SUCCESSOR"
@@ -3647,7 +3689,7 @@ function Core.recover_ack_timeout(p,now)
     local ok,res=pcall(bridge.cancel_pending_issue,p.issue)
     if not ok or res~=true then return false end
     S.pending_by_uid[st.uid]=nil;S.pending_by_issue[p.issue]=nil;S.pending_count=math.max(0,S.pending_count-1)
-    st.owned=p.previous_owned
+    st.owned=p.previous_owned;st.move_owner=p.previous_move_owner or st.move_owner
     st.phase=st.attack and (st.attack.previous_eligible and "ATTACK_HOLD" or "ATTACK_APPROACH") or "MOVE_TRACKING"
     st.input_gapped=true
     if p.reassert_attack then
