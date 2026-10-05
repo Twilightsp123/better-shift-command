@@ -53,7 +53,7 @@ mutants=[
  ('ordinary_attack_globally_depends_on_entity_v2',controller,'local eligible=r.allow -- ordinary Attack keeps mature FEG behavior.','local eligible=r.allow and R1.entity(st,now)~=nil -- mutant global dependency','v109'),
  ('disable_center_a2_mode',controller,'local CENTER_A2_MODE = true','local CENTER_A2_MODE = false','center_b2'),
  ('sc6_reconciliation_forced_back_to_v2',controller,'if v3.execution_identity==true then','if false and v3.execution_identity==true then','sc6'),
- ('sc6_ignore_execution_sequence',controller,'if e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH" end','if false and e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH" end','sc6'),
+ ('sc6_ignore_execution_sequence',controller,'if e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH",lineage end','if false and e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH",lineage end','sc6'),
  ('t1_advance_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="PROACTIVE"})','local decision={route_ok=true,zone="ISSUE_READY",issue_reason="MUTANT"}','t1_contract'),
  ('t1_sc6_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{consumer="NATIVE_RECONCILE",current_index=st.idx,future_index=future_index})','local decision={zone="HARD_BLOCK",reason="MUTANT"}','t1_contract'),
  ('t1_scheduler_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="SCHEDULER"})','local decision={route_ok=true}','t1_contract'),
