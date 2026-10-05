@@ -55,7 +55,7 @@ mutants=[
  ('sc6_reconciliation_forced_back_to_v2',controller,'if v3.execution_identity==true then','if false and v3.execution_identity==true then','sc6'),
  ('sc6_ignore_execution_sequence',controller,'if e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH",lineage end','if false and e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH",lineage end','sc6'),
  ('t1_advance_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="PROACTIVE"})','local decision={route_ok=true,zone="ISSUE_READY",issue_reason="MUTANT"}','t1_contract'),
- ('t1_sc6_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{consumer="NATIVE_RECONCILE",current_index=st.idx,future_index=future_index})','local decision={zone="HARD_BLOCK",reason="MUTANT"}','t1_contract'),
+ ('t1_sc6_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{consumer="NATIVE_RECONCILE",current_index=st.idx,future_index=future_index,execution_lineage=future_lineage})','local decision={zone="HARD_BLOCK",reason="MUTANT"}','t1_contract'),
  ('t1_scheduler_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="SCHEDULER"})','local decision={route_ok=true}','t1_contract'),
  ('t1_h2_allows_future_skip',controller,'if future_index and future_index~=current_index+1 then','if false and future_index and future_index~=current_index+1 then','sc6'),
 ]
