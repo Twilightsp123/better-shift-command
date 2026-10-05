@@ -187,11 +187,13 @@ T('SC1 accepted steering-corner handoff completes the intermediate waypoint with
  f:tick(400,95,55);assert(not f:has('route_reason=PRIOR_ROUTE_OBLIGATION_PENDING'));healthy(f)
 end)
 
-T('SC1 U-turn starts before the waypoint instead of requiring a node-complete stop',function()
+T('SC1 U-turn waits until a near-waypoint hairpin corridor before reversing',function()
  local f=F({debug_source=true,width=20});f:start();f:emit('MOVE',false,100,0);f:emit('MOVE',true,0,0)
  f:tick(100,0,0);f:tick(200,60,0)
- assert(f.issued==1,'U-turn should enter steering corridor with substantial distance remaining')
- hascmd(f,1,'MOVE',0);assert(f:has('route_mode=STEERING_CORNER'));assert(not f:has('reason=MOVE_AFTER_NODE_COMPLETE'));healthy(f)
+ assert(f.issued==0,'U-turn must not fold the formation back at mid-leg progress')
+ f:tick(300,96,0)
+ assert(f.issued==1,'U-turn may hand off only after entering the strict near-waypoint hairpin window')
+ hascmd(f,1,'MOVE',0);assert(f:has('reason=MOVE_AFTER_NODE_COMPLETE') or f:has('reason=HAIRPIN_NEAR_WAYPOINT'),'near-waypoint reversal must use strict completion/hairpin credit');healthy(f)
 end)
 
 

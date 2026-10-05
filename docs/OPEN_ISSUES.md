@@ -33,7 +33,7 @@ Status: **OFFLINE FIX CANDIDATE / WH3 RUNTIME SMOKE REQUIRED**.
 
 T2-A now permits only an **exact immediate i+1 Native MOVE** to soft-adopt, and only when the current Move is already inside the controller's existing bounded dispatch/steering window. The first implementation is adopt-only: it does not add new proactive Move issue permission. It keeps i+2 overrun rollback, exact execution identity, prior-route-debt blocking, short-leg protection, and Exit-route separation.
 
-Offline evidence: dedicated T2-A suite **11/11 PASS** plus mutation protection for disabled adopt, i+2 skipping, prior-debt bypass, and premature straight-line adoption. WH3 RT-TP-04/05 remains required.
+Offline evidence: dedicated T2-A suite **11/11 PASS** plus mutation protection for disabled adopt, i+2 skipping, prior-debt bypass, and premature straight-line adoption. WH3 RT-TP-04/05 remains required. The first WH3 fold-back smoke exposed a separate hairpin defect: severe turns could inherit the wide normal `STEERING_CORNER` window and reverse at only 25–40% progress, producing formation self-compression. The current candidate splits >=135° turns into a strict near-waypoint hairpin gate; dedicated hairpin coverage is **5/5 PASS**. A new WH3 fold-back smoke is required.
 
 ### O-10 — Transition policy/MCT not implemented
 

@@ -107,3 +107,15 @@ Controller-only gameplay candidate; Native Bridge/address map unchanged.
 - dedicated T2-A regression coverage is **11/11 PASS** and mutation coverage is **44/44 CAUGHT**.
 
 Promotion is blocked on WH3 RT-TP-04/05 runtime smoke. T2-B is separately runtime verified by the 2026-10-05 WH3 9.0.2 log.
+
+## 2026-10-05 — T2-A hairpin/U-turn safety candidate
+
+WH3 9.0.2 runtime feedback exposed formation self-compression on fold-back routes: severe turns could enter the normal `STEERING_CORNER` window at only 25–40% progress even with cut error far outside tolerance.
+
+- turns at or above 135° are split from normal corner smoothing into a strict hairpin gate;
+- hairpin handoff requires at least 85% route progress plus a near-waypoint window capped by cut tolerance and both adjacent legs;
+- mid-leg 180° Native successor adoption now rolls back instead of folding the formation back across itself;
+- 90° bounded corner smoothing remains unchanged;
+- dedicated hairpin regression coverage is **5/5 PASS** and mutation coverage is **45/45 CAUGHT**.
+
+WH3 runtime smoke remains required before T2-A can be promoted from candidate.

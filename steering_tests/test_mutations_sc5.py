@@ -16,7 +16,7 @@ mutants=[
  ('disable_t2b_terminal_corridor',controller,'if (g.remaining or BSC_HUGE)>(g.threshold or 0) then','if true or (g.remaining or BSC_HUGE)>(g.threshold or 0) then','t2b'),
  ('remove_t2b_short_leg_progress_guard',controller,'if (g.leg or 0)<60 and (g.leg or 0)>0.001 then','if false and (g.leg or 0)<60 and (g.leg or 0)>0.001 then','blocks'),
  ('disable_steering_corner',controller,'if g.progress>=min_progress and g.remaining<=corner_window then','if false and g.progress>=min_progress and g.remaining<=corner_window then','blocks'),
- ('steering_corner_creates_return_debt',controller,'if hg.route_mode=="STEERING_CORNER" then','if false and hg.route_mode=="STEERING_CORNER" then','blocks'),
+ ('steering_corner_creates_return_debt',controller,'if hg.route_mode=="STEERING_CORNER" or hg.route_mode=="STEERING_HAIRPIN" then','if false and (hg.route_mode=="STEERING_CORNER" or hg.route_mode=="STEERING_HAIRPIN") then','blocks'),
  ('remove_steering_adjacent_leg_caps',controller,'local base_corner_window=math.min(lookahead*turn_factor,\n        g.leg*CFG.route_corner_current_leg_fraction,\n        next_leg*CFG.route_corner_next_leg_fraction)','local base_corner_window=lookahead*turn_factor','blocks'),
  ('disable_sc2_early_window',controller,'local corner_window=math.max(base_corner_window,early_corner_window)','local corner_window=base_corner_window','blocks'),
  ('disable_sc3_soft_debt',controller,'local soft_ok,soft_reason=move_route_debt_soft_continue(st,cur,nexta,g)','local soft_ok,soft_reason=false,\"MUTANT_HARD_DEBT\"','blocks'),
@@ -59,8 +59,9 @@ mutants=[
  ('t2a_allow_future_overrun_to_skip_intermediates',controller,'if future_index~=st.idx+1 then','if false and future_index~=st.idx+1 then','t2a'),
  ('t2a_ignore_prior_route_debt',controller,'if not debt_clear then','if false and not debt_clear then','t2a'),
  ('t2a_widen_straight_adopt_before_predictive_window',controller,'if g.route_mode=="PATH_SAFE" then','if g.route_mode=="PATH_SAFE" then return true,why end; if false then','t2a'),
+ ('t2a_disable_hairpin_guard',controller,'if (g.ratio or 0)>=CFG.route_hairpin_start_ratio then','if false and (g.ratio or 0)>=CFG.route_hairpin_start_ratio then','hairpin'),
 ]
-suite_map={'t2a':'test_tpol_t2a_shift_move.lua','t2b':'test_tpol_t2b_shift_attack.lua','center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua','gate':'test_gate.lua','gate_compat':'test_gate_v103.lua','gate_v104':'test_gate_v104.lua','sc6':'test_exec_identity_v3.lua'}
+suite_map={'hairpin':'test_tpol_t2a_hairpin.lua','t2a':'test_tpol_t2a_shift_move.lua','t2b':'test_tpol_t2b_shift_attack.lua','center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua','gate':'test_gate.lua','gate_compat':'test_gate_v103.lua','gate_v104':'test_gate_v104.lua','sc6':'test_exec_identity_v3.lua'}
 for kind in sorted(set(x[4] for x in mutants)):
     args=LUA+[str(ROOT/'tests'/suite_map[kind]),str(ROOT/'source'/('fresh_engagement_gate.lua' if kind.startswith('gate') else 'better_shift_command.lua'))]
     if not kind.startswith('gate'):args.append(str(ROOT/'tests/fixture.lua'))
@@ -73,7 +74,7 @@ for name,src,before,after,kind in mutants:
         if kind in ('gate','gate_compat','gate_v104'):
             script={'gate':'test_gate.lua','gate_compat':'test_gate_v103.lua','gate_v104':'test_gate_v104.lua','sc6':'test_exec_identity_v3.lua'}[kind];args=LUA+[str(ROOT/'tests'/script),str(p)]
         else:
-            script={'t2a':'test_tpol_t2a_shift_move.lua','t2b':'test_tpol_t2b_shift_attack.lua','center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua','sc6':'test_exec_identity_v3.lua'}[kind]
+            script={'hairpin':'test_tpol_t2a_hairpin.lua','t2a':'test_tpol_t2a_shift_move.lua','t2b':'test_tpol_t2b_shift_attack.lua','center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua','sc6':'test_exec_identity_v3.lua'}[kind]
             args=LUA+[str(ROOT/'tests'/script),str(p),str(ROOT/'tests/fixture.lua')]
         r=subprocess.run(args,capture_output=True,text=True,cwd=ROOT)
         if r.returncode==0:raise SystemExit('MUTANT SURVIVED: '+name)

@@ -44,7 +44,7 @@ issues=read('docs/OPEN_ISSUES.md')
 for token in ('O-08 — Move→Attack','O-09 — SC6 rolls back immediate future MOVE','O-11 — Battle exit/main-menu/desktop hang','TPOL-T1H / T2 outstanding'):
     if token not in issues: fail('OPEN_ISSUES missing current blocker: '+token)
 matrix=read('docs/TEST_MATRIX.md')
-for token in ('Windows Native CTest | 14/14 PASS','T1H hidden PolicyProfile/MCT scaffold | PASS','T1 shared behavior-neutral evaluator refactor | NOT RUN','T2 Move→Attack terminal handoff | PASS: 9/9 + mutation + WH3 9.0.2 smoke','T3 visible MCT adapter/UI wiring | NOT RUN'):
+for token in ('Windows Native CTest | 14/14 PASS','T1H hidden PolicyProfile/MCT scaffold | PASS','T1 shared behavior-neutral evaluator refactor | NOT RUN','T2 Move→Attack terminal handoff | PASS: 9/9 + mutation + WH3 9.0.2 smoke','T2-A hairpin/U-turn safety | OFFLINE PASS: 5/5 + mutation','T3 visible MCT adapter/UI wiring | NOT RUN'):
     if token not in matrix: fail('TEST_MATRIX missing gate: '+token)
 ledger=read('docs/ASSUMPTION_LEDGER.md')
 if '`Entity +0x18 = MovementComponent*` | **RETRACTED**' not in ledger: fail('Assumption ledger lost retracted Entity+0x18 status')
@@ -55,9 +55,9 @@ hist=read('docs/DEVELOPMENT_HISTORY.md')
 for token in ('HISTORICAL DOCUMENT — NOT CURRENT AUTHORITY','## 18. 2026-09-29 — Move VTable closure reveals transition-policy limitations','## 19. 2026-09-29 — TPOL-T1H hidden MCT/profile scaffold'):
     if token not in hist: fail('DEVELOPMENT_HISTORY missing marker: '+token)
 manifest=json.loads(read('DESIGN_MANIFEST.json'))
-if manifest.get('design_stream')!='BSC-TPOL-D1' or manifest.get('status')!='T1H_PROFILE_SCAFFOLD_T2B_RUNTIME_VERIFIED_T2A_OFFLINE_CANDIDATE': fail('DESIGN_MANIFEST identity/status mismatch')
+if manifest.get('design_stream')!='BSC-TPOL-D1' or manifest.get('status')!='T1H_PROFILE_SCAFFOLD_T2B_RUNTIME_VERIFIED_T2A_HAIRPIN_OFFLINE_CANDIDATE': fail('DESIGN_MANIFEST identity/status mismatch')
 if manifest.get('product_default')!='SMOOTH' or manifest.get('hard_invariants_configurable') is not False: fail('DESIGN_MANIFEST policy contract mismatch')
-for token in ('T2B_MOVE_ATTACK_RUNTIME_VERIFIED','T2A_IMMEDIATE_MOVE_OFFLINE_CANDIDATE','T2C_HYSTERESIS_PENDING'):
+for token in ('T2B_MOVE_ATTACK_RUNTIME_VERIFIED','T2A_IMMEDIATE_MOVE_OFFLINE_CANDIDATE','T2A_HAIRPIN_OFFLINE_CANDIDATE','T2C_HYSTERESIS_PENDING'):
     if token not in manifest.get('implementation_stages',[]): fail('DESIGN_MANIFEST missing partial T2 stage: '+token)
 if manifest.get('mct_ui')!='HIDDEN_NOT_REGISTERED': fail('DESIGN_MANIFEST MCT visibility mismatch')
 if manifest.get('formal_project_version')!='1.3.0' or manifest.get('canonical_pack_name')!='zzz_better_shift_command_steam.pack': fail('DESIGN_MANIFEST formal version/pack identity mismatch')

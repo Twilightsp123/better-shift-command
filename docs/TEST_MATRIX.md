@@ -4,8 +4,8 @@
 
 | Gate | Result | Meaning |
 |---|---:|---|
-| Maintenance jobs | 27/27 PASS | full offline Lua/Python/static baseline including T2-A/T2-B |
-| Mutation suite | 44/44 CAUGHT | includes T2-A adopt/overrun/debt/window and T2-B safety mutants |
+| Maintenance jobs | 28/28 PASS | full offline Lua/Python/static baseline including T2-A/T2-B |
+| Mutation suite | 45/45 CAUGHT | includes T2-A adopt/overrun/debt/window and T2-B safety mutants |
 | Portable Native CTest | 13/13 PASS | portable native fixtures |
 | ASan/UBSan CTest | 13/13 PASS | sanitizer baseline |
 | Windows VS2019 v142 + MASM | PASS | audited Move-VTable-fix delivery |
@@ -34,6 +34,7 @@
 | T1H hidden PolicyProfile/MCT scaffold | PASS | static contract + existing suite; no visible MCT UI |
 | T1 shared behavior-neutral evaluator refactor | NOT RUN | old/new decision equivalence + existing suite |
 | T2 immediate-MOVE reconciliation | OFFLINE PASS: 11/11 + mutation | WH3 RT-TP-04/05 still required |
+| T2-A hairpin/U-turn safety | OFFLINE PASS: 5/5 + mutation | WH3 fold-back smoke required |
 | T2 Move→Attack terminal handoff | PASS: 9/9 + mutation + WH3 9.0.2 smoke | runtime verified |
 | T2 hysteresis | NOT RUN | adopt-only boundary tests; no rollback thrash |
 | T3 visible MCT adapter/UI wiring | NOT RUN | uses existing T1H profile compiler; missing-MCT fallback |

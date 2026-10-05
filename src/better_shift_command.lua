@@ -12,7 +12,7 @@ local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
 local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
 local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T2AB_CANDIDATE")
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T2AB_HAIRPIN_CANDIDATE")
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -482,6 +482,10 @@ local CFG={evidence_max_age_ms=500,evidence_wait_ms=5000,route_resolution_ms=200
     route_corner_speed_seconds=2.0,route_corner_width_factor=0.35,
     route_corner_turn_base=0.70,route_corner_turn_extra=0.60,
     route_corner_current_leg_fraction=0.45,route_corner_next_leg_fraction=0.45,
+    -- Hairpin/U-turns must not reuse the wide normal-corner smoothing window.
+    -- A formation folding back on itself before the waypoint causes self-compression.
+    route_hairpin_start_ratio=0.75,route_hairpin_min_progress=0.85,
+    route_hairpin_current_leg_fraction=0.12,route_hairpin_next_leg_fraction=0.12,
     -- SC2 EARLY A/B: keep SC1's bounded lookahead, but also allow Move->Move handoff
     -- as soon as the existing predictive threshold is reached on normal-length legs.
     -- The 0.75 adjacent-leg cap preserves short-zig-zag safety while deliberately
@@ -1804,7 +1808,7 @@ function Core.ingest(r,now)
                         " successor="..clean(p.action.action_id).." mode=ISSUE_ACK remaining="..num_or_nil(hg.remaining)..
                         " progress="..num_or_nil(hg.progress).." threshold="..num_or_nil(hg.threshold)..
                         " min_progress="..num_or_nil(hg.attack_min_progress).." model_ms="..now)
-                elseif hg.route_mode=="STEERING_CORNER" then
+                elseif hg.route_mode=="STEERING_CORNER" or hg.route_mode=="STEERING_HAIRPIN" then
                     -- The successor was accepted while the unit was inside the bounded turn corridor.
                     -- That is the completion proof for an intermediate navigation waypoint: do not
                     -- create a debt that would force the formation to return and physically stamp Pn.
@@ -2420,6 +2424,26 @@ local function route_handoff_ready(st,g,nexta)
         return true,g.route_reason
     end
 
+    -- Hairpin/U-turn safety: normal corner smoothing deliberately grows its turn
+    -- window with angle, which is useful for ordinary bends but unsafe once the
+    -- route folds back across the incoming formation. For severe turns require the
+    -- unit to be very near the waypoint and inside a cut-error window capped by
+    -- both adjacent legs before any handoff/adoption is legal.
+    if (g.ratio or 0)>=CFG.route_hairpin_start_ratio then
+        local hairpin_min_progress=math.max(min_progress,CFG.route_hairpin_min_progress)
+        local hairpin_window=math.min(tol,
+            g.leg*CFG.route_hairpin_current_leg_fraction,
+            next_leg*CFG.route_hairpin_next_leg_fraction)
+        g.hairpin=true;g.hairpin_min_progress=hairpin_min_progress;g.hairpin_window=hairpin_window
+        if g.progress>=hairpin_min_progress and g.remaining<=hairpin_window and err<=hairpin_window then
+            g.route_safe=true;g.route_mode="STEERING_HAIRPIN";g.route_reason="HAIRPIN_NEAR_WAYPOINT"
+            return true,g.route_reason
+        end
+        g.route_safe=false;g.route_mode="BLOCKED"
+        g.route_reason=g.progress<hairpin_min_progress and "HAIRPIN_PROGRESS_REQUIRED" or "HAIRPIN_WAYPOINT_REQUIRED"
+        return false,g.route_reason
+    end
+
     -- B. SC1 steering corridor. A waypoint is an intermediate navigation guide,
     -- not an arrival target. Predict a bounded turn-start distance from live speed,
     -- formation width and turn severity, then cap it by BOTH adjacent legs so short
@@ -2500,8 +2524,8 @@ local function native_move_successor_ready(st,g,nexta)
     -- window. STEERING_CORNER already encodes its own bounded turn window. A
     -- straight/path-safe successor must additionally satisfy one of the existing
     -- predictive/proximity/stall dispatch thresholds that advance() already uses.
-    if g.route_mode=="STEERING_CORNER" then
-        g.native_move_adopt_gate="STEERING_CORNER"
+    if g.route_mode=="STEERING_CORNER" or g.route_mode=="STEERING_HAIRPIN" then
+        g.native_move_adopt_gate=g.route_mode
         return true,why
     end
     if g.route_mode=="PATH_SAFE" then
@@ -2841,6 +2865,7 @@ local function dispatch(st,index,reason,g,now,opts)
             attack_short_min_progress=g.attack_short_min_progress,attack_terminal_window=g.attack_terminal_window,
             corner_window=g.corner_window,corner_window_base=g.corner_window_base,
             corner_window_early=g.corner_window_early,corner_lookahead=g.corner_lookahead,
+            hairpin=g.hairpin,hairpin_window=g.hairpin_window,hairpin_min_progress=g.hairpin_min_progress,
             corner_turn_factor=g.corner_turn_factor,corner_stall_escape=g.corner_stall_escape,
             corner_stall_no_progress_ms=g.corner_stall_no_progress_ms,corner_stall_escape_margin=g.corner_stall_escape_margin,
             corner_stall_escape_limit=g.corner_stall_escape_limit,next_leg=g.next_leg,ratio=g.ratio,
