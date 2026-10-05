@@ -997,7 +997,8 @@ function R1.execution_matches_action(e,a)
             or math.abs(e.dest_x-a.pos.x)>0.05 or math.abs(e.dest_z-a.pos.z)>0.05 then
             return false,"EXECUTION_DESTINATION_MISMATCH"
         end
-    end    return true,"OK"
+    end
+    return true,"OK"
 end
 function R1.order_evidence(st,a,now)
     local e,why=R1.read_active_execution(st)
@@ -1996,7 +1997,8 @@ function Core.ingest(r,now)
     for i=from,#st.actions do candidate[#candidate+1]=st.actions[i] end
     local supported,why=plan_supported(st,candidate,active)
     if active and not supported then
-        table.remove(st.actions,#st.actions)        if a.block_id and (a.type=="ATTACK" or not st.actions[#st.actions] or st.actions[#st.actions].block_id~=a.block_id) then
+        table.remove(st.actions,#st.actions)
+        if a.block_id and (a.type=="ATTACK" or not st.actions[#st.actions] or st.actions[#st.actions].block_id~=a.block_id) then
             st.block_state[a.block_id]=nil
         end
         log("APPEND_REFUSED uid="..st.uid.." reason="..why.." policy=PRESERVE_EXISTING_ACTIONS");return
@@ -2995,7 +2997,8 @@ function Core.advance_attack(st,now,observe_only)
             " issue="..t.issue.." credited_ms="..credited.." dist="..num_or_nil(r.distance)..
             " bbox_distance="..num_or_nil(contact_distance).." reason="..clean(r.reason)..
             " model_ms="..now) end
-    end    if delta>CFG.attack_observation_gap_ms or st.input_gapped then
+    end
+    if delta>CFG.attack_observation_gap_ms or st.input_gapped then
         if DEBUG_TELEMETRY then log("ATTACK_OBSERVATION_GAP uid="..st.uid.." gen="..st.gen.." issue="..t.issue..
             " delta_ms="..string.format("%.0f",delta).." model_ms="..string.format("%.0f",now).." credited_ms=0") end
     end

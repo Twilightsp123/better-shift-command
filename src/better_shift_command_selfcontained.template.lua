@@ -997,7 +997,8 @@ function R1.read_active_execution(st)
     end
     local v2=S.evidence_caps or {}
     if v2.execution_identity==true then
-        if type(bridge.read_active_order_identity_v2)~="function" then return nil,"V2_PROVIDER_UNAVAILABLE" end        local ok,e,reason=pcall(bridge.read_active_order_identity_v2,st.uid)
+        if type(bridge.read_active_order_identity_v2)~="function" then return nil,"V2_PROVIDER_UNAVAILABLE" end
+        local ok,e,reason=pcall(bridge.read_active_order_identity_v2,st.uid)
         if not ok then return nil,"V2_PROVIDER_EXCEPTION" end
         if type(e)~="table" then return nil,reason or "V2_ORDER_IDENTITY_UNAVAILABLE" end
         return normalize_active_execution(st,e,"V2",2)
@@ -1996,7 +1997,8 @@ function Core.ingest(r,now)
         end
         st.queue_reset_cert=nil;st.restart_idle_cert=nil;st.restart_idle_candidate=nil
         -- Preserve native queued=true. Do not forge a REPLACE or send a priming order.
-    end    if #st.actions>=CFG.max_actions and st.plan and st.idx>1 and not S.pending_by_uid[st.uid] then
+    end
+    if #st.actions>=CFG.max_actions and st.plan and st.idx>1 and not S.pending_by_uid[st.uid] then
         local n=st.idx-1
         for i=1,#st.actions-n do st.actions[i]=st.actions[i+n] end
         for i=#st.actions,#st.actions-n+1,-1 do st.actions[i]=nil end
@@ -2995,7 +2997,8 @@ function Core.advance_attack(st,now,observe_only)
     if r.reset_hold then
         if DEBUG_TELEMETRY then log("FEG_RELOCK uid="..st.uid.." gen="..st.gen.." issue="..t.issue.." episode="..r.episode..
             " model_ms="..string.format("%.0f",now).." previous_credit_ms="..string.format("%.0f",t.eligible_ms)..
-            " reason="..r.reason) end        t.previous_eligible=false;t.ready_logged=false -- R06: preserve already qualified credit on relock
+            " reason="..r.reason) end
+        t.previous_eligible=false;t.ready_logged=false -- R06: preserve already qualified credit on relock
     end
     if r.just_opened then
         if DEBUG_TELEMETRY then log("FEG_OPEN uid="..st.uid.." gen="..st.gen.." issue="..t.issue.." episode="..r.episode..
