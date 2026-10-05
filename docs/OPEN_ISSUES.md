@@ -21,11 +21,11 @@ The Move-VTable correction has been built and exercised in WH3. Native outcome f
 
 ### O-08 — Move→Attack can still brake/stop before Attack
 
-Status: **OPEN / DESIGN APPROVED**.
+Status: **OFFLINE FIX CANDIDATE / WH3 RUNTIME SMOKE REQUIRED**.
 
-Current code deliberately blocks Move→Attack until current Move `semantic_done` (`ATTACK_REQUIRES_ROUTE_COMPLETE`). Runtime evidence on 2026-09-29 showed Native already entering immediate Attack and SC6 rolling it back because route permission was still strict.
+The strict `ATTACK_REQUIRES_ROUTE_COMPLETE` boundary has been replaced for ordinary Move→Attack by the bounded T2-B `ATTACK_TERMINAL_CORRIDOR`. The implementation requires exact immediate successor semantics, viable target, clear prior route debt, bounded progress, attack-geometry distance caps, extra high-angle progress, and stricter short-leg preservation. Accepted proactive handoff and exact Native adoption both grant explicit `ATTACK_TERMINAL_HANDOFF` completion credit; Exit→Attack remains on its separate strict gate.
 
-Planned closure: `BSC-TPOL-D1` T2-B terminal Attack handoff.
+Offline closure evidence: dedicated T2-B suite **9/9 PASS**, legacy block suite **33/33 PASS**, and mutation coverage catches both disabled-terminal-corridor and removed-short-leg-guard mutants. The remaining closure requirement is WH3 RT-TP-02/03 runtime smoke on the 9.0.2 candidate.
 
 ### O-09 — SC6 rolls back immediate future MOVE
 
@@ -76,5 +76,5 @@ The 2026-09-29 disassembly reports proved allocator return ABI, top-level constr
 
 - T1H hidden profile scaffold is implemented; visible MCT UI is intentionally deferred.
 - Movement Cornering / Attack Handoff / Route Fidelity / Native Successor Tolerance / Disengage Priority are reserved but not runtime-wired yet.
-- T2 must still implement the shared transition evaluator, immediate successor MOVE adoption, Move→Attack terminal handoff, and hysteresis.
+- T2 still needs the shared transition evaluator, immediate successor MOVE adoption, and hysteresis. Move→Attack terminal handoff is implemented as an offline-tested candidate and awaits WH3 runtime smoke.
 - Minimum Engagement Time is wired at the legacy-equivalent default 3.0 s; alternate values are not exposed to users in T1H.

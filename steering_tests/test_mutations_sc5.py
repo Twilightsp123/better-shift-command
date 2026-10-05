@@ -13,7 +13,8 @@ if not LUA:raise SystemExit('A Lua interpreter is required')
 module=(ROOT/'source/fresh_engagement_gate.lua').read_text()
 controller=(ROOT/'source/better_shift_command.lua').read_text()
 mutants=[
- ('attack_accepts_predictive_route_debt',controller,'g.route_safe=false;g.route_mode="BLOCKED";g.route_reason="ATTACK_REQUIRES_ROUTE_COMPLETE"\n        return false,g.route_reason','g.route_safe=true;g.route_mode="MUTANT";g.route_reason="MUTANT_ATTACK_PREDICTIVE"\n        return true,g.route_reason','blocks'),
+ ('disable_t2b_terminal_corridor',controller,'if (g.remaining or BSC_HUGE)>(g.threshold or 0) then','if true or (g.remaining or BSC_HUGE)>(g.threshold or 0) then','t2b'),
+ ('remove_t2b_short_leg_progress_guard',controller,'if (g.leg or 0)<60 and (g.leg or 0)>0.001 then','if false and (g.leg or 0)<60 and (g.leg or 0)>0.001 then','blocks'),
  ('disable_steering_corner',controller,'if g.progress>=min_progress and g.remaining<=corner_window then','if false and g.progress>=min_progress and g.remaining<=corner_window then','blocks'),
  ('steering_corner_creates_return_debt',controller,'if hg.route_mode=="STEERING_CORNER" then','if false and hg.route_mode=="STEERING_CORNER" then','blocks'),
  ('remove_steering_adjacent_leg_caps',controller,'local base_corner_window=math.min(lookahead*turn_factor,\n        g.leg*CFG.route_corner_current_leg_fraction,\n        next_leg*CFG.route_corner_next_leg_fraction)','local base_corner_window=lookahead*turn_factor','blocks'),
@@ -56,7 +57,7 @@ mutants=[
  ('sc6_ignore_execution_sequence',controller,'if e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH" end','if false and e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH" end','sc6'),
  ('sc6_allow_future_overrun_to_skip_intermediates',controller,'if future_index~=st.idx+1 or future.type~="ATTACK" then','if false and (future_index~=st.idx+1 or future.type~="ATTACK") then','sc6'),
 ]
-suite_map={'center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua','gate':'test_gate.lua','gate_compat':'test_gate_v103.lua','gate_v104':'test_gate_v104.lua','sc6':'test_exec_identity_v3.lua'}
+suite_map={'t2b':'test_tpol_t2b_shift_attack.lua','center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua','gate':'test_gate.lua','gate_compat':'test_gate_v103.lua','gate_v104':'test_gate_v104.lua','sc6':'test_exec_identity_v3.lua'}
 for kind in sorted(set(x[4] for x in mutants)):
     args=LUA+[str(ROOT/'tests'/suite_map[kind]),str(ROOT/'source'/('fresh_engagement_gate.lua' if kind.startswith('gate') else 'better_shift_command.lua'))]
     if not kind.startswith('gate'):args.append(str(ROOT/'tests/fixture.lua'))
@@ -69,7 +70,7 @@ for name,src,before,after,kind in mutants:
         if kind in ('gate','gate_compat','gate_v104'):
             script={'gate':'test_gate.lua','gate_compat':'test_gate_v103.lua','gate_v104':'test_gate_v104.lua','sc6':'test_exec_identity_v3.lua'}[kind];args=LUA+[str(ROOT/'tests'/script),str(p)]
         else:
-            script={'center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua','sc6':'test_exec_identity_v3.lua'}[kind]
+            script={'t2b':'test_tpol_t2b_shift_attack.lua','center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua','sc6':'test_exec_identity_v3.lua'}[kind]
             args=LUA+[str(ROOT/'tests'/script),str(p),str(ROOT/'tests/fixture.lua')]
         r=subprocess.run(args,capture_output=True,text=True,cwd=ROOT)
         if r.returncode==0:raise SystemExit('MUTANT SURVIVED: '+name)

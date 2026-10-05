@@ -230,9 +230,8 @@ end)
 T('Move to Attack uses a formation-aware reached envelope before idle, while a short leg stays protected',function()
  local f=F({width=40,debug_source=true});f:start();f.enemy.x=200;f.enemy.z=0
  f.unit.idle=false;f.unit.moving=true;f:emit('MOVE',false,100,0);f:emit('ATTACK',true,nil,nil,'2001')
- f:tick(100,0,0);f:tick(200,89,0);assert(f.issued==0,'11m remaining is outside the 10m long-leg envelope')
- f:tick(300,90.5,0);assert(f.issued==1,'long Move should hand off before an idle stop once the route node is actually reached')
- hascmd(f,1,'ATTACK');assert((f:has('reason=ROUTE_NODE_REACHED') or f:has('reason=ROUTE_NODE_PASSED')) and f:has('reason=ATTACK_AFTER_ROUTE_COMPLETE'));healthy(f)
+ f:tick(100,0,0);f:tick(200,89,0);assert(f.issued==1,'T2-B should issue Attack inside the bounded terminal corridor before arrival braking')
+ hascmd(f,1,'ATTACK');assert(f:has('reason=ATTACK_TERMINAL_HANDOFF'),'long-leg early handoff must be explicit terminal Attack credit');healthy(f)
  local s=F({width=40,debug_source=true});s:start();s.enemy.x=100;s.enemy.z=0;s.unit.idle=false;s.unit.moving=true
  s:emit('MOVE',false,20,0);s:emit('ATTACK',true,nil,nil,'2001')
  s:tick(100,0,0);s:tick(200,15,0);assert(s.issued==0,'short 20m leg must not use the full formation-width envelope')

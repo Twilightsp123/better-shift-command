@@ -1796,7 +1796,15 @@ function Core.ingest(r,now)
             local previous=st.plan[p.previous_idx]
             if previous and previous.type=="MOVE" and action_runtime(previous).handoff_committed and not action_runtime(previous).semantic_done then
                 local hg=p.handoff_geometry or {}
-                if hg.route_mode=="STEERING_CORNER" then
+                if hg.route_mode=="ATTACK_TERMINAL_CORRIDOR" and p.action and p.action.type=="ATTACK" then
+                    -- T2-B completion credit is granted only after Native accepts the
+                    -- immediate Attack. No route debt may survive across this boundary.
+                    mark_action_complete(st,previous,"ATTACK_TERMINAL_HANDOFF",now,hg.remaining)
+                    log("ATTACK_TERMINAL_HANDOFF uid="..st.uid.." gen="..st.gen.." action="..previous.action_id..
+                        " successor="..clean(p.action.action_id).." mode=ISSUE_ACK remaining="..num_or_nil(hg.remaining)..
+                        " progress="..num_or_nil(hg.progress).." threshold="..num_or_nil(hg.threshold)..
+                        " min_progress="..num_or_nil(hg.attack_min_progress).." model_ms="..now)
+                elseif hg.route_mode=="STEERING_CORNER" then
                     -- The successor was accepted while the unit was inside the bounded turn corridor.
                     -- That is the completion proof for an intermediate navigation waypoint: do not
                     -- create a debt that would force the formation to return and physically stamp Pn.
@@ -2191,6 +2199,36 @@ local function move_reach_tolerance(st,leg)
     end
     return tol
 end
+local function attack_terminal_handoff_ready(st,g,nexta)
+    local cur=st.plan and st.plan[st.idx]
+    if not cur or cur.type~="MOVE" or not nexta or nexta.type~="ATTACK" then
+        return false,"ATTACK_TERMINAL_CLASS_MISMATCH"
+    end
+    -- T2-B is intentionally ordinary Move->Attack only. Exit->Attack keeps its
+    -- stricter displacement/route gate until the separate Exit policy is migrated.
+    if cur.block_kind=="EXIT_ROUTE" then
+        return false,"EXIT_ATTACK_REQUIRES_EXIT_POLICY"
+    end
+    local turn=clamp(g.ratio or 0,0,1)
+    local min_progress=clamp(CFG.route_attack_min_progress+CFG.route_attack_turn_progress*turn,0,0.95)
+    -- Preserve the existing short-leg route fidelity: on compact waypoints the
+    -- terminal Attack corridor may not become wider than the Move reach envelope.
+    if (g.leg or 0)<60 and (g.leg or 0)>0.001 then
+        local short_progress=clamp(1-move_reach_tolerance(st,g.leg)/g.leg,0,0.95)
+        min_progress=math.max(min_progress,short_progress)
+        g.attack_short_min_progress=short_progress
+    end
+    g.attack_min_progress=min_progress
+    g.attack_terminal_window=g.threshold
+    if (g.progress or 0)+0.000001<min_progress then
+        return false,"ATTACK_TERMINAL_PROGRESS_LOW"
+    end
+    if (g.remaining or BSC_HUGE)>(g.threshold or 0) then
+        return false,"ATTACK_OUTSIDE_TERMINAL_CORRIDOR"
+    end
+    g.route_safe=true;g.route_mode="ATTACK_TERMINAL_CORRIDOR";g.route_reason="ATTACK_TERMINAL_CORRIDOR"
+    return true,g.route_reason
+end
 function Core.move_idle_finish_envelope(st)
     return math.min(CFG.move_idle_finish_cap_m,CFG.move_idle_finish_base_m+ordered_width_hint(st)*CFG.move_idle_finish_width_factor)
 end
@@ -2350,10 +2388,13 @@ local function route_handoff_ready(st,g,nexta)
         g.route_safe=true;g.route_mode="COMPLETE";g.route_reason="ACTION_COMPLETE";g.cut_error=0;g.cut_tolerance=BSC_HUGE
         return true,g.route_reason
     end
-    -- Move -> Attack remains intentionally strict and is outside SC1.
-    -- Only Move -> Move may interpret an intermediate waypoint as steering guidance.
+    -- T2-B: ordinary Move->Attack may hand off inside the bounded terminal
+    -- corridor already computed by attack_geometry(). Prior route debt has already
+    -- been proven clear above; no debt is allowed to cross this semantic boundary.
     if nexta.type=="ATTACK" then
-        g.route_safe=false;g.route_mode="BLOCKED";g.route_reason="ATTACK_REQUIRES_ROUTE_COMPLETE"
+        local ok,why=attack_terminal_handoff_ready(st,g,nexta)
+        if ok then return true,why end
+        g.route_safe=false;g.route_mode="BLOCKED";g.route_reason=why
         return false,g.route_reason
     end
     local q=nexta.pos
@@ -2685,17 +2726,29 @@ local function dispatch(st,index,reason,g,now,opts)
         cancel(st,"REVISION_CHANGED_BEFORE_DISPATCH",now,true); st.blocked=true; return
     end
     if a.type=="ATTACK" then
-        local cur=st.plan[st.idx]
-        if cur and cur.type=="MOVE" then
-            if not action_runtime(cur).semantic_done or not block_route_clear(st,cur) then
-                if DEBUG_TELEMETRY then log("HANDOFF_POST_DRAIN_DEFER uid="..st.uid.." gen="..st.gen.." reason=R1_GUARD_RECHECK model_ms="..now) end
-                return
-            end
-        end
         local good,why=target_ready(a,now)
         if not good then
             if skip_future_attack_keep_tail(st,index,why,now) then return end
             target_wait(st,why,now);return
+        end
+        local cur=st.plan[st.idx]
+        if cur and cur.type=="MOVE" then
+            local route_ok=action_runtime(cur).semantic_done and block_route_clear(st,cur)
+            if not route_ok and reason=="ATTACK_TERMINAL_HANDOFF" then
+                local fresh=geometry(st,a)
+                if fresh then fresh=attack_geometry(st,a,fresh) end
+                if fresh then
+                    attack_brake_state(fresh)
+                    local fresh_ok,fresh_reason=transition_handoff_ready(st,fresh,a)
+                    if fresh_ok and fresh_reason=="ATTACK_TERMINAL_CORRIDOR" and exit_gate_ready(st,a) then
+                        route_ok=true;g=fresh
+                    end
+                end
+            end
+            if not route_ok then
+                if DEBUG_TELEMETRY then log("HANDOFF_POST_DRAIN_DEFER uid="..st.uid.." gen="..st.gen.." reason=R1_GUARD_RECHECK model_ms="..now) end
+                return
+            end
         end
     end
     if st.attack and not st.attack.done then
@@ -2744,7 +2797,9 @@ local function dispatch(st,index,reason,g,now,opts)
         reassert_attack=opts.reassert_attack==true,previous_origin=copy(st.origin),
         attack_abort=opts.attack_abort,previous_idx=st.idx,previous_owned=st.owned,action=a,saw_append=false,
         handoff_geometry={cut_tolerance=g.cut_tolerance,cut_error=g.cut_error,remaining=g.remaining,route_reason=g.route_reason,
-            route_mode=g.route_mode,corner_window=g.corner_window,corner_window_base=g.corner_window_base,
+            route_mode=g.route_mode,progress=g.progress,threshold=g.threshold,attack_min_progress=g.attack_min_progress,
+            attack_short_min_progress=g.attack_short_min_progress,attack_terminal_window=g.attack_terminal_window,
+            corner_window=g.corner_window,corner_window_base=g.corner_window_base,
             corner_window_early=g.corner_window_early,corner_lookahead=g.corner_lookahead,
             corner_turn_factor=g.corner_turn_factor,corner_stall_escape=g.corner_stall_escape,
             corner_stall_no_progress_ms=g.corner_stall_no_progress_ms,corner_stall_escape_margin=g.corner_stall_escape_margin,
@@ -3228,6 +3283,14 @@ function Core.reconcile_native_successor(st,now)
             "NATIVE_ADVANCED_BEFORE_PERMISSION",why,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE")
     end
 
+    if why=="ATTACK_TERMINAL_CORRIDOR" and not action_runtime(cur).semantic_done then
+        mark_action_complete(st,cur,"ATTACK_TERMINAL_HANDOFF",now,g and g.remaining)
+        Core.mark_handoff_committed(st,cur,future,"ATTACK_TERMINAL_HANDOFF",now,g)
+        log("ATTACK_TERMINAL_HANDOFF uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
+            " successor="..future.action_id.." mode=NATIVE_ADOPT remaining="..num_or_nil(g and g.remaining)..
+            " progress="..num_or_nil(g and g.progress).." threshold="..num_or_nil(g and g.threshold)..
+            " min_progress="..num_or_nil(g and g.attack_min_progress).." model_ms="..now)
+    end
     R1.clear_fault(st,cur,now)
     st.unverified_native_successor=nil
     st.idx=st.idx+1;st.origin=copy(st.pos);st.owned=false;st.tail_reached=false
@@ -3322,6 +3385,8 @@ local function advance(st,now)
             return
         elseif rt.semantic_done and not reason then
             reason="ATTACK_AFTER_ROUTE_COMPLETE"
+        elseif route_reason=="ATTACK_TERMINAL_CORRIDOR" then
+            reason="ATTACK_TERMINAL_HANDOFF"
         end
         if DEBUG_TELEMETRY and not reason and now-st.last_wait>=1000 then
             st.last_wait=now

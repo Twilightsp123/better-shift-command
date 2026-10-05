@@ -33,6 +33,7 @@ def main():
       ('v107.txt',L+['tests/test_v107_regressions.lua','source/better_shift_command.lua','tests/fixture.lua']),
       ('v109_corepath.txt',L+['tests/test_v109_regressions.lua','source/better_shift_command.lua','tests/fixture.lua']),
       ('exec_identity_v3.txt',L+['tests/test_exec_identity_v3.lua','source/better_shift_command.lua','tests/fixture.lua']),
+      ('tpol_t2b_shift_attack.txt',L+['tests/test_tpol_t2b_shift_attack.lua','source/better_shift_command.lua','tests/fixture.lua']),
       ('tools.txt',[sys.executable,'tests/test_tools.py']),
       ('reverse.txt',[sys.executable,'tests/test_reverse_inventory.py']),
       ('mutations.txt',[sys.executable,'steering_tests/test_mutations_sc5.py'])]
