@@ -22,16 +22,16 @@ need('previous_execution_lane=st.execution_lane',1)
 need('st.execution_lane="BSC_ISSUED"',1)
 need('st.execution_lane=p.previous_execution_lane or st.execution_lane',2)
 need('execution_lineage=future_lineage',3)
-need('future_index=future_index,execution_lineage=future_lineage',1)
+need('successor_index=future_index,execution_lineage=future_lineage',1)
 need('execution_lineage="..clean(execution_lineage)',1)
 need('local current_match,_,current_lineage=R1.execution_matches_action(e,cur)',1)
 need('local match,_,lineage=R1.execution_matches_action(e,st.plan[i])',1)
 # T1.5 must not itself activate the later T2 behavior vocabulary.
-for forbidden in ('zone="ADOPT_ONLY"','ATTACK_TERMINAL_CORRIDOR','NATIVE_MOVE_PASSTHROUGH'):
+for forbidden in ('ATTACK_TERMINAL_CORRIDOR','NATIVE_MOVE_PASSTHROUGH'):
     if forbidden in s: fail('T1.5 accidentally activates/retains staged behavior: '+forbidden)
 # Existing T1 evaluator remains the sole transition decision plane.
 need('function R1.TransitionPolicy.evaluate(',1)
-need('consumer="PROACTIVE"',2)
-need('consumer="NATIVE_RECONCILE"',1)
-need('consumer="SCHEDULER"',2)
-print('PASS: T1.5 execution-lineage structural contract; transition behavior remains T1')
+if s.count('R1.TransitionPolicy.evaluate(st,')!=6: fail('shared evaluator call-site count changed after T1.5')
+for legacy in ('consumer="PROACTIVE"','consumer="NATIVE_RECONCILE"','consumer="SCHEDULER"','context.consumer'):
+    if legacy in s: fail('later stage reintroduced consumer-specific permission: '+legacy)
+print('PASS: T1.5 execution-lineage structural contract preserved through later permission-neutral stages')
