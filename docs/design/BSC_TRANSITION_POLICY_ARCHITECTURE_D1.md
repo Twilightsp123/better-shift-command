@@ -1,6 +1,6 @@
 # BSC Transition Policy Architecture D1
 
-Status: **APPROVED DESIGN — T1H PROFILE SCAFFOLD IMPLEMENTED; T2 GAMEPLAY POLICY NOT YET IMPLEMENTED**  
+Status: **APPROVED DESIGN — T1H + T1 SHARED EVALUATOR IMPLEMENTED; T2 GAMEPLAY POLICY NOT ACTIVE**  
 Design stream: `BSC-TPOL-D1`  
 Runtime baseline: `BSC v1.2.2 / 1.2.2-corepath-rc8` + Native `1.0.17-corepath-wh3-6c104-movevtfix`
 
@@ -353,7 +353,7 @@ Those are separate maintenance streams.
 
 ## 16. Promotion rule
 
-This design becomes production architecture only after the staged migration in `TRANSITION_POLICY_MIGRATION_D1.md` passes its own offline and WH3 gates. Until then, current SC1–SC6 source remains runtime authority.
+The T1 structural layer is now implemented behavior-neutrally. T2/T3/T4 become production behavior only after their staged migration gates pass. Until a T2 stage is promoted, current SC1–SC6 decisions remain runtime authority through the shared evaluator.
 
 
 ## 14. T1H hidden-profile implementation note

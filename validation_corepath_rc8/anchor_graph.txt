@@ -1,0 +1,12 @@
+$ /opt/pyvenv/bin/python tests/test_anchor_graph.py
+test_bidirectional_callgraph_propagation (__main__.TestAnchorGraph.test_bidirectional_callgraph_propagation) ... ok
+test_hard_contradiction_fails_closed (__main__.TestAnchorGraph.test_hard_contradiction_fails_closed) ... ok
+test_regional_shift_is_advisory_only (__main__.TestAnchorGraph.test_regional_shift_is_advisory_only) ... ok
+test_single_edge_resolution_is_not_enough_for_stage6_promotion (__main__.TestAnchorGraph.test_single_edge_resolution_is_not_enough_for_stage6_promotion) ... ok
+test_unique_after_one_hard_support_stays_unresolved (__main__.TestAnchorGraph.test_unique_after_one_hard_support_stays_unresolved) ... ok
+test_unique_after_two_hard_supports_resolves (__main__.TestAnchorGraph.test_unique_after_two_hard_supports_resolves) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK

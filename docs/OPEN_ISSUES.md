@@ -21,29 +21,25 @@ The Move-VTable correction has been built and exercised in WH3. Native outcome f
 
 ### O-08 — Move→Attack can still brake/stop before Attack
 
-Status: **WH3 9.0.2 RUNTIME VERIFIED**.
+Status: **OPEN / T1 STRUCTURE READY / T2-B RUNTIME CONCEPT PROVEN EXPERIMENTALLY**.
 
-The strict `ATTACK_REQUIRES_ROUTE_COMPLETE` boundary has been replaced for ordinary Move→Attack by the bounded T2-B `ATTACK_TERMINAL_CORRIDOR`. The implementation requires exact immediate successor semantics, viable target, clear prior route debt, bounded progress, attack-geometry distance caps, extra high-angle progress, and stricter short-leg preservation. Accepted proactive handoff and exact Native adoption both grant explicit `ATTACK_TERMINAL_HANDOFF` completion credit; Exit→Attack remains on its separate strict gate.
+Current T1 code deliberately preserves strict Move→Attack until current Move `semantic_done` (`ATTACK_REQUIRES_ROUTE_COMPLETE`). The 2026-10-05 direct T2-B experiment produced repeated smooth `ATTACK_TERMINAL_HANDOFF` events in WH3 9.0.2 and the user reported no pause, but that direct patch is historical evidence rather than current runtime.
 
-Closure evidence: dedicated T2-B suite **9/9 PASS**, mutation protection, Windows CI PASS, and the 2026-10-05 WH3 9.0.2 runtime smoke records repeated smooth `ATTACK_TERMINAL_HANDOFF ... mode=ISSUE_ACK` transitions with the old Attack rollback pattern absent.
+Planned closure: reintroduce T2-B through the shared TransitionPolicy evaluator, then pass T2 regression + WH3 RT-TP-02/03 again.
 
-### O-09 — Move→Move ownership conflict / destructive rollback
+### O-09 — SC6 rolls back immediate future MOVE
 
-Status: **NATIVE PASSTHROUGH DIAGNOSTIC / WH3 RUNTIME SMOKE REQUIRED**.
+Status: **OPEN / T1 STRUCTURE READY / T2-A NOT ACTIVE**.
 
-The first T2-A adopt-only candidate exposed a deeper ownership conflict. With a permissive Move→Move gate, Native could start a fold-back early and formations compressed into themselves; tightening the gate then caused repeated `NATIVE_SUCCESSOR_ROLLBACK` / nonqueued Move reasserts, which broke the native Shift queue into stepwise movement. The two symptoms come from the same architecture: BSC was treating disagreement between the Lua cursor and CA's already-running Move queue as a reason to mutate that queue.
+Current T1 SC6 deliberately preserves the legacy immediate future MOVE rollback so T1 equivalence is behavior-neutral. Direct T2-A/hairpin experiments on 2026-10-05 were not promotable: permissive adoption produced fold-back self-compression; stricter rollback gates produced stepwise movement. The native-passthrough diagnostic was useful isolation evidence but is not the BSC product architecture.
 
-Current diagnostic architecture makes **player-native Move chains authoritative**. Pure Move→Move transitions do not proactively dispatch a BSC Move and do not rollback/reassert a Native Move. Exact canonical Native Move execution only advances the Lua shadow cursor; all-Move sampling gaps may fast-forward the shadow cursor; crossings over Attack/Exit semantics yield BSC Move tracking rather than issuing a replacement. Once BSC itself issues a command (for example T2-B Attack or Attack→Exit Move), the generation becomes BSC-owned and existing command/ACK/recovery rules continue to apply.
+Planned closure: T2-A must use the shared evaluator and D1 decision vocabulary; T2-C hysteresis must provide a wider bounded adopt window before any final runtime promotion.
 
-Offline evidence: native Move passthrough suite **7/7 PASS**, active block suite **19/19 PASS**, contracts **24/24 PASS**, v109 **27/27 PASS**, and mutation protection for ownership disable, proactive Move re-enable, shadow-sync disable, and cross-semantic fast-forward. The previous T2-A/hairpin candidates and SC1–SC4 controller-owned Move scheduler tests are archived under `archive/legacy_move_scheduler_tests/`.
+### O-10 — Transition policy behavior/MCT only partially implemented
 
-The required WH3 diagnostic smoke is intentionally simple: straight Move chains, 90° corners, and 180° fold-back. If passthrough removes both self-compression and stepwise movement, the ownership diagnosis is confirmed. If native passthrough still self-compresses on fold-back, the remaining problem belongs to CA's native queue behavior and must be solved by a new, non-destructive intervention design rather than rollback/reassert.
+Status: **T1/T1H IMPLEMENTED; T2/T3 PENDING**.
 
-### O-10 — Transition policy/MCT not implemented
-
-Status: **DESIGN ONLY**.
-
-Smooth/Balanced/Precise/Custom policy architecture is defined under `docs/design/`; no runtime source in this package implements it yet.
+The hidden PolicyProfile scaffold and shared behavior-neutral TransitionPolicy evaluator are implemented. Smooth/Balanced/Precise movement values remain reserved; visible MCT is still absent. T2 is the first intentional gameplay change.
 
 ## C. Lifecycle / teardown stream — separate from gameplay
 
@@ -80,5 +76,5 @@ The 2026-09-29 disassembly reports proved allocator return ABI, top-level constr
 
 - T1H hidden profile scaffold is implemented; visible MCT UI is intentionally deferred.
 - Movement Cornering / Attack Handoff / Route Fidelity / Native Successor Tolerance / Disengage Priority are reserved but not runtime-wired yet.
-- T2 still needs the shared behavior-neutral evaluator and hysteresis. Move→Attack is runtime verified; immediate successor MOVE adoption is implemented as an offline-tested adopt-only candidate awaiting WH3 runtime smoke.
+- T1 shared evaluator is implemented and behavior-neutral. T2 must still implement immediate successor MOVE policy, Move→Attack terminal handoff, and hysteresis through that evaluator.
 - Minimum Engagement Time is wired at the legacy-equivalent default 3.0 s; alternate values are not exposed to users in T1H.

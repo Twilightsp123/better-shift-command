@@ -21,32 +21,31 @@ Native identity:
 
 The corrected bridge runs in WH3 without the old `OWNED_OUTCOME_INDETERMINATE` failure caused by the wrong top-level Move VTable. This closes the address/outcome blocker sufficiently to expose remaining gameplay policy behavior.
 
-## 3. Current gameplay limitations now visible
+## 3. Current gameplay limitations after T1
 
-### 3.1 Move→Attack T2-B runtime closure
+### 3.1 Strict Move→Attack boundary remains current behavior
 
-The strict Move→Attack boundary has been replaced by the bounded `ATTACK_TERMINAL_CORRIDOR`. The 2026-10-05 WH3 9.0.2 runtime smoke records successful `ATTACK_TERMINAL_HANDOFF` events without the old Attack rollback pattern. T2-B is runtime verified.
+T1 deliberately preserves the pre-T2 rule: ordinary Move→Attack remains blocked until current Move `semantic_done` (`ATTACK_REQUIRES_ROUTE_COMPLETE`). A 2026-10-05 direct T2-B experiment demonstrated that bounded terminal handoff can remove the visible pause in WH3 9.0.2, but that experiment is **not current T1 runtime**. T2-B must be reintroduced through the shared evaluator.
 
-### 3.2 Native Move queue ownership diagnostic
+### 3.2 SC6 immediate-MOVE asymmetry remains current behavior
 
-The T2-A adopt-only/hairpin sequence was retired after WH3 runtime testing exposed a structural ownership conflict. A permissive gate allowed Native fold-back too early and caused formation self-compression; a strict hairpin gate forced repeated nonqueued Move reasserts and produced stepwise movement.
+T1 also deliberately preserves the legacy SC6 result for exact immediate future MOVE: it remains a hard rollback in current runtime so structural equivalence can be proven. T2-A is the staged behavior change that will evaluate the same MOVE→MOVE policy for Native reconciliation.
 
-Current diagnostic rule: while a generation remains **player-native Move owned**, BSC never proactively dispatches Move→Move and never rolls back/reasserts a Native Move. Exact canonical Move execution only synchronizes the Lua shadow cursor. If polling skips multiple ordinary Move nodes, the shadow cursor may fast-forward across Move-only nodes. If a sample crosses Attack/Exit semantics or cannot be reconciled canonically, BSC yields Move tracking rather than mutating the native queue. BSC ownership begins only after BSC itself issues a command such as T2-B Attack or an Attack→Exit Move.
+### 3.3 2026-10-05 direct T2 experiments are historical evidence
 
-This diagnostic preserves the already runtime-verified T2-B Move→Attack path and is explicitly **not** a claim that T2-A is solved. The next WH3 smoke must determine whether native passthrough itself handles 180° fold-back acceptably.
+The direct T2-A adoption candidate caused early fold-back/self-compression in WH3. A stricter hairpin patch then produced repeated rollback/reassert and stepwise movement. A later native-Move-passthrough diagnostic isolated destructive rollback as part of the symptom chain, but passthrough contradicts BSC's product goal and D1's approved SC1–SC4 preservation. These experiments are archived as evidence and must not be promoted as current architecture.
 
-## 4. Approved architecture — partially implemented
+## 4. Approved architecture — T1 implemented, T2 pending
 
-`BSC-TPOL-D1` introduces a Transition Policy Plane between canonical semantics and execution coordination.
+`BSC-TPOL-D1` introduces one Transition Policy Plane between canonical semantics and execution coordination. T1 now implements the shared evaluator structure while preserving existing decisions.
 
 Key properties:
 
-- one evaluator for proactive dispatch and SC6 reconciliation;
+- one evaluator for proactive dispatch, SC6 reconciliation and scheduler preview;
 - hard invariants separated from soft timing/precision policy;
 - Smooth is the default profile;
-- Move→Attack gets a bounded terminal handoff corridor;
-- exact immediate successor MOVE can be adopted when Move→Move policy permits;
-- bounded adopt-only hysteresis prevents near-boundary rollback thrash;
+- current T1 zones preserve legacy decisions and do **not** activate `ADOPT_ONLY`;
+- T2 will add immediate future MOVE policy, bounded Move→Attack terminal handoff, then issue/adopt hysteresis;
 - MCT configures only soft policy through an immutable per-battle `PolicyProfile`.
 
 Full design: `docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md`.
@@ -55,14 +54,16 @@ Full design: `docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md`.
 
 Battle-complete / desktop / main-menu hang investigation is **not** part of Transition Policy D1. Current safe-stop and UI-listener observations remain tracked separately in `OPEN_ISSUES.md`. Do not combine lifecycle and smoothness changes in one patch.
 
-## 6. TPOL-T1H + partial T2 implementation status
+## 6. TPOL-T1H + TPOL-T1 implementation status
 
-The hidden policy/profile scaffold is implemented, and two bounded gameplay slices now exist under the built-in default behavior.
+The hidden profile scaffold and shared behavior-neutral TransitionPolicy evaluator are now implemented.
 
 - no visible MCT UI exists;
 - no MCT dependency is required;
-- built-in hidden source remains authoritative;
-- `engagement_hold_seconds=3.0` is wired to the existing 3000 ms Attack hold requirement;
-- T2-B Move→Attack terminal handoff is WH3 9.0.2 runtime verified;
-- previous T2-A adopt/hairpin candidates are retired; current Move→Move stage is a native-queue passthrough diagnostic awaiting WH3 smoke;
-- movement policy values are still not profile-driven; T1 shared evaluator, T2-C hysteresis and T3 visible MCT remain pending.
+- built-in hidden source is authoritative;
+- `engagement_hold_seconds=3.0` remains behavior-equivalent to the legacy 3000 ms Attack hold;
+- `R1.TransitionPolicy.evaluate()` is consumed by proactive `advance()`, SC6 reconciliation, and scheduler urgency;
+- T1 old/new deterministic transition probes are equivalent;
+- existing SC1–SC6 gameplay regressions remain unchanged;
+- `ADOPT_ONLY`, immediate-MOVE T2-A, Move→Attack terminal T2-B, and T2-C hysteresis are **not active in current source**;
+- movement policy profile values remain reserved until their staged T2/T3 promotions.

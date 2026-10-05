@@ -12,7 +12,7 @@ local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
 local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
 local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_NATIVE_MOVE_PASSTHROUGH_DIAG")
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1H_HIDDEN")
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -482,10 +482,6 @@ local CFG={evidence_max_age_ms=500,evidence_wait_ms=5000,route_resolution_ms=200
     route_corner_speed_seconds=2.0,route_corner_width_factor=0.35,
     route_corner_turn_base=0.70,route_corner_turn_extra=0.60,
     route_corner_current_leg_fraction=0.45,route_corner_next_leg_fraction=0.45,
-    -- Hairpin/U-turns must not reuse the wide normal-corner smoothing window.
-    -- A formation folding back on itself before the waypoint causes self-compression.
-    route_hairpin_start_ratio=0.75,route_hairpin_min_progress=0.85,
-    route_hairpin_current_leg_fraction=0.12,route_hairpin_next_leg_fraction=0.12,
     -- SC2 EARLY A/B: keep SC1's bounded lookahead, but also allow Move->Move handoff
     -- as soon as the existing predictive threshold is reached on normal-length legs.
     -- The 0.75 adjacent-leg cap preserves short-zig-zag safety while deliberately
@@ -1001,8 +997,7 @@ function R1.execution_matches_action(e,a)
             or math.abs(e.dest_x-a.pos.x)>0.05 or math.abs(e.dest_z-a.pos.z)>0.05 then
             return false,"EXECUTION_DESTINATION_MISMATCH"
         end
-    end
-    return true,"OK"
+    end    return true,"OK"
 end
 function R1.order_evidence(st,a,now)
     local e,why=R1.read_active_execution(st)
@@ -1487,7 +1482,7 @@ end
 function Core.new_state(su,dynamic)
     dynamic=dynamic==true
     return {uid=uid(su.unit),unit=su.unit,uc=su.uc,gen=0,revision=nil,actions={},plan=nil,
-        idx=1,owned=false,move_owner="NATIVE_QUEUE",terminal=false,blocked=false,require_replace=dynamic,recover_revision=nil,speeds={},pos=nil,prev_pos=nil,last_pos=nil,
+        idx=1,owned=false,terminal=false,blocked=false,require_replace=dynamic,recover_revision=nil,speeds={},pos=nil,prev_pos=nil,last_pos=nil,
         last_sample=nil,origin=nil,moves=0,last_wait=-1000000,refused=nil,phase=dynamic and "WAIT_FOR_REPLACE" or "NATIVE_TRACKING",
         attack=nil,model_step_ms=0,cold_seen=dynamic,cold_idle=nil,queue_reset_cert=nil,restart_idle_candidate=nil,restart_idle_cert=nil,
         dynamic=dynamic,last_seen_scan=nil,block_state={},action_serial=0,action_base=0}
@@ -1656,7 +1651,7 @@ cancel=function(st,reason,now,observe)
         end
     end
     st.gen=st.gen+1; st.actions={}; st.plan=nil; st.idx=1; st.origin=nil
-    st.owned=false; st.move_owner="NATIVE_QUEUE"; st.terminal=false; st.moves=0; st.refused=nil; st.attack=nil; st.phase="CANCELLED"; st.input_gapped=false; st.tail_reached=false; st.recover_revision=nil
+    st.owned=false; st.terminal=false; st.moves=0; st.refused=nil; st.attack=nil; st.phase="CANCELLED"; st.input_gapped=false; st.tail_reached=false; st.recover_revision=nil
     st.block_state={};st.action_serial=0;st.action_base=0;st.native_arrival=nil;st.unverified_native_successor=nil
     -- A pending native order is NOT relabelled to the new generation.
 end
@@ -1760,7 +1755,7 @@ function Core.ingest(r,now)
                 and r.unit_revision==st.revision and cmp(st.revision,p.revision)>0
                 and r.order_type==p.kind and r.is_queued==false
                 and (p.kind~="ATTACK" or r.target_uid==p.target_uid) then
-                st.owned=p.previous_owned;st.move_owner=p.previous_move_owner or st.move_owner
+                st.owned=p.previous_owned
                 st.phase=st.attack and (st.attack.previous_eligible and "ATTACK_HOLD" or "ATTACK_APPROACH") or "MOVE_TRACKING"
                 st.input_gapped=true
                 if DEBUG_TELEMETRY then dlog("OWN_STALE_AFTER_APPEND uid="..st.uid.." gen="..st.gen.." issue="..p.issue..
@@ -1800,15 +1795,7 @@ function Core.ingest(r,now)
             local previous=st.plan[p.previous_idx]
             if previous and previous.type=="MOVE" and action_runtime(previous).handoff_committed and not action_runtime(previous).semantic_done then
                 local hg=p.handoff_geometry or {}
-                if hg.route_mode=="ATTACK_TERMINAL_CORRIDOR" and p.action and p.action.type=="ATTACK" then
-                    -- T2-B completion credit is granted only after Native accepts the
-                    -- immediate Attack. No route debt may survive across this boundary.
-                    mark_action_complete(st,previous,"ATTACK_TERMINAL_HANDOFF",now,hg.remaining)
-                    log("ATTACK_TERMINAL_HANDOFF uid="..st.uid.." gen="..st.gen.." action="..previous.action_id..
-                        " successor="..clean(p.action.action_id).." mode=ISSUE_ACK remaining="..num_or_nil(hg.remaining)..
-                        " progress="..num_or_nil(hg.progress).." threshold="..num_or_nil(hg.threshold)..
-                        " min_progress="..num_or_nil(hg.attack_min_progress).." model_ms="..now)
-                elseif hg.route_mode=="STEERING_CORNER" or hg.route_mode=="STEERING_HAIRPIN" then
+                if hg.route_mode=="STEERING_CORNER" then
                     -- The successor was accepted while the unit was inside the bounded turn corridor.
                     -- That is the completion proof for an intermediate navigation waypoint: do not
                     -- create a debt that would force the formation to return and physically stamp Pn.
@@ -1822,7 +1809,7 @@ function Core.ingest(r,now)
                 end
             end
         end
-        st.idx=p.idx; st.owned=true; st.move_owner="BSC"
+        st.idx=p.idx; st.owned=true
         if not p.reassert_current then st.origin=p.origin end
         local enter_reason=p.reassert_attack and "CURRENT_ATTACK_REASSERT_ACK" or (p.reassert_current and "CURRENT_MOVE_REASSERT_ACK" or "OWN_ACK")
         enter_action(st,st.plan[p.idx],now,enter_reason)
@@ -2009,8 +1996,7 @@ function Core.ingest(r,now)
     for i=from,#st.actions do candidate[#candidate+1]=st.actions[i] end
     local supported,why=plan_supported(st,candidate,active)
     if active and not supported then
-        table.remove(st.actions,#st.actions)
-        if a.block_id and (a.type=="ATTACK" or not st.actions[#st.actions] or st.actions[#st.actions].block_id~=a.block_id) then
+        table.remove(st.actions,#st.actions)        if a.block_id and (a.type=="ATTACK" or not st.actions[#st.actions] or st.actions[#st.actions].block_id~=a.block_id) then
             st.block_state[a.block_id]=nil
         end
         log("APPEND_REFUSED uid="..st.uid.." reason="..why.." policy=PRESERVE_EXISTING_ACTIONS");return
@@ -2107,7 +2093,7 @@ function Core.activate(st)
     end
     if not first.origin then return end
     -- Each input payload was already copied at admission. The live native queue is NOT consulted.
-    st.plan=st.actions; st.idx=1; st.origin=copy(first.origin);st.move_owner="NATIVE_QUEUE"
+    st.plan=st.actions; st.idx=1; st.origin=copy(first.origin)
     enter_action(st,first,clock(),attack_first and "PLAYER_ATTACK_ADOPTED" or "PLAYER_MOVE_ADOPTED")
     if attack_first then first.seed_mode="PLAYER_ATTACK_REPLACE" end
     st.phase=attack_first and "ATTACK_APPROACH" or "MOVE_TRACKING"
@@ -2202,36 +2188,6 @@ local function move_reach_tolerance(st,leg)
         tol=math.min(tol,math.max(CFG.move_reach_floor_m,leg*CFG.move_reach_short_fraction))
     end
     return tol
-end
-local function attack_terminal_handoff_ready(st,g,nexta)
-    local cur=st.plan and st.plan[st.idx]
-    if not cur or cur.type~="MOVE" or not nexta or nexta.type~="ATTACK" then
-        return false,"ATTACK_TERMINAL_CLASS_MISMATCH"
-    end
-    -- T2-B is intentionally ordinary Move->Attack only. Exit->Attack keeps its
-    -- stricter displacement/route gate until the separate Exit policy is migrated.
-    if cur.block_kind=="EXIT_ROUTE" then
-        return false,"EXIT_ATTACK_REQUIRES_EXIT_POLICY"
-    end
-    local turn=clamp(g.ratio or 0,0,1)
-    local min_progress=clamp(CFG.route_attack_min_progress+CFG.route_attack_turn_progress*turn,0,0.95)
-    -- Preserve the existing short-leg route fidelity: on compact waypoints the
-    -- terminal Attack corridor may not become wider than the Move reach envelope.
-    if (g.leg or 0)<60 and (g.leg or 0)>0.001 then
-        local short_progress=clamp(1-move_reach_tolerance(st,g.leg)/g.leg,0,0.95)
-        min_progress=math.max(min_progress,short_progress)
-        g.attack_short_min_progress=short_progress
-    end
-    g.attack_min_progress=min_progress
-    g.attack_terminal_window=g.threshold
-    if (g.progress or 0)+0.000001<min_progress then
-        return false,"ATTACK_TERMINAL_PROGRESS_LOW"
-    end
-    if (g.remaining or BSC_HUGE)>(g.threshold or 0) then
-        return false,"ATTACK_OUTSIDE_TERMINAL_CORRIDOR"
-    end
-    g.route_safe=true;g.route_mode="ATTACK_TERMINAL_CORRIDOR";g.route_reason="ATTACK_TERMINAL_CORRIDOR"
-    return true,g.route_reason
 end
 function Core.move_idle_finish_envelope(st)
     return math.min(CFG.move_idle_finish_cap_m,CFG.move_idle_finish_base_m+ordered_width_hint(st)*CFG.move_idle_finish_width_factor)
@@ -2392,13 +2348,10 @@ local function route_handoff_ready(st,g,nexta)
         g.route_safe=true;g.route_mode="COMPLETE";g.route_reason="ACTION_COMPLETE";g.cut_error=0;g.cut_tolerance=BSC_HUGE
         return true,g.route_reason
     end
-    -- T2-B: ordinary Move->Attack may hand off inside the bounded terminal
-    -- corridor already computed by attack_geometry(). Prior route debt has already
-    -- been proven clear above; no debt is allowed to cross this semantic boundary.
+    -- Move -> Attack remains intentionally strict and is outside SC1.
+    -- Only Move -> Move may interpret an intermediate waypoint as steering guidance.
     if nexta.type=="ATTACK" then
-        local ok,why=attack_terminal_handoff_ready(st,g,nexta)
-        if ok then return true,why end
-        g.route_safe=false;g.route_mode="BLOCKED";g.route_reason=why
+        g.route_safe=false;g.route_mode="BLOCKED";g.route_reason="ATTACK_REQUIRES_ROUTE_COMPLETE"
         return false,g.route_reason
     end
     local q=nexta.pos
@@ -2422,26 +2375,6 @@ local function route_handoff_ready(st,g,nexta)
     if g.progress>=min_progress and err<=safe_limit then
         g.route_safe=true;g.route_mode="PATH_SAFE";g.route_reason="PATH_DEVIATION_SAFE_WITH_MARGIN"
         return true,g.route_reason
-    end
-
-    -- Hairpin/U-turn safety: normal corner smoothing deliberately grows its turn
-    -- window with angle, which is useful for ordinary bends but unsafe once the
-    -- route folds back across the incoming formation. For severe turns require the
-    -- unit to be very near the waypoint and inside a cut-error window capped by
-    -- both adjacent legs before any handoff/adoption is legal.
-    if (g.ratio or 0)>=CFG.route_hairpin_start_ratio then
-        local hairpin_min_progress=math.max(min_progress,CFG.route_hairpin_min_progress)
-        local hairpin_window=math.min(tol,
-            g.leg*CFG.route_hairpin_current_leg_fraction,
-            next_leg*CFG.route_hairpin_next_leg_fraction)
-        g.hairpin=true;g.hairpin_min_progress=hairpin_min_progress;g.hairpin_window=hairpin_window
-        if g.progress>=hairpin_min_progress and g.remaining<=hairpin_window and err<=hairpin_window then
-            g.route_safe=true;g.route_mode="STEERING_HAIRPIN";g.route_reason="HAIRPIN_NEAR_WAYPOINT"
-            return true,g.route_reason
-        end
-        g.route_safe=false;g.route_mode="BLOCKED"
-        g.route_reason=g.progress<hairpin_min_progress and "HAIRPIN_PROGRESS_REQUIRED" or "HAIRPIN_WAYPOINT_REQUIRED"
-        return false,g.route_reason
     end
 
     -- B. SC1 steering corridor. A waypoint is an intermediate navigation guide,
@@ -2501,46 +2434,6 @@ local function route_handoff_ready(st,g,nexta)
     g.route_safe=false;g.route_mode="BLOCKED"
     g.route_reason=g.progress<min_progress and "ROUTE_PROGRESS_REQUIRED" or "TURN_CORRIDOR_REQUIRED"
     return false,g.route_reason
-end
-local function native_move_successor_ready(st,g,nexta)
-    local cur=st.plan and st.plan[st.idx]
-    if not cur or cur.type~="MOVE" or not nexta or nexta.type~="MOVE" then
-        return false,"MOVE_NATIVE_ADOPT_CLASS_MISMATCH"
-    end
-    if cur.block_kind=="EXIT_ROUTE" then
-        return false,"EXIT_MOVE_REQUIRES_EXIT_POLICY"
-    end
-    local debt_clear=block_route_clear(st,cur)
-    if not debt_clear then
-        return false,"PRIOR_ROUTE_OBLIGATION_PENDING"
-    end
-    local route_ok,why=route_handoff_ready(st,g,nexta)
-    if not route_ok then return false,why end
-    if action_runtime(cur).semantic_done or g.route_mode=="COMPLETE" then
-        g.native_move_adopt_gate="CURRENT_MOVE_COMPLETE"
-        return true,why
-    end
-    -- Adopt-only means Native may not widen Lua's existing Move->Move dispatch
-    -- window. STEERING_CORNER already encodes its own bounded turn window. A
-    -- straight/path-safe successor must additionally satisfy one of the existing
-    -- predictive/proximity/stall dispatch thresholds that advance() already uses.
-    if g.route_mode=="STEERING_CORNER" or g.route_mode=="STEERING_HAIRPIN" then
-        g.native_move_adopt_gate=g.route_mode
-        return true,why
-    end
-    if g.route_mode=="PATH_SAFE" then
-        local ready_reason=nil
-        if g.remaining<=CFG.proximity then ready_reason="PROXIMITY_A"
-        elseif g.remaining<=CFG.stall_distance and g.stall then ready_reason="PROXIMITY_B_STALL"
-        elseif g.remaining<=g.threshold then ready_reason="PREDICTIVE"
-        elseif g.stall and g.remaining<=math.min(CFG.lead_cap,g.threshold+CFG.brake_extra) then ready_reason="BRAKE_FALLBACK" end
-        if ready_reason then
-            g.native_move_adopt_gate=ready_reason
-            return true,why
-        end
-        return false,"MOVE_NATIVE_ADOPT_WINDOW_REQUIRED"
-    end
-    return false,"MOVE_NATIVE_ADOPT_ROUTE_MODE_UNSUPPORTED"
 end
 function Core.observe_move_completion(st,now)
     if not st.plan then return end
@@ -2729,6 +2622,64 @@ local function transition_handoff_ready(st,g,nexta)
     return true,why
 end
 
+-- BSC-TPOL-T1 shared TransitionPolicy evaluator.
+-- T1_BEHAVIOR_NEUTRAL: this stage centralizes existing decisions only. It does
+-- NOT enable T2 immediate-MOVE adoption, Move->Attack terminal handoff, or
+-- adopt-only hysteresis. Those remain later staged behavior changes.
+R1.TransitionPolicy=R1.TransitionPolicy or {VERSION="TPOL_T1_1"}
+function R1.TransitionPolicy.evaluate(st,current,successor,g,context)
+    context=context or {}
+    local consumer=context.consumer or "PROACTIVE"
+    local d={transition_kind=(current and current.type or "NONE").."->"..(successor and successor.type or "NONE"),
+        zone="WAIT",reason="TRANSITION_WAIT",hard_violation=false,route_ok=false,route_reason=nil,
+        route_debt_mode=g and g.route_debt_mode or nil,current_credit=nil,issue_window=nil,adopt_window=nil,
+        metrics=g,profile_id=R1.Policy.active and R1.Policy.active.behavior_preset or "SMOOTH",
+        policy_version=R1.TransitionPolicy.VERSION,behavior_stage="T1_BEHAVIOR_NEUTRAL"}
+    if not current or not successor then
+        d.zone="HARD_BLOCK";d.reason="TRANSITION_ACTION_MISSING";d.hard_violation=true
+        return d
+    end
+    if consumer=="NATIVE_RECONCILE" then
+        local current_index=context.current_index or st.idx
+        local future_index=context.future_index
+        if future_index and future_index~=current_index+1 then
+            d.zone="HARD_BLOCK";d.reason="CANONICAL_INTERMEDIATE_ACTIONS_OWED";d.hard_violation=true
+            return d
+        end
+        -- T1 preserves the pre-D1 SC6 asymmetry exactly. T2-A is the staged
+        -- change that will replace this legacy hard block with MOVE->MOVE policy.
+        if successor.type=="MOVE" then
+            d.zone="HARD_BLOCK";d.reason="CANONICAL_INTERMEDIATE_ACTIONS_OWED";d.hard_violation=true
+            return d
+        end
+    end
+    if not g then d.reason="SUCCESSOR_GEOMETRY_UNAVAILABLE";return d end
+    local route_ok,why
+    if successor.type=="ATTACK" then route_ok,why=transition_handoff_ready(st,g,successor)
+    else route_ok,why=route_handoff_ready(st,g,successor) end
+    d.route_ok=route_ok==true;d.route_reason=why;d.route_debt_mode=g.route_debt_mode
+    if not route_ok then d.reason=why or "TRANSITION_ROUTE_BLOCKED";return d end
+    if consumer=="NATIVE_RECONCILE" then
+        d.zone="ISSUE_READY";d.reason=why or "NATIVE_IMMEDIATE_SUCCESSOR_READY"
+        return d
+    end
+    local rt=action_runtime(current)
+    local issue_reason=nil
+    if successor.type=="ATTACK" then
+        -- Pre-T2 route_handoff_ready() can only pass Move->Attack after semantic_done.
+        if rt.semantic_done then issue_reason="ATTACK_AFTER_ROUTE_COMPLETE" end
+    else
+        if rt.semantic_done then issue_reason="MOVE_AFTER_NODE_COMPLETE"
+        elseif g.remaining<=CFG.proximity then issue_reason="PROXIMITY_A"
+        elseif g.remaining<=CFG.stall_distance and g.stall then issue_reason="PROXIMITY_B_STALL"
+        elseif g.remaining<=g.threshold then issue_reason="PREDICTIVE"
+        elseif g.stall and g.remaining<=math.min(CFG.lead_cap,g.threshold+CFG.brake_extra) then issue_reason="BRAKE_FALLBACK" end
+    end
+    d.issue_reason=issue_reason
+    if issue_reason then d.zone="ISSUE_READY";d.reason=issue_reason else d.reason=why or "TRANSITION_ROUTE_READY_WAIT_WINDOW" end
+    return d
+end
+
 local function attack_metrics(g,now)
     return " execution_cap="..string.format("%.6f",g.execution_cap)..
         " poll_margin="..string.format("%.6f",g.poll_margin)..
@@ -2790,29 +2741,17 @@ local function dispatch(st,index,reason,g,now,opts)
         cancel(st,"REVISION_CHANGED_BEFORE_DISPATCH",now,true); st.blocked=true; return
     end
     if a.type=="ATTACK" then
+        local cur=st.plan[st.idx]
+        if cur and cur.type=="MOVE" then
+            if not action_runtime(cur).semantic_done or not block_route_clear(st,cur) then
+                if DEBUG_TELEMETRY then log("HANDOFF_POST_DRAIN_DEFER uid="..st.uid.." gen="..st.gen.." reason=R1_GUARD_RECHECK model_ms="..now) end
+                return
+            end
+        end
         local good,why=target_ready(a,now)
         if not good then
             if skip_future_attack_keep_tail(st,index,why,now) then return end
             target_wait(st,why,now);return
-        end
-        local cur=st.plan[st.idx]
-        if cur and cur.type=="MOVE" then
-            local route_ok=action_runtime(cur).semantic_done and block_route_clear(st,cur)
-            if not route_ok and reason=="ATTACK_TERMINAL_HANDOFF" then
-                local fresh=geometry(st,a)
-                if fresh then fresh=attack_geometry(st,a,fresh) end
-                if fresh then
-                    attack_brake_state(fresh)
-                    local fresh_ok,fresh_reason=transition_handoff_ready(st,fresh,a)
-                    if fresh_ok and fresh_reason=="ATTACK_TERMINAL_CORRIDOR" and exit_gate_ready(st,a) then
-                        route_ok=true;g=fresh
-                    end
-                end
-            end
-            if not route_ok then
-                if DEBUG_TELEMETRY then log("HANDOFF_POST_DRAIN_DEFER uid="..st.uid.." gen="..st.gen.." reason=R1_GUARD_RECHECK model_ms="..now) end
-                return
-            end
         end
     end
     if st.attack and not st.attack.done then
@@ -2859,13 +2798,10 @@ local function dispatch(st,index,reason,g,now,opts)
         revision=rev,target_uid=a.target_uid,started=now,after_attack=after_attack,attack_issue=attack_issue,hold_ms=hold_ms,
         source_attack_target_uid=attack_target_uid,reassert_current=opts.reassert_current==true,
         reassert_attack=opts.reassert_attack==true,previous_origin=copy(st.origin),
-        attack_abort=opts.attack_abort,previous_idx=st.idx,previous_owned=st.owned,previous_move_owner=st.move_owner,action=a,saw_append=false,
+        attack_abort=opts.attack_abort,previous_idx=st.idx,previous_owned=st.owned,action=a,saw_append=false,
         handoff_geometry={cut_tolerance=g.cut_tolerance,cut_error=g.cut_error,remaining=g.remaining,route_reason=g.route_reason,
-            route_mode=g.route_mode,progress=g.progress,threshold=g.threshold,attack_min_progress=g.attack_min_progress,
-            attack_short_min_progress=g.attack_short_min_progress,attack_terminal_window=g.attack_terminal_window,
-            corner_window=g.corner_window,corner_window_base=g.corner_window_base,
+            route_mode=g.route_mode,corner_window=g.corner_window,corner_window_base=g.corner_window_base,
             corner_window_early=g.corner_window_early,corner_lookahead=g.corner_lookahead,
-            hairpin=g.hairpin,hairpin_window=g.hairpin_window,hairpin_min_progress=g.hairpin_min_progress,
             corner_turn_factor=g.corner_turn_factor,corner_stall_escape=g.corner_stall_escape,
             corner_stall_no_progress_ms=g.corner_stall_no_progress_ms,corner_stall_escape_margin=g.corner_stall_escape_margin,
             corner_stall_escape_limit=g.corner_stall_escape_limit,next_leg=g.next_leg,ratio=g.ratio,
@@ -3059,8 +2995,7 @@ function Core.advance_attack(st,now,observe_only)
             " issue="..t.issue.." credited_ms="..credited.." dist="..num_or_nil(r.distance)..
             " bbox_distance="..num_or_nil(contact_distance).." reason="..clean(r.reason)..
             " model_ms="..now) end
-    end
-    if delta>CFG.attack_observation_gap_ms or st.input_gapped then
+    end    if delta>CFG.attack_observation_gap_ms or st.input_gapped then
         if DEBUG_TELEMETRY then log("ATTACK_OBSERVATION_GAP uid="..st.uid.." gen="..st.gen.." issue="..t.issue..
             " delta_ms="..string.format("%.0f",delta).." model_ms="..string.format("%.0f",now).." credited_ms=0") end
     end
@@ -3271,52 +3206,6 @@ function Core.maybe_reassert_exit(st,now)
     return false
 end
 
-local function native_move_passthrough_owned(st)
-    return st and st.move_owner=="NATIVE_QUEUE" and st.owned~=true
-end
-local function native_move_passthrough_range(st,from_i,to_i)
-    if not st or not st.plan then return false,"NO_PLAN" end
-    for i=from_i,to_i do
-        local a=st.plan[i]
-        if not a or a.type~="MOVE" then return false,"SEMANTIC_BOUNDARY" end
-        if a.block_kind=="EXIT_ROUTE" then return false,"EXIT_ROUTE_BOUNDARY" end
-    end
-    return true,"ALL_MOVE"
-end
-local function native_move_passthrough_sync(st,future_index,e,now)
-    local from=st.idx
-    local ok,why=native_move_passthrough_range(st,from,future_index)
-    if not ok then return false,why end
-    for i=from,future_index-1 do
-        local a=st.plan[i]
-        local remaining=st.pos and a.pos and dist(st.pos,a.pos) or nil
-        mark_action_complete(st,a,"NATIVE_QUEUE_SHADOW_ADVANCE",now,remaining)
-    end
-    local future=st.plan[future_index]
-    local previous=st.plan[future_index-1]
-    st.idx=future_index
-    st.origin=(previous and previous.type=="MOVE" and previous.pos) and copy(previous.pos) or copy(st.pos)
-    st.owned=false;st.move_owner="NATIVE_QUEUE";st.tail_reached=false;st.unverified_native_successor=nil
-    enter_action(st,future,now,"NATIVE_MOVE_PASSTHROUGH_SYNC")
-    st.phase="NATIVE_MOVE_PASSTHROUGH"
-    local skipped=future_index-from-1
-    log((skipped>0 and "NATIVE_MOVE_PASSTHROUGH_FAST_FORWARD" or "NATIVE_MOVE_PASSTHROUGH_SYNC")..
-        " uid="..st.uid.." gen="..st.gen.." from_index="..from.." to_index="..future_index..
-        " skipped="..math.max(0,skipped).." action="..clean(future and future.action_id)..
-        " active_engine_seq="..clean(e and e.active_engine_seq).." provider="..clean(e and e.provider)..
-        " policy=NATIVE_QUEUE_OWNED_NO_REISSUE model_ms="..now)
-    return true,"NATIVE_QUEUE_SYNC"
-end
-local function native_move_passthrough_yield(st,cur,future,future_index,e,now,reason)
-    st.unverified_native_successor={gen=st.gen,action=cur and cur.action_id or nil,next_action=future and future.action_id or nil,
-        future_index=future_index,ms=now,exact=e~=nil,provider=e and e.provider or nil,passthrough=true}
-    st.phase="NATIVE_MOVE_PASSTHROUGH_YIELD"
-    log("NATIVE_MOVE_PASSTHROUGH_YIELD uid="..st.uid.." gen="..st.gen.." action="..clean(cur and cur.action_id)..
-        " future_index="..clean(future_index).." future_action="..clean(future and future.action_id)..
-        " active_kind="..clean(e and e.kind).." active_engine_seq="..clean(e and e.active_engine_seq)..
-        " reason="..clean(reason).." policy=PRESERVE_NATIVE_QUEUE_NO_REPLACE model_ms="..now)
-    return false
-end
 local function rollback_native_future_to_current(st,cur,future,future_index,e,now,fault_reason,route_reason,recovery_reason)
     st.unverified_native_successor={gen=st.gen,action=cur.action_id,next_action=future and future.action_id or nil,
         future_index=future_index,ms=now,exact=true,provider=e and e.provider or nil}
@@ -3338,6 +3227,10 @@ function Core.reconcile_native_successor(st,now)
     if not st.plan or st.blocked or S.pending_by_uid[st.uid] then return false end
     local cur=st.plan[st.idx]
     if not cur or cur.type~="MOVE" then return false end
+
+    -- Read the native active execution exactly once. V3 is authoritative in the
+    -- production build; V2 is used only on a genuinely V3-unavailable compatibility
+    -- host. current_target() never authorizes a transition or rollback.
     local e,ewhy=R1.read_active_execution(st)
     if not e or e.active~=true or e.known~=true then
         local nexta=st.plan[st.idx+1]
@@ -3352,85 +3245,53 @@ function Core.reconcile_native_successor(st,now)
         end
         return false
     end
+
     local current_match=R1.execution_matches_action(e,cur)
     if current_match then
         st.unverified_native_successor=nil
         if cur.runtime and cur.runtime.fault and cur.runtime.fault.code=="BLOCKED_EXECUTION_IDENTITY" then R1.clear_fault(st,cur,now) end
         return false
     end
+
+    -- The engine may have promoted any captured future queue item before Lua's
+    -- canonical cursor advanced. Identify the exact future action, but never skip
+    -- intermediate canonical actions just because Native overran them.
     local future_index=nil;local future=nil
     for i=st.idx+1,#st.plan do
-        if R1.execution_matches_action(e,st.plan[i]) then future_index=i;future=st.plan[i];break end
+        local match=R1.execution_matches_action(e,st.plan[i])
+        if match then future_index=i;future=st.plan[i];break end
     end
-    local native_passthrough=native_move_passthrough_owned(st)
     if not future then
-        if native_passthrough and e.kind=="MOVE" then
-            st.unverified_native_successor={gen=st.gen,action=cur.action_id,ms=now,exact=true,provider=e.provider,noncanonical=true,passthrough=true}
-            st.phase="NATIVE_MOVE_PASSTHROUGH_NONCANONICAL"
-            log("NATIVE_MOVE_PASSTHROUGH_NONCANONICAL uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
-                " active_kind="..clean(e.kind).." active_engine_seq="..clean(e.active_engine_seq)..
-                " provider="..clean(e.provider).." policy=OBSERVE_NO_REPLACE model_ms="..now)
-            return false
-        end
         st.unverified_native_successor={gen=st.gen,action=cur.action_id,ms=now,exact=true,provider=e.provider,noncanonical=true}
         R1.fault(st,cur,"BLOCKED_EXECUTION_IDENTITY","ACTIVE_EXECUTION_NOT_CANONICAL",now)
+        if DEBUG_TELEMETRY then dlog("NATIVE_EXECUTION_NOT_CANONICAL uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
+            " active_kind="..clean(e.kind).." active_engine_seq="..clean(e.active_engine_seq).." provider="..clean(e.provider).." model_ms="..now) end
         return false
     end
-    if native_passthrough and future.type=="MOVE" then
-        local ok,why=native_move_passthrough_range(st,st.idx,future_index)
-        if ok then return native_move_passthrough_sync(st,future_index,e,now) end
-        return native_move_passthrough_yield(st,cur,future,future_index,e,now,why)
-    end
-    if native_passthrough and future_index~=st.idx+1 then
-        return native_move_passthrough_yield(st,cur,future,future_index,e,now,"SEMANTIC_BOUNDARY_OR_SAMPLING_GAP")
-    end
-    if future_index~=st.idx+1 then
-        return rollback_native_future_to_current(st,cur,future,future_index,e,now,
-            "NATIVE_FUTURE_OVERRUN","CANONICAL_INTERMEDIATE_ACTIONS_OWED","NATIVE_FUTURE_OVERRUN_ROLLBACK_TO_CURRENT_MOVE")
-    end
+
     local g=geometry(st,future)
-    local route_ok,why=false,"SUCCESSOR_GEOMETRY_UNAVAILABLE"
-    if future.type=="MOVE" then
-        if g then route_ok,why=native_move_successor_ready(st,g,future) end
-    elseif future.type=="ATTACK" then
-        if g then g=attack_geometry(st,future,g) end
-        if g then route_ok,why=transition_handoff_ready(st,g,future) end
-    else
+    if g and future.type=="ATTACK" then g=attack_geometry(st,future,g) end
+    local decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{consumer="NATIVE_RECONCILE",current_index=st.idx,future_index=future_index})
+    if decision.zone=="HARD_BLOCK" then
         return rollback_native_future_to_current(st,cur,future,future_index,e,now,
-            "NATIVE_FUTURE_OVERRUN","CANONICAL_INTERMEDIATE_ACTIONS_OWED","NATIVE_FUTURE_OVERRUN_ROLLBACK_TO_CURRENT_MOVE")
+            "NATIVE_FUTURE_OVERRUN",decision.reason,"NATIVE_FUTURE_OVERRUN_ROLLBACK_TO_CURRENT_MOVE")
     end
-    if not route_ok then
+    if decision.zone~="ISSUE_READY" then
         return rollback_native_future_to_current(st,cur,future,future_index,e,now,
-            "NATIVE_ADVANCED_BEFORE_PERMISSION",why,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE")
+            "NATIVE_ADVANCED_BEFORE_PERMISSION",decision.reason,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE")
     end
-    if future.type=="MOVE" then
-        if not action_runtime(cur).semantic_done then
-            mark_action_complete(st,cur,"MOVE_STEERING_HANDOFF",now,g and g.remaining)
-            Core.mark_handoff_committed(st,cur,future,"MOVE_STEERING_HANDOFF",now,g)
-        end
-    elseif why=="ATTACK_TERMINAL_CORRIDOR" and not action_runtime(cur).semantic_done then
-        mark_action_complete(st,cur,"ATTACK_TERMINAL_HANDOFF",now,g and g.remaining)
-        Core.mark_handoff_committed(st,cur,future,"ATTACK_TERMINAL_HANDOFF",now,g)
-        log("ATTACK_TERMINAL_HANDOFF uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
-            " successor="..future.action_id.." mode=NATIVE_ADOPT remaining="..num_or_nil(g and g.remaining)..
-            " progress="..num_or_nil(g and g.progress).." threshold="..num_or_nil(g and g.threshold)..
-            " min_progress="..num_or_nil(g and g.attack_min_progress).." model_ms="..now)
-    end
+    local why=decision.route_reason or decision.reason
+
     R1.clear_fault(st,cur,now)
     st.unverified_native_successor=nil
     st.idx=st.idx+1;st.origin=copy(st.pos);st.owned=false;st.tail_reached=false
-    enter_action(st,future,now,future.type=="MOVE" and "NATIVE_MOVE_SUCCESSOR_ADOPTED" or "NATIVE_SUCCESSOR_ADOPTED")
-    if future.type=="ATTACK" then
-        begin_attack_history(st,future,now,"NATIVE_CHAIN","0")
-        if DEBUG_TELEMETRY then log("NATIVE_SUCCESSOR_ADOPTED uid="..st.uid.." gen="..st.gen.." action="..future.action_id..
-            " target="..future.target_uid.." previous_action="..cur.action_id.." active_engine_seq="..e.active_engine_seq..
-            " provider="..clean(e.provider).." route_reason="..clean(why).." model_ms="..now) end
-    else
-        st.phase="MOVE_TRACKING"
-    end
+    enter_action(st,future,now,"NATIVE_SUCCESSOR_ADOPTED")
+    begin_attack_history(st,future,now,"NATIVE_CHAIN","0")
+    if DEBUG_TELEMETRY then log("NATIVE_SUCCESSOR_ADOPTED uid="..st.uid.." gen="..st.gen.." action="..future.action_id..
+        " target="..future.target_uid.." previous_action="..cur.action_id.." active_engine_seq="..e.active_engine_seq..
+        " provider="..clean(e.provider).." route_reason="..clean(why).." model_ms="..now) end
     return true
 end
-
 local function advance(st,now)
     if not st.plan or st.terminal or st.blocked then return end
     if S.pending_by_uid[st.uid] then return end
@@ -3448,10 +3309,6 @@ local function advance(st,now)
         and st.unverified_native_successor.action==cur.action_id and st.unverified_native_successor.ms==now then return end
     local rt=action_runtime(cur)
     local nexta=st.plan[st.idx+1]
-    if nexta and nexta.type=="MOVE" and native_move_passthrough_owned(st) then
-        st.phase="NATIVE_MOVE_PASSTHROUGH"
-        return
-    end
     if not nexta then
         if rt.semantic_done then
             local route_clear,b=block_route_clear(st,cur)
@@ -3497,7 +3354,8 @@ local function advance(st,now)
         g=attack_geometry(st,nexta,g)
         if not g then target_wait(st,"ATTACK_TARGET_POSITION_UNAVAILABLE",now);return end
         attack_brake_state(g)
-        local route_ok,route_reason=transition_handoff_ready(st,g,nexta)
+        local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="PROACTIVE"})
+        local route_ok,route_reason=decision.route_ok,decision.route_reason or decision.reason
         local exit_ok=exit_gate_ready(st,nexta)
         if not exit_ok then
             st.phase="EXIT_ROUTE_PROTECT"
@@ -3517,10 +3375,8 @@ local function advance(st,now)
                     " route_reason="..clean(route_reason).." model_ms="..now) end
             end
             return
-        elseif rt.semantic_done and not reason then
-            reason="ATTACK_AFTER_ROUTE_COMPLETE"
-        elseif route_reason=="ATTACK_TERMINAL_CORRIDOR" then
-            reason="ATTACK_TERMINAL_HANDOFF"
+        elseif decision.zone=="ISSUE_READY" and not reason then
+            reason=decision.issue_reason or "ATTACK_AFTER_ROUTE_COMPLETE"
         end
         if DEBUG_TELEMETRY and not reason and now-st.last_wait>=1000 then
             st.last_wait=now
@@ -3529,7 +3385,8 @@ local function advance(st,now)
                 " route_safe="..tostring(g.route_safe).." cut_error="..num_or_nil(g.cut_error).." cut_tolerance="..num_or_nil(g.cut_tolerance)..attack_metrics(g,now)) end
         end
     else
-        local route_ok,route_reason=route_handoff_ready(st,g,nexta)
+        local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="PROACTIVE"})
+        local route_ok,route_reason=decision.route_ok,decision.route_reason or decision.reason
         if not route_ok then
             if DEBUG_TELEMETRY and now-st.last_wait>=1000 then
                 st.last_wait=now
@@ -3542,11 +3399,7 @@ local function advance(st,now)
                     " stall_escape_limit="..num_or_nil(g.corner_stall_escape_limit).." route_reason="..clean(route_reason).." model_ms="..now) end
             end
             return
-        elseif rt.semantic_done then reason="MOVE_AFTER_NODE_COMPLETE"
-        elseif g.remaining<=CFG.proximity then reason="PROXIMITY_A"
-        elseif g.remaining<=CFG.stall_distance and g.stall then reason="PROXIMITY_B_STALL"
-        elseif g.remaining<=g.threshold then reason="PREDICTIVE"
-        elseif g.stall and g.remaining<=math.min(CFG.lead_cap,g.threshold+CFG.brake_extra) then reason="BRAKE_FALLBACK" end
+        elseif decision.zone=="ISSUE_READY" then reason=decision.issue_reason end
     end
     if reason then dispatch(st,st.idx+1,reason,g,now) end
 end
@@ -3628,9 +3481,6 @@ function Core.handoff_urgency(st,now)
     end
     local rt=action_runtime(cur)
     local nexta=st.plan[st.idx+1]
-    if nexta and nexta.type=="MOVE" and native_move_passthrough_owned(st) then
-        return BSC_HUGE,"NATIVE_MOVE_PASSTHROUGH"
-    end
     if not nexta then
         if rt.semantic_done then return -100,"MOVE_COMPLETE_NO_SUCCESSOR" end
         return BSC_HUGE,"NO_SUCCESSOR"
@@ -3640,12 +3490,14 @@ function Core.handoff_urgency(st,now)
         if not target_viable(nexta) then return BSC_HUGE,"TARGET_NOT_READY" end
         g=attack_geometry(st,nexta,g);if not g then return BSC_HUGE,"ATTACK_TARGET_POSITION_UNAVAILABLE" end
         attack_brake_state(g)
-        local route_ok=transition_handoff_ready(st,g,nexta)
+        local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="SCHEDULER"})
+        local route_ok=decision.route_ok
         if not exit_gate_ready(st,nexta) then return 50000,"EXIT_BLOCK_PROTECT" end
         if not route_ok then return 50000+(g.cut_error or 0),"ATTACK_ROUTE_PROTECT" end
         if rt.semantic_done then return -800000,"MOVE_COMPLETE_ATTACK_READY" end
     else
-        local route_ok=route_handoff_ready(st,g,nexta)
+        local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="SCHEDULER"})
+        local route_ok=decision.route_ok
         if not route_ok then return 50000+(g.cut_error or 0),"MOVE_ROUTE_PROTECT" end
         if rt.semantic_done then return -700000,"MOVE_NODE_COMPLETE" end
     end
@@ -3689,7 +3541,7 @@ function Core.recover_ack_timeout(p,now)
     local ok,res=pcall(bridge.cancel_pending_issue,p.issue)
     if not ok or res~=true then return false end
     S.pending_by_uid[st.uid]=nil;S.pending_by_issue[p.issue]=nil;S.pending_count=math.max(0,S.pending_count-1)
-    st.owned=p.previous_owned;st.move_owner=p.previous_move_owner or st.move_owner
+    st.owned=p.previous_owned
     st.phase=st.attack and (st.attack.previous_eligible and "ATTACK_HOLD" or "ATTACK_APPROACH") or "MOVE_TRACKING"
     st.input_gapped=true
     if p.reassert_attack then

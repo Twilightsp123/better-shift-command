@@ -4,8 +4,8 @@
 
 | Gate | Result | Meaning |
 |---|---:|---|
-| Maintenance jobs | 27/27 PASS | active offline Lua/Python/static baseline with native Move passthrough + T2-B |
-| Mutation suite | 34/34 CAUGHT | retired Move scheduler mutants removed; passthrough ownership + T2-B safety covered |
+| Maintenance jobs | 27/27 PASS | full offline Lua/Python/static baseline including T1 contract/equivalence |
+| Mutation suite | 43/43 CAUGHT | existing invariants + T1 evaluator consumer/H2 bypass mutants |
 | Portable Native CTest | 13/13 PASS | portable native fixtures |
 | ASan/UBSan CTest | 13/13 PASS | sanitizer baseline |
 | Windows VS2019 v142 + MASM | PASS | audited Move-VTable-fix delivery |
@@ -18,10 +18,10 @@
 
 | Behavior | Current result | Status |
 |---|---|---|
-| Move→Move normal steering | Native queue authoritative; BSC shadow-sync only | **diagnostic WH3 smoke required** |
-| Move→Attack | T2-B bounded terminal handoff | **WH3 9.0.2 runtime verified** |
+| Move→Move normal steering | operational, but SC6 exact future-MOVE rollback still observed | redesign needed |
+| Move→Attack | strict boundary can brake/stop | redesign needed |
 | SC6 immediate successor ATTACK | current adopt/rollback path exists | migrate to shared evaluator |
-| SC6 immediate/future MOVE | shadow-sync / all-Move fast-forward; no REPLACE | diagnostic runtime smoke pending |
+| SC6 immediate successor MOVE | current code rolls back | **known limitation** |
 | future index > i+1 | rollback | must remain |
 | canonical target identity | enforced | must remain |
 
@@ -32,11 +32,10 @@
 | D1 architecture document | PASS / approved design | this package |
 | D1 decision table | PASS / approved design | this package |
 | T1H hidden PolicyProfile/MCT scaffold | PASS | static contract + existing suite; no visible MCT UI |
-| T1 shared behavior-neutral evaluator refactor | NOT RUN | old/new decision equivalence + existing suite |
-| Native Move passthrough ownership | OFFLINE PASS: 7/7 + mutation | straight/corner/fold-back WH3 smoke required |
-| Previous T2-A/hairpin candidates | RETIRED / archived | do not promote |
-| T2 Move→Attack terminal handoff | PASS: 9/9 + mutation + WH3 9.0.2 smoke | runtime verified |
-| T2 hysteresis | NOT RUN | adopt-only boundary tests; no rollback thrash |
+| T1 shared behavior-neutral evaluator refactor | **PASS** | old/new deterministic decision probe equivalent; existing suite unchanged |
+| T2 immediate-MOVE reconciliation | NOT ACTIVE | implement only after T1; offline + mutation + WH3 RT-TP-04/05 |
+| T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1 NOT ACTIVE | reimplement through evaluator + rerun offline/WH3 RT-TP-02/03 |
+| T2 hysteresis | NOT ACTIVE | issue/adopt bands required before T2 promotion |
 | T3 visible MCT adapter/UI wiring | NOT RUN | uses existing T1H profile compiler; missing-MCT fallback |
 | T3 MCT runtime comparison | NOT RUN | Smooth/Balanced/Precise differ only in timing/precision |
 | T4 Attack/Exit tuning | DEFERRED | only after T2/T3 stable |

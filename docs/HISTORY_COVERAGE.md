@@ -61,3 +61,13 @@ These gaps should be stated explicitly in future handoffs. Do not invent missing
 | corrected Move-VTable Windows delivery | NESTED BUILD EVIDENCE | `runtime_evidence/20260929_transition_policy/BSC_COREPATH_RC8_WINDOWS_DELIVERY.zip` |
 | 2026-09-29 smoothness/lifecycle runtime logs | DIRECT | `runtime_evidence/20260929_transition_policy/` |
 | D1 architecture/MCT/migration/test design | COMPLETE DESIGN SET | `docs/design/` |
+
+
+## 2026-10-05 transition-policy additions
+
+| Material | Coverage | Location |
+|---|---|---|
+| BSC-TPOL-T1 pre-shared-evaluator controller | COMPLETE SOURCE SNAPSHOT | `archive/tpol_t1_pre_shared_evaluator/source/` |
+| direct T2-B/T2-A/hairpin runtime observations | DIRECT LOG EVIDENCE | `runtime_evidence/20261005_transition_policy_experiments/` |
+| direct T2-A/hairpin test artifacts | HISTORICAL / SUPERSEDED | `archive/legacy_move_scheduler_tests/` and Git history |
+| native Move passthrough diagnostic | HISTORICAL / REJECTED AS PRODUCT ARCHITECTURE | `archive/tpol_t2_experiments/` + Git commit `e9306614156d39ac5e9778fe18d234703bbd7a44` |

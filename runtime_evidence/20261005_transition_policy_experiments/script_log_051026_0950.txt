@@ -1,0 +1,277 @@
+
+creating logfile script_log_051026_0950.txt
+
+[out] <0.0s>     battle_scripted.lua loaded: a new battle is being initialised
+[out] <0.0s>     
+*************************************************************************************************************
+*************************************************************************************************************
+[out] <32.7s>    lib_header.lua :: script libraries reloaded in battle configuration
+[out] <32.7s>    	loading took 0.14199829101563s
+[out] <32.7s>    	Lua version is Lua 5.1
+[out] <32.7s>    
+<32.7s><100ms> battle_manager created, script path of battle script is script\battle\default_battle\battle_start.lua
+<32.7s><100ms> battle_manager: constructed 37 script_unit objects
+<32.7s><100ms> alliance 1 army 1:
+<32.7s><100ms> 	sunits_generated_1_1_main created with 17 units
+<32.7s><100ms> alliance 2 army 1:
+<32.7s><100ms> 	sunits_generated_2_1_main created with 20 units
+[help_pages] <32.7s>    
+[help_pages] <32.7s>    
+[help_pages] <32.7s>    
+[help_pages] <32.7s>    *** help page system initialising ***
+[help_pages] <32.7s>    
+[help_pages] <32.7s>    
+[help_pages] <32.7s>    ***
+[help_pages] <32.7s>    *** setup_battle_help_pages() called
+[help_pages] <32.7s>    ***
+[ui] <32.7s>    *** output_uicomponent_on_click() called ***
+<32.7s><100ms> 
+<32.7s><100ms> ****************************
+<32.7s><100ms> Loading Mods
+<32.7s><100ms> 	Loading mod file [script\_lib\mod\!!!!!chee_logger.lua]
+<32.7s><100ms> 	Mod [script\_lib\mod\!!!!!chee_logger.lua] loaded successfully
+<32.7s><100ms> 	Loading mod file [script\_lib\mod\!glib_init.lua]
+<32.7s><100ms> 		MCT.Init
+<32.9s><100ms> 		Done loading mods!
+<32.9s><100ms> 	Mod [script\_lib\mod\!glib_init.lua] loaded successfully
+<32.9s><100ms> 	Loading mod file [script\_lib\mod\_helpers.klissan.lua]
+<32.9s><100ms> 	Mod [script\_lib\mod\_helpers.klissan.lua] loaded successfully
+<32.9s><100ms> 	Loading mod file [script\_lib\mod\context_functions.klissan.lua]
+<32.9s><100ms> 	Mod [script\_lib\mod\context_functions.klissan.lua] loaded successfully
+<32.9s><100ms> 	Loading mod file [script\_lib\mod\debugging_helpers.lua]
+<33.0s><100ms> 		qa_console.lua loaded
+<33.0s><100ms> 	Mod [script\_lib\mod\debugging_helpers.lua] loaded successfully
+<33.0s><100ms> 	Loading mod file [script\_lib\mod\demo_uimf.lua]
+<33.0s><100ms> 	Mod [script\_lib\mod\demo_uimf.lua] loaded successfully
+<33.0s><100ms> 	Loading mod file [script\_lib\mod\memreader.lua]
+<33.0s><100ms> 	Mod [script\_lib\mod\memreader.lua] loaded successfully
+<33.0s><100ms> 	Loading mod file [script\_lib\mod\mixer_lib.lua]
+<33.0s><100ms> 	Mod [script\_lib\mod\mixer_lib.lua] loaded successfully
+<33.0s><100ms> 	Loading mod file [script\_lib\mod\mixer_lib_campaign.lua]
+<33.0s><100ms> 	Mod [script\_lib\mod\mixer_lib_campaign.lua] loaded successfully
+<33.0s><100ms> 	Loading mod file [script\_lib\mod\mixer_lib_frontend.lua]
+<33.0s><100ms> 	Mod [script\_lib\mod\mixer_lib_frontend.lua] loaded successfully
+<33.0s><100ms> 	Loading mod file [script\_lib\mod\omlette_ries.lua]
+<33.0s><100ms> 	Mod [script\_lib\mod\omlette_ries.lua] loaded successfully
+<33.0s><100ms> 	Loading mod file [script\_lib\mod\pj_error_wrapping.lua]
+<33.0s><100ms> 	Mod [script\_lib\mod\pj_error_wrapping.lua] loaded successfully
+<33.0s><100ms> 	Loading mod file [script\_lib\mod\qa_console.lua]
+<33.0s><100ms> 		qa_console.lua loaded
+<33.0s><100ms> 	Mod [script\_lib\mod\qa_console.lua] loaded successfully
+<33.0s><100ms> 	Loading mod file [script\_lib\mod\table_fatigue.klissan.lua]
+<33.0s><100ms> 	Mod [script\_lib\mod\table_fatigue.klissan.lua] loaded successfully
+<33.0s><100ms> 	Loading mod file [script\_lib\mod\table_kv_rules.klissan.lua]
+<33.0s><100ms> 	Mod [script\_lib\mod\table_kv_rules.klissan.lua] loaded successfully
+<33.0s><100ms> 	Loading mod file [script\_lib\mod\test_script_here.lua]
+<33.0s><100ms> 		
+<33.0s><100ms> 		*** test_script_here.lua loaded - if you want to add test scripts to campaign, battle or the frontend, see the lua file working_data\script\_lib\mod\test_script_here.lua ***
+<33.0s><100ms> 		
+<33.0s><100ms> 	Mod [script\_lib\mod\test_script_here.lua] loaded successfully
+<33.0s><100ms> 	Loading mod file [script\_lib\mod\uimf_init.lua]
+<33.1s><100ms> 	Mod [script\_lib\mod\uimf_init.lua] loaded successfully
+<33.1s><100ms> 	Loading mod file [script\battle\mod\battle_hui.klissan.lua]
+<33.1s><100ms> 	Mod [script\battle\mod\battle_hui.klissan.lua] loaded successfully
+<33.1s><100ms> 	Loading mod file [script\battle\mod\better_shift_command.lua]
+<33.1s><100ms> 		[BETTER_SHIFT_COMMAND] ENTER version=1.3.0 run=V1_3_0 phase=P2B build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=false physical_evidence=QUARANTINED policy_stage=TPOL_T2AB_CANDIDATE
+<33.2s><100ms> 		[BETTER_SHIFT_COMMAND] BRIDGE_OK version=1.0.17-corepath-wh3-6c104-movevtfix
+<33.2s><100ms> 	Mod [script\battle\mod\better_shift_command.lua] loaded successfully
+<33.2s><100ms> 	Loading mod file [script\battle\mod\data_handler.klissan.lua]
+<33.2s><100ms> 		[Battle Data Dumper Mod] loaded
+<33.2s><100ms> 	Mod [script\battle\mod\data_handler.klissan.lua] loaded successfully
+<33.2s><100ms> 	Loading mod file [script\battle\mod\native_withdraw_unlock.lua]
+<33.2s><100ms> 	Mod [script\battle\mod\native_withdraw_unlock.lua] loaded successfully
+<33.2s><100ms> 	Loading mod file [script\battle\mod\pj_formations.lua]
+<33.2s><100ms> 	Mod [script\battle\mod\pj_formations.lua] loaded successfully
+<33.2s><100ms> 	Loading mod file [script\battle\mod\pj_formations\json.lua]
+<33.2s><100ms> 		Failed to load mod file [script\battle\mod\pj_formations\json.lua], error is: cannot open json: No such file or directory. Will attempt to require() this file to generate a more meaningful error message:
+<33.2s><100ms> 			module 'json' not found:jsonno field package.preload['json']no file '/script/battle/mod/json.lua'no file 'script/uimf/json.lua'no file '/script/_lib/mod/json.lua'no file '.\json.lua'no file 'C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\lua\json.lua'no file 'C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\lua\json\init.lua'no file 'C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\json.lua'no file 'C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\json\init.lua'no file 'data/script/_lib/json.lua'no file 'data/script/battle/json.lua'no file '.\json.dll'no file 'C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\json.dll'no file 'C:\Program Files (x86)\Steam\steamapps\common\Total War WARHAMMER III\loadall.dll'
+<33.2s><100ms> 	Failed to load mod: [script\battle\mod\pj_formations\json.lua]
+<33.2s><100ms> 	Loading mod file [script\battle\mod\zzz_cbfm_cacophonous_assault.lua]
+<33.2s><100ms> 	Mod [script\battle\mod\zzz_cbfm_cacophonous_assault.lua] loaded successfully
+<33.2s><100ms> ****************************
+<33.2s><100ms> 
+<33.3s><100ms> Saved profiles table is table: 000000018AE121E0
+<33.3s><100ms> Saved profiles string is {
+}
+<33.4s><100ms> 
+<33.4s><100ms> * No battle script defined - default script loaded *
+<33.4s><100ms> 
+<33.4s><100ms> 	Not loading advice
+<33.4s><100ms> ********************************************************************
+<33.4s><100ms> *** loaded collapse composite scene script
+<33.4s><100ms> ********************************************************************
+<33.4s><100ms> 
+<33.4s><100ms> wh2_intro_battle.lua loaded
+[scripted_tours] <33.4s>    
+[scripted_tours] <33.4s>    Battle Fundamentals scripted tour is working out what units/battlefield area to use
+[scripted_tours] <33.4s>    	player sunits:
+[scripted_tours] <33.4s>    		1: 1003 of type wh_dlc04_emp_inf_sigmars_sons_0 at position [65.931709289551, 30.265514373779, -271.4524230957] with strategic value 700
+[scripted_tours] <33.4s>    		2: 1002 of type wh_main_emp_inf_swordsmen at position [34.516254425049, 26.751873016357, -270.91925048828] with strategic value 400
+[scripted_tours] <33.4s>    	
+[scripted_tours] <33.4s>    	enemy sunits:
+[scripted_tours] <33.4s>    		1: 1020 of type wh3_main_cth_inf_jade_warriors_0 at position [-174.29592895508, 29.980823516846, 30.971841812134] with strategic value 550
+[scripted_tours] <33.4s>    		2: 1031 of type wh3_main_cth_cav_peasant_horsemen_0 at position [-51.757919311523, 55.709342956543, 161.29484558105] with strategic value 550
+[scripted_tours] <33.4s>    	suitability score for obb at [52.384990692139, 39.958290100098, -187.46051025391] with bearing 0.9722900390625 (deg), width 68.200004577637 and depth 220 is [93.75]
+[scripted_tours] <33.4s>    Chosen this straight-ahead-from-player-start bounding box position as the tour combat area
+[ui] <33.4s>    Panel opened finish_deployment
+[ui] <33.4s>    Panel closed winds_of_magic_gambler
+<33.5s><200ms> 	Battle is now entering phase: Startup
+<33.6s><300ms> 	Battle is now entering phase: PrebattleWeather
+<33.7s><500ms> 	Battle is now entering phase: PrebattleCinematic
+<33.8s><700ms> 	Battle is now entering phase: Deployment
+<33.8s><700ms> Entering init
+<33.8s><700ms> not a replay battle
+<33.8s><700ms> [Battle Data Dumper Mod]: Entering init
+<33.8s><700ms> [Battle Data Dumper Mod]: not a replay battle
+[ui] <37.2s>    
+[ui] <37.2s>    uicomponent button_battle_start
+[ui] <37.2s>    	path from root:	root > finish_deployment > deployment_end_sp > button_battle_start
+[ui] <37.2s>    	position on screen: [857, 131], size: [271, 87], state: [inactive], visible: [true], priority: [60], interactive: [true]
+[ui] <37.2s>    
+<37.4s><4300ms> 	Battle is now entering phase: Deployed
+[ui] <37.9s>    Panel closed finish_deployment
+[ui] <38.2s>    
+[ui] <38.2s>    uicomponent ffwd
+[ui] <38.2s>    	path from root:	root > hud_battle > radar_holder > speed_controls > speed_buttons > ffwd
+[ui] <38.2s>    	position on screen: [1887, 1], size: [40, 40], state: [down], visible: [true], priority: [0], interactive: [true]
+[ui] <38.2s>    
+[ui] <38.8s>    
+[ui] <38.8s>    uicomponent root
+[ui] <38.8s>    	path from root:	root
+[ui] <38.8s>    	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <38.8s>    
+[ui] <42.7s>    
+[ui] <42.7s>    uicomponent root
+[ui] <42.7s>    	path from root:	root
+[ui] <42.7s>    	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <42.7s>    
+<45.1s><18500ms> [BETTER_SHIFT_COMMAND] MOVE_STEERING_HANDOFF uid=1006 gen=1 action=1 successor=2 mode=NATIVE_ADOPT remaining=19.352911 progress=0.251731 route_mode=STEERING_CORNER route_reason=TURN_CORRIDOR_ENTERED adopt_gate=STEERING_CORNER threshold=22.756775 corner_window=19.397690 cut_error=19.351551 cut_tolerance=3.103630 model_ms=18500
+<45.1s><18500ms> [BETTER_SHIFT_COMMAND] NATIVE_MOVE_SUCCESSOR_ADOPTED uid=1006 gen=1 action=2 previous_action=1 active_engine_seq=848 provider=V3 route_reason=TURN_CORRIDOR_ENTERED model_ms=18500
+<47.2s><23400ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1006 gen=1 action=2 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_ADVANCED_BEFORE_PERMISSION model_ms=23400 preserved_tail=true semantic_success=false native_tail_restored=false
+<47.2s><23400ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1006 gen=1 action=2 blocked_successor=3 future_index=3 active_kind=MOVE active_engine_seq=1390 provider=V3 route_reason=ROUTE_PROGRESS_REQUIRED remaining_budget=3 model_ms=23400 preserved_tail=true shared_budget=true
+<48.5s><26300ms> [BETTER_SHIFT_COMMAND] ATTACK_TERMINAL_HANDOFF uid=1004 gen=1 action=1 successor=2 mode=ISSUE_ACK remaining=32.011223 progress=0.790205 threshold=32.108765 min_progress=0.743835 model_ms=26300
+<49.2s><28100ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1006 gen=1 action=3 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_ADVANCED_BEFORE_PERMISSION model_ms=28100 preserved_tail=true semantic_success=false native_tail_restored=false
+<49.2s><28100ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1006 gen=1 action=3 blocked_successor=4 future_index=4 active_kind=MOVE active_engine_seq=2058 provider=V3 route_reason=ROUTE_PROGRESS_REQUIRED remaining_budget=3 model_ms=28100 preserved_tail=true shared_budget=true
+<50.9s><32200ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1006 gen=1 action=4 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_ADVANCED_BEFORE_PERMISSION model_ms=32200 preserved_tail=true semantic_success=false native_tail_restored=false
+<50.9s><32200ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1006 gen=1 action=4 blocked_successor=5 future_index=5 active_kind=MOVE active_engine_seq=2604 provider=V3 route_reason=TURN_CORRIDOR_REQUIRED remaining_budget=3 model_ms=32200 preserved_tail=true shared_budget=true
+<51.4s><33300ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1006 gen=1 action=5 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_ADVANCED_BEFORE_PERMISSION model_ms=33300 preserved_tail=true semantic_success=false native_tail_restored=false
+<51.4s><33300ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1006 gen=1 action=5 blocked_successor=6 future_index=6 active_kind=MOVE active_engine_seq=2850 provider=V3 route_reason=ROUTE_PROGRESS_REQUIRED remaining_budget=3 model_ms=33300 preserved_tail=true shared_budget=true
+<53.3s><37500ms> [BETTER_SHIFT_COMMAND] MOVE_STEERING_HANDOFF uid=1006 gen=1 action=6 successor=7 mode=NATIVE_ADOPT remaining=39.375141 progress=0.339081 route_mode=STEERING_CORNER route_reason=TURN_CORRIDOR_ENTERED adopt_gate=STEERING_CORNER threshold=49.328777 corner_window=44.682247 cut_error=39.375141 cut_tolerance=7.149159 model_ms=37500
+<53.3s><37500ms> [BETTER_SHIFT_COMMAND] NATIVE_MOVE_SUCCESSOR_ADOPTED uid=1006 gen=1 action=7 previous_action=6 active_engine_seq=3396 provider=V3 route_reason=TURN_CORRIDOR_ENTERED model_ms=37500
+[ui] <54.4s>    
+[ui] <54.4s>    uicomponent root
+[ui] <54.4s>    	path from root:	root
+[ui] <54.4s>    	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <54.4s>    
+<55.5s><41600ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1008 gen=1 action=1 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_ADVANCED_BEFORE_PERMISSION model_ms=41600 preserved_tail=true semantic_success=false native_tail_restored=false
+<55.5s><41600ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1008 gen=1 action=1 blocked_successor=2 future_index=2 active_kind=MOVE active_engine_seq=3728 provider=V3 route_reason=ROUTE_PROGRESS_REQUIRED remaining_budget=3 model_ms=41600 preserved_tail=true shared_budget=true
+[ui] <56.4s>    
+[ui] <56.4s>    uicomponent root
+[ui] <56.4s>    	path from root:	root
+[ui] <56.4s>    	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <56.4s>    
+<57.0s><44200ms> [BETTER_SHIFT_COMMAND] EXIT_BLOCK_REASSERT uid=1004 gen=1 block=E3 action=3 count=1 remaining_budget=3 no_progress_ms=1000 required_stall_ms=900 contacts=1 speed=0.286525 evidence=COREPATH_POSITIVE_CONTACT_FALLBACK v3_reason=PHYSICAL_EVIDENCE_QUARANTINED model_ms=44200 shared_budget=true
+[ui] <61.0s>    
+[ui] <61.0s>    uicomponent root
+[ui] <61.0s>    	path from root:	root
+[ui] <61.0s>    	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <61.0s>    
+<64.5s><58700ms> [BETTER_SHIFT_COMMAND] MOVE_STEERING_HANDOFF uid=1006 gen=5 action=1 successor=2 mode=NATIVE_ADOPT remaining=12.548550 progress=0.396522 route_mode=STEERING_CORNER route_reason=TURN_CORRIDOR_ENTERED adopt_gate=STEERING_CORNER threshold=19.132219 corner_window=15.595284 cut_error=12.548550 cut_tolerance=2.495245 model_ms=58700
+<64.5s><58700ms> [BETTER_SHIFT_COMMAND] NATIVE_MOVE_SUCCESSOR_ADOPTED uid=1006 gen=5 action=2 previous_action=1 active_engine_seq=7850 provider=V3 route_reason=TURN_CORRIDOR_ENTERED model_ms=58700
+<65.1s><60000ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1006 gen=5 action=2 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_ADVANCED_BEFORE_PERMISSION model_ms=60000 preserved_tail=true semantic_success=false native_tail_restored=false
+<65.1s><60000ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1006 gen=5 action=2 blocked_successor=3 future_index=3 active_kind=MOVE active_engine_seq=8264 provider=V3 route_reason=ROUTE_PROGRESS_REQUIRED remaining_budget=3 model_ms=60000 preserved_tail=true shared_budget=true
+<67.4s><64700ms> [BETTER_SHIFT_COMMAND] ATTACK_TERMINAL_HANDOFF uid=1010 gen=4 action=1 successor=2 mode=ISSUE_ACK remaining=30.437742 progress=0.806910 threshold=31.096298 min_progress=0.711882 model_ms=64700
+<68.7s><67400ms> [BETTER_SHIFT_COMMAND] MOVE_STEERING_HANDOFF uid=1006 gen=5 action=3 successor=4 mode=NATIVE_ADOPT remaining=41.308411 progress=0.323724 route_mode=STEERING_CORNER route_reason=TURN_CORRIDOR_ENTERED adopt_gate=STEERING_CORNER threshold=44.125092 corner_window=43.887829 cut_error=38.121502 cut_tolerance=10.100000 model_ms=67400
+<68.7s><67400ms> [BETTER_SHIFT_COMMAND] NATIVE_MOVE_SUCCESSOR_ADOPTED uid=1006 gen=5 action=4 previous_action=3 active_engine_seq=10169 provider=V3 route_reason=TURN_CORRIDOR_ENTERED model_ms=67400
+[ui] <70.6s>    
+[ui] <70.6s>    uicomponent root
+[ui] <70.6s>    	path from root:	root
+[ui] <70.6s>    	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <70.6s>    
+[ui] <72.0s>    
+[ui] <72.0s>    uicomponent root
+[ui] <72.0s>    	path from root:	root
+[ui] <72.0s>    	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <72.0s>    
+[ui] <73.2s>    
+[ui] <73.2s>    uicomponent root
+[ui] <73.2s>    	path from root:	root
+[ui] <73.2s>    	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <73.2s>    
+<74.8s><79500ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1006 gen=6 action=1 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_ADVANCED_BEFORE_PERMISSION model_ms=79500 preserved_tail=true semantic_success=false native_tail_restored=false
+<74.8s><79500ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1006 gen=6 action=1 blocked_successor=2 future_index=2 active_kind=MOVE active_engine_seq=13610 provider=V3 route_reason=ROUTE_PROGRESS_REQUIRED remaining_budget=3 model_ms=79500 preserved_tail=true shared_budget=true
+<77.1s><83900ms> [BETTER_SHIFT_COMMAND] ATTACK_TERMINAL_HANDOFF uid=1008 gen=1 action=8 successor=9 mode=ISSUE_ACK remaining=22.487637 progress=0.637092 threshold=27.884333 min_progress=0.612008 model_ms=83900
+<78.6s><86800ms> [BETTER_SHIFT_COMMAND] MOVE_STEERING_HANDOFF uid=1006 gen=6 action=2 successor=3 mode=NATIVE_ADOPT remaining=36.532139 progress=0.512685 route_mode=STEERING_CORNER route_reason=TURN_CORRIDOR_ENTERED adopt_gate=STEERING_CORNER threshold=49.316162 corner_window=49.316162 cut_error=36.532139 cut_tolerance=10.100000 model_ms=86800
+<78.6s><86800ms> [BETTER_SHIFT_COMMAND] NATIVE_MOVE_SUCCESSOR_ADOPTED uid=1006 gen=6 action=3 previous_action=2 active_engine_seq=15844 provider=V3 route_reason=TURN_CORRIDOR_ENTERED model_ms=86800
+<84.9s><99200ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1006 gen=7 action=1 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_ADVANCED_BEFORE_PERMISSION model_ms=99200 preserved_tail=true semantic_success=false native_tail_restored=false
+<84.9s><99200ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1006 gen=7 action=1 blocked_successor=2 future_index=2 active_kind=MOVE active_engine_seq=17313 provider=V3 route_reason=ROUTE_PROGRESS_REQUIRED remaining_budget=3 model_ms=99200 preserved_tail=true shared_budget=true
+[ui] <89.2s>    
+[ui] <89.2s>    uicomponent root
+[ui] <89.2s>    	path from root:	root
+[ui] <89.2s>    	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <89.2s>    
+[ui] <95.5s>    
+[ui] <95.5s>    uicomponent unit_information
+[ui] <95.5s>    	path from root:	root > hud_battle > info_panel_parent > info_panel_background > unit_information
+[ui] <95.5s>    	position on screen: [-1, 148], size: [293, 601], state: [NewState], visible: [true], priority: [46], interactive: [true]
+[ui] <95.5s>    
+[ui] <96.9s>    
+[ui] <96.9s>    uicomponent root
+[ui] <96.9s>    	path from root:	root
+[ui] <96.9s>    	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <96.9s>    
+<97.4s><123200ms> [BETTER_SHIFT_COMMAND] MOVE_STEERING_HANDOFF uid=1006 gen=7 action=2 successor=3 mode=NATIVE_ADOPT remaining=7.919312 progress=0.911381 route_mode=COMPLETE route_reason=ACTION_COMPLETE adopt_gate=CURRENT_MOVE_COMPLETE threshold=44.656464 corner_window=nil cut_error=0.000000 cut_tolerance=nil model_ms=123200
+<97.4s><123200ms> [BETTER_SHIFT_COMMAND] NATIVE_MOVE_SUCCESSOR_ADOPTED uid=1006 gen=7 action=3 previous_action=2 active_engine_seq=19827 provider=V3 route_reason=ACTION_COMPLETE model_ms=123200
+<98.1s><124400ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1006 gen=7 action=3 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_ADVANCED_BEFORE_PERMISSION model_ms=124400 preserved_tail=true semantic_success=false native_tail_restored=false
+<98.1s><124400ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1006 gen=7 action=3 blocked_successor=4 future_index=4 active_kind=MOVE active_engine_seq=19981 provider=V3 route_reason=ROUTE_PROGRESS_REQUIRED remaining_budget=3 model_ms=124400 preserved_tail=true shared_budget=true
+[ui] <100.5s>   
+[ui] <100.5s>   uicomponent root
+[ui] <100.5s>   	path from root:	root
+[ui] <100.5s>   	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <100.5s>   
+[ui] <100.9s>   
+[ui] <100.9s>   uicomponent root
+[ui] <100.9s>   	path from root:	root
+[ui] <100.9s>   	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <100.9s>   
+<101.7s><131300ms> [BETTER_SHIFT_COMMAND] TAKEOVER_REFUSED uid=1004 gen=3 reason=ATTACK_FIRST_PHASE2_REQUIRED native_plan_preserved=true
+[ui] <104.0s>   
+[ui] <104.0s>   uicomponent root
+[ui] <104.0s>   	path from root:	root
+[ui] <104.0s>   	position on screen: [0, 0], size: [2350, 1163], state: [NewState], visible: [true], priority: [0], interactive: [true]
+[ui] <104.0s>   
+<109.7s><146200ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1006 gen=8 action=1 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_ADVANCED_BEFORE_PERMISSION model_ms=146200 preserved_tail=true semantic_success=false native_tail_restored=false
+<109.7s><146200ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1006 gen=8 action=1 blocked_successor=2 future_index=2 active_kind=MOVE active_engine_seq=21827 provider=V3 route_reason=ROUTE_PROGRESS_REQUIRED remaining_budget=3 model_ms=146200 preserved_tail=true shared_budget=true
+<110.4s><147400ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1006 gen=8 action=1 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_FUTURE_OVERRUN model_ms=147400 preserved_tail=true semantic_success=false native_tail_restored=false
+<110.4s><147400ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1006 gen=8 action=1 blocked_successor=3 future_index=3 active_kind=MOVE active_engine_seq=22058 provider=V3 route_reason=CANONICAL_INTERMEDIATE_ACTIONS_OWED remaining_budget=2 model_ms=147400 preserved_tail=true shared_budget=true
+<117.9s><162400ms> [BETTER_SHIFT_COMMAND] MOVE_STEERING_HANDOFF uid=1006 gen=8 action=3 successor=4 mode=NATIVE_ADOPT remaining=17.979610 progress=0.748059 route_mode=STEERING_CORNER route_reason=TURN_CORRIDOR_ENTERED adopt_gate=STEERING_CORNER threshold=48.370369 corner_window=48.370369 cut_error=17.979610 cut_tolerance=10.100000 model_ms=162400
+<117.9s><162400ms> [BETTER_SHIFT_COMMAND] NATIVE_MOVE_SUCCESSOR_ADOPTED uid=1006 gen=8 action=4 previous_action=3 active_engine_seq=24615 provider=V3 route_reason=TURN_CORRIDOR_ENTERED model_ms=162400
+<123.8s><174400ms> [BETTER_SHIFT_COMMAND] ACTION_FAULT uid=1006 gen=8 action=4 code=BLOCKED_EXECUTION_IDENTITY reason=NATIVE_ADVANCED_BEFORE_PERMISSION model_ms=174400 preserved_tail=true semantic_success=false native_tail_restored=false
+<123.8s><174400ms> [BETTER_SHIFT_COMMAND] NATIVE_SUCCESSOR_ROLLBACK uid=1006 gen=8 action=4 blocked_successor=5 future_index=5 active_kind=MOVE active_engine_seq=25382 provider=V3 route_reason=ROUTE_PROGRESS_REQUIRED remaining_budget=3 model_ms=174400 preserved_tail=true shared_budget=true
+[ui] <124.9s>   
+[ui] <124.9s>   uicomponent button_cheat_sheet
+[ui] <124.9s>   	path from root:	root > esc_menu > main > menu_left > menu_buttons > frame_options > button_cheat_sheet
+[ui] <124.9s>   	position on screen: [210, 477], size: [100, 96], state: [selected], visible: [true], priority: [100], interactive: [true]
+[ui] <124.9s>   
+[ui] <124.9s>   Panel opened esc_menu
+[ui] <125.7s>   
+[ui] <125.7s>   uicomponent button_windows
+[ui] <125.7s>   	path from root:	root > esc_menu > main > menu_left > menu_buttons > frame_quit > button_windows
+[ui] <125.7s>   	position on screen: [50, 738], size: [186, 100], state: [hover], visible: [false], priority: [100], interactive: [true]
+[ui] <125.7s>   
+<125.7s><176700ms> [BETTER_SHIFT_COMMAND] SESSION_END run=V1_3_0 reason=QUIT_WINDOWS_CLICK route_passes=0 cancel_passes=0
+<125.8s><176700ms> [BETTER_SHIFT_COMMAND] OBSERVER_SAFE_STOP reason=QUIT_WINDOWS_CLICK result=true detail=true
+[ui] <126.5s>   Panel closed esc_menu
+[ui] <126.6s>   
+[ui] <126.6s>   uicomponent button_tick
+[ui] <126.6s>   	path from root:	dialogue_box > both_group > button_tick
+[ui] <126.6s>   	position on screen: [936, 625], size: [56, 56], state: [down_off], visible: [false], priority: [250], interactive: [true]
+[ui] <126.6s>   
+<126.7s><176700ms> 
+<126.7s><176700ms> ********************************************************************************
+<126.7s><176700ms> event has occurred:: UIDestroyed
+<126.7s><176700ms> ********************************************************************************
+<126.7s><176700ms> ********************************************************************************
+<126.7s><176700ms> 
+
+*** clear_battle_event_callbacks() called, 27 callbacks cleared ***

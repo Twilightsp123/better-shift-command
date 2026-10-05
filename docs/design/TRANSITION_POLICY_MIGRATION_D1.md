@@ -1,6 +1,6 @@
 # Transition Policy Migration D1
 
-Status: **APPROVED IMPLEMENTATION PLAN — NO RUNTIME CHANGE IN THIS PACKAGE**
+Status: **APPROVED IMPLEMENTATION PLAN — T1H + T1 IMPLEMENTED; T2 PENDING**
 
 The migration deliberately avoids a broad convergence rewrite. Each stage must be independently testable and revertible.
 
@@ -42,6 +42,8 @@ Gate:
 - existing controller suite unchanged PASS;
 - new equivalence tests compare old/new decisions over fixtures;
 - mutation catches bypass of evaluator.
+
+**T1 implementation result — 2026-10-05:** PASS. Shared evaluator is wired to `advance()`, SC6 and scheduler urgency; deterministic old/new probe is equivalent; full maintenance suite passes; mutation catches evaluator bypass. No T2 behavior is active.
 
 ## T2 — Smooth-default behavior correction
 

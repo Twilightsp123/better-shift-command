@@ -26,10 +26,10 @@ index=read('docs/MAINTAINER_INDEX.md')
 for token in ('Document authority','Implemented TPOL scaffold + approved-next design','Historical narrative','Do not count ContactPair as the 17th mandatory hook','D1 promotion rule'):
     if token not in index: fail('MAINTAINER_INDEX missing rule: '+token)
 arch=read('docs/ARCHITECTURE_STATUS_20260929.md')
-for token in ('Current production/runtime architecture','Move→Attack T2-B runtime closure','Native Move queue ownership diagnostic','TPOL-T1H + partial T2 implementation status'):
+for token in ('Current production/runtime architecture','Strict Move→Attack boundary remains current behavior','SC6 immediate-MOVE asymmetry remains current behavior','TPOL-T1H + TPOL-T1 implementation status'):
     if token not in arch: fail('ARCHITECTURE_STATUS missing current/design separation: '+token)
 policy=read('docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md')
-for token in ('T1H PROFILE SCAFFOLD IMPLEMENTED','Hard invariants','Hysteresis','MOVE → ATTACK policy','SC6 becomes a coordinator','MCT architecture'):
+for token in ('T1H + T1 SHARED EVALUATOR IMPLEMENTED','Hard invariants','Hysteresis','MOVE → ATTACK policy','SC6 becomes a coordinator','MCT architecture'):
     if token not in policy: fail('D1 architecture missing token: '+token)
 mct=read('docs/design/MCT_POLICY_SCHEMA_D1.md')
 for token in ('Smooth   (default / recommended)','Movement Cornering','Attack Handoff','Route Fidelity','Native Successor Tolerance','Minimum Engagement Time','Disengage Priority','Forbidden MCT controls'):
@@ -38,13 +38,13 @@ hidden=read('docs/design/HIDDEN_MCT_INTERFACE_T1H.md')
 for token in ('NO USER-VISIBLE MCT UI','from_mct_values','engagement_hold_seconds = 3.0','reserved but intentionally do not alter gameplay yet'):
     if token not in hidden: fail('T1H hidden interface missing token: '+token)
 dec=read('docs/DECISION_LOG.md')
-for token in ('D-20260929-02','D-20260929-03','D-20260929-04','D-20260929-05','D-20260929-06','Replace abstract Attack Commitment with direct Minimum Engagement Time'):
+for token in ('D-20260929-02','D-20260929-03','D-20260929-04','D-20260929-05','D-20260929-06','D-20261005-01','D-20261005-02','Replace abstract Attack Commitment with direct Minimum Engagement Time'):
     if token not in dec: fail('DECISION_LOG missing decision: '+token)
 issues=read('docs/OPEN_ISSUES.md')
-for token in ('O-08 — Move→Attack','O-09 — Move→Move ownership conflict / destructive rollback','O-11 — Battle exit/main-menu/desktop hang','TPOL-T1H / T2 outstanding'):
+for token in ('O-08 — Move→Attack','O-09 — SC6 rolls back immediate future MOVE','O-11 — Battle exit/main-menu/desktop hang','TPOL-T1H / T2 outstanding'):
     if token not in issues: fail('OPEN_ISSUES missing current blocker: '+token)
 matrix=read('docs/TEST_MATRIX.md')
-for token in ('Windows Native CTest | 14/14 PASS','T1H hidden PolicyProfile/MCT scaffold | PASS','T1 shared behavior-neutral evaluator refactor | NOT RUN','T2 Move→Attack terminal handoff | PASS: 9/9 + mutation + WH3 9.0.2 smoke','Native Move passthrough ownership | OFFLINE PASS: 7/7 + mutation','T3 visible MCT adapter/UI wiring | NOT RUN'):
+for token in ('Windows Native CTest | 14/14 PASS','T1H hidden PolicyProfile/MCT scaffold | PASS','T1 shared behavior-neutral evaluator refactor | **PASS**','T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1 NOT ACTIVE','T3 visible MCT adapter/UI wiring | NOT RUN'):
     if token not in matrix: fail('TEST_MATRIX missing gate: '+token)
 ledger=read('docs/ASSUMPTION_LEDGER.md')
 if '`Entity +0x18 = MovementComponent*` | **RETRACTED**' not in ledger: fail('Assumption ledger lost retracted Entity+0x18 status')
@@ -52,13 +52,13 @@ lineage=read('docs/VERSION_LINEAGE.md')
 for token in ('BSC-CONV-RC2','NATIVE-MAP-RC7','COREPATH-RC8','SMARTGUARD-RC2','BSC-TPOL-D1','BSC-TPOL-T1H'):
     if token not in lineage: fail('VERSION_LINEAGE missing token: '+token)
 hist=read('docs/DEVELOPMENT_HISTORY.md')
-for token in ('HISTORICAL DOCUMENT — NOT CURRENT AUTHORITY','## 18. 2026-09-29 — Move VTable closure reveals transition-policy limitations','## 19. 2026-09-29 — TPOL-T1H hidden MCT/profile scaffold'):
+for token in ('HISTORICAL DOCUMENT — NOT CURRENT AUTHORITY','## 18. 2026-09-29 — Move VTable closure reveals transition-policy limitations','## 19. 2026-09-29 — TPOL-T1H hidden MCT/profile scaffold','## 21. 2026-10-05 — direct T2 experiments','## 22. 2026-10-05 — BSC-TPOL-T1 shared evaluator implemented behavior-neutrally'):
     if token not in hist: fail('DEVELOPMENT_HISTORY missing marker: '+token)
 manifest=json.loads(read('DESIGN_MANIFEST.json'))
-if manifest.get('design_stream')!='BSC-TPOL-D1' or manifest.get('status')!='T1H_PROFILE_SCAFFOLD_T2B_RUNTIME_VERIFIED_NATIVE_MOVE_PASSTHROUGH_DIAG': fail('DESIGN_MANIFEST identity/status mismatch')
+if manifest.get('design_stream')!='BSC-TPOL-D1' or manifest.get('status')!='T1_SHARED_EVALUATOR_IMPLEMENTED_BEHAVIOR_NEUTRAL_T2_NOT_ACTIVE': fail('DESIGN_MANIFEST identity/status mismatch')
 if manifest.get('product_default')!='SMOOTH' or manifest.get('hard_invariants_configurable') is not False: fail('DESIGN_MANIFEST policy contract mismatch')
-for token in ('T2B_MOVE_ATTACK_RUNTIME_VERIFIED','T2A_PREVIOUS_CANDIDATES_RETIRED','NATIVE_MOVE_PASSTHROUGH_DIAGNOSTIC','T2C_HYSTERESIS_PENDING'):
-    if token not in manifest.get('implementation_stages',[]): fail('DESIGN_MANIFEST missing partial T2 stage: '+token)
+if 'T1_SHARED_EVALUATOR_IMPLEMENTED' not in manifest.get('implementation_stages',[]): fail('DESIGN_MANIFEST missing implemented T1 stage')
+if 'T2A_IMMEDIATE_MOVE_PENDING' not in manifest.get('implementation_stages',[]) or 'T2C_HYSTERESIS_PENDING' not in manifest.get('implementation_stages',[]): fail('DESIGN_MANIFEST must keep T2 pending after T1')
 if manifest.get('mct_ui')!='HIDDEN_NOT_REGISTERED': fail('DESIGN_MANIFEST MCT visibility mismatch')
 if manifest.get('formal_project_version')!='1.3.0' or manifest.get('canonical_pack_name')!='zzz_better_shift_command_steam.pack': fail('DESIGN_MANIFEST formal version/pack identity mismatch')
 print('PASS: v1.3.0 documentation contract; formal version/pack identity and hidden policy scaffold are separated from internal maintenance labels')

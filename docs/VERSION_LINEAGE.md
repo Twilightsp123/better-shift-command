@@ -14,7 +14,7 @@ The project has several independent numbering systems. A bare label such as `RC2
 | Public/formal BSC releases | v1.2.0, v1.2.1, v1.2.2, **v1.3.0** | formal Mod version line | current formal maintained version = **v1.3.0**; v1.2.2 remains upstream behavior ancestry |
 | Native Bridge versions | 0.1.1, 0.4.x, 0.5.x, 1.0.x | native observer/identity/issuing/evidence evolution | current candidate = `1.0.17-corepath-wh3-6c104-movevtfix` |
 | WH3 current-build remap/diagnostic | RC4, RC5, RC6, RC7, RC8 | native map/runtime-gate work for WH3 9.0.1 current EXE | current = **CorePath RC8** |
-| Transition-policy architecture | BSC-TPOL-D1 | next gameplay/MCT architecture; no new Native RE | **approved design, not implemented** |
+| Transition-policy architecture | BSC-TPOL-D1 / T1H / T1 | staged gameplay/MCT architecture; no new Native RE | **T1H + behavior-neutral T1 implemented; T2 pending** |
 | Smart Guard diagnostics | its own RC labels | separate optional Smart Guard investigation | staged disabled; never identify by bare `RCx` in shared docs |
 
 ### Naming rule for new docs
@@ -63,7 +63,7 @@ A broad convergence/cleanup attempt modified too many runtime/maintenance surfac
 - v1.2.0: SC1–SC5 behavior closure and release telemetry cleanup.
 - v1.2.1: SC6 V3 exact execution-identity reconciliation.
 - v1.2.2: Lua `math.huge` compatibility update over v1.2.1 behavior.
-- v1.3.0: formal version normalization for the current maintained tree; includes the Move-VTable correction and hidden Transition Policy/MCT scaffold while T2 smoothness behavior remains pending.
+- v1.3.0: formal maintained version; current maintenance tree includes the Move-VTable correction, hidden PolicyProfile scaffold, and behavior-neutral shared T1 evaluator while T2 smoothness behavior remains pending.
 - `1.2.2-corepath-rc8`: maintenance candidate, not a public release; changes production Native evidence wiring, not the upstream gameplay baseline.
 
 ## 3. Native Bridge chronology
@@ -111,8 +111,20 @@ D1 is **not** a runtime version. It defines:
 - adoption hysteresis;
 - Smooth/Balanced/Precise/Custom MCT policy profiles.
 
-Implementation promotion stages are T1–T4. Do not write `D1 fixed` until source and runtime gates actually pass.
+Implementation promotion stages are T1–T4. T1 is now implemented behavior-neutrally; T2–T4 remain staged. Do not write `D1 fixed` until all relevant source/runtime gates pass.
 
 ## 7. BSC-TPOL-T1H — hidden policy/MCT scaffold
 
 First implemented substage of the D1 migration. It adds the internal immutable PolicyProfile schema and future MCT adapter boundary while preserving existing gameplay decisions. No MCT UI is registered. `engagement_hold_seconds=3.0` becomes the policy source for the existing 3000 ms attack hold; all movement transition settings remain reserved until T2.
+
+
+## 8. BSC-TPOL-T1 — shared evaluator
+
+Implemented 2026-10-05 from the pre-T2 CorePath/T1H behavior baseline. It centralizes Move transition decisions behind `R1.TransitionPolicy.evaluate()` for proactive dispatch, SC6 reconciliation, and scheduler urgency while intentionally preserving old decisions. T1 is structural, not a gameplay release.
+
+## 9. 2026-10-05 direct T2 experiment line
+
+- direct T2-B terminal Attack candidate: useful runtime evidence; no Attack pause observed; later reverted from current source pending proper T2 migration;
+- direct T2-A immediate-MOVE adoption: not promoted; fold-back self-compression observed;
+- T2-A hairpin restriction: not promoted; stepwise rollback/reassert observed;
+- Native Move passthrough diagnostic: isolation experiment only; rejected as product architecture because BSC exists to improve Move→Move behavior rather than surrender it to vanilla Shift.

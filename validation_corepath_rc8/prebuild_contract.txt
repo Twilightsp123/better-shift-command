@@ -1,0 +1,8 @@
+$ /opt/pyvenv/bin/python tools/prebuild_contract_check.py
+PASS
+map=WH3_9.0.1_6c104a63_COREPATH_RC8
+core_hooks=16
+optional_sites=2
+native_map_source=JSON_GENERATED
+physical_evidence=QUARANTINED
+smart_guard=STAGED_DISABLED

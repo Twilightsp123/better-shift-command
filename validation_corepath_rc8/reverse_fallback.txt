@@ -1,0 +1,13 @@
+$ /opt/pyvenv/bin/python tests/test_reverse_fallback.py
+test_analyze_headless_discovery (__main__.TestReverseFallback.test_analyze_headless_discovery) ... ok
+test_bindiff_schema_discovery_and_anchor_extract (__main__.TestReverseFallback.test_bindiff_schema_discovery_and_anchor_extract) ... ok
+test_binexport_headless_options_are_single_semicolon_argument (__main__.TestReverseFallback.test_binexport_headless_options_are_single_semicolon_argument) ... ok
+test_ghidra_callgraph_can_reduce_unresolved_callee (__main__.TestReverseFallback.test_ghidra_callgraph_can_reduce_unresolved_callee) ... ok
+test_ghidra_evidence_script_exports_graph_features (__main__.TestReverseFallback.test_ghidra_evidence_script_exports_graph_features) ... ok
+test_ghidra_runner_requires_bundle_exe_sha_match (__main__.TestReverseFallback.test_ghidra_runner_requires_bundle_exe_sha_match) ... ok
+test_stage7_bundle_declares_no_exe_and_bindiff_requirement (__main__.TestReverseFallback.test_stage7_bundle_declares_no_exe_and_bindiff_requirement) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.002s
+
+OK

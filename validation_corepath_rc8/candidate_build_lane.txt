@@ -1,0 +1,14 @@
+$ /opt/pyvenv/bin/python tests/test_candidate_build_lane.py
+test_candidate_is_not_promoted (__main__.TestCandidateBuildLane.test_candidate_is_not_promoted) ... ok
+test_candidate_pointer_and_ci_are_generic (__main__.TestCandidateBuildLane.test_candidate_pointer_and_ci_are_generic) ... ok
+test_cmake_overlay_contract (__main__.TestCandidateBuildLane.test_cmake_overlay_contract) ... ok
+test_native_fixtures_follow_generated_map (__main__.TestCandidateBuildLane.test_native_fixtures_follow_generated_map) ... ok
+test_native_order_identity_consumers_are_map_backed (__main__.TestCandidateBuildLane.test_native_order_identity_consumers_are_map_backed) ... ok
+test_no_api_literal_newline_corruption (__main__.TestCandidateBuildLane.test_no_api_literal_newline_corruption) ... ok
+test_overlay_header_is_self_contained (__main__.TestCandidateBuildLane.test_overlay_header_is_self_contained) ... ok
+test_prepare_script_does_not_write_promoted_header (__main__.TestCandidateBuildLane.test_prepare_script_does_not_write_promoted_header) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.002s
+
+OK

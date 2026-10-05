@@ -2,6 +2,10 @@
 
 Status: **DESIGN GATE**
 
+## 0. T1 structural gate status
+
+T1 behavior-neutral shared-evaluator gate: **PASS (2026-10-05)**. Existing gameplay suite is unchanged, deterministic pre-T1/current transition probe is equivalent, and mutation catches bypass of the evaluator in proactive dispatch, SC6 and scheduler urgency. The tests below remain T2/T3 promotion requirements.
+
 ## 1. Offline policy tests
 
 Every test should assert both decision `zone` and stable `reason`.

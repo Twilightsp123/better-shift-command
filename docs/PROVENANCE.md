@@ -58,3 +58,13 @@ These logs motivate the D1 transition-policy design; they are not reverse-engine
 ## TPOL-T1H provenance
 
 T1H controller/source begins from `BSC_TRANSITION_POLICY_ARCHITECTURE_D1`, whose runtime source matched the CorePath RC8 Move-VTable Fix baseline. Native bridge binary/source is unchanged at `1.0.17-corepath-wh3-6c104-movevtfix`. The installable T1H pack reuses the previously Windows-validated bridge DLL and changes only the embedded controller Lua/profile scaffold.
+
+
+## 2026-10-05 T1 shared evaluator provenance
+
+Behavior-neutral T1 source was re-anchored from maintenance branch commit `577e789b26e686b7b55b20f50a18c32d3f20c645`, before direct T2 gameplay experiments. The exact pre-T1 controller is preserved at:
+
+- `archive/tpol_t1_pre_shared_evaluator/source/better_shift_command.lua`
+- SHA256 `40f8e3a1aba798e731e7da3eade5adaecdd2d5a326f49a1c1892114613ae4412`
+
+Runtime evidence that falsified the direct T2-A/hairpin path is preserved under `runtime_evidence/20261005_transition_policy_experiments/`. Those logs are gameplay-policy evidence, not Native reverse-engineering evidence.

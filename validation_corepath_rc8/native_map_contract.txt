@@ -1,0 +1,7 @@
+$ /opt/pyvenv/bin/python maintenance_tools/check_native_map_contract.py
+PASS
+map=WH3_9.0.1_6c104a63_COREPATH_RC8
+core=16/16
+optional=2/2
+generated_header=SYNC
+runtime_sources=JSON_BACKED

@@ -3,6 +3,30 @@
   "status": "PASS",
   "steps": [
     {
+      "name": "native_map_contract.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "address_pipeline.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "candidate_build_lane.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "anchor_graph.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "reverse_fallback.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "prebuild_contract.txt",
+      "exit_code": 0
+    },
+    {
       "name": "corepath_contract.txt",
       "exit_code": 0
     },
@@ -64,6 +88,14 @@
     },
     {
       "name": "exec_identity_v3.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "transition_policy_t1_contract.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "transition_policy_t1_equivalence.txt",
       "exit_code": 0
     },
     {

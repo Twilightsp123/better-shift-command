@@ -32,9 +32,9 @@ Current runtime baseline / design stage:
 - Smart Guard runtime: **STAGED_DISABLED**;
 - current runtime stage: Move-VTable correction built and exercised in WH3; gameplay smoothness/lifecycle work remains open;
 - transition design stream: **`BSC-TPOL-D1`**;
-- implemented substage: **`BSC-TPOL-T1H`** hidden profile/MCT scaffold;
+- implemented substages: **`BSC-TPOL-T1H`** hidden profile/MCT scaffold + **`BSC-TPOL-T1`** shared behavior-neutral TransitionPolicy evaluator;
 - visible BSC MCT UI: **not registered**;
-- movement transition behavior: still current CorePath baseline until T2.
+- movement transition behavior: still the pre-T2 CorePath SC1–SC6 baseline; T1 centralizes decisions but does not change them.
 
 ## 3. What each document answers
 
@@ -86,4 +86,4 @@ When a future maintainer discovers a conflict, fix the navigation/current-state 
 
 ## 7. D1 promotion rule
 
-`BSC-TPOL-D1` remains the design stream. `BSC-TPOL-T1H` is the first implemented substage: hidden PolicyProfile/MCT scaffolding only. T2 movement behavior and T3 visible MCT are still future work. Source behavior wins any disagreement with a design-only section.
+`BSC-TPOL-D1` remains the design stream. `BSC-TPOL-T1H` and the behavior-neutral `BSC-TPOL-T1` shared evaluator are implemented. T2 movement behavior and T3 visible MCT are still future work. The 2026-10-05 direct T2/passthrough experiments are historical evidence, not current runtime authority. Source behavior wins any disagreement with a design-only or historical section.

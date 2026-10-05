@@ -1,0 +1,2 @@
+$ /opt/pyvenv/bin/python tests/test_transition_policy_t1_contract.py
+PASS: T1 shared TransitionPolicy structural contract

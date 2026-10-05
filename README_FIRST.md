@@ -53,13 +53,17 @@ The Native Bridge string is an internal compatibility/build identifier, not the 
 
 ## Current architecture status
 
-The current production behavior still uses the existing SC1–SC6 transition decisions. The new Transition Policy architecture has a hidden profile/MCT interface scaffold, but the smoothness changes planned for T2 are not yet active.
+The current runtime is **BSC-TPOL-T1 behavior-neutral** on top of the existing SC1–SC6 gameplay baseline. T1H provides the hidden immutable PolicyProfile/MCT adapter scaffold; T1 now adds the shared `R1.TransitionPolicy.evaluate()` decision plane used by proactive `advance()`, SC6 reconciliation, and scheduler urgency.
 
-The next gameplay work is therefore still:
+**T1 intentionally does not change gameplay decisions.** Move→Attack is still strict until current Move semantic completion, and an exact immediate future MOVE in SC6 still follows the legacy rollback behavior. `ADOPT_ONLY` / hysteresis is not active yet.
 
-- Move→Attack terminal handoff;
-- immediate-successor MOVE adopt/soft-adopt in SC6;
-- transition hysteresis;
+The 2026-10-05 direct T2-B, T2-A, hairpin and native-passthrough builds are preserved as historical experiments/evidence only. They do not override the staged D1 migration or current runtime source.
+
+The next gameplay work is therefore:
+
+- T2-A immediate-successor MOVE policy through the shared evaluator;
+- T2-B Move→Attack terminal handoff reintroduced through the shared evaluator, using the successful runtime experiment as evidence;
+- T2-C separate issue/adopt hysteresis windows;
 - later visible MCT wiring.
 
 Battle teardown/hang remains a separate lifecycle stream and must not be mixed into transition-policy changes.

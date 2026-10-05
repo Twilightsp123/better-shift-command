@@ -96,3 +96,20 @@
 **Reason:** Players need to decide how long a unit must actually remain in verified engagement before a queued Exit Move can become eligible. This is different from how aggressively BSC should enforce disengagement after eligibility.
 
 **Consequence:** `disengage_priority` remains a separate later-stage control. Minimum Engagement Time counts eligible engagement evidence, not time since Attack order/ACK.
+
+
+## D-20261005-01 — Direct T2 experiments do not override the staged D1 migration
+
+**Decision:** The 2026-10-05 direct T2-B, T2-A, hairpin, and native-Move-passthrough experiments are historical evidence only. Current runtime is re-anchored on pre-T2 behavior while T1 is implemented first.
+
+**Reason:** T2-B demonstrated a useful smooth Attack handoff, but direct T2-A patches exposed the exact failure D-20260929-03/-04 predicted: separate proactive and SC6 policy paths fought each other. Permissive adoption caused fold-back compression; stricter rollback caused stepwise movement. Native passthrough isolated destructive rollback but contradicts the product goal of improving Move→Move steering and D1's requirement to preserve SC1–SC4.
+
+**Consequence:** Preserve all experiment evidence, but do not treat those builds as current architecture. Reintroduce gameplay changes only after behavior-neutral T1 and through one shared evaluator.
+
+## D-20261005-02 — Implement T1 shared evaluator with zero gameplay change
+
+**Decision:** `R1.TransitionPolicy.evaluate()` is the single structural decision adapter consumed by proactive `advance()`, SC6 native reconciliation, and scheduler urgency. T1 preserves every pre-T2 transition outcome, including strict Move→Attack and legacy immediate-MOVE rollback.
+
+**Evidence:** full existing maintenance suite PASS, deterministic old/new transition probe equivalent, and mutation coverage catches evaluator bypass in advance/SC6/scheduler plus H2 future-skip relaxation.
+
+**Consequence:** T2-A/T2-B/T2-C may now change policy in one place. `ADOPT_ONLY` remains inactive until T2-C.

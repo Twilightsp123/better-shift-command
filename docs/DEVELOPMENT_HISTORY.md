@@ -572,3 +572,30 @@ The first D1 implementation step intentionally avoided changing transition behav
 ## 20. 2026-09-29 — Formal version normalization to v1.3.0
 
 The maintained project version is normalized to **v1.3.0**. Internal labels (`COREPATH-RC8`, `BSC-TPOL-D1`, `BSC-TPOL-T1H`, Native `movevtfix`) remain preserved as engineering history/provenance only. The canonical Steam pack filename is fixed as `zzz_better_shift_command_steam.pack`. Historical logs, patches and archived source retain their original version strings.
+
+
+---
+
+## 21. 2026-10-05 — direct T2 experiments expose the missing T1/T2-C architecture
+
+After 9.0.2 runtime testing became available, several direct gameplay patches were tried before the documented T1 migration had been completed.
+
+- A direct Move→Attack terminal handoff (T2-B concept) worked well in runtime and removed the visible pause before Attack.
+- Direct immediate-MOVE adoption then exposed early fold-back/self-compression because proactive and Native-reconcile boundaries were still separate.
+- Tightening hairpin thresholds moved the failure in the opposite direction: SC6 repeatedly reasserted the previous nonqueued Move, producing stepwise movement.
+- A native Move passthrough diagnostic isolated destructive rollback/reassert as part of the symptom, but surrendering Move→Move to vanilla Shift conflicts with BSC's product goal and the approved D1 architecture.
+
+The important conclusion was architectural, not numerical: T1 shared evaluation and T2-C hysteresis cannot be skipped. The direct builds are preserved as historical experiments rather than promoted as current runtime.
+
+## 22. 2026-10-05 — BSC-TPOL-T1 shared evaluator implemented behavior-neutrally
+
+The project returned to the approved migration order and re-anchored source on the pre-T2 behavior baseline.
+
+- Added `R1.TransitionPolicy.evaluate()` as one structured decision adapter.
+- Proactive `advance()`, SC6 exact-Native reconciliation, and scheduler urgency now consume that shared evaluator.
+- T1 deliberately preserves strict Move→Attack and legacy immediate future MOVE rollback. No `ADOPT_ONLY` behavior is active.
+- Added a frozen pre-T1 source snapshot and deterministic old/new transition probe.
+- Full existing suite remained PASS.
+- Mutation coverage was extended to catch advance/SC6/scheduler evaluator bypass and H2 future-skip relaxation.
+
+This stage is the structural prerequisite for T2-A, T2-B and T2-C; it is not itself a smoothness behavior change.
