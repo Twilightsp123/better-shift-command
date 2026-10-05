@@ -14,6 +14,7 @@ if s.count('function R1.TransitionPolicy.evaluate(')!=1: fail('shared Transition
 if s.count('R1.TransitionPolicy.evaluate(st,')!=6: fail('advance/SC6/scheduler must keep five shared evaluator call sites')
 for legacy in ('consumer="PROACTIVE"','consumer="NATIVE_RECONCILE"','consumer="SCHEDULER"','context.consumer'):
     if legacy in s: fail('consumer-specific policy permission path remains: '+legacy)
+if 'if current_index and successor_index and successor_index~=current_index+1 then' not in s: fail('immediate-successor invariant missing')
 if 'T1_BEHAVIOR_NEUTRAL' not in s: fail('missing explicit T1 behavior-neutral lineage marker')
 if not mutated:
     for token in ('function R1.TransitionPolicy.evaluate(', 'T1_BEHAVIOR_NEUTRAL'):
