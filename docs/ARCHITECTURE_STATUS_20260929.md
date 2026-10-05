@@ -21,11 +21,11 @@ Native identity:
 
 The corrected bridge runs in WH3 without the old `OWNED_OUTCOME_INDETERMINATE` failure caused by the wrong top-level Move VTable. This closes the address/outcome blocker sufficiently to expose remaining gameplay policy behavior.
 
-## 3. Current gameplay limitations after T1.6
+## 3. Current gameplay limitations after T1.7
 
 ### 3.1 Strict Move→Attack boundary remains current behavior
 
-T1 deliberately preserves the pre-T2 rule: ordinary Move→Attack remains blocked until current Move `semantic_done` (`ATTACK_REQUIRES_ROUTE_COMPLETE`). A 2026-10-05 direct T2-B experiment demonstrated that bounded terminal handoff can remove the visible pause in WH3 9.0.2, but that experiment is **not current T1.6 runtime**. T2-B must be reintroduced through the shared evaluator.
+T1 deliberately preserves the pre-T2 rule: ordinary Move→Attack remains blocked until current Move `semantic_done` (`ATTACK_REQUIRES_ROUTE_COMPLETE`). A 2026-10-05 direct T2-B experiment demonstrated that bounded terminal handoff can remove the visible pause in WH3 9.0.2, but that experiment is **not current T1.7 runtime**. T2-B must be reintroduced through the shared evaluator.
 
 ### 3.2 SC6 immediate-MOVE asymmetry remains current behavior
 
@@ -48,16 +48,16 @@ T1.6 removes the remaining ACK-vs-SC6 execution-protocol split without changing 
 
 This specifically closes the pre-T2 hazard where `ACTION_HANDOFF_COMMITTED` could be set while the Native command was only pending. Immediate future MOVE remains legacy rollback, Move→Attack remains strict, and no hysteresis band is active.
 
-## 4. Approved architecture — T1 + T1.5 + T1.6 implemented, T1.7/T2 pending
+## 4. Approved architecture — T1 + T1.5 + T1.6 + T1.7 implemented structurally, T2 pending
 
-`BSC-TPOL-D1` introduces one Transition Policy Plane between canonical semantics and execution coordination. T1 implements the shared evaluator structure, T1.5 makes command-execution lineage explicit, and T1.6 unifies edge commitment after ACK / exact Native adoption while preserving the same permission decisions.
+`BSC-TPOL-D1` introduces one Transition Policy Plane between canonical semantics and execution coordination. T1 implements the shared evaluator structure, T1.5 makes command-execution lineage explicit, T1.6 unifies edge commitment after ACK / exact Native adoption, and T1.7 moves issue/adopt permission into consumer-neutral envelopes while preserving the same transition outcomes.
 
 Key properties:
 
 - one evaluator for proactive dispatch, SC6 reconciliation and scheduler preview;
 - hard invariants separated from soft timing/precision policy;
 - Smooth is the default profile;
-- current T1.6 zones preserve legacy decisions and do **not** activate `ADOPT_ONLY`;
+- current T1.7 envelopes preserve legacy T1.6 permission; `ADOPT_ONLY` exists only as structural vocabulary and is not reachable in current permission fixtures;
 - T2 will add immediate future MOVE policy, bounded Move→Attack terminal handoff, then issue/adopt hysteresis;
 - MCT configures only soft policy through an immutable per-battle `PolicyProfile`.
 
@@ -67,7 +67,7 @@ Full design: `docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md`.
 
 Battle-complete / desktop / main-menu hang investigation is **not** part of Transition Policy D1. Current safe-stop and UI-listener observations remain tracked separately in `OPEN_ISSUES.md`. Do not combine lifecycle and smoothness changes in one patch.
 
-## 6. TPOL-T1H + TPOL-T1 + TPOL-T1.5 + TPOL-T1.6 implementation status
+## 6. TPOL-T1H + TPOL-T1 + TPOL-T1.5 + TPOL-T1.6 + TPOL-T1.7 implementation status
 
 The hidden profile scaffold and shared behavior-neutral TransitionPolicy evaluator are now implemented.
 
@@ -84,3 +84,10 @@ The hidden profile scaffold and shared behavior-neutral TransitionPolicy evaluat
 - existing SC1–SC6 gameplay regressions remain unchanged;
 - `ADOPT_ONLY`, immediate-MOVE T2-MOVE, and Move→Attack terminal T2-B are **not active in current source**;
 - movement policy profile values remain reserved until their staged T2/T3 promotions.
+
+
+### 3.6 T1.7 consumer-neutral policy envelopes are implemented permission-neutrally
+
+T1.7 removes the last permission calculation keyed by evaluator consumer. The evaluator now computes a single immediate-edge decision containing separate `issue_window` and `adopt_window` envelopes. Proactive dispatch reads the issue envelope; SC6 reads the adopt envelope; scheduler urgency consumes the same route decision without changing permission.
+
+To preserve T1.6 behavior, the legacy immediate-MOVE adopt envelope is explicitly closed while the Move issue envelope keeps the existing SC1–SC4 timing rules. Move→Attack remains strict and no Native tolerance/hysteresis is active. The T1.7 candidate is awaiting CI validation.

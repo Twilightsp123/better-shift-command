@@ -135,3 +135,12 @@
 
 **Migration update:** after T1.6, add a consumer-neutral policy-envelope stage before gameplay promotion. T2-B terminal Attack may then validate the new commit protocol first; immediate MOVE reconciliation and hysteresis are promoted together rather than exposing a standalone permissive T2-A state.
 
+
+
+## D-20261006-01 — Remove policy consumer identity before T2
+
+**Decision:** T1.7 makes `R1.TransitionPolicy.evaluate()` consumer-neutral. The evaluator emits one immediate-edge decision with separate issue and adopt envelopes. Proactive dispatch, SC6 Native reconciliation and scheduler urgency may interpret the same decision differently, but none may alter permission inside the evaluator by passing a consumer identity.
+
+**Reason:** T1.6 fixed execution commitment but still encoded the old SC6 asymmetry with `consumer=="NATIVE_RECONCILE"`. Promoting T2 on top of that would keep two permission models hidden inside one function and make hysteresis difficult to prove.
+
+**Consequence:** T1.7 remains permission-neutral. Legacy immediate-MOVE adoption stays closed in the adopt envelope while the issue envelope preserves existing SC1–SC4 timing. Strict Move→Attack remains unchanged. T2-B and T2-MOVE may now widen only the appropriate envelope through one shared policy calculation.

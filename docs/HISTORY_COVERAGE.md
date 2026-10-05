@@ -80,3 +80,10 @@ These gaps should be stated explicitly in future handoffs. Do not invent missing
 | BSC-TPOL-T1.5 execution lineage | SOURCE + TEST + DECISION coverage | current controller, `archive/tpol_t15_pre_execution_lineage/`, `tests/test_execution_lineage_t15_*`, Decision Log | behavior-neutral structural stage; no WH3 gameplay claim |
 
 - 2026-10-05 T1.6 committed-edge transaction: **fully preserved** in current source/tests/docs plus `archive/tpol_t16_pre_transition_transaction/`.
+
+
+## T1.7 coverage addition
+
+| Material | Coverage | Location / caution |
+|---|---|---|
+| BSC-TPOL-T1.7 consumer-neutral envelopes | SOURCE + TEST + DECISION coverage | current controller, `archive/tpol_t17_pre_policy_envelopes/`, `tests/test_policy_envelopes_t17_*`, Decision Log; permission-neutral structural stage |

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "design_stream": "BSC-TPOL-D1",
-  "status": "T1_6_TRANSITION_TRANSACTION_IMPLEMENTED_PERMISSION_NEUTRAL_T2_NOT_ACTIVE",
+  "status": "T1_7_CONSUMER_NEUTRAL_ENVELOPES_IMPLEMENTED_PERMISSION_NEUTRAL_VALIDATION_PENDING",
   "runtime_baseline": {
     "controller": "1.3.0",
     "native_bridge": "1.0.17-corepath-wh3-6c104-movevtfix",
@@ -15,7 +15,7 @@
     "T1_SHARED_EVALUATOR_IMPLEMENTED",
     "T1_5_EXECUTION_LINEAGE_IMPLEMENTED",
     "T1_6_TRANSITION_TRANSACTION_IMPLEMENTED",
-    "T1_7_CONSUMER_NEUTRAL_ENVELOPES_PENDING",
+    "T1_7_CONSUMER_NEUTRAL_ENVELOPES_IMPLEMENTED",
     "T2B_MOVE_ATTACK_PENDING_REIMPLEMENT",
     "T2_MOVE_IMMEDIATE_MOVE_WITH_HYSTERESIS_PENDING",
     "T3_VISIBLE_MCT",
@@ -36,9 +36,9 @@
   "engagement_hold_seconds": {
     "range": [
       0.5,
-      10.0
+      10
     ],
-    "default": 3.0,
+    "default": 3,
     "runtime_wired_in_t1h": true
   },
   "formal_project_version": "1.3.0",

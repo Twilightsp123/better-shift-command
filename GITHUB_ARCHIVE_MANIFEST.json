@@ -5,8 +5,8 @@
   "canonical_pack_name": "zzz_better_shift_command_steam.pack",
   "archive_role": "FULL_GITHUB_MAINTENANCE_SOURCE_AND_EVIDENCE_ARCHIVE",
   "pack_generated_in_this_archive": false,
-  "file_count_before_checksum": 342,
-  "current_controller_sha256": "b47f226d24ecf0f23c9ca4565352586196c87ca87801a58e324dc8ef75bccc52",
+  "file_count_before_checksum": 346,
+  "current_controller_sha256": "PENDING_T1_7_CI_CHECKSUM",
   "current_native_bridge_binary_sha256": "8fc223c9d1da5834b2034ced8e34ea9f0a8bc0a27964d6704ce931bc9a3b3b0a",
   "native_bridge_compatibility_id": "1.0.17-corepath-wh3-6c104-movevtfix",
   "target_wh3_sha256": "6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297",
@@ -38,8 +38,8 @@
     "hidden_policy_contract": "PASS",
     "documentation_contract": "PASS",
     "prebuild_contract": "PASS",
-    "controller_regression_jobs": "34/34 PASS (LOCAL T1.6 CONSOLIDATED)",
-    "mutation_suite": "43/43 CORE + 7/7 T1.5 LINEAGE + 7/7 T1.6 TRANSACTION",
+    "controller_regression_jobs": "PENDING_T1_7_CI",
+    "mutation_suite": "43/43 CORE + 7/7 T1.5 LINEAGE + 7/7 T1.6 TRANSACTION + T1.7 PENDING_CI",
     "transition_policy_t1_contract": "PASS",
     "transition_policy_t1_equivalence": "PASS",
     "execution_lineage_t15_contract": "PASS",
@@ -48,7 +48,10 @@
     "transition_transaction_t16_contract": "PASS",
     "transition_transaction_t16_equivalence": "PASS",
     "transition_transaction_t16_mutations": "PASS_7_OF_7",
-    "transition_transaction_t16_runtime": "PASS_3_OF_3"
+    "transition_transaction_t16_runtime": "PASS_3_OF_3",
+    "policy_envelopes_t17_contract": "PENDING_CI",
+    "policy_envelopes_t17_equivalence": "PENDING_CI",
+    "policy_envelopes_t17_mutations": "PENDING_CI"
   },
-  "transition_policy_stage": "BSC-TPOL-T1_6_TRANSITION_TRANSACTION_PERMISSION_NEUTRAL"
+  "transition_policy_stage": "BSC-TPOL-T1_7_CONSUMER_NEUTRAL_ENVELOPES_PERMISSION_NEUTRAL_VALIDATION_PENDING"
 }

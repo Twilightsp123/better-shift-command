@@ -26,8 +26,8 @@ need('if st.transition_txn then return BSC_HUGE,"TRANSITION_TXN_OPEN" end',1)
 if 'if previous and previous.type=="MOVE" then Core.mark_handoff_committed(st,previous,a,reason,now,g) end' in s:
     fail('dispatch still commits handoff before ACK')
 # T1.6 is permission-neutral: later T2 behavior remains inactive.
-for forbidden in ('zone="ADOPT_ONLY"','ATTACK_TERMINAL_CORRIDOR','NATIVE_MOVE_PASSTHROUGH'):
-    if forbidden in s: fail('T1.6 accidentally activates staged T2 behavior: '+forbidden)
+for forbidden in ('ATTACK_TERMINAL_CORRIDOR','NATIVE_MOVE_PASSTHROUGH'):
+    if forbidden in s: fail('T1.6/T1.7 accidentally activates staged T2 behavior: '+forbidden)
 need('if successor.type=="MOVE" then',1)
-need('d.zone="HARD_BLOCK";d.reason="CANONICAL_INTERMEDIATE_ACTIONS_OWED"')
-print('PASS: T1.6 transition transaction structural contract; T1.5 permission remains unchanged')
+need('d.adopt_window=transition_envelope(false,"CANONICAL_INTERMEDIATE_ACTIONS_OWED",true)',1)
+print('PASS: T1.6 transition transaction structural contract; T1.7 envelopes retain T1.6 permission')

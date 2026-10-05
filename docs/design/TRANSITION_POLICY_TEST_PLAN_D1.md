@@ -22,6 +22,19 @@ T1.5 is behavior-neutral and must prove:
 
 T1.6 permission-neutral gate: **PASS (2026-10-05 local consolidated validation)**. It proves BSC submission is not canonical commitment, ACK commits through the shared edge path, rejection aborts without commit, and exact Native successor adoption uses the same commit function. Deterministic T1 transition output and all scalar CFG values remain unchanged. T1.6 transaction mutations are 7/7 caught; runtime transaction cases are 3/3 PASS.
 
+## 0.7 T1.7 consumer-neutral envelope gate
+
+T1.7 is permission-neutral and must prove:
+
+- no evaluator permission branch reads a consumer identity;
+- proactive dispatch, SC6 and scheduler retain all shared evaluator call sites;
+- the decision carries separate issue and adopt envelopes;
+- legacy immediate-MOVE adoption remains closed while proactive Move issue remains unchanged;
+- deterministic T1.6 transition output and all scalar CFG values remain unchanged;
+- envelope-specific mutation tests catch consumer reintroduction, missing envelopes, widened legacy MOVE adoption, Native adopt-envelope bypass and future-index skipping.
+
+The implementation candidate adds contract/equivalence/mutation jobs; CI validation is pending.
+
 ## 1. Offline policy tests
 
 Every test should assert both decision `zone` and stable `reason`.

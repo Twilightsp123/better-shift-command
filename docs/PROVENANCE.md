@@ -77,3 +77,8 @@ T1.5 begins from restored maintenance commit `0648934bf3550ef2ad3f4d0268efcf11c3
 ## 2026-10-05 T1.6 transition-transaction provenance
 
 T1.6 begins from canonical maintenance commit `88c06e92ff9278e7f0c80c2724ce28150551cf27`. The exact pre-T1.6 controller is preserved at `archive/tpol_t16_pre_transition_transaction/source/better_shift_command.lua` (SHA256 `d7711f1581b6a2b468e9ea7fd505562237a21ea2604e80a32cfa4d971bd023dc`). The stage changes Lua transition commit protocol, tests and documentation only; Native C++/ASM, WH3 candidate maps, generated Native header, address relocation tooling and address tests remain protected and must stay blob-identical to the T1.5 baseline.
+
+
+## 2026-10-06 T1.7 consumer-neutral envelope provenance
+
+T1.7 begins from canonical T1.6 commit `cd679c98de96fb8dafc88b1cee1f74a891b9ba80`. The exact pre-T1.7 controller is preserved at `archive/tpol_t17_pre_policy_envelopes/source/better_shift_command.lua`. The stage changes Lua transition policy representation, tests and documentation only; Native C++/ASM, WH3 candidate maps, generated Native header, relocation tooling and address tests remain unchanged.

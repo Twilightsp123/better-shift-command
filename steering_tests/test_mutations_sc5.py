@@ -54,10 +54,10 @@ mutants=[
  ('disable_center_a2_mode',controller,'local CENTER_A2_MODE = true','local CENTER_A2_MODE = false','center_b2'),
  ('sc6_reconciliation_forced_back_to_v2',controller,'if v3.execution_identity==true then','if false and v3.execution_identity==true then','sc6'),
  ('sc6_ignore_execution_sequence',controller,'if e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH",lineage end','if false and e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH",lineage end','sc6'),
- ('t1_advance_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="PROACTIVE"})','local decision={route_ok=true,zone="ISSUE_READY",issue_reason="MUTANT"}','t1_contract'),
- ('t1_sc6_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{consumer="NATIVE_RECONCILE",current_index=st.idx,future_index=future_index,execution_lineage=future_lineage})','local decision={zone="HARD_BLOCK",reason="MUTANT"}','t1_contract'),
- ('t1_scheduler_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="SCHEDULER"})','local decision={route_ok=true}','t1_contract'),
- ('t1_h2_allows_future_skip',controller,'if future_index and future_index~=current_index+1 then','if false and future_index and future_index~=current_index+1 then','sc6'),
+ ('t1_advance_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{current_index=st.idx,successor_index=st.idx+1})','local decision={route_ok=true,issue_window={open=true,reason="MUTANT"}}','t1_contract'),
+ ('t1_sc6_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{current_index=st.idx,successor_index=future_index,execution_lineage=future_lineage})','local decision={adopt_window={open=false,hard_violation=true,reason="MUTANT"}}','t1_contract'),
+ ('t1_scheduler_bypass_shared_evaluator',controller,'local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{current_index=st.idx,successor_index=st.idx+1})','local decision={route_ok=true}','t1_contract'),
+ ('t1_h2_allows_future_skip',controller,'if current_index and successor_index and successor_index~=current_index+1 then','if false and current_index and successor_index and successor_index~=current_index+1 then','t1_contract'),
 ]
 suite_map={'center_b2':'test_center_phase_b2.lua','blocks':'test_v104_blocks.lua','contracts':'test_contracts_v104.lua','regressions':'test_regressions_v104.lua','v107':'test_v107_regressions.lua','v109':'test_v109_regressions.lua','second_charge':'test_r1_v3_second_charge.lua','gate':'test_gate.lua','gate_compat':'test_gate_v103.lua','gate_v104':'test_gate_v104.lua','sc6':'test_exec_identity_v3.lua'}
 for kind in sorted(set(x[4] for x in mutants)):

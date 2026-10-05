@@ -102,3 +102,8 @@ Controller-only behavior-neutral stage over restored T1. Player Native capture i
 ## 2026-10-05 — BSC-TPOL-T1.6 transition transaction
 
 Permission-neutral execution-protocol refactor over T1.5. Introduced one canonical edge transaction lifecycle; BSC submission no longer marks a handoff committed before Native ACK. Verified ACK and exact Native successor adoption now converge on `Core.commit_transition_edge()`, which applies MOVE handoff credit / route-debt transfer, advances the cursor and updates execution lineage. Rejected/late/timed-out submissions abort without committing the edge. TransitionPolicy zones, route/attack geometry, CFG scalars, strict Move→Attack and immediate-MOVE rollback remain unchanged. Local maintenance **34/34 PASS**; core mutations **43/43**, T1.5 mutations **7/7**, T1.6 mutations **7/7**, T1.6 runtime **3/3**. Native/address source unchanged.
+
+
+## 2026-10-06 — BSC-TPOL-T1.7 consumer-neutral policy envelopes
+
+Permission-neutral controller refactor over T1.6. `R1.TransitionPolicy.evaluate()` no longer changes permission from a consumer identity. One decision now exposes separate issue/adopt envelopes; proactive dispatch consumes the issue envelope and SC6 Native reconciliation consumes the adopt envelope. Legacy immediate-MOVE adoption remains closed, strict Move→Attack remains unchanged, and no hysteresis/tolerance is activated. Added pre-T1.7 source snapshot plus contract/equivalence/mutation gates. Native/address source unchanged. CI validation pending.

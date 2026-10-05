@@ -616,3 +616,8 @@ Validation added for this stage: structural contract, seven lineage-specific mut
 Post-T1.5 architecture audit found that policy permission had been centralized, but execution commitment was still split: `dispatch()` marked MOVE handoff committed at Native submission time, ACK later applied waypoint/debt semantics, and SC6 exact-Native adoption advanced the cursor through a separate path. That structure would become unsafe once immediate MOVE adoption or terminal Attack handoff were enabled.
 
 T1.6 introduces an explicit edge transaction. Submission is `AUTHORIZED/SUBMITTED`, exact Native successor observation is `OBSERVED`, and only the shared `commit_transition_edge()` path produces `COMMITTED`; reject/timeout produces `ABORTED`. This is permission-neutral: T1 deterministic transition results and CFG scalars remain unchanged, immediate future MOVE still rolls back, and Move→Attack remains strict. Local consolidated maintenance is 34/34 PASS; core mutation 43/43, T1.5 lineage mutation 7/7, T1.6 transaction mutation 7/7, runtime transaction gate 3/3.
+
+
+## 25. 2026-10-06 — BSC-TPOL-T1.7 consumer-neutral policy envelopes
+
+T1.7 removes evaluator permission branches keyed by proactive/Native/scheduler consumer identity. One immediate-edge decision now carries distinct issue and adopt envelopes. Proactive dispatch reads the issue envelope; SC6 reads the adopt envelope; scheduler uses the same route decision. The legacy immediate-MOVE adopt envelope remains closed, strict Move→Attack remains unchanged, and no hysteresis/tolerance is activated. A pre-T1.7 source snapshot and contract/equivalence/mutation gates were added. CI validation is pending at the implementation-candidate commit.
