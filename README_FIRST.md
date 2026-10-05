@@ -31,7 +31,7 @@ It is historical/reference material and must not be mistaken for the formal v1.3
 
 The Native Bridge string is an internal compatibility/build identifier, not the Mod version.
 
-Implemented transition substages: `BSC-TPOL-T1H` → `BSC-TPOL-T1` → `BSC-TPOL-T1.5` → `BSC-TPOL-T1.6`. T1.7/T2 remain future work.
+Implemented transition substages: `BSC-TPOL-T1H` → `BSC-TPOL-T1` → `BSC-TPOL-T1.5` → `BSC-TPOL-T1.6` → `BSC-TPOL-T1.7`. T2 remains future work.
 
 ## Mandatory maintainer reading order
 
@@ -55,15 +55,14 @@ Implemented transition substages: `BSC-TPOL-T1H` → `BSC-TPOL-T1` → `BSC-TPOL
 
 ## Current architecture status
 
-The current runtime is **BSC-TPOL-T1.6 permission-neutral** on top of the existing SC1–SC6 gameplay baseline. T1H provides the hidden immutable PolicyProfile/MCT adapter scaffold; T1 provides the shared `R1.TransitionPolicy.evaluate()` decision plane; T1.5 separates original player-capture execution identity from BSC-issued/ACK identity; T1.6 adds a single committed-edge transaction protocol so BSC ACK and exact Native adoption converge on the same canonical commit path.
+The current runtime is **BSC-TPOL-T1.7 permission-neutral** on top of the existing SC1–SC6 gameplay baseline. T1H provides the hidden immutable PolicyProfile/MCT adapter scaffold; T1 provides the shared TransitionPolicy plane; T1.5 separates original player-capture execution identity from BSC-issued/ACK identity; T1.6 adds a single committed-edge transaction protocol; T1.7 separates consumer-neutral edge evaluation from consumer projection and materializes locked issue/adopt envelopes without widening permission.
 
-**T1.6 still intentionally does not change transition permission.** Move→Attack remains strict until current Move semantic completion, an exact immediate future MOVE in SC6 still follows the legacy rollback behavior, and `ADOPT_ONLY` / hysteresis is not active. The change is execution protocol: command submission is no longer treated as commitment; handoff credit, route-debt transfer, cursor advance and execution-lane switch occur only after verified ACK or exact Native adoption.
+**T1.7 still intentionally does not change transition permission.** Move→Attack remains strict until current Move semantic completion, an exact immediate future MOVE in SC6 still follows the legacy rollback behavior, and `ADOPT_ONLY` / hysteresis is not active. `evaluate_edge()` computes one consumer-neutral edge decision; `project()` preserves the legacy proactive/Native mapping; `adopt_window` is locked to `issue_window` until T2-MOVE.
 
 The 2026-10-05 direct T2-B, T2-A, hairpin and native-passthrough builds are preserved as historical experiments/evidence only. They do not override the staged D1 migration or current runtime source.
 
 The next transition work is therefore:
 
-- T1.7 consumer-neutral policy envelopes, still permission-neutral;
 - T2-B Move→Attack terminal handoff reintroduced through the shared evaluator/transaction path, using the successful runtime experiment as evidence;
 - T2-MOVE immediate-successor MOVE reconciliation **with hysteresis from the first promotion** (T2-A + former T2-C together);
 - later visible MCT wiring.

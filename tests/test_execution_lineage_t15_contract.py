@@ -29,9 +29,14 @@ need('local match,_,lineage=R1.execution_matches_action(e,st.plan[i])',1)
 # T1.5 must not itself activate the later T2 behavior vocabulary.
 for forbidden in ('zone="ADOPT_ONLY"','ATTACK_TERMINAL_CORRIDOR','NATIVE_MOVE_PASSTHROUGH'):
     if forbidden in s: fail('T1.5 accidentally activates/retains staged behavior: '+forbidden)
-# Existing T1 evaluator remains the sole transition decision plane.
+# The shared transition plane remains authoritative. T1.7 may split its pure edge
+# evaluator from consumer projection while preserving T1.5 identity semantics.
 need('function R1.TransitionPolicy.evaluate(',1)
 need('consumer="PROACTIVE"',2)
 need('consumer="NATIVE_RECONCILE"',1)
-need('consumer="SCHEDULER"',2)
-print('PASS: T1.5 execution-lineage structural contract; transition behavior remains T1')
+if 'function R1.TransitionPolicy.evaluate_edge(' in s:
+    if 'consumer="SCHEDULER"' in s: fail('T1.7 scheduler must not become a permission consumer')
+    need('function R1.TransitionPolicy.project(',1)
+else:
+    need('consumer="SCHEDULER"',2)
+print('PASS: T1.5 execution-lineage structural contract; identity semantics preserved across later policy refactors')

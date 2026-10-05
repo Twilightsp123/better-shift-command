@@ -616,3 +616,10 @@ Validation added for this stage: structural contract, seven lineage-specific mut
 Post-T1.5 architecture audit found that policy permission had been centralized, but execution commitment was still split: `dispatch()` marked MOVE handoff committed at Native submission time, ACK later applied waypoint/debt semantics, and SC6 exact-Native adoption advanced the cursor through a separate path. That structure would become unsafe once immediate MOVE adoption or terminal Attack handoff were enabled.
 
 T1.6 introduces an explicit edge transaction. Submission is `AUTHORIZED/SUBMITTED`, exact Native successor observation is `OBSERVED`, and only the shared `commit_transition_edge()` path produces `COMMITTED`; reject/timeout produces `ABORTED`. This is permission-neutral: T1 deterministic transition results and CFG scalars remain unchanged, immediate future MOVE still rolls back, and Move→Attack remains strict. Local consolidated maintenance is 34/34 PASS; core mutation 43/43, T1.5 lineage mutation 7/7, T1.6 transaction mutation 7/7, runtime transaction gate 3/3.
+
+
+## 25. 2026-10-05 — BSC-TPOL-T1.7 consumer-neutral policy envelopes
+
+T1.7 splits the shared transition policy into a consumer-neutral `evaluate_edge()` and a consumer projection layer. The edge decision now carries explicit issue/adopt envelope records, but the adoption envelope is deliberately locked to the issue envelope so no `ADOPT_ONLY` state can occur yet. Proactive dispatch and SC6 project the same edge result; scheduler urgency reads the edge result directly instead of participating as a permission consumer.
+
+This stage is deliberately permission-neutral. Immediate future MOVE remains the T1/T1.6 legacy hard rollback, Move→Attack remains strict until route semantic completion, route/attack geometry and CFG scalars are unchanged, and T2 behavior is still inactive. Local consolidated maintenance is **37/37 PASS**; core mutation **43/43**, T1.5 lineage **7/7**, T1.6 transaction **7/7**, T1.7 policy **7/7**, and T1.6 runtime transaction **3/3** all pass.

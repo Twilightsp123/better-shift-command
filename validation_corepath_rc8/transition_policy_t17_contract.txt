@@ -1,0 +1,2 @@
+$ /opt/pyvenv/bin/python tests/test_transition_policy_t17_contract.py
+PASS: T1.7 consumer-neutral policy contract; adopt envelope locked to issue envelope

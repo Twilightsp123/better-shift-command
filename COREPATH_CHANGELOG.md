@@ -99,6 +99,11 @@ No Native C++/ASM change and no new reverse-engineered dependency.
 
 Controller-only behavior-neutral stage over restored T1. Player Native capture identity and later BSC-issued/ACK identity are stored separately; `R1.action_execution_identity()` exposes `PLAYER_NATIVE` / `BSC_ISSUED` lineage while preserving the previous identity verdict. TransitionPolicy, route/attack geometry and CFG thresholds are unchanged. Added T1.5 structural, semantic-equivalence and mutation gates. Final GitHub Actions v4 validation passes the documentation contract and consolidated maintenance **30/30**; core mutation harness **43/43** and T1.5 lineage mutations **7/7** pass. WH3 address/native source is unchanged.
 
+
+## 2026-10-05 — BSC-TPOL-T1.7 consumer-neutral policy envelopes
+
+Permission-neutral policy-plane refactor over T1.6. `TransitionPolicy.evaluate_edge()` now computes one consumer-independent edge result with explicit issue/adopt envelopes; `TransitionPolicy.project()` preserves the legacy proactive/Native mapping; scheduler urgency reads the shared edge decision directly. The adoption envelope remains locked to the issue envelope, so `ADOPT_ONLY`, immediate MOVE adoption and terminal Attack handoff are still inactive. Local consolidated maintenance **37/37 PASS**; core mutations **43/43**, T1.5 **7/7**, T1.6 **7/7**, T1.7 **7/7**, T1.6 runtime **3/3**. Native/address source unchanged.
+
 ## 2026-10-05 — BSC-TPOL-T1.6 transition transaction
 
 Permission-neutral execution-protocol refactor over T1.5. Introduced one canonical edge transaction lifecycle; BSC submission no longer marks a handoff committed before Native ACK. Verified ACK and exact Native successor adoption now converge on `Core.commit_transition_edge()`, which applies MOVE handoff credit / route-debt transfer, advances the cursor and updates execution lineage. Rejected/late/timed-out submissions abort without committing the edge. TransitionPolicy zones, route/attack geometry, CFG scalars, strict Move→Attack and immediate-MOVE rollback remain unchanged. Local maintenance **34/34 PASS**; core mutations **43/43**, T1.5 mutations **7/7**, T1.6 mutations **7/7**, T1.6 runtime **3/3**. Native/address source unchanged.

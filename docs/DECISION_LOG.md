@@ -135,3 +135,14 @@
 
 **Migration update:** after T1.6, add a consumer-neutral policy-envelope stage before gameplay promotion. T2-B terminal Attack may then validate the new commit protocol first; immediate MOVE reconciliation and hysteresis are promoted together rather than exposing a standalone permissive T2-A state.
 
+
+
+## D-20261005-05 — Make policy envelopes consumer-neutral before T2
+
+**Decision:** Implement T1.7 as a permission-neutral split between consumer-independent edge evaluation and consumer projection. `R1.TransitionPolicy.evaluate_edge()` computes route/geometry readiness plus explicit `issue_window` / `adopt_window` data without reading a consumer. `R1.TransitionPolicy.project()` preserves the current proactive and Native-reconcile mapping. Scheduler urgency reads the edge decision directly and is not a permission consumer.
+
+**Reason:** The T1/T1.5 audit showed that a shared function name was not sufficient while `consumer` still changed permission inside the evaluator. Enabling T2-MOVE by merely deleting the legacy Native MOVE hard block would recreate the permissive-adopt failure that caused fold-back compression. The edge decision must exist before any consumer interprets it, and the adoption envelope must be explicit before it is widened.
+
+**Evidence:** Local consolidated maintenance is **37/37 PASS**. Deterministic T1/T1.6 transition outputs, route/attack geometry and CFG scalars remain equivalent; T1.7 policy mutations are **7/7 caught**; the core mutation harness remains **43/43**, T1.5 lineage mutations **7/7**, T1.6 transaction mutations **7/7**, and T1.6 runtime transaction cases **3/3**. `ADOPT_ONLY` remains absent and immediate future MOVE still hard-rolls back.
+
+**Consequence:** T1.7 becomes the current permission-neutral architecture. The next gameplay promotion is **T2-B terminal Move→Attack handoff** through the shared edge decision + transition transaction. Only after that validation does **T2-MOVE** widen `adopt_window` beyond `issue_window` and enable immediate MOVE reconciliation; T2-MOVE and hysteresis ship together, never as a standalone permissive T2-A state.

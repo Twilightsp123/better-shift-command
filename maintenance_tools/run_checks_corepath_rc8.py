@@ -42,6 +42,9 @@ def main():
       ('transition_transaction_t16_equivalence.txt',[sys.executable,'tests/test_transition_transaction_t16_equivalence.py']),
       ('transition_transaction_t16_mutations.txt',[sys.executable,'tests/test_transition_transaction_t16_mutations.py']),
       ('transition_transaction_t16_runtime.txt',L+['tests/test_transition_transaction_t16.lua','source/better_shift_command.lua','tests/fixture.lua']),
+      ('transition_policy_t17_contract.txt',[sys.executable,'tests/test_transition_policy_t17_contract.py']),
+      ('transition_policy_t17_equivalence.txt',[sys.executable,'tests/test_transition_policy_t17_equivalence.py']),
+      ('transition_policy_t17_mutations.txt',[sys.executable,'tests/test_transition_policy_t17_mutations.py']),
       ('tools.txt',[sys.executable,'tests/test_tools.py']),
       ('reverse.txt',[sys.executable,'tests/test_reverse_inventory.py']),
       ('mutations.txt',[sys.executable,'steering_tests/test_mutations_sc5.py'])]

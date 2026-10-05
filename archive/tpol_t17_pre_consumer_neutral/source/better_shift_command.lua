@@ -12,7 +12,7 @@ local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
 local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
 local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE transaction_stage=TPOL_T1_6_TRANSITION_TRANSACTION policy_envelope_stage=TPOL_T1_7_CONSUMER_NEUTRAL")
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE transaction_stage=TPOL_T1_6_TRANSITION_TRANSACTION")
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -2709,27 +2709,36 @@ local function transition_handoff_ready(st,g,nexta)
     return true,why
 end
 
--- BSC-TPOL-T1.7 consumer-neutral TransitionPolicy edge evaluator.
--- T1_BEHAVIOR_NEUTRAL remains the permission baseline: this stage changes only
--- decision plumbing. It does NOT enable immediate-MOVE adoption, Move->Attack
--- terminal handoff, or ADOPT_ONLY hysteresis.
-R1.TransitionPolicy=R1.TransitionPolicy or {VERSION="TPOL_T1_7_1"}
-local function clone_transition_decision(src)
-    local d={};for k,v in pairs(src or {}) do d[k]=v end;return d
-end
-function R1.TransitionPolicy.evaluate_edge(st,current,successor,g)
+-- BSC-TPOL-T1 shared TransitionPolicy evaluator.
+-- T1_BEHAVIOR_NEUTRAL: this stage centralizes existing decisions only. It does
+-- NOT enable T2 immediate-MOVE adoption, Move->Attack terminal handoff, or
+-- adopt-only hysteresis. Those remain later staged behavior changes.
+R1.TransitionPolicy=R1.TransitionPolicy or {VERSION="TPOL_T1_1"}
+function R1.TransitionPolicy.evaluate(st,current,successor,g,context)
+    context=context or {}
+    local consumer=context.consumer or "PROACTIVE"
     local d={transition_kind=(current and current.type or "NONE").."->"..(successor and successor.type or "NONE"),
-        current_type=current and current.type or "NONE",successor_type=successor and successor.type or "NONE",
         zone="WAIT",reason="TRANSITION_WAIT",hard_violation=false,route_ok=false,route_reason=nil,
-        route_debt_mode=g and g.route_debt_mode or nil,current_credit=nil,
-        issue_ready=false,adopt_ready=false,issue_reason=nil,adopt_reason=nil,
-        issue_window={ready=false,mode="T1_7_LEGACY_ISSUE"},
-        adopt_window={ready=false,mode="T1_7_LOCKED_TO_ISSUE"},
+        route_debt_mode=g and g.route_debt_mode or nil,current_credit=nil,issue_window=nil,adopt_window=nil,
         metrics=g,profile_id=R1.Policy.active and R1.Policy.active.behavior_preset or "SMOOTH",
-        policy_version=R1.TransitionPolicy.VERSION,behavior_stage="T1_7_CONSUMER_NEUTRAL_PERMISSION_EQUIVALENT"}
+        policy_version=R1.TransitionPolicy.VERSION,behavior_stage="T1_BEHAVIOR_NEUTRAL"}
     if not current or not successor then
         d.zone="HARD_BLOCK";d.reason="TRANSITION_ACTION_MISSING";d.hard_violation=true
         return d
+    end
+    if consumer=="NATIVE_RECONCILE" then
+        local current_index=context.current_index or st.idx
+        local future_index=context.future_index
+        if future_index and future_index~=current_index+1 then
+            d.zone="HARD_BLOCK";d.reason="CANONICAL_INTERMEDIATE_ACTIONS_OWED";d.hard_violation=true
+            return d
+        end
+        -- T1 preserves the pre-D1 SC6 asymmetry exactly. T2-A is the staged
+        -- change that will replace this legacy hard block with MOVE->MOVE policy.
+        if successor.type=="MOVE" then
+            d.zone="HARD_BLOCK";d.reason="CANONICAL_INTERMEDIATE_ACTIONS_OWED";d.hard_violation=true
+            return d
+        end
     end
     if not g then d.reason="SUCCESSOR_GEOMETRY_UNAVAILABLE";return d end
     local route_ok,why
@@ -2737,6 +2746,10 @@ function R1.TransitionPolicy.evaluate_edge(st,current,successor,g)
     else route_ok,why=route_handoff_ready(st,g,successor) end
     d.route_ok=route_ok==true;d.route_reason=why;d.route_debt_mode=g.route_debt_mode
     if not route_ok then d.reason=why or "TRANSITION_ROUTE_BLOCKED";return d end
+    if consumer=="NATIVE_RECONCILE" then
+        d.zone="ISSUE_READY";d.reason=why or "NATIVE_IMMEDIATE_SUCCESSOR_READY"
+        return d
+    end
     local rt=action_runtime(current)
     local issue_reason=nil
     if successor.type=="ATTACK" then
@@ -2749,42 +2762,9 @@ function R1.TransitionPolicy.evaluate_edge(st,current,successor,g)
         elseif g.remaining<=g.threshold then issue_reason="PREDICTIVE"
         elseif g.stall and g.remaining<=math.min(CFG.lead_cap,g.threshold+CFG.brake_extra) then issue_reason="BRAKE_FALLBACK" end
     end
-    d.issue_reason=issue_reason;d.issue_ready=issue_reason~=nil
-    d.issue_window.ready=d.issue_ready;d.issue_window.reason=issue_reason
-    -- T1.7 only creates the envelope model. The adoption envelope is deliberately
-    -- locked to the issue envelope until T2-MOVE widens it, so ADOPT_ONLY cannot occur.
-    d.adopt_ready=d.issue_ready;d.adopt_reason=issue_reason
-    d.adopt_window.ready=d.adopt_ready;d.adopt_window.reason=issue_reason
+    d.issue_reason=issue_reason
     if issue_reason then d.zone="ISSUE_READY";d.reason=issue_reason else d.reason=why or "TRANSITION_ROUTE_READY_WAIT_WINDOW" end
     return d
-end
-function R1.TransitionPolicy.project(edge,context)
-    context=context or {}
-    local consumer=context.consumer or "PROACTIVE"
-    local d=clone_transition_decision(edge)
-    if consumer=="NATIVE_RECONCILE" then
-        local current_index=context.current_index
-        local future_index=context.future_index
-        if future_index and current_index and future_index~=current_index+1 then
-            d.zone="HARD_BLOCK";d.reason="CANONICAL_INTERMEDIATE_ACTIONS_OWED";d.hard_violation=true
-            return d
-        end
-        -- Preserve T1/T1.6 SC6 asymmetry until T2-MOVE: immediate future MOVE
-        -- remains a hard rollback even though the shared edge evaluator can describe it.
-        if d.successor_type=="MOVE" then
-            d.zone="HARD_BLOCK";d.reason="CANONICAL_INTERMEDIATE_ACTIONS_OWED";d.hard_violation=true
-            return d
-        end
-        if d.route_ok then
-            d.zone="ISSUE_READY";d.reason=d.route_reason or "NATIVE_IMMEDIATE_SUCCESSOR_READY"
-        end
-    end
-    return d
-end
--- Compatibility wrapper for archived tests/tools. Runtime consumers use
--- evaluate_edge()+project() explicitly from T1.7 onward.
-function R1.TransitionPolicy.evaluate(st,current,successor,g,context)
-    return R1.TransitionPolicy.project(R1.TransitionPolicy.evaluate_edge(st,current,successor,g),context)
 end
 
 local function attack_metrics(g,now)
@@ -3378,8 +3358,7 @@ function Core.reconcile_native_successor(st,now)
 
     local g=geometry(st,future)
     if g and future.type=="ATTACK" then g=attack_geometry(st,future,g) end
-    local edge=R1.TransitionPolicy.evaluate_edge(st,cur,future,g)
-    local decision=R1.TransitionPolicy.project(edge,{consumer="NATIVE_RECONCILE",current_index=st.idx,future_index=future_index,execution_lineage=future_lineage})
+    local decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{consumer="NATIVE_RECONCILE",current_index=st.idx,future_index=future_index,execution_lineage=future_lineage})
     if decision.zone=="HARD_BLOCK" then
         return rollback_native_future_to_current(st,cur,future,future_index,e,now,
             "NATIVE_FUTURE_OVERRUN",decision.reason,"NATIVE_FUTURE_OVERRUN_ROLLBACK_TO_CURRENT_MOVE",future_lineage)
@@ -3466,8 +3445,7 @@ local function advance(st,now)
         g=attack_geometry(st,nexta,g)
         if not g then target_wait(st,"ATTACK_TARGET_POSITION_UNAVAILABLE",now);return end
         attack_brake_state(g)
-        local edge=R1.TransitionPolicy.evaluate_edge(st,cur,nexta,g)
-        local decision=R1.TransitionPolicy.project(edge,{consumer="PROACTIVE"})
+        local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="PROACTIVE"})
         local route_ok,route_reason=decision.route_ok,decision.route_reason or decision.reason
         local exit_ok=exit_gate_ready(st,nexta)
         if not exit_ok then
@@ -3498,8 +3476,7 @@ local function advance(st,now)
                 " route_safe="..tostring(g.route_safe).." cut_error="..num_or_nil(g.cut_error).." cut_tolerance="..num_or_nil(g.cut_tolerance)..attack_metrics(g,now)) end
         end
     else
-        local edge=R1.TransitionPolicy.evaluate_edge(st,cur,nexta,g)
-        local decision=R1.TransitionPolicy.project(edge,{consumer="PROACTIVE"})
+        local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="PROACTIVE"})
         local route_ok,route_reason=decision.route_ok,decision.route_reason or decision.reason
         if not route_ok then
             if DEBUG_TELEMETRY and now-st.last_wait>=1000 then
@@ -3605,13 +3582,13 @@ function Core.handoff_urgency(st,now)
         if not target_viable(nexta) then return BSC_HUGE,"TARGET_NOT_READY" end
         g=attack_geometry(st,nexta,g);if not g then return BSC_HUGE,"ATTACK_TARGET_POSITION_UNAVAILABLE" end
         attack_brake_state(g)
-        local decision=R1.TransitionPolicy.evaluate_edge(st,cur,nexta,g)
+        local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="SCHEDULER"})
         local route_ok=decision.route_ok
         if not exit_gate_ready(st,nexta) then return 50000,"EXIT_BLOCK_PROTECT" end
         if not route_ok then return 50000+(g.cut_error or 0),"ATTACK_ROUTE_PROTECT" end
         if rt.semantic_done then return -800000,"MOVE_COMPLETE_ATTACK_READY" end
     else
-        local decision=R1.TransitionPolicy.evaluate_edge(st,cur,nexta,g)
+        local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{consumer="SCHEDULER"})
         local route_ok=decision.route_ok
         if not route_ok then return 50000+(g.cut_error or 0),"MOVE_ROUTE_PROTECT" end
         if rt.semantic_done then return -700000,"MOVE_NODE_COMPLETE" end

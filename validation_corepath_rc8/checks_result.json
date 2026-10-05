@@ -127,6 +127,18 @@
       "exit_code": 0
     },
     {
+      "name": "transition_policy_t17_contract.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "transition_policy_t17_equivalence.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "transition_policy_t17_mutations.txt",
+      "exit_code": 0
+    },
+    {
       "name": "tools.txt",
       "exit_code": 0
     },

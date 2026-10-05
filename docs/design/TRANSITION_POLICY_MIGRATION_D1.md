@@ -1,6 +1,6 @@
 # Transition Policy Migration D1
 
-Status: **APPROVED IMPLEMENTATION PLAN — THROUGH T1.6 IMPLEMENTED; T1.7/T2 PENDING**
+Status: **APPROVED IMPLEMENTATION PLAN — THROUGH T1.7 IMPLEMENTED; T2 PENDING**
 
 The migration deliberately avoids a broad convergence rewrite. Each stage must be independently testable and revertible.
 
@@ -86,11 +86,23 @@ Gate:
 
 ### T1.7 — Consumer-neutral policy envelopes (permission-neutral)
 
-After T1.6, remove `consumer` from the permission calculation itself. The evaluator emits one edge decision with explicit issue/adopt envelope data; proactive dispatch, Native reconcile and scheduler only interpret that same decision. Initially map the envelopes back to T1.6 outcomes so this stage remains permission-neutral.
+After T1.6, remove `consumer` from the permission calculation itself. The evaluator emits one edge decision with explicit issue/adopt envelope data; proactive dispatch and Native reconcile project that same decision while scheduler reads it directly. Initially map the envelopes back to T1.6 outcomes so this stage remains permission-neutral.
+
+**T1.7 implementation result — 2026-10-05:** PASS. `evaluate_edge()` is consumer-neutral; `project()` preserves T1.6 proactive/Native outcomes; scheduler is no longer a permission consumer; `adopt_window` is locked to `issue_window`; deterministic transition output, route/attack geometry and CFG scalars remain unchanged. Local consolidated maintenance is 37/37 PASS; core mutations 43/43, T1.5 mutations 7/7, T1.6 mutations 7/7, T1.7 mutations 7/7, and T1.6 runtime transaction cases 3/3. No T2 behavior is active.
 
 ## T2 — Smooth-default behavior correction
 
 This is the first intentional gameplay change.
+
+### T2-B — MOVE→ATTACK terminal handoff
+
+Promote bounded `attack_geometry` into a real transition policy first, using the runtime-successful 2026-10-05 T2-B experiment to validate the T1.6/T1.7 transaction + policy architecture:
+
+- prior route debt must be clear;
+- target must be exact and viable;
+- bounded progress requirement;
+- path-safe or terminal corridor proof;
+- accepted Attack gives explicit `ATTACK_TERMINAL_HANDOFF` credit.
 
 ### T2-MOVE — Immediate future MOVE reconciliation + hysteresis
 
@@ -108,16 +120,6 @@ future_index == i+1
 ```
 
 Immediate Move successor may be adopted/soft-adopted if the current route semantics permit. `i+2` or later remains hard rollback. This promotion includes the separate `issue_window` / wider `adopt_window` hysteresis from the start; do not ship a standalone permissive immediate-MOVE stage.
-
-### T2-B — MOVE→ATTACK terminal handoff
-
-Promote bounded `attack_geometry` into a real transition policy:
-
-- prior route debt must be clear;
-- target must be exact and viable;
-- bounded progress requirement;
-- path-safe or terminal corridor proof;
-- accepted Attack gives explicit `ATTACK_TERMINAL_HANDOFF` credit.
 
 Gate:
 

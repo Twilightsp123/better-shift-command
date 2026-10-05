@@ -7,6 +7,6 @@ test_unique_after_one_hard_support_stays_unresolved (__main__.TestAnchorGraph.te
 test_unique_after_two_hard_supports_resolves (__main__.TestAnchorGraph.test_unique_after_two_hard_supports_resolves) ... ok
 
 ----------------------------------------------------------------------
-Ran 6 tests in 0.001s
+Ran 6 tests in 0.000s
 
 OK

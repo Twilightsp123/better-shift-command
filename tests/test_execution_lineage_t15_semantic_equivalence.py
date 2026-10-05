@@ -18,12 +18,16 @@ def function_block(text, signature, next_marker):
     if b<0: fail('missing end marker '+next_marker)
     return text[a:b]
 
-# T1.5 must not alter the shared policy engine or the geometry gates it consumes.
-for signature,next_marker in [
-    ('function R1.TransitionPolicy.evaluate(', '\nlocal function attack_metrics'),
+# T1.5 permanently owns identity and geometry equivalence. Later permission-neutral
+# stages may refactor the policy function body itself, so only compare that body
+# while the current source is still pre-T1.7.
+checks=[
     ('local function route_handoff_ready(', '\nlocal function transition_handoff_ready'),
     ('local function attack_geometry(', '\nlocal function attack_brake_state'),
-]:
+]
+if 'function R1.TransitionPolicy.evaluate_edge(' not in new_t15:
+    checks.insert(0,('function R1.TransitionPolicy.evaluate(', '\nlocal function attack_metrics'))
+for signature,next_marker in checks:
     if function_block(old,signature,next_marker)!=function_block(new_t15,signature,next_marker):
         fail(signature+' changed during behavior-neutral T1.5')
 
@@ -80,4 +84,4 @@ for seq,serial,life,aseq,areceipt,alife in itertools.product(vals, repeat=6):
         a['runtime']['issued_identity']={'seq':aseq,'receipt':areceipt,'lifetime':alife}
     if old_id(a)!=new_id(a): fail('identity semantics changed for '+repr(a))
     checked+=1
-print(f'PASS: T1.5 semantic equivalence; policy/geometry/CFG unchanged and {checked} identity states equivalent')
+print(f'PASS: T1.5 semantic equivalence; identity/geometry/CFG unchanged and {checked} identity states equivalent')

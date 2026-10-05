@@ -14,7 +14,7 @@ The project has several independent numbering systems. A bare label such as `RC2
 | Public/formal BSC releases | v1.2.0, v1.2.1, v1.2.2, **v1.3.0** | formal Mod version line | current formal maintained version = **v1.3.0**; v1.2.2 remains upstream behavior ancestry |
 | Native Bridge versions | 0.1.1, 0.4.x, 0.5.x, 1.0.x | native observer/identity/issuing/evidence evolution | current candidate = `1.0.17-corepath-wh3-6c104-movevtfix` |
 | WH3 current-build remap/diagnostic | RC4, RC5, RC6, RC7, RC8 | native map/runtime-gate work for WH3 9.0.1 current EXE | current = **CorePath RC8** |
-| Transition-policy architecture | BSC-TPOL-D1 / T1H / T1 / T1.5 / T1.6 | staged gameplay/MCT architecture; no new Native RE | **through T1.6 implemented; T1.7/T2 pending** |
+| Transition-policy architecture | BSC-TPOL-D1 / T1H / T1 / T1.5 / T1.6 / T1.7 | staged gameplay/MCT architecture; no new Native RE | **through T1.7 implemented; T2 pending** |
 | Smart Guard diagnostics | its own RC labels | separate optional Smart Guard investigation | staged disabled; never identify by bare `RCx` in shared docs |
 
 ### Naming rule for new docs
@@ -137,3 +137,8 @@ Implemented 2026-10-05 on top of restored T1. It separates the player's captured
 ## 11. BSC-TPOL-T1.6 — committed-edge transaction
 
 Implemented 2026-10-05 on top of T1.5. It introduces an explicit edge transaction lifecycle and moves canonical handoff commitment from Native submission time to verified ACK / exact Native adoption. Both paths use `Core.commit_transition_edge()`. Transition permission, SC1–SC6 geometry, CFG scalars, immediate-MOVE rollback, and strict Move→Attack remain unchanged. This is the execution-protocol prerequisite for T1.7/T2, not a gameplay promotion.
+
+
+## 12. BSC-TPOL-T1.7 — consumer-neutral policy envelopes
+
+Implemented 2026-10-05 on top of T1.6. `TransitionPolicy.evaluate_edge()` now computes one consumer-neutral edge result, while `TransitionPolicy.project()` preserves the existing proactive/Native mapping. Scheduler urgency consumes the edge decision directly. Explicit issue/adopt envelope records are present but locked together, so no hysteresis or `ADOPT_ONLY` behavior is active. Local consolidated maintenance is 37/37 PASS; this is the final permission-neutral prerequisite before T2 gameplay promotion.

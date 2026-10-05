@@ -22,6 +22,12 @@ T1.5 is behavior-neutral and must prove:
 
 T1.6 permission-neutral gate: **PASS (2026-10-05 local consolidated validation)**. It proves BSC submission is not canonical commitment, ACK commits through the shared edge path, rejection aborts without commit, and exact Native successor adoption uses the same commit function. Deterministic T1 transition output and all scalar CFG values remain unchanged. T1.6 transaction mutations are 7/7 caught; runtime transaction cases are 3/3 PASS.
 
+
+
+## 0.7 T1.7 consumer-neutral policy-envelope gate
+
+T1.7 permission-neutral gate: **PASS (2026-10-05 local consolidated validation)**. It proves `evaluate_edge()` contains no consumer-dependent permission logic, `project()` preserves current proactive/Native mapping, scheduler reads the shared edge decision directly, issue/adopt envelopes are explicit but locked together, and no `ADOPT_ONLY` state is active. Deterministic transition output, route/attack geometry and CFG scalars remain unchanged. T1.7 policy mutations are 7/7 caught; consolidated maintenance is 37/37 PASS.
+
 ## 1. Offline policy tests
 
 Every test should assert both decision `zone` and stable `reason`.

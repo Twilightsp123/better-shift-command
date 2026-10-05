@@ -1,2 +1,2 @@
-$ python tests/test_execution_lineage_t15_contract.py
-PASS: T1.5 execution-lineage structural contract; transition behavior remains T1
+$ /opt/pyvenv/bin/python tests/test_execution_lineage_t15_contract.py
+PASS: T1.5 execution-lineage structural contract; identity semantics preserved across later policy refactors

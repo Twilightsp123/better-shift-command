@@ -1,0 +1,9 @@
+$ /opt/pyvenv/bin/python tests/test_transition_policy_t17_mutations.py
+CAUGHT consumer_leaks_into_edge :: FAIL consumer leaked into evaluate_edge permission calculation
+CAUGHT widen_adopt_early :: FAIL missing d.adopt_ready=d.issue_ready
+CAUGHT activate_adopt_only :: FAIL T1.7 must not activate ADOPT_ONLY
+CAUGHT drop_native_projection :: FAIL missing local decision=R1.TransitionPolicy.project(edge,{consumer="NATIVE_RECONCILE"
+CAUGHT drop_proactive_projection :: FAIL proactive MOVE/ATTACK must project the same edge decision
+CAUGHT scheduler_becomes_consumer :: FAIL scheduler still participates as a permission consumer
+CAUGHT drop_h2_projection_guard :: FAIL missing if future_index and current_index and future_index~=current_index+1 then
+TOTAL 7 T1.7 MUTANTS CAUGHT

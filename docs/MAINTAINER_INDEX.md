@@ -32,9 +32,9 @@ Current runtime baseline / design stage:
 - Smart Guard runtime: **STAGED_DISABLED**;
 - current runtime stage: Move-VTable correction built and exercised in WH3; gameplay smoothness/lifecycle work remains open;
 - transition design stream: **`BSC-TPOL-D1`**;
-- implemented substages: **`BSC-TPOL-T1H`** hidden profile/MCT scaffold + **`BSC-TPOL-T1`** shared behavior-neutral TransitionPolicy evaluator + **`BSC-TPOL-T1.5`** execution-lineage separation + **`BSC-TPOL-T1.6`** committed-edge transaction protocol;
+- implemented substages: **`BSC-TPOL-T1H`** hidden profile/MCT scaffold + **`BSC-TPOL-T1`** shared behavior-neutral TransitionPolicy evaluator + **`BSC-TPOL-T1.5`** execution-lineage separation + **`BSC-TPOL-T1.6`** committed-edge transaction protocol + **`BSC-TPOL-T1.7`** consumer-neutral policy envelopes;
 - visible BSC MCT UI: **not registered**;
-- movement transition behavior: still the pre-T2 CorePath SC1–SC6 baseline; T1 centralizes decisions, T1.5 separates execution lineage, and T1.6 makes transition commitment transactional, but none changes transition permission.
+- movement transition behavior: still the pre-T2 CorePath SC1–SC6 baseline; T1 centralizes decisions, T1.5 separates execution lineage, T1.6 makes transition commitment transactional, and T1.7 separates edge evaluation from consumer projection; none changes transition permission.
 
 ## 3. What each document answers
 
@@ -86,4 +86,4 @@ When a future maintainer discovers a conflict, fix the navigation/current-state 
 
 ## 7. D1 promotion rule
 
-`BSC-TPOL-D1` remains the design stream. `BSC-TPOL-T1H`, `BSC-TPOL-T1`, `BSC-TPOL-T1.5`, and permission-neutral `BSC-TPOL-T1.6` are implemented. T1.7 policy-envelope normalization, T2 gameplay behavior and T3 visible MCT are still future work. The 2026-10-05 direct T2/passthrough experiments are historical evidence, not current runtime authority. Source behavior wins any disagreement with a design-only or historical section.
+`BSC-TPOL-D1` remains the design stream. `BSC-TPOL-T1H`, `BSC-TPOL-T1`, `BSC-TPOL-T1.5`, `BSC-TPOL-T1.6`, and permission-neutral `BSC-TPOL-T1.7` are implemented. T2 gameplay behavior and T3 visible MCT are still future work. The 2026-10-05 direct T2/passthrough experiments are historical evidence, not current runtime authority. Source behavior wins any disagreement with a design-only or historical section.

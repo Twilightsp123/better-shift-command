@@ -12,6 +12,6 @@ test_move_identity_is_full_not_sibling (__main__.TestAddressPipeline.test_move_i
 test_pair_relationships (__main__.TestAddressPipeline.test_pair_relationships) ... ok
 
 ----------------------------------------------------------------------
-Ran 11 tests in 0.002s
+Ran 11 tests in 0.003s
 
 OK

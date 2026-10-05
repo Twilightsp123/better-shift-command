@@ -1,5 +1,5 @@
-$ /opt/pyvenv/bin/python tests/test_transition_policy_t1_equivalence.py
-PASS: T1 old/new transition behavior equivalence
+$ /opt/pyvenv/bin/python tests/test_transition_policy_t17_equivalence.py
+PASS: T1.7 permission equivalence; deterministic T1/T1.6 behavior and CFG unchanged
 RESULT move_turn issued=1 commands=MOVE:100:100 tags=
 RESULT attack_early issued=0 commands= tags=
 RESULT attack_complete issued=1 commands=ATTACK:: tags=ATTACK_AFTER_ROUTE_COMPLETE,ATTACK_AFTER_ROUTE_COMPLETE

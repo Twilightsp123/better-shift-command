@@ -1,6 +1,6 @@
 # BSC Transition Policy Architecture D1
 
-Status: **APPROVED DESIGN — T1H + T1 + T1.5 + T1.6 IMPLEMENTED; T1.7/T2 GAMEPLAY POLICY NOT ACTIVE**  
+Status: **APPROVED DESIGN — THROUGH T1.7 IMPLEMENTED PERMISSION-NEUTRALLY; T2 GAMEPLAY POLICY NOT ACTIVE**  
 Design stream: `BSC-TPOL-D1`  
 Runtime baseline: `BSC v1.2.2 / 1.2.2-corepath-rc8` + Native `1.0.17-corepath-wh3-6c104-movevtfix`
 
@@ -179,7 +179,7 @@ Before T2 changes any decision zone, exact execution identity is represented wit
 
 Before any T2 permission change, execution commitment is transactional. `dispatch()` may authorize/submit an edge but may not mark the prior action committed. A verified BSC ACK or exact Native successor observation calls the same `Core.commit_transition_edge()` path; that path owns MOVE handoff credit / route-debt transfer, cursor advance, execution-lane update and successor entry. Rejection/timeout aborts the transaction. This removes the ACK-vs-SC6 commit split while leaving all T1.5 zones unchanged.
 
-T1.7 will make issue/adopt envelope calculation consumer-neutral before T2 changes any zone.
+T1.7 implements consumer-neutral issue/adopt envelope calculation before T2 changes any zone. `evaluate_edge()` does not read a consumer; `project()` preserves legacy consumer mapping; the adopt envelope is locked to the issue envelope until T2-MOVE.
 
 ## 7. Hysteresis: the anti-thrashing rule
 
