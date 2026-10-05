@@ -610,3 +610,9 @@ Before re-entering T2, the execution-identity representation was split without c
 T1.5 deliberately does **not** solve O-09 by itself. Immediate future MOVE still rolls back exactly as T1 did. Its purpose is to prevent the next T2 implementation from confusing an old Native queue item with a BSC-issued execution merely because both correspond to the same canonical action.
 
 Validation added for this stage: structural contract, seven lineage-specific mutations, policy/geometry/CFG byte-equivalence, and a modeled 15,625-state identity-equivalence gate. Final GitHub Actions v4 validation passes the documentation contract and the consolidated maintenance runner **30/30**; the core mutation harness passes **43/43**. No Native C++/ASM or WH3 address map is changed.
+
+## 24. 2026-10-05 — BSC-TPOL-T1.6 committed-edge transaction
+
+Post-T1.5 architecture audit found that policy permission had been centralized, but execution commitment was still split: `dispatch()` marked MOVE handoff committed at Native submission time, ACK later applied waypoint/debt semantics, and SC6 exact-Native adoption advanced the cursor through a separate path. That structure would become unsafe once immediate MOVE adoption or terminal Attack handoff were enabled.
+
+T1.6 introduces an explicit edge transaction. Submission is `AUTHORIZED/SUBMITTED`, exact Native successor observation is `OBSERVED`, and only the shared `commit_transition_edge()` path produces `COMMITTED`; reject/timeout produces `ABORTED`. This is permission-neutral: T1 deterministic transition results and CFG scalars remain unchanged, immediate future MOVE still rolls back, and Move→Attack remains strict. Local consolidated maintenance is 34/34 PASS; core mutation 43/43, T1.5 lineage mutation 7/7, T1.6 transaction mutation 7/7, runtime transaction gate 3/3.

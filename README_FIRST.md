@@ -31,6 +31,8 @@ It is historical/reference material and must not be mistaken for the formal v1.3
 
 The Native Bridge string is an internal compatibility/build identifier, not the Mod version.
 
+Implemented transition substages: `BSC-TPOL-T1H` → `BSC-TPOL-T1` → `BSC-TPOL-T1.5` → `BSC-TPOL-T1.6`. T1.7/T2 remain future work.
+
 ## Mandatory maintainer reading order
 
 1. `README_FIRST.md`
@@ -53,17 +55,17 @@ The Native Bridge string is an internal compatibility/build identifier, not the 
 
 ## Current architecture status
 
-The current runtime is **BSC-TPOL-T1.5 behavior-neutral** on top of the existing SC1–SC6 gameplay baseline. T1H provides the hidden immutable PolicyProfile/MCT adapter scaffold; T1 provides the shared `R1.TransitionPolicy.evaluate()` decision plane; T1.5 now separates original player-capture execution identity from BSC-issued/ACK identity and records the active execution lineage explicitly.
+The current runtime is **BSC-TPOL-T1.6 permission-neutral** on top of the existing SC1–SC6 gameplay baseline. T1H provides the hidden immutable PolicyProfile/MCT adapter scaffold; T1 provides the shared `R1.TransitionPolicy.evaluate()` decision plane; T1.5 separates original player-capture execution identity from BSC-issued/ACK identity; T1.6 adds a single committed-edge transaction protocol so BSC ACK and exact Native adoption converge on the same canonical commit path.
 
-**T1.5 still intentionally does not change gameplay decisions.** Move→Attack remains strict until current Move semantic completion, an exact immediate future MOVE in SC6 still follows the legacy rollback behavior, and `ADOPT_ONLY` / hysteresis is not active. T1.5 is a structural prerequisite for T2 so Native-captured queue items and later BSC-issued commands cannot share an ambiguous identity slot.
+**T1.6 still intentionally does not change transition permission.** Move→Attack remains strict until current Move semantic completion, an exact immediate future MOVE in SC6 still follows the legacy rollback behavior, and `ADOPT_ONLY` / hysteresis is not active. The change is execution protocol: command submission is no longer treated as commitment; handoff credit, route-debt transfer, cursor advance and execution-lane switch occur only after verified ACK or exact Native adoption.
 
 The 2026-10-05 direct T2-B, T2-A, hairpin and native-passthrough builds are preserved as historical experiments/evidence only. They do not override the staged D1 migration or current runtime source.
 
-The next gameplay work is therefore:
+The next transition work is therefore:
 
-- T2-A immediate-successor MOVE policy through the shared evaluator;
-- T2-B Move→Attack terminal handoff reintroduced through the shared evaluator, using the successful runtime experiment as evidence;
-- T2-C separate issue/adopt hysteresis windows;
+- T1.7 consumer-neutral policy envelopes, still permission-neutral;
+- T2-B Move→Attack terminal handoff reintroduced through the shared evaluator/transaction path, using the successful runtime experiment as evidence;
+- T2-MOVE immediate-successor MOVE reconciliation **with hysteresis from the first promotion** (T2-A + former T2-C together);
 - later visible MCT wiring.
 
 Battle teardown/hang remains a separate lifecycle stream and must not be mixed into transition-policy changes.

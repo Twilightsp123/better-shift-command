@@ -1,0 +1,2 @@
+$ /opt/pyvenv/bin/python tests/test_transition_transaction_t16_contract.py
+PASS: T1.6 transition transaction structural contract; T1.5 permission remains unchanged

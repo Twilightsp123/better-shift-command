@@ -99,6 +99,34 @@
       "exit_code": 0
     },
     {
+      "name": "execution_lineage_t15_contract.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "execution_lineage_t15_semantic_equivalence.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "execution_lineage_t15_mutations.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "transition_transaction_t16_contract.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "transition_transaction_t16_equivalence.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "transition_transaction_t16_mutations.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "transition_transaction_t16_runtime.txt",
+      "exit_code": 0
+    },
+    {
       "name": "tools.txt",
       "exit_code": 0
     },

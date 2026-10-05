@@ -29,15 +29,15 @@ Planned closure: reintroduce T2-B through the shared TransitionPolicy evaluator,
 
 ### O-09 — SC6 rolls back immediate future MOVE
 
-Status: **OPEN / T1 + T1.5 STRUCTURE READY / T2-A NOT ACTIVE**.
+Status: **OPEN / T1 + T1.5 + T1.6 STRUCTURE READY / T2-MOVE NOT ACTIVE**.
 
-Current T1.5 SC6 deliberately preserves the legacy immediate future MOVE rollback so the structural work remains behavior-neutral. T1.5 now exposes whether an exact match comes from the original `PLAYER_NATIVE` capture or a later `BSC_ISSUED` ACK identity. Direct T2-A/hairpin experiments on 2026-10-05 were not promotable: permissive adoption produced fold-back self-compression; stricter rollback gates produced stepwise movement. The native-passthrough diagnostic was useful isolation evidence but is not the BSC product architecture.
+Current T1.6 SC6 deliberately preserves the legacy immediate future MOVE rollback; T1.6 is permission-neutral and only changes commit protocol. T1.5 now exposes whether an exact match comes from the original `PLAYER_NATIVE` capture or a later `BSC_ISSUED` ACK identity. Direct T2-A/hairpin experiments on 2026-10-05 were not promotable: permissive adoption produced fold-back self-compression; stricter rollback gates produced stepwise movement. The native-passthrough diagnostic was useful isolation evidence but is not the BSC product architecture.
 
-Planned closure: T2-A must use the shared evaluator and D1 decision vocabulary; T2-C hysteresis must provide a wider bounded adopt window before any final runtime promotion.
+Planned closure: complete T1.7 consumer-neutral policy envelopes, then promote immediate-MOVE reconciliation and bounded adopt hysteresis together as T2-MOVE. No standalone permissive T2-A state is allowed.
 
 ### O-10 — Transition policy behavior/MCT only partially implemented
 
-Status: **T1H/T1/T1.5 IMPLEMENTED; T2/T3 PENDING**.
+Status: **T1H/T1/T1.5/T1.6 IMPLEMENTED; T1.7/T2/T3 PENDING**.
 
 The hidden PolicyProfile scaffold, shared behavior-neutral TransitionPolicy evaluator, and execution-lineage separation are implemented. Smooth/Balanced/Precise movement values remain reserved; visible MCT is still absent. T2 is the first intentional gameplay change.
 
@@ -76,5 +76,5 @@ The 2026-09-29 disassembly reports proved allocator return ABI, top-level constr
 
 - T1H hidden profile scaffold is implemented; visible MCT UI is intentionally deferred.
 - Movement Cornering / Attack Handoff / Route Fidelity / Native Successor Tolerance / Disengage Priority are reserved but not runtime-wired yet.
-- T1 shared evaluator and T1.5 execution-lineage separation are implemented and behavior-neutral. T2 must still implement immediate successor MOVE policy, Move→Attack terminal handoff, and hysteresis through that evaluator.
+- T1 shared evaluator, T1.5 execution-lineage separation, and T1.6 committed-edge transaction are implemented without widening transition permission. T1.7 must make policy envelopes consumer-neutral; T2 must still implement Move→Attack terminal handoff and immediate successor MOVE+hysteresis through that evaluator/transaction protocol.
 - Minimum Engagement Time is wired at the legacy-equivalent default 3.0 s; alternate values are not exposed to users in T1H.

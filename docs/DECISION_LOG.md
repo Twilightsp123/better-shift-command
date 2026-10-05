@@ -124,3 +124,14 @@
 **Evidence:** T1.5 leaves `TransitionPolicy.evaluate()`, route/attack geometry and CFG thresholds unchanged; a modeled equivalence gate checks 15,625 capture/accepted identity states against the old selector; seven lineage-specific mutations are caught. Final GitHub Actions v4 validation passes the documentation contract and the consolidated maintenance runner **30/30**; the core mutation harness also passes **43/43**.
 
 **Consequence:** T1.5 is behavior-neutral. Immediate future MOVE still follows the legacy T1 rollback rule, Move→Attack remains strict, and `ADOPT_ONLY` remains inactive. T2 may consume the lineage metadata later, but T1.5 itself may not use it to widen or narrow transition permission.
+
+## D-20261005-04 — Insert a committed-edge transaction layer before T2
+
+**Decision:** T2 behavior work is paused until transition execution is routed through one explicit edge transaction. `TransitionPolicy` continues to decide permission, but BSC issue submission, Native ACK, exact Native successor adoption, handoff credit, route-debt transfer and cursor movement must converge on one commit path. A command being submitted to Native is not itself a committed canonical handoff.
+
+**Reason:** the post-T1.5 audit found a remaining execution-protocol asymmetry. `dispatch()` marked a MOVE handoff committed immediately after `issue_verified_command()` returned `PENDING_NATIVE_ACCEPTANCE`, while waypoint credit / route-debt transfer happened later on ACK and SC6 exact-Native adoption advanced the cursor through a separate path. That split is tolerable while T1.5 keeps immediate MOVE adoption blocked, but it becomes unsafe once T2-A/T2-C allows Native MOVE adoption or T2-B allows terminal Attack handoff. The direct T2 experiments already showed the practical failure mode of policy/execution paths fighting each other.
+
+**Consequence:** add **T1.6 Transition Transaction** as a permission-neutral stage. The lifecycle is `AUTHORIZED -> SUBMITTED/OBSERVED -> COMMITTED` or `ABORTED`. `ACTION_HANDOFF_COMMITTED`, waypoint completion/debt transfer, cursor advance and execution-lane switch occur only in the shared commit path after a verified ACK or an already-exact Native adoption. Rejected or timed-out submissions abort without committing the previous edge. T1.5 transition permissions remain unchanged: immediate future MOVE is still legacy rollback, Move->Attack is still strict, and `ADOPT_ONLY` is still inactive.
+
+**Migration update:** after T1.6, add a consumer-neutral policy-envelope stage before gameplay promotion. T2-B terminal Attack may then validate the new commit protocol first; immediate MOVE reconciliation and hysteresis are promoted together rather than exposing a standalone permissive T2-A state.
+

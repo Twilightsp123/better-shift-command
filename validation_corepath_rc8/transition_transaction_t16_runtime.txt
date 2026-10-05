@@ -1,0 +1,6 @@
+$ /usr/bin/texlua tests/test_transition_transaction_t16.lua source/better_shift_command.lua tests/fixture.lua
+PASS T16-00 BSC successor submit does not commit edge before ACK
+PASS T16-01 rejected successor never commits previous waypoint handoff
+PASS T16-02 exact Native successor adoption uses same edge commit path
+ACTUAL_INTERPRETER=Lua 5.3; T1.6 transition transaction permission-neutral gate
+TOTAL 3 PASS 0 FAIL

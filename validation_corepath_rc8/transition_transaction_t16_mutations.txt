@@ -1,0 +1,9 @@
+$ /opt/pyvenv/bin/python tests/test_transition_transaction_t16_mutations.py
+CAUGHT drop_pending_transaction :: FAIL missing transition_txn=transition_txn,handoff_geometry=handoff_geometry
+CAUGHT drop_ack_shared_commit :: FAIL missing Core.commit_transition_edge(st,p.transition_txn
+CAUGHT drop_native_shared_commit :: FAIL missing Core.commit_transition_edge(st,tx,now,{
+CAUGHT drop_reject_abort :: FAIL missing Core.abort_transition_txn(st,p.transition_txn,"OWN_
+CAUGHT allow_authorized_commit :: FAIL missing if not tx or (tx.state~="SUBMITTED" and tx.state~="OBSERVED")
+CAUGHT drop_advance_txn_lock :: FAIL missing if S.pending_by_uid[st.uid] or st.transition_txn then return end
+CAUGHT restore_pre_ack_handoff_commit :: FAIL dispatch still commits handoff before ACK
+TOTAL 7 T1.6 MUTANTS CAUGHT

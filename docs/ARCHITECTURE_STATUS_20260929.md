@@ -21,11 +21,11 @@ Native identity:
 
 The corrected bridge runs in WH3 without the old `OWNED_OUTCOME_INDETERMINATE` failure caused by the wrong top-level Move VTable. This closes the address/outcome blocker sufficiently to expose remaining gameplay policy behavior.
 
-## 3. Current gameplay limitations after T1.5
+## 3. Current gameplay limitations after T1.6
 
 ### 3.1 Strict Move→Attack boundary remains current behavior
 
-T1 deliberately preserves the pre-T2 rule: ordinary Move→Attack remains blocked until current Move `semantic_done` (`ATTACK_REQUIRES_ROUTE_COMPLETE`). A 2026-10-05 direct T2-B experiment demonstrated that bounded terminal handoff can remove the visible pause in WH3 9.0.2, but that experiment is **not current T1.5 runtime**. T2-B must be reintroduced through the shared evaluator.
+T1 deliberately preserves the pre-T2 rule: ordinary Move→Attack remains blocked until current Move `semantic_done` (`ATTACK_REQUIRES_ROUTE_COMPLETE`). A 2026-10-05 direct T2-B experiment demonstrated that bounded terminal handoff can remove the visible pause in WH3 9.0.2, but that experiment is **not current T1.6 runtime**. T2-B must be reintroduced through the shared evaluator.
 
 ### 3.2 SC6 immediate-MOVE asymmetry remains current behavior
 
@@ -41,16 +41,23 @@ The canonical action now carries an explicit `capture_identity` for the player's
 
 This stage does **not** authorize any new handoff. The shared TransitionPolicy logic, route geometry, CFG thresholds, immediate-MOVE rollback behavior and strict Move→Attack behavior remain byte/semantics-equivalent to T1.
 
-## 4. Approved architecture — T1 + T1.5 implemented, T2 pending
 
-`BSC-TPOL-D1` introduces one Transition Policy Plane between canonical semantics and execution coordination. T1 implements the shared evaluator structure, and T1.5 makes command-execution lineage explicit while preserving the same decisions.
+### 3.5 T1.6 committed-edge transaction is implemented permission-neutrally
+
+T1.6 removes the remaining ACK-vs-SC6 execution-protocol split without changing policy permission. BSC successor submission creates an `AUTHORIZED/SUBMITTED` edge transaction but does **not** commit the current handoff. Verified Native ACK and exact Native successor adoption both call the same `Core.commit_transition_edge()` path, which applies MOVE handoff credit / route-debt transfer, advances the canonical cursor, updates execution lineage and enters the successor action. Rejection / timeout aborts the transaction without committing the previous edge.
+
+This specifically closes the pre-T2 hazard where `ACTION_HANDOFF_COMMITTED` could be set while the Native command was only pending. Immediate future MOVE remains legacy rollback, Move→Attack remains strict, and no hysteresis band is active.
+
+## 4. Approved architecture — T1 + T1.5 + T1.6 implemented, T1.7/T2 pending
+
+`BSC-TPOL-D1` introduces one Transition Policy Plane between canonical semantics and execution coordination. T1 implements the shared evaluator structure, T1.5 makes command-execution lineage explicit, and T1.6 unifies edge commitment after ACK / exact Native adoption while preserving the same permission decisions.
 
 Key properties:
 
 - one evaluator for proactive dispatch, SC6 reconciliation and scheduler preview;
 - hard invariants separated from soft timing/precision policy;
 - Smooth is the default profile;
-- current T1.5 zones preserve legacy decisions and do **not** activate `ADOPT_ONLY`;
+- current T1.6 zones preserve legacy decisions and do **not** activate `ADOPT_ONLY`;
 - T2 will add immediate future MOVE policy, bounded Move→Attack terminal handoff, then issue/adopt hysteresis;
 - MCT configures only soft policy through an immutable per-battle `PolicyProfile`.
 
@@ -60,7 +67,7 @@ Full design: `docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md`.
 
 Battle-complete / desktop / main-menu hang investigation is **not** part of Transition Policy D1. Current safe-stop and UI-listener observations remain tracked separately in `OPEN_ISSUES.md`. Do not combine lifecycle and smoothness changes in one patch.
 
-## 6. TPOL-T1H + TPOL-T1 + TPOL-T1.5 implementation status
+## 6. TPOL-T1H + TPOL-T1 + TPOL-T1.5 + TPOL-T1.6 implementation status
 
 The hidden profile scaffold and shared behavior-neutral TransitionPolicy evaluator are now implemented.
 
@@ -72,7 +79,8 @@ The hidden profile scaffold and shared behavior-neutral TransitionPolicy evaluat
 - T1 old/new deterministic transition probes are equivalent;
 - T1.5 separates `capture_identity` from BSC `issued_identity`, with explicit `execution_lane` tracking;
 - T1.5 semantic-equivalence checks prove the shared policy/geometry/CFG are unchanged and the new identity adapter preserves the old identity result;
-- final GitHub Actions v4 validation passes the documentation contract and consolidated maintenance runner **30/30**, with the core mutation harness **43/43** and T1.5 lineage mutations **7/7**;
+- T1.6 local consolidated maintenance is **34/34 PASS**, with core mutation harness **43/43**, T1.5 lineage mutations **7/7**, T1.6 transaction mutations **7/7**, and T1.6 runtime transaction gates **3/3**;
+- T1.6 permission equivalence preserves the deterministic T1 transition probe and all CFG scalars;
 - existing SC1–SC6 gameplay regressions remain unchanged;
-- `ADOPT_ONLY`, immediate-MOVE T2-A, Move→Attack terminal T2-B, and T2-C hysteresis are **not active in current source**;
+- `ADOPT_ONLY`, immediate-MOVE T2-MOVE, and Move→Attack terminal T2-B are **not active in current source**;
 - movement policy profile values remain reserved until their staged T2/T3 promotions.

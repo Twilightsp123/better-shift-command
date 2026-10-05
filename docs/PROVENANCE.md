@@ -73,3 +73,7 @@ Runtime evidence that falsified the direct T2-A/hairpin path is preserved under 
 ## 2026-10-05 T1.5 execution-lineage provenance
 
 T1.5 begins from restored maintenance commit `0648934bf3550ef2ad3f4d0268efcf11c3b90988`. The stage changes Lua controller identity representation, tests and documentation only. Native C++/ASM, WH3 9.0.2 candidate-map tooling, generated Native map header and address-pipeline tests are intentionally unchanged. The protected address-file blob audit must remain 8/8 identical to `0648934`. The exact pre-T1.5 controller is preserved at `archive/tpol_t15_pre_execution_lineage/source/better_shift_command.lua` (SHA256 `f01be6f81d0e662ab265dfc9b81a1f9df99a9de42666d994badc86085727b3c4`).
+
+## 2026-10-05 T1.6 transition-transaction provenance
+
+T1.6 begins from canonical maintenance commit `88c06e92ff9278e7f0c80c2724ce28150551cf27`. The exact pre-T1.6 controller is preserved at `archive/tpol_t16_pre_transition_transaction/source/better_shift_command.lua` (SHA256 `d7711f1581b6a2b468e9ea7fd505562237a21ea2604e80a32cfa4d971bd023dc`). The stage changes Lua transition commit protocol, tests and documentation only; Native C++/ASM, WH3 candidate maps, generated Native header, address relocation tooling and address tests remain protected and must stay blob-identical to the T1.5 baseline.

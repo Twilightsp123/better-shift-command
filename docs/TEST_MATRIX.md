@@ -4,8 +4,8 @@
 
 | Gate | Result | Meaning |
 |---|---:|---|
-| Maintenance jobs | **30/30 PASS** | GitHub Actions v4 consolidated runner: recovered CorePath/T1 gates plus 3 T1.5 gates |
-| Mutation suite | **PASS** | Core mutation harness PASS (43/43) + T1.5 lineage 7/7 CAUGHT; consolidated runner PASS |
+| Maintenance jobs | **34/34 PASS (LOCAL T1.6)** | CorePath/T1/T1.5 plus T1.6 contract/equivalence/mutation/runtime gates |
+| Mutation suite | **PASS** | Core mutation harness 43/43 + T1.5 lineage 7/7 + T1.6 transaction 7/7 CAUGHT |
 | Portable Native CTest | 13/13 PASS | portable native fixtures |
 | ASan/UBSan CTest | 13/13 PASS | sanitizer baseline |
 | Windows VS2019 v142 + MASM | PASS | audited Move-VTable-fix delivery |
@@ -34,8 +34,9 @@
 | T1H hidden PolicyProfile/MCT scaffold | PASS | static contract + existing suite; no visible MCT UI |
 | T1 shared behavior-neutral evaluator refactor | **PASS** | old/new deterministic decision probe equivalent; existing suite unchanged |
 | T1.5 execution-lineage separation | **PASS / BEHAVIOR-NEUTRAL** | capture/issued identity split; 15,625 identity states equivalent; 7/7 lineage mutants caught; consolidated 30/30 PASS |
+| T1.6 committed-edge transaction | **PASS / PERMISSION-NEUTRAL** | submit is not commit; ACK and exact Native adopt share `commit_transition_edge`; reject aborts; deterministic T1 probe/CFG unchanged; 7/7 transaction mutants; runtime 3/3 |
 | T2 immediate-MOVE reconciliation | NOT ACTIVE | implement only after T1; offline + mutation + WH3 RT-TP-04/05 |
-| T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1.5 NOT ACTIVE | reimplement through evaluator + rerun offline/WH3 RT-TP-02/03 |
+| T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1.6 NOT ACTIVE | reimplement through evaluator + rerun offline/WH3 RT-TP-02/03 |
 | T2 hysteresis | NOT ACTIVE | issue/adopt bands required before T2 promotion |
 | T3 visible MCT adapter/UI wiring | NOT RUN | uses existing T1H profile compiler; missing-MCT fallback |
 | T3 MCT runtime comparison | NOT RUN | Smooth/Balanced/Precise differ only in timing/precision |

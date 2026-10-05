@@ -31,27 +31,30 @@
   },
   "policy_architecture": {
     "design_stream": "BSC-TPOL-D1",
-    "implemented_internal_stage": "BSC-TPOL-T1H + BSC-TPOL-T1 + BSC-TPOL-T1.5",
+    "implemented_internal_stage": "BSC-TPOL-T1H + BSC-TPOL-T1 + BSC-TPOL-T1.5 + BSC-TPOL-T1.6",
     "mct_ui": "NOT_REGISTERED",
     "default_policy": "SMOOTH_HIDDEN",
     "minimum_engagement_time_seconds": 3.0,
-    "movement_policy_fields": "RESERVED_NOT_RUNTIME_WIRED_T1_5_BEHAVIOR_NEUTRAL",
-    "transition_evaluator": "SHARED_IMPLEMENTED_BEHAVIOR_NEUTRAL_T1_5_LINEAGE_INPUT_ONLY",
-    "execution_lineage": "CAPTURE_IDENTITY_AND_BSC_ISSUED_IDENTITY_SEPARATED_BEHAVIOR_NEUTRAL"
+    "movement_policy_fields": "RESERVED_NOT_RUNTIME_WIRED_T1_6_PERMISSION_NEUTRAL",
+    "transition_evaluator": "SHARED_IMPLEMENTED_T1_6_PERMISSION_UNCHANGED_TRANSACTIONAL_COMMIT",
+    "execution_lineage": "CAPTURE_IDENTITY_AND_BSC_ISSUED_IDENTITY_SEPARATED_BEHAVIOR_NEUTRAL",
+    "transition_transaction": "ACK_AND_EXACT_NATIVE_ADOPT_SHARE_COMMIT_EDGE"
   },
   "validation": {
-    "controller_jobs": "30/30 PASS (CONSOLIDATED GITHUB ACTIONS V4)",
-    "mutations": "43/43 CORE HARNESS PASS + 7/7 T1.5 LINEAGE CAUGHT",
+    "controller_jobs": "34/34 PASS (LOCAL T1.6 CONSOLIDATED)",
+    "mutations": "43/43 CORE + 7/7 T1.5 LINEAGE + 7/7 T1.6 TRANSACTION",
     "portable_native_ctest": "13/13 PASS",
     "asan_ubsan_ctest": "13/13 PASS",
     "windows_native_ctest": "14/14 PASS",
     "mandatory_guards": "16/16 PASS",
-    "t15_identity_equivalence": "15625/15625 PASS"
+    "t15_identity_equivalence": "15625/15625 PASS",
+    "t16_permission_equivalence": "PASS",
+    "t16_runtime": "3/3 PASS"
   },
   "current_open_work": [
-    "T2-A immediate-successor MOVE policy through shared evaluator using explicit execution lineage",
-    "T2-B Move-to-Attack terminal handoff reimplementation through shared evaluator",
-    "T2-C issue/adopt hysteresis",
+    "T1.7 consumer-neutral policy envelopes",
+    "T2-B Move-to-Attack terminal handoff reimplementation through shared evaluator/transaction",
+    "T2-MOVE immediate-successor MOVE reconciliation with issue/adopt hysteresis",
     "future visible MCT UI wiring",
     "separate battle lifecycle/teardown closure"
   ],

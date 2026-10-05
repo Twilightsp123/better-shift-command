@@ -15,7 +15,7 @@ controller=(ROOT/'source/better_shift_command.lua').read_text()
 mutants=[
  ('attack_accepts_predictive_route_debt',controller,'g.route_safe=false;g.route_mode="BLOCKED";g.route_reason="ATTACK_REQUIRES_ROUTE_COMPLETE"\n        return false,g.route_reason','g.route_safe=true;g.route_mode="MUTANT";g.route_reason="MUTANT_ATTACK_PREDICTIVE"\n        return true,g.route_reason','blocks'),
  ('disable_steering_corner',controller,'if g.progress>=min_progress and g.remaining<=corner_window then','if false and g.progress>=min_progress and g.remaining<=corner_window then','blocks'),
- ('steering_corner_creates_return_debt',controller,'if hg.route_mode=="STEERING_CORNER" then','if false and hg.route_mode=="STEERING_CORNER" then','blocks'),
+ ('steering_corner_creates_return_debt',controller,'if g.route_mode=="STEERING_CORNER" then','if false and g.route_mode=="STEERING_CORNER" then','blocks'),
  ('remove_steering_adjacent_leg_caps',controller,'local base_corner_window=math.min(lookahead*turn_factor,\n        g.leg*CFG.route_corner_current_leg_fraction,\n        next_leg*CFG.route_corner_next_leg_fraction)','local base_corner_window=lookahead*turn_factor','blocks'),
  ('disable_sc2_early_window',controller,'local corner_window=math.max(base_corner_window,early_corner_window)','local corner_window=base_corner_window','blocks'),
  ('disable_sc3_soft_debt',controller,'local soft_ok,soft_reason=move_route_debt_soft_continue(st,cur,nexta,g)','local soft_ok,soft_reason=false,\"MUTANT_HARD_DEBT\"','blocks'),

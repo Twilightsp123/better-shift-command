@@ -3,6 +3,10 @@ import re,itertools
 ROOT=Path(__file__).resolve().parents[1]
 old=(ROOT/'archive/tpol_t15_pre_execution_lineage/source/better_shift_command.lua').read_text(encoding='utf-8')
 new=(ROOT/'source/better_shift_command.lua').read_text(encoding='utf-8')
+# Later permission-neutral stages may insert transaction helpers between existing functions.
+# Strip only the explicitly marked T1.6 helper block before checking T1.5 policy/geometry equivalence.
+new_t15=re.sub(r'\n-- T1\.6 Transition Transaction\..*?\nfunction Core\.observe_move_completion', '\nfunction Core.observe_move_completion', new, flags=re.S)
+new_t15=new_t15.replace('end\n\nfunction Core.observe_move_completion','end\nfunction Core.observe_move_completion',1)
 
 def fail(msg):
     print('FAIL '+msg);raise SystemExit(1)
@@ -20,7 +24,7 @@ for signature,next_marker in [
     ('local function route_handoff_ready(', '\nlocal function transition_handoff_ready'),
     ('local function attack_geometry(', '\nlocal function attack_brake_state'),
 ]:
-    if function_block(old,signature,next_marker)!=function_block(new,signature,next_marker):
+    if function_block(old,signature,next_marker)!=function_block(new_t15,signature,next_marker):
         fail(signature+' changed during behavior-neutral T1.5')
 
 # All scalar CFG assignments must be identical. T1.5 cannot tune a gameplay threshold.

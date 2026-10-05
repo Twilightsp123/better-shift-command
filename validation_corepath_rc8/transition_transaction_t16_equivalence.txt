@@ -1,0 +1,7 @@
+$ /opt/pyvenv/bin/python tests/test_transition_transaction_t16_equivalence.py
+PASS: T1.6 permission equivalence; deterministic T1 probe and CFG scalars unchanged
+RESULT move_turn issued=1 commands=MOVE:100:100 tags=
+RESULT attack_early issued=0 commands= tags=
+RESULT attack_complete issued=1 commands=ATTACK:: tags=ATTACK_AFTER_ROUTE_COMPLETE,ATTACK_AFTER_ROUTE_COMPLETE
+RESULT native_move_legacy issued=1 commands=MOVE:100:0 tags=NATIVE_FUTURE_OVERRUN,NATIVE_FUTURE_OVERRUN,NATIVE_SUCCESSOR_ROLLBACK
+RESULT native_attack_complete issued=1 commands=ATTACK:: tags=ATTACK_AFTER_ROUTE_COMPLETE,ATTACK_AFTER_ROUTE_COMPLETE

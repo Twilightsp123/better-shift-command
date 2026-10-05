@@ -38,6 +38,10 @@ def main():
       ('execution_lineage_t15_contract.txt',[sys.executable,'tests/test_execution_lineage_t15_contract.py']),
       ('execution_lineage_t15_semantic_equivalence.txt',[sys.executable,'tests/test_execution_lineage_t15_semantic_equivalence.py']),
       ('execution_lineage_t15_mutations.txt',[sys.executable,'tests/test_execution_lineage_t15_mutations.py']),
+      ('transition_transaction_t16_contract.txt',[sys.executable,'tests/test_transition_transaction_t16_contract.py']),
+      ('transition_transaction_t16_equivalence.txt',[sys.executable,'tests/test_transition_transaction_t16_equivalence.py']),
+      ('transition_transaction_t16_mutations.txt',[sys.executable,'tests/test_transition_transaction_t16_mutations.py']),
+      ('transition_transaction_t16_runtime.txt',L+['tests/test_transition_transaction_t16.lua','source/better_shift_command.lua','tests/fixture.lua']),
       ('tools.txt',[sys.executable,'tests/test_tools.py']),
       ('reverse.txt',[sys.executable,'tests/test_reverse_inventory.py']),
       ('mutations.txt',[sys.executable,'steering_tests/test_mutations_sc5.py'])]

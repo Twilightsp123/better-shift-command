@@ -18,6 +18,10 @@ T1.5 is behavior-neutral and must prove:
 - Native reconciliation receives lineage metadata but does not use it to alter T1 zones;
 - lineage mutation tests catch dropped capture identity, ignored/unstored issued identity, lost lane snapshot/restore, and missing reconcile lineage.
 
+## 0.6 T1.6 transition-transaction gate
+
+T1.6 permission-neutral gate: **PASS (2026-10-05 local consolidated validation)**. It proves BSC submission is not canonical commitment, ACK commits through the shared edge path, rejection aborts without commit, and exact Native successor adoption uses the same commit function. Deterministic T1 transition output and all scalar CFG values remain unchanged. T1.6 transaction mutations are 7/7 caught; runtime transaction cases are 3/3 PASS.
+
 ## 1. Offline policy tests
 
 Every test should assert both decision `zone` and stable `reason`.

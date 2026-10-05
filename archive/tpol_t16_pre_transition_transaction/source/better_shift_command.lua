@@ -12,7 +12,7 @@ local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
 local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
 local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE transaction_stage=TPOL_T1_6_TRANSITION_TRANSACTION")
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE")
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -545,7 +545,7 @@ local function fail(reason)
     S.failed=true
     log("CONTROLLER_FAIL reason="..clean(reason).." cursor="..S.cursor)
     if bridge then pcall(bridge.arm_verified_issue,false) end
-    for _,st in pairs(S.states) do st.plan=nil; st.actions={}; st.owned=false; st.transition_txn=nil end
+    for _,st in pairs(S.states) do st.plan=nil; st.actions={}; st.owned=false end
 end
 local function checked(fn)
     return function()
@@ -1676,7 +1676,7 @@ cancel=function(st,reason,now,observe)
     end
     st.gen=st.gen+1; st.actions={}; st.plan=nil; st.idx=1; st.origin=nil
     st.owned=false; st.execution_lane="PLAYER_NATIVE"; st.terminal=false; st.moves=0; st.refused=nil; st.attack=nil; st.phase="CANCELLED"; st.input_gapped=false; st.tail_reached=false; st.recover_revision=nil
-    st.block_state={};st.action_serial=0;st.action_base=0;st.native_arrival=nil;st.unverified_native_successor=nil;st.transition_txn=nil
+    st.block_state={};st.action_serial=0;st.action_base=0;st.native_arrival=nil;st.unverified_native_successor=nil
     -- A pending native order is NOT relabelled to the new generation.
 end
 local function action(st,r,now)
@@ -1763,7 +1763,6 @@ function Core.ingest(r,now)
         if S.pending_by_issue[r.script_issue_id]~=p then fail("OWN_ISSUE_INDEX_MISMATCH");return end
         S.pending_by_uid[st.uid]=nil;S.pending_by_issue[p.issue]=nil;S.pending_count=S.pending_count-1
         if st.gen~=p.gen then
-            if p.transition_txn then Core.abort_transition_txn(st,p.transition_txn,"LATE_OWN_ACK_GENERATION",now) end
             -- Native ledger advancement is independent of old-generation plan ownership.
             -- A late ACK may update revision, but cannot revive actions or cursor.
             if accepted(r) then
@@ -1777,7 +1776,6 @@ function Core.ingest(r,now)
             return
         end
         if not accepted(r) then
-            if p.transition_txn then Core.abort_transition_txn(st,p.transition_txn,"OWN_"..clean(r.status),now) end
             if r.status=="REJECTED_STALE" and p.saw_append and st.plan and not st.blocked
                 and st.idx==p.previous_idx and st.plan[p.idx]==p.action
                 and r.unit_revision==st.revision and cmp(st.revision,p.revision)>0
@@ -1821,13 +1819,28 @@ function Core.ingest(r,now)
         accepted_rt.accepted_receipt=r.serial
         accepted_rt.accepted_lifetime=r.unit_lifetime
         accepted_rt.issued_identity={lineage="BSC_ISSUED",seq=accepted_rt.accepted_seq,receipt=r.serial,lifetime=r.unit_lifetime,issue=p.issue}
-        local enter_reason=p.reassert_attack and "CURRENT_ATTACK_REASSERT_ACK" or (p.reassert_current and "CURRENT_MOVE_REASSERT_ACK" or "OWN_ACK")
         if not p.reassert_current then
-            if not Core.commit_transition_edge(st,p.transition_txn,now,{owned=true,execution_lane="BSC_ISSUED",origin=p.origin,enter_reason=enter_reason}) then return end
-        else
-            st.idx=p.idx; st.owned=true;st.execution_lane="BSC_ISSUED"
-            enter_action(st,st.plan[p.idx],now,enter_reason)
+            local previous=st.plan[p.previous_idx]
+            if previous and previous.type=="MOVE" and action_runtime(previous).handoff_committed and not action_runtime(previous).semantic_done then
+                local hg=p.handoff_geometry or {}
+                if hg.route_mode=="STEERING_CORNER" then
+                    -- The successor was accepted while the unit was inside the bounded turn corridor.
+                    -- That is the completion proof for an intermediate navigation waypoint: do not
+                    -- create a debt that would force the formation to return and physically stamp Pn.
+                    mark_action_complete(st,previous,"STEERING_CORNER_HANDOFF",now,hg.remaining)
+                    if DEBUG_TELEMETRY then dlog("STEERING_CORNER_COMMITTED uid="..st.uid.." gen="..st.gen.." action="..previous.action_id..
+                        " successor="..clean(p.action and p.action.action_id).." remaining="..num_or_nil(hg.remaining)..
+                        " corner_window="..num_or_nil(hg.corner_window).." lookahead="..num_or_nil(hg.corner_lookahead)..
+                        " turn_factor="..num_or_nil(hg.corner_turn_factor).." model_ms="..now) end
+                else
+                    register_route_obligation(st,previous,hg,now)
+                end
+            end
         end
+        st.idx=p.idx; st.owned=true;st.execution_lane="BSC_ISSUED"
+        if not p.reassert_current then st.origin=p.origin end
+        local enter_reason=p.reassert_attack and "CURRENT_ATTACK_REASSERT_ACK" or (p.reassert_current and "CURRENT_MOVE_REASSERT_ACK" or "OWN_ACK")
+        enter_action(st,st.plan[p.idx],now,enter_reason)
         if p.kind=="MOVE" then
             if not p.reassert_current then st.moves=st.moves+1 end
             st.phase="MOVE_TRACKING"
@@ -2451,77 +2464,6 @@ local function route_handoff_ready(st,g,nexta)
     g.route_reason=g.progress<min_progress and "ROUTE_PROGRESS_REQUIRED" or "TURN_CORRIDOR_REQUIRED"
     return false,g.route_reason
 end
-
--- T1.6 Transition Transaction. Permission remains T1.5; this layer only makes
--- execution commitment atomic across BSC ACK and exact Native adoption.
-local function transition_geometry_snapshot(g)
-    g=g or {}
-    return {cut_tolerance=g.cut_tolerance,cut_error=g.cut_error,remaining=g.remaining,route_reason=g.route_reason,
-        route_mode=g.route_mode,corner_window=g.corner_window,corner_window_base=g.corner_window_base,
-        corner_window_early=g.corner_window_early,corner_lookahead=g.corner_lookahead,
-        corner_turn_factor=g.corner_turn_factor,corner_stall_escape=g.corner_stall_escape,
-        corner_stall_no_progress_ms=g.corner_stall_no_progress_ms,corner_stall_escape_margin=g.corner_stall_escape_margin,
-        corner_stall_escape_limit=g.corner_stall_escape_limit,next_leg=g.next_leg,ratio=g.ratio,
-        route_debt_mode=g.route_debt_mode,route_debt_count=g.route_debt_count,
-        route_debt_error=g.route_debt_error,route_debt_limit=g.route_debt_limit}
-end
-function Core.begin_transition_txn(st,current,successor,reason,now,g,source)
-    if st.transition_txn then fail("TRANSITION_TXN_ALREADY_OPEN");return nil end
-    if not st.plan or st.plan[st.idx]~=current or st.plan[st.idx+1]~=successor then
-        fail("TRANSITION_TXN_EDGE_IDENTITY");return nil
-    end
-    local tx={gen=st.gen,current_idx=st.idx,successor_idx=st.idx+1,current=current,successor=successor,
-        current_action_id=current.action_id,successor_action_id=successor.action_id,reason=reason or "TRANSITION_READY",
-        source=source or "UNKNOWN",state="AUTHORIZED",authorized_ms=now,geometry=transition_geometry_snapshot(g)}
-    st.transition_txn=tx
-    if DEBUG_TELEMETRY then dlog("TRANSITION_EDGE_AUTHORIZED uid="..st.uid.." gen="..st.gen.." current="..clean(current.action_id)..
-        " successor="..clean(successor.action_id).." source="..clean(tx.source).." reason="..clean(tx.reason).." model_ms="..now) end
-    return tx
-end
-function Core.abort_transition_txn(st,tx,reason,now)
-    if not tx or tx.state=="COMMITTED" or tx.state=="ABORTED" then return false end
-    tx.state="ABORTED";tx.abort_reason=reason;tx.abort_ms=now
-    if st.transition_txn==tx then st.transition_txn=nil end
-    if DEBUG_TELEMETRY then dlog("TRANSITION_EDGE_ABORTED uid="..st.uid.." gen="..clean(tx.gen).." current="..clean(tx.current_action_id)..
-        " successor="..clean(tx.successor_action_id).." source="..clean(tx.source).." reason="..clean(reason).." model_ms="..now) end
-    return true
-end
-function Core.commit_transition_edge(st,tx,now,opts)
-    opts=opts or {}
-    if not tx or (tx.state~="SUBMITTED" and tx.state~="OBSERVED") then fail("TRANSITION_TXN_NOT_COMMITTABLE");return false end
-    if tx.gen~=st.gen or not st.plan or tx.successor_idx~=tx.current_idx+1
-        or st.plan[tx.current_idx]~=tx.current or st.plan[tx.successor_idx]~=tx.successor then
-        fail("TRANSITION_TXN_COMMIT_IDENTITY");return false
-    end
-    local current,successor,g=tx.current,tx.successor,tx.geometry or {}
-    if current.type=="MOVE" then
-        Core.mark_handoff_committed(st,current,successor,tx.reason,now,g)
-        local rt=action_runtime(current)
-        if not rt.semantic_done then
-            if g.route_mode=="STEERING_CORNER" then
-                mark_action_complete(st,current,"STEERING_CORNER_HANDOFF",now,g.remaining)
-                if DEBUG_TELEMETRY then dlog("STEERING_CORNER_COMMITTED uid="..st.uid.." gen="..st.gen.." action="..current.action_id..
-                    " successor="..clean(successor.action_id).." remaining="..num_or_nil(g.remaining)..
-                    " corner_window="..num_or_nil(g.corner_window).." lookahead="..num_or_nil(g.corner_lookahead)..
-                    " turn_factor="..num_or_nil(g.corner_turn_factor).." model_ms="..now) end
-            else
-                register_route_obligation(st,current,g,now)
-            end
-        end
-    end
-    st.idx=tx.successor_idx
-    if opts.origin~=nil then st.origin=opts.origin elseif opts.use_current_origin then st.origin=copy(st.pos) end
-    st.owned=opts.owned==true
-    st.execution_lane=opts.execution_lane or st.execution_lane
-    if opts.observed_execution_lineage then st.observed_execution_lineage=opts.observed_execution_lineage end
-    enter_action(st,successor,now,opts.enter_reason or "TRANSITION_EDGE_COMMITTED")
-    tx.state="COMMITTED";tx.commit_ms=now;tx.commit_lineage=st.execution_lane
-    if st.transition_txn==tx then st.transition_txn=nil end
-    if DEBUG_TELEMETRY then dlog("TRANSITION_EDGE_COMMITTED uid="..st.uid.." gen="..st.gen.." current="..clean(current.action_id)..
-        " successor="..clean(successor.action_id).." source="..clean(tx.source).." lineage="..clean(st.execution_lane)..
-        " reason="..clean(tx.reason).." model_ms="..now) end
-    return true
-end
 function Core.observe_move_completion(st,now)
     if not st.plan then return end
     local a=st.plan[st.idx]
@@ -2800,7 +2742,6 @@ end
 local function dispatch(st,index,reason,g,now,opts)
     opts=opts or {}
     if S.pending_by_uid[st.uid] or S.pending_count>=CFG.max_inflight or S.failed then return end
-    if not opts.reassert_current and st.transition_txn then fail("TRANSITION_TXN_ALREADY_OPEN");return end
     local generation=st.gen
     local selected_base=st.action_base or 0
     local selected=st.plan and st.plan[index]
@@ -2860,11 +2801,6 @@ local function dispatch(st,index,reason,g,now,opts)
         return
     end
     local origin=point(st.unit); if not origin then cancel(st,"UNIT_POSITION",now,false); return end
-    local transition_txn=nil
-    if not opts.reassert_current then
-        transition_txn=Core.begin_transition_txn(st,st.plan[st.idx],a,reason,now,g,"BSC_ISSUE")
-        if not transition_txn then return end
-    end
     local called=false
     local issue_args={a.type,false,st.uid,rev,function()
         called=true
@@ -2879,7 +2815,6 @@ local function dispatch(st,index,reason,g,now,opts)
     if a.type=="MOVE" then issue_args[6]=a.pos.x;issue_args[7]=a.pos.y;issue_args[8]=a.pos.z end
     local sent,issue,result=pcall(bridge.issue_verified_command,unpack(issue_args))
     if not sent or not id(issue) or result~="PENDING_NATIVE_ACCEPTANCE" or not called then
-        if transition_txn then Core.abort_transition_txn(st,transition_txn,"ISSUE_"..clean(result or issue or "FAILED"),now) end
         if sent and issue==nil and (result=="ISSUE_CAPACITY" or result=="ISSUE_ALREADY_PENDING") and not called then
             if DEBUG_TELEMETRY then dlog("NATIVE_BACKPRESSURE uid="..st.uid.." reason="..result) end;return
         end
@@ -2888,15 +2823,24 @@ local function dispatch(st,index,reason,g,now,opts)
         end
         fail("ISSUE_"..clean(a.type).."_"..clean(result or issue)); return
     end
-    if transition_txn then transition_txn.state="SUBMITTED";transition_txn.issue=issue;transition_txn.submitted_ms=now end
-    local handoff_geometry=transition_txn and transition_txn.geometry or transition_geometry_snapshot(g)
     local pending={uid=st.uid,gen=generation,issue=issue,kind=a.type,idx=index,origin=origin,
         revision=rev,target_uid=a.target_uid,started=now,after_attack=after_attack,attack_issue=attack_issue,hold_ms=hold_ms,
         source_attack_target_uid=attack_target_uid,reassert_current=opts.reassert_current==true,
         reassert_attack=opts.reassert_attack==true,previous_origin=copy(st.origin),
         attack_abort=opts.attack_abort,previous_idx=st.idx,previous_owned=st.owned,previous_execution_lane=st.execution_lane,action=a,saw_append=false,
-        transition_txn=transition_txn,handoff_geometry=handoff_geometry}
+        handoff_geometry={cut_tolerance=g.cut_tolerance,cut_error=g.cut_error,remaining=g.remaining,route_reason=g.route_reason,
+            route_mode=g.route_mode,corner_window=g.corner_window,corner_window_base=g.corner_window_base,
+            corner_window_early=g.corner_window_early,corner_lookahead=g.corner_lookahead,
+            corner_turn_factor=g.corner_turn_factor,corner_stall_escape=g.corner_stall_escape,
+            corner_stall_no_progress_ms=g.corner_stall_no_progress_ms,corner_stall_escape_margin=g.corner_stall_escape_margin,
+            corner_stall_escape_limit=g.corner_stall_escape_limit,next_leg=g.next_leg,ratio=g.ratio,
+            route_debt_mode=g.route_debt_mode,route_debt_count=g.route_debt_count,
+            route_debt_error=g.route_debt_error,route_debt_limit=g.route_debt_limit}}
     S.pending_by_uid[st.uid]=pending;S.pending_by_issue[issue]=pending;S.pending_count=S.pending_count+1
+    if not opts.reassert_current then
+        local previous=st.plan[pending.previous_idx]
+        if previous and previous.type=="MOVE" then Core.mark_handoff_committed(st,previous,a,reason,now,g) end
+    end
     st.last_dispatch_ms=now
     if DEBUG_TELEMETRY then S.dispatch_count=S.dispatch_count+1 end; st.owned=true
     if opts.reassert_attack then st.phase="REASSERT_ATTACK_PENDING"
@@ -3310,7 +3254,7 @@ local function rollback_native_future_to_current(st,cur,future,future_index,e,no
     return false
 end
 function Core.reconcile_native_successor(st,now)
-    if not st.plan or st.blocked or S.pending_by_uid[st.uid] or st.transition_txn then return false end
+    if not st.plan or st.blocked or S.pending_by_uid[st.uid] then return false end
     local cur=st.plan[st.idx]
     if not cur or cur.type~="MOVE" then return false end
 
@@ -3371,13 +3315,9 @@ function Core.reconcile_native_successor(st,now)
 
     R1.clear_fault(st,cur,now)
     st.unverified_native_successor=nil
-    local tx=Core.begin_transition_txn(st,cur,future,why,now,g,"NATIVE_RECONCILE")
-    if not tx then return false end
-    tx.state="OBSERVED";tx.execution_lineage=future_lineage
-    if not Core.commit_transition_edge(st,tx,now,{owned=false,execution_lane=future_lineage or "PLAYER_NATIVE",
-        observed_execution_lineage=future_lineage,use_current_origin=true,enter_reason="NATIVE_SUCCESSOR_ADOPTED"}) then return false end
-    st.tail_reached=false
-    if future.type=="ATTACK" then begin_attack_history(st,future,now,"NATIVE_CHAIN","0") end
+    st.idx=st.idx+1;st.origin=copy(st.pos);st.owned=false;st.execution_lane=future_lineage or "PLAYER_NATIVE";st.observed_execution_lineage=future_lineage;st.tail_reached=false
+    enter_action(st,future,now,"NATIVE_SUCCESSOR_ADOPTED")
+    begin_attack_history(st,future,now,"NATIVE_CHAIN","0")
     if DEBUG_TELEMETRY then log("NATIVE_SUCCESSOR_ADOPTED uid="..st.uid.." gen="..st.gen.." action="..future.action_id..
         " target="..future.target_uid.." previous_action="..cur.action_id.." active_engine_seq="..e.active_engine_seq..
         " provider="..clean(e.provider).." execution_lineage="..clean(future_lineage).." route_reason="..clean(why).." model_ms="..now) end
@@ -3385,7 +3325,7 @@ function Core.reconcile_native_successor(st,now)
 end
 local function advance(st,now)
     if not st.plan or st.terminal or st.blocked then return end
-    if S.pending_by_uid[st.uid] or st.transition_txn then return end
+    if S.pending_by_uid[st.uid] then return end
     local cur=st.plan[st.idx]
     if not cur then return end
     if cur.type=="ATTACK" then
@@ -3555,7 +3495,6 @@ end
 
 function Core.handoff_urgency(st,now)
     if not st.plan or st.terminal or st.blocked then return BSC_HUGE,"INACTIVE" end
-    if st.transition_txn then return BSC_HUGE,"TRANSITION_TXN_OPEN" end
     if S.pending_by_uid[st.uid] then return BSC_HUGE,"OWN_PENDING" end
     local cur=st.plan[st.idx]
     if not cur then return BSC_HUGE,"NO_CURSOR" end
@@ -3673,7 +3612,6 @@ function Core.poll_core()
     for _,pending in pairs(S.pending_by_issue) do
         if now-pending.started>=CFG.ack_timeout_ms then
             if Core.recover_ack_timeout(pending,now) then return end
-            if pending.transition_txn then Core.abort_transition_txn(S.states[pending.uid],pending.transition_txn,"OWN_ACK_TIMEOUT",now) end
             fail("OWN_ACK_TIMEOUT issue="..pending.issue);return
         end
     end
@@ -3819,69 +3757,6 @@ local function start()
     for _,st in pairs(S.states) do observe_cold_idle(st,now) end
     if DEBUG_TELEMETRY then dlog("INPUT_READY run="..RUN_ID.." route=SHIFT_MOVE_CHAIN_ATTACK_SHIFT_MOVE_CONTINUOUS_APPEND") end
 end
--- Self-contained native materializer.
--- Keep every bootstrap helper inside one closure so the controller main chunk
--- pays for exactly one local slot: ensure_embedded_native.
-local ensure_embedded_native=(function()
-    local EMBEDDED_NATIVE = {
-        {
-            disk_path = ".\\minhook.x64.dll",
-            virtual_path = "/script/better_shift_command/bin/minhook_Windows_NT-x64.lua",
-            size = 115712,
-            sha256 = "df452eacdb076c35a80c795df920fd3c6f128faa3e0bccb0b7490e95f8659d54"
-        },
-        {
-            disk_path = ".\\wh3_native_bridge.dll",
-            virtual_path = "/script/better_shift_command/bin/bridge_Windows_NT-x64.lua",
-            size = @@BRIDGE_SIZE@@,
-            sha256 = "@@BRIDGE_SHA256@@"
-        }
-    }
-    local function native_read_all(path)
-        local f=io.open(path,"rb")
-        if not f then return nil end
-        local d=f:read("*a")
-        f:close()
-        return d
-    end
-    local function native_write_all(path,data)
-        local f,err=io.open(path,"wb")
-        if not f then return nil,err end
-        local ok,werr=pcall(function() f:write(data) end)
-        f:close()
-        if not ok then return nil,werr end
-        return true
-    end
-    local function native_payload(spec)
-        if type(loadfile)~="function" then error("EMBED_LOADFILE_UNAVAILABLE") end
-        local chunk,err=loadfile(spec.virtual_path)
-        if type(chunk)~="function" then error("EMBED_PAYLOAD_OPEN "..clean(err or spec.virtual_path)) end
-        local ok,data=pcall(chunk)
-        if not ok or type(data)~="string" then error("EMBED_PAYLOAD_DECODE "..clean(data)) end
-        if #data~=spec.size then error("EMBED_PAYLOAD_SIZE "..spec.disk_path.." got="..tostring(#data).." expected="..tostring(spec.size)) end
-        return data
-    end
-    local function native_ensure_one(spec)
-        local payload=native_payload(spec)
-        local existing=native_read_all(spec.disk_path)
-        if existing==payload then
-            dlog("NATIVE_EMBED_KEEP file="..spec.disk_path.." size="..tostring(#payload).." sha256="..spec.sha256)
-            return true
-        end
-        log("NATIVE_EMBED_WRITE file="..spec.disk_path.." size="..tostring(#payload).." sha256="..spec.sha256)
-        local ok,err=native_write_all(spec.disk_path,payload)
-        if not ok then error("EMBED_WRITE "..spec.disk_path.." "..clean(err)) end
-        local verify=native_read_all(spec.disk_path)
-        if verify~=payload then error("EMBED_VERIFY_EXACT_BYTES "..spec.disk_path) end
-        log("NATIVE_EMBED_OK file="..spec.disk_path.." exact_bytes=true sha256="..spec.sha256)
-        return true
-    end
-    return function()
-        if type(io)~="table" or type(io.open)~="function" then error("EMBED_IO_UNAVAILABLE") end
-        -- MinHook must be materialized before Bridge because Bridge resolves it dynamically.
-        for i=1,#EMBEDDED_NATIVE do native_ensure_one(EMBEDDED_NATIVE[i]) end
-    end
-end)()
 function Core.boot()
     if TEST_PROFILE~="JOINT" and TEST_PROFILE~="ROUTE_ONLY" then error("INVALID_TEST_PROFILE") end
     if CONTROLLER_PHASE~="P1E" and CONTROLLER_PHASE~="P2B" then error("INVALID_CONTROLLER_PHASE") end
@@ -3891,7 +3766,6 @@ function Core.boot()
     if not ok or not b then error("BATTLE_MANAGER_UNAVAILABLE") end
     bmgr=b; if DEBUG_TELEMETRY then dlog("BATTLE_MANAGER_OK") end
     if type(package)~="table" or type(package.loadlib)~="function" then error("LOADLIB_UNAVAILABLE") end
-    ensure_embedded_native()
     local lok,loader,le=pcall(package.loadlib,".\\wh3_native_bridge.dll","luaopen_wh3_native_bridge")
     if not lok or type(loader)~="function" then error("DLL_LOAD "..clean(le or loader)) end
     local bok,module,be=pcall(loader)
