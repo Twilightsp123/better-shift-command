@@ -9,7 +9,7 @@ def read(rel):
     if not p.exists(): fail('missing required documentation file: '+rel)
     return p.read_text(encoding='utf-8')
 required=[
- 'README_FIRST.md','VERSION','PACK_NAME','DESIGN_MANIFEST.json','docs/VERSION_POLICY.md','docs/MAINTAINER_INDEX.md','docs/ARCHITECTURE_STATUS_20260929.md',
+ 'README_FIRST.md','VERSION','PACK_NAME','DESIGN_MANIFEST.json','RELEASE_MANIFEST.json','GITHUB_ARCHIVE_MANIFEST.json','docs/VERSION_POLICY.md','docs/MAINTAINER_INDEX.md','docs/ARCHITECTURE_STATUS_20260929.md',
  'docs/OPEN_ISSUES.md','docs/ASSUMPTION_LEDGER.md','docs/TEST_MATRIX.md','docs/CURRENT_BUILD_MAP.md',
  'docs/DECISION_LOG.md','docs/VERSION_LINEAGE.md','docs/PROVENANCE.md','docs/HISTORY_COVERAGE.md',
  'docs/DEVELOPMENT_HISTORY.md','docs/MAINTENANCE_PROTOCOL.md','docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md',
@@ -44,7 +44,7 @@ issues=read('docs/OPEN_ISSUES.md')
 for token in ('O-08 — Move→Attack','O-09 — SC6 rolls back immediate future MOVE','O-11 — Battle exit/main-menu/desktop hang','T1.5','TPOL-T1H / T2 outstanding'):
     if token not in issues: fail('OPEN_ISSUES missing current blocker: '+token)
 matrix=read('docs/TEST_MATRIX.md')
-for token in ('Windows Native CTest | 14/14 PASS','T1H hidden PolicyProfile/MCT scaffold | PASS','T1 shared behavior-neutral evaluator refactor | **PASS**','T1.5 execution-lineage separation | **LOCAL STRUCTURAL/EQUIVALENCE PASS**','T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1 NOT ACTIVE','T3 visible MCT adapter/UI wiring | NOT RUN'):
+for token in ('Maintenance jobs | **30/30 PASS**','Mutation suite | **PASS**','Windows Native CTest | 14/14 PASS','T1H hidden PolicyProfile/MCT scaffold | PASS','T1 shared behavior-neutral evaluator refactor | **PASS**','T1.5 execution-lineage separation | **PASS / BEHAVIOR-NEUTRAL**','T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1.5 NOT ACTIVE','T3 visible MCT adapter/UI wiring | NOT RUN'):
     if token not in matrix: fail('TEST_MATRIX missing gate: '+token)
 ledger=read('docs/ASSUMPTION_LEDGER.md')
 if '`Entity +0x18 = MovementComponent*` | **RETRACTED**' not in ledger: fail('Assumption ledger lost retracted Entity+0x18 status')
@@ -62,4 +62,10 @@ if 'T1_5_EXECUTION_LINEAGE_IMPLEMENTED' not in manifest.get('implementation_stag
 if 'T2A_IMMEDIATE_MOVE_PENDING' not in manifest.get('implementation_stages',[]) or 'T2C_HYSTERESIS_PENDING' not in manifest.get('implementation_stages',[]): fail('DESIGN_MANIFEST must keep T2 pending after T1')
 if manifest.get('mct_ui')!='HIDDEN_NOT_REGISTERED': fail('DESIGN_MANIFEST MCT visibility mismatch')
 if manifest.get('formal_project_version')!='1.3.0' or manifest.get('canonical_pack_name')!='zzz_better_shift_command_steam.pack': fail('DESIGN_MANIFEST formal version/pack identity mismatch')
+release=json.loads(read('RELEASE_MANIFEST.json'))
+if release.get('validation',{}).get('controller_jobs')!='30/30 PASS (CONSOLIDATED GITHUB ACTIONS V4)': fail('RELEASE_MANIFEST consolidated validation mismatch')
+if '43/43 CORE HARNESS PASS' not in release.get('validation',{}).get('mutations',''): fail('RELEASE_MANIFEST mutation validation mismatch')
+gh=json.loads(read('GITHUB_ARCHIVE_MANIFEST.json'))
+if gh.get('validation',{}).get('controller_regression_jobs')!='30/30 PASS (CONSOLIDATED GITHUB ACTIONS V4)': fail('GITHUB_ARCHIVE_MANIFEST consolidated validation mismatch')
+if gh.get('validation',{}).get('execution_lineage_t15_contract')!='PASS' or gh.get('validation',{}).get('execution_lineage_t15_mutations')!='PASS_7_OF_7': fail('GITHUB_ARCHIVE_MANIFEST T1.5 gate mismatch')
 print('PASS: v1.3.0 documentation contract; T1.5 execution lineage is current while T2 behavior remains pending')
