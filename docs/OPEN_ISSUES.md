@@ -21,19 +21,19 @@ The Move-VTable correction has been built and exercised in WH3. Native outcome f
 
 ### O-08 — Move→Attack can still brake/stop before Attack
 
-Status: **OFFLINE FIX CANDIDATE / WH3 RUNTIME SMOKE REQUIRED**.
+Status: **WH3 9.0.2 RUNTIME VERIFIED**.
 
 The strict `ATTACK_REQUIRES_ROUTE_COMPLETE` boundary has been replaced for ordinary Move→Attack by the bounded T2-B `ATTACK_TERMINAL_CORRIDOR`. The implementation requires exact immediate successor semantics, viable target, clear prior route debt, bounded progress, attack-geometry distance caps, extra high-angle progress, and stricter short-leg preservation. Accepted proactive handoff and exact Native adoption both grant explicit `ATTACK_TERMINAL_HANDOFF` completion credit; Exit→Attack remains on its separate strict gate.
 
-Offline closure evidence: dedicated T2-B suite **9/9 PASS**, legacy block suite **33/33 PASS**, and mutation coverage catches both disabled-terminal-corridor and removed-short-leg-guard mutants. The remaining closure requirement is WH3 RT-TP-02/03 runtime smoke on the 9.0.2 candidate.
+Closure evidence: dedicated T2-B suite **9/9 PASS**, mutation protection, Windows CI PASS, and the 2026-10-05 WH3 9.0.2 runtime smoke records repeated smooth `ATTACK_TERMINAL_HANDOFF ... mode=ISSUE_ACK` transitions with the old Attack rollback pattern absent.
 
 ### O-09 — SC6 rolls back immediate future MOVE
 
-Status: **OPEN / DESIGN APPROVED**.
+Status: **OFFLINE FIX CANDIDATE / WH3 RUNTIME SMOKE REQUIRED**.
 
-Current SC6 treats any future type other than ATTACK as overrun. Runtime `script_log_290926_1833.txt` records exact immediate/future MOVE execution followed by `NATIVE_FUTURE_OVERRUN` rollback.
+T2-A now permits only an **exact immediate i+1 Native MOVE** to soft-adopt, and only when the current Move is already inside the controller's existing bounded dispatch/steering window. The first implementation is adopt-only: it does not add new proactive Move issue permission. It keeps i+2 overrun rollback, exact execution identity, prior-route-debt blocking, short-leg protection, and Exit-route separation.
 
-Planned closure: `BSC-TPOL-D1` T2-A shared transition evaluator + immediate-MOVE adopt/soft-adopt.
+Offline evidence: dedicated T2-A suite **11/11 PASS** plus mutation protection for disabled adopt, i+2 skipping, prior-debt bypass, and premature straight-line adoption. WH3 RT-TP-04/05 remains required.
 
 ### O-10 — Transition policy/MCT not implemented
 
@@ -76,5 +76,5 @@ The 2026-09-29 disassembly reports proved allocator return ABI, top-level constr
 
 - T1H hidden profile scaffold is implemented; visible MCT UI is intentionally deferred.
 - Movement Cornering / Attack Handoff / Route Fidelity / Native Successor Tolerance / Disengage Priority are reserved but not runtime-wired yet.
-- T2 still needs the shared transition evaluator, immediate successor MOVE adoption, and hysteresis. Move→Attack terminal handoff is implemented as an offline-tested candidate and awaits WH3 runtime smoke.
+- T2 still needs the shared behavior-neutral evaluator and hysteresis. Move→Attack is runtime verified; immediate successor MOVE adoption is implemented as an offline-tested adopt-only candidate awaiting WH3 runtime smoke.
 - Minimum Engagement Time is wired at the legacy-equivalent default 3.0 s; alternate values are not exposed to users in T1H.

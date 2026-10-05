@@ -4,8 +4,8 @@
 
 | Gate | Result | Meaning |
 |---|---:|---|
-| Maintenance jobs | 26/26 PASS | full offline Lua/Python/static baseline including T2-B |
-| Mutation suite | 41/41 CAUGHT | includes T2-B terminal-corridor and short-leg safety mutants |
+| Maintenance jobs | 27/27 PASS | full offline Lua/Python/static baseline including T2-A/T2-B |
+| Mutation suite | 44/44 CAUGHT | includes T2-A adopt/overrun/debt/window and T2-B safety mutants |
 | Portable Native CTest | 13/13 PASS | portable native fixtures |
 | ASan/UBSan CTest | 13/13 PASS | sanitizer baseline |
 | Windows VS2019 v142 + MASM | PASS | audited Move-VTable-fix delivery |
@@ -18,10 +18,10 @@
 
 | Behavior | Current result | Status |
 |---|---|---|
-| Move→Move normal steering | operational, but SC6 exact future-MOVE rollback still observed | redesign needed |
-| Move→Attack | T2-B bounded terminal handoff implemented offline | WH3 runtime smoke required |
+| Move→Move normal steering | T2-A exact i+1 Native adopt implemented offline | WH3 runtime smoke required |
+| Move→Attack | T2-B bounded terminal handoff | **WH3 9.0.2 runtime verified** |
 | SC6 immediate successor ATTACK | current adopt/rollback path exists | migrate to shared evaluator |
-| SC6 immediate successor MOVE | current code rolls back | **known limitation** |
+| SC6 immediate successor MOVE | adopt-only bounded T2-A path implemented | runtime smoke pending |
 | future index > i+1 | rollback | must remain |
 | canonical target identity | enforced | must remain |
 
@@ -33,8 +33,8 @@
 | D1 decision table | PASS / approved design | this package |
 | T1H hidden PolicyProfile/MCT scaffold | PASS | static contract + existing suite; no visible MCT UI |
 | T1 shared behavior-neutral evaluator refactor | NOT RUN | old/new decision equivalence + existing suite |
-| T2 immediate-MOVE reconciliation | NOT RUN | offline + mutation + WH3 RT-TP-04/05 |
-| T2 Move→Attack terminal handoff | OFFLINE PASS: 9/9 + mutation | WH3 RT-TP-02/03 still required |
+| T2 immediate-MOVE reconciliation | OFFLINE PASS: 11/11 + mutation | WH3 RT-TP-04/05 still required |
+| T2 Move→Attack terminal handoff | PASS: 9/9 + mutation + WH3 9.0.2 smoke | runtime verified |
 | T2 hysteresis | NOT RUN | adopt-only boundary tests; no rollback thrash |
 | T3 visible MCT adapter/UI wiring | NOT RUN | uses existing T1H profile compiler; missing-MCT fallback |
 | T3 MCT runtime comparison | NOT RUN | Smooth/Balanced/Precise differ only in timing/precision |

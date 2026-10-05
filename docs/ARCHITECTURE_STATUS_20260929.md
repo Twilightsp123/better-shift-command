@@ -23,17 +23,15 @@ The corrected bridge runs in WH3 without the old `OWNED_OUTCOME_INDETERMINATE` f
 
 ## 3. Current gameplay limitations now visible
 
-### 3.1 Strict Move→Attack boundary
+### 3.1 Move→Attack T2-B runtime closure
 
-Current `route_handoff_ready()` explicitly returns `ATTACK_REQUIRES_ROUTE_COMPLETE` for Move→Attack until current Move `semantic_done`. This can allow CA arrival braking / stop before Attack is issued.
+The strict Move→Attack boundary has been replaced by the bounded `ATTACK_TERMINAL_CORRIDOR`. The 2026-10-05 WH3 9.0.2 runtime smoke records successful `ATTACK_TERMINAL_HANDOFF` events without the old Attack rollback pattern. T2-B is runtime verified.
 
-### 3.2 SC6 immediate-MOVE asymmetry
+### 3.2 T2-A immediate-MOVE adopt-only candidate
 
-Current `reconcile_native_successor()` only permits the immediate future action to be adopted if `future.type == ATTACK`. An exact immediate future MOVE is classified as `NATIVE_FUTURE_OVERRUN` and rolled back even though it may be the correct next canonical action.
+`reconcile_native_successor()` now permits an **exact immediate i+1 MOVE** to soft-adopt only when the current Move is already inside the existing bounded dispatch/steering window. The path is adopt-only: it grants no new proactive Move issue permission, keeps i+2+ rollback, exact execution identity, prior route debt, short-leg protection, and Exit-route separation. Offline T2-A is 11/11 PASS plus mutation protection; WH3 RT-TP-04/05 is still pending.
 
-Runtime evidence exists in `runtime_evidence/20260929_transition_policy/`.
-
-## 4. Approved next architecture — not yet implemented
+## 4. Approved architecture — partially implemented
 
 `BSC-TPOL-D1` introduces a Transition Policy Plane between canonical semantics and execution coordination.
 
@@ -53,13 +51,14 @@ Full design: `docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md`.
 
 Battle-complete / desktop / main-menu hang investigation is **not** part of Transition Policy D1. Current safe-stop and UI-listener observations remain tracked separately in `OPEN_ISSUES.md`. Do not combine lifecycle and smoothness changes in one patch.
 
-## 6. TPOL-T1H implementation status
+## 6. TPOL-T1H + partial T2 implementation status
 
-The hidden policy/profile scaffold is now implemented in controller source.
+The hidden policy/profile scaffold is implemented, and two bounded gameplay slices now exist under the built-in default behavior.
 
 - no visible MCT UI exists;
 - no MCT dependency is required;
-- built-in hidden source is authoritative for this stage;
+- built-in hidden source remains authoritative;
 - `engagement_hold_seconds=3.0` is wired to the existing 3000 ms Attack hold requirement;
-- movement policy values are schema-only/reserved and do not yet change gameplay;
-- T2 smoothness behavior remains pending.
+- T2-B Move→Attack terminal handoff is WH3 9.0.2 runtime verified;
+- T2-A exact immediate Move reconciliation is an offline-tested adopt-only candidate awaiting RT-TP-04/05;
+- movement policy values are still not profile-driven; T1 shared evaluator, T2-C hysteresis and T3 visible MCT remain pending.

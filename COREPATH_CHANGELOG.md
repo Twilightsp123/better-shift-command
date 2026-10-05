@@ -93,3 +93,17 @@ Controller-only gameplay candidate; Native Bridge/address map unchanged.
 - adds dedicated T2-B regression coverage (9/9 PASS) and mutation protection.
 
 Promotion is blocked on WH3 RT-TP-02/03 runtime smoke.
+
+## 2026-10-05 — BSC-TPOL-T2A immediate Move native-adopt offline candidate
+
+Controller-only gameplay candidate; Native Bridge/address map unchanged.
+
+- exact immediate `i+1 MOVE` may soft-adopt when Native is already executing it and the current Move is inside the controller's existing bounded dispatch/steering window;
+- implementation is adopt-only and adds no new proactive Move→Move issue permission;
+- `i+2+` remains hard `NATIVE_FUTURE_OVERRUN`; exact receipt/lifetime/sequence/destination identity remains mandatory;
+- unresolved prior route debt and Exit-route semantics remain hard blocks;
+- PATH_SAFE native adoption additionally requires the same predictive/proximity/stall window used by normal proactive dispatch, preventing early straight-line widening;
+- accepted adoption grants explicit `MOVE_STEERING_HANDOFF` completion credit and records `NATIVE_MOVE_SUCCESSOR_ADOPTED` telemetry;
+- dedicated T2-A regression coverage is **11/11 PASS** and mutation coverage is **44/44 CAUGHT**.
+
+Promotion is blocked on WH3 RT-TP-04/05 runtime smoke. T2-B is separately runtime verified by the 2026-10-05 WH3 9.0.2 log.

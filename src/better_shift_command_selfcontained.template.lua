@@ -12,7 +12,7 @@ local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
 local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
 local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1H_HIDDEN")
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T2AB_CANDIDATE")
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -2478,6 +2478,46 @@ local function route_handoff_ready(st,g,nexta)
     g.route_reason=g.progress<min_progress and "ROUTE_PROGRESS_REQUIRED" or "TURN_CORRIDOR_REQUIRED"
     return false,g.route_reason
 end
+local function native_move_successor_ready(st,g,nexta)
+    local cur=st.plan and st.plan[st.idx]
+    if not cur or cur.type~="MOVE" or not nexta or nexta.type~="MOVE" then
+        return false,"MOVE_NATIVE_ADOPT_CLASS_MISMATCH"
+    end
+    if cur.block_kind=="EXIT_ROUTE" then
+        return false,"EXIT_MOVE_REQUIRES_EXIT_POLICY"
+    end
+    local debt_clear=block_route_clear(st,cur)
+    if not debt_clear then
+        return false,"PRIOR_ROUTE_OBLIGATION_PENDING"
+    end
+    local route_ok,why=route_handoff_ready(st,g,nexta)
+    if not route_ok then return false,why end
+    if action_runtime(cur).semantic_done or g.route_mode=="COMPLETE" then
+        g.native_move_adopt_gate="CURRENT_MOVE_COMPLETE"
+        return true,why
+    end
+    -- Adopt-only means Native may not widen Lua's existing Move->Move dispatch
+    -- window. STEERING_CORNER already encodes its own bounded turn window. A
+    -- straight/path-safe successor must additionally satisfy one of the existing
+    -- predictive/proximity/stall dispatch thresholds that advance() already uses.
+    if g.route_mode=="STEERING_CORNER" then
+        g.native_move_adopt_gate="STEERING_CORNER"
+        return true,why
+    end
+    if g.route_mode=="PATH_SAFE" then
+        local ready_reason=nil
+        if g.remaining<=CFG.proximity then ready_reason="PROXIMITY_A"
+        elseif g.remaining<=CFG.stall_distance and g.stall then ready_reason="PROXIMITY_B_STALL"
+        elseif g.remaining<=g.threshold then ready_reason="PREDICTIVE"
+        elseif g.stall and g.remaining<=math.min(CFG.lead_cap,g.threshold+CFG.brake_extra) then ready_reason="BRAKE_FALLBACK" end
+        if ready_reason then
+            g.native_move_adopt_gate=ready_reason
+            return true,why
+        end
+        return false,"MOVE_NATIVE_ADOPT_WINDOW_REQUIRED"
+    end
+    return false,"MOVE_NATIVE_ADOPT_ROUTE_MODE_UNSUPPORTED"
+end
 function Core.observe_move_completion(st,now)
     if not st.plan then return end
     local a=st.plan[st.idx]
@@ -3269,21 +3309,44 @@ function Core.reconcile_native_successor(st,now)
         return false
     end
 
-    if future_index~=st.idx+1 or future.type~="ATTACK" then
+    if future_index~=st.idx+1 then
         return rollback_native_future_to_current(st,cur,future,future_index,e,now,
             "NATIVE_FUTURE_OVERRUN","CANONICAL_INTERMEDIATE_ACTIONS_OWED","NATIVE_FUTURE_OVERRUN_ROLLBACK_TO_CURRENT_MOVE")
     end
 
     local g=geometry(st,future)
-    if g then g=attack_geometry(st,future,g) end
     local route_ok,why=false,"SUCCESSOR_GEOMETRY_UNAVAILABLE"
-    if g then route_ok,why=transition_handoff_ready(st,g,future) end
+    if future.type=="MOVE" then
+        -- T2-A is adopt-only. Never grant new proactive Move->Move issue permission here;
+        -- only stop fighting an exact immediate Native successor that is already
+        -- inside the existing bounded steering corridor. Earlier route debt stays
+        -- authoritative and Exit-route semantics remain on their separate policy.
+        if g then route_ok,why=native_move_successor_ready(st,g,future) end
+    elseif future.type=="ATTACK" then
+        if g then g=attack_geometry(st,future,g) end
+        if g then route_ok,why=transition_handoff_ready(st,g,future) end
+    else
+        return rollback_native_future_to_current(st,cur,future,future_index,e,now,
+            "NATIVE_FUTURE_OVERRUN","CANONICAL_INTERMEDIATE_ACTIONS_OWED","NATIVE_FUTURE_OVERRUN_ROLLBACK_TO_CURRENT_MOVE")
+    end
     if not route_ok then
         return rollback_native_future_to_current(st,cur,future,future_index,e,now,
             "NATIVE_ADVANCED_BEFORE_PERMISSION",why,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE")
     end
 
-    if why=="ATTACK_TERMINAL_CORRIDOR" and not action_runtime(cur).semantic_done then
+    if future.type=="MOVE" then
+        if not action_runtime(cur).semantic_done then
+            mark_action_complete(st,cur,"MOVE_STEERING_HANDOFF",now,g and g.remaining)
+            Core.mark_handoff_committed(st,cur,future,"MOVE_STEERING_HANDOFF",now,g)
+        end
+        log("MOVE_STEERING_HANDOFF uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
+            " successor="..future.action_id.." mode=NATIVE_ADOPT remaining="..num_or_nil(g and g.remaining)..
+            " progress="..num_or_nil(g and g.progress).." route_mode="..clean(g and g.route_mode)..
+            " route_reason="..clean(why).." adopt_gate="..clean(g and g.native_move_adopt_gate)..
+            " threshold="..num_or_nil(g and g.threshold).." corner_window="..num_or_nil(g and g.corner_window)..
+            " cut_error="..num_or_nil(g and g.cut_error).." cut_tolerance="..num_or_nil(g and g.cut_tolerance)..
+            " model_ms="..now)
+    elseif why=="ATTACK_TERMINAL_CORRIDOR" and not action_runtime(cur).semantic_done then
         mark_action_complete(st,cur,"ATTACK_TERMINAL_HANDOFF",now,g and g.remaining)
         Core.mark_handoff_committed(st,cur,future,"ATTACK_TERMINAL_HANDOFF",now,g)
         log("ATTACK_TERMINAL_HANDOFF uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
@@ -3294,11 +3357,18 @@ function Core.reconcile_native_successor(st,now)
     R1.clear_fault(st,cur,now)
     st.unverified_native_successor=nil
     st.idx=st.idx+1;st.origin=copy(st.pos);st.owned=false;st.tail_reached=false
-    enter_action(st,future,now,"NATIVE_SUCCESSOR_ADOPTED")
-    begin_attack_history(st,future,now,"NATIVE_CHAIN","0")
-    if DEBUG_TELEMETRY then log("NATIVE_SUCCESSOR_ADOPTED uid="..st.uid.." gen="..st.gen.." action="..future.action_id..
-        " target="..future.target_uid.." previous_action="..cur.action_id.." active_engine_seq="..e.active_engine_seq..
-        " provider="..clean(e.provider).." route_reason="..clean(why).." model_ms="..now) end
+    enter_action(st,future,now,future.type=="MOVE" and "NATIVE_MOVE_SUCCESSOR_ADOPTED" or "NATIVE_SUCCESSOR_ADOPTED")
+    if future.type=="ATTACK" then
+        begin_attack_history(st,future,now,"NATIVE_CHAIN","0")
+        if DEBUG_TELEMETRY then log("NATIVE_SUCCESSOR_ADOPTED uid="..st.uid.." gen="..st.gen.." action="..future.action_id..
+            " target="..future.target_uid.." previous_action="..cur.action_id.." active_engine_seq="..e.active_engine_seq..
+            " provider="..clean(e.provider).." route_reason="..clean(why).." model_ms="..now) end
+    else
+        st.phase="MOVE_TRACKING"
+        log("NATIVE_MOVE_SUCCESSOR_ADOPTED uid="..st.uid.." gen="..st.gen.." action="..future.action_id..
+            " previous_action="..cur.action_id.." active_engine_seq="..e.active_engine_seq..
+            " provider="..clean(e.provider).." route_reason="..clean(why).." model_ms="..now)
+    end
     return true
 end
 local function advance(st,now)
