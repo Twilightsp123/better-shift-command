@@ -38,13 +38,13 @@
     "hidden_policy_contract": "PASS",
     "documentation_contract": "PASS",
     "prebuild_contract": "PASS",
-    "controller_regression_jobs": "27/27 RECOVERED T1 BASELINE; T1.5 CONSOLIDATED RERUN PENDING",
-    "mutation_suite": "43/43 RECOVERED T1 + 7/7 T1.5 LINEAGE LOCAL",
+    "controller_regression_jobs": "30/30 PASS (CONSOLIDATED GITHUB ACTIONS V4)",
+    "mutation_suite": "43/43 CORE HARNESS PASS + 7/7 T1.5 LINEAGE CAUGHT",
     "transition_policy_t1_contract": "PASS",
     "transition_policy_t1_equivalence": "PASS",
-    "execution_lineage_t15_contract": "PASS_LOCAL",
-    "execution_lineage_t15_semantic_equivalence": "PASS_LOCAL_15625_STATES",
-    "execution_lineage_t15_mutations": "PASS_LOCAL_7_OF_7"
+    "execution_lineage_t15_contract": "PASS",
+    "execution_lineage_t15_semantic_equivalence": "PASS_15625_STATES",
+    "execution_lineage_t15_mutations": "PASS_7_OF_7"
   },
   "transition_policy_stage": "BSC-TPOL-T1_5_EXECUTION_LINEAGE_BEHAVIOR_NEUTRAL"
 }

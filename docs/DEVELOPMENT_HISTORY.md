@@ -609,4 +609,4 @@ Before re-entering T2, the execution-identity representation was split without c
 
 T1.5 deliberately does **not** solve O-09 by itself. Immediate future MOVE still rolls back exactly as T1 did. Its purpose is to prevent the next T2 implementation from confusing an old Native queue item with a BSC-issued execution merely because both correspond to the same canonical action.
 
-Validation added for this stage: structural contract, seven lineage-specific mutations, policy/geometry/CFG byte-equivalence, and a modeled 15,625-state identity-equivalence gate. No Native C++/ASM or WH3 address map is changed.
+Validation added for this stage: structural contract, seven lineage-specific mutations, policy/geometry/CFG byte-equivalence, and a modeled 15,625-state identity-equivalence gate. Final GitHub Actions v4 validation passes the documentation contract and the consolidated maintenance runner **30/30**; the core mutation harness passes **43/43**. No Native C++/ASM or WH3 address map is changed.

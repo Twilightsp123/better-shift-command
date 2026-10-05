@@ -40,13 +40,13 @@
     "execution_lineage": "CAPTURE_IDENTITY_AND_BSC_ISSUED_IDENTITY_SEPARATED_BEHAVIOR_NEUTRAL"
   },
   "validation": {
-    "controller_jobs": "27/27 RECOVERED T1 BASELINE; T1.5 CONSOLIDATED RERUN PENDING",
-    "mutations": "43/43 RECOVERED T1 + 7/7 T1.5 LINEAGE LOCAL",
+    "controller_jobs": "30/30 PASS (CONSOLIDATED GITHUB ACTIONS V4)",
+    "mutations": "43/43 CORE HARNESS PASS + 7/7 T1.5 LINEAGE CAUGHT",
     "portable_native_ctest": "13/13 PASS",
     "asan_ubsan_ctest": "13/13 PASS",
     "windows_native_ctest": "14/14 PASS",
     "mandatory_guards": "16/16 PASS",
-    "t15_identity_equivalence": "15625/15625 LOCAL PASS"
+    "t15_identity_equivalence": "15625/15625 PASS"
   },
   "current_open_work": [
     "T2-A immediate-successor MOVE policy through shared evaluator using explicit execution lineage",

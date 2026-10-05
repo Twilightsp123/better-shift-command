@@ -72,6 +72,7 @@ The hidden profile scaffold and shared behavior-neutral TransitionPolicy evaluat
 - T1 old/new deterministic transition probes are equivalent;
 - T1.5 separates `capture_identity` from BSC `issued_identity`, with explicit `execution_lane` tracking;
 - T1.5 semantic-equivalence checks prove the shared policy/geometry/CFG are unchanged and the new identity adapter preserves the old identity result;
+- final GitHub Actions v4 validation passes the documentation contract and consolidated maintenance runner **30/30**, with the core mutation harness **43/43** and T1.5 lineage mutations **7/7**;
 - existing SC1–SC6 gameplay regressions remain unchanged;
 - `ADOPT_ONLY`, immediate-MOVE T2-A, Move→Attack terminal T2-B, and T2-C hysteresis are **not active in current source**;
 - movement policy profile values remain reserved until their staged T2/T3 promotions.

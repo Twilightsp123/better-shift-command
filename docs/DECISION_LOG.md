@@ -121,6 +121,6 @@
 
 **Reason:** The direct T2 experiments showed that Native future execution and BSC recovery can interact destructively. The old identity selector was semantically correct but encoded two different command lineages in one implicit fallback. T2 reconciliation needs to know not only *which canonical action* an exact Native order matches, but also *which command lineage* supplied that identity, without changing T1 decisions yet.
 
-**Evidence:** T1.5 leaves `TransitionPolicy.evaluate()`, route/attack geometry and CFG thresholds unchanged; a modeled equivalence gate checks 15,625 capture/accepted identity states against the old selector; seven lineage-specific mutations are caught.
+**Evidence:** T1.5 leaves `TransitionPolicy.evaluate()`, route/attack geometry and CFG thresholds unchanged; a modeled equivalence gate checks 15,625 capture/accepted identity states against the old selector; seven lineage-specific mutations are caught. Final GitHub Actions v4 validation passes the documentation contract and the consolidated maintenance runner **30/30**; the core mutation harness also passes **43/43**.
 
 **Consequence:** T1.5 is behavior-neutral. Immediate future MOVE still follows the legacy T1 rollback rule, Move→Attack remains strict, and `ADOPT_ONLY` remains inactive. T2 may consume the lineage metadata later, but T1.5 itself may not use it to widen or narrow transition permission.

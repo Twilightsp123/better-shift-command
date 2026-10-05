@@ -4,8 +4,8 @@
 
 | Gate | Result | Meaning |
 |---|---:|---|
-| Maintenance jobs | 27/27 recovered T1 baseline PASS; T1.5 adds 3 new gates | full consolidated rerun required after branch push |
-| Mutation suite | 43/43 recovered T1 baseline CAUGHT + T1.5 lineage 7/7 CAUGHT locally | full consolidated rerun required after branch push |
+| Maintenance jobs | **30/30 PASS** | GitHub Actions v4 consolidated runner: recovered CorePath/T1 gates plus 3 T1.5 gates |
+| Mutation suite | **PASS** | Core mutation harness PASS (43/43) + T1.5 lineage 7/7 CAUGHT; consolidated runner PASS |
 | Portable Native CTest | 13/13 PASS | portable native fixtures |
 | ASan/UBSan CTest | 13/13 PASS | sanitizer baseline |
 | Windows VS2019 v142 + MASM | PASS | audited Move-VTable-fix delivery |
@@ -33,9 +33,9 @@
 | D1 decision table | PASS / approved design | this package |
 | T1H hidden PolicyProfile/MCT scaffold | PASS | static contract + existing suite; no visible MCT UI |
 | T1 shared behavior-neutral evaluator refactor | **PASS** | old/new deterministic decision probe equivalent; existing suite unchanged |
-| T1.5 execution-lineage separation | **LOCAL STRUCTURAL/EQUIVALENCE PASS** | capture/issued identity split; 15,625 identity states equivalent; 7/7 lineage mutants caught; full consolidated rerun pending |
+| T1.5 execution-lineage separation | **PASS / BEHAVIOR-NEUTRAL** | capture/issued identity split; 15,625 identity states equivalent; 7/7 lineage mutants caught; consolidated 30/30 PASS |
 | T2 immediate-MOVE reconciliation | NOT ACTIVE | implement only after T1; offline + mutation + WH3 RT-TP-04/05 |
-| T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1 NOT ACTIVE | reimplement through evaluator + rerun offline/WH3 RT-TP-02/03 |
+| T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1.5 NOT ACTIVE | reimplement through evaluator + rerun offline/WH3 RT-TP-02/03 |
 | T2 hysteresis | NOT ACTIVE | issue/adopt bands required before T2 promotion |
 | T3 visible MCT adapter/UI wiring | NOT RUN | uses existing T1H profile compiler; missing-MCT fallback |
 | T3 MCT runtime comparison | NOT RUN | Smooth/Balanced/Precise differ only in timing/precision |
