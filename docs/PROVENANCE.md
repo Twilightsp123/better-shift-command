@@ -68,3 +68,8 @@ Behavior-neutral T1 source was re-anchored from maintenance branch commit `577e7
 - SHA256 `40f8e3a1aba798e731e7da3eade5adaecdd2d5a326f49a1c1892114613ae4412`
 
 Runtime evidence that falsified the direct T2-A/hairpin path is preserved under `runtime_evidence/20261005_transition_policy_experiments/`. Those logs are gameplay-policy evidence, not Native reverse-engineering evidence.
+
+
+## 2026-10-05 T1.5 execution-lineage provenance
+
+T1.5 begins from restored maintenance commit `0648934bf3550ef2ad3f4d0268efcf11c3b90988`. The stage changes Lua controller identity representation, tests and documentation only. Native C++/ASM, WH3 9.0.2 candidate-map tooling, generated Native map header and address-pipeline tests are intentionally unchanged. The protected address-file blob audit must remain 8/8 identical to `0648934`. The exact pre-T1.5 controller is preserved at `archive/tpol_t15_pre_execution_lineage/source/better_shift_command.lua` (SHA256 `f01be6f81d0e662ab265dfc9b81a1f9df99a9de42666d994badc86085727b3c4`).

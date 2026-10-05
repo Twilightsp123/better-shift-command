@@ -71,3 +71,10 @@ These gaps should be stated explicitly in future handoffs. Do not invent missing
 | direct T2-B/T2-A/hairpin runtime observations | DIRECT LOG EVIDENCE | `runtime_evidence/20261005_transition_policy_experiments/` |
 | direct T2-A/hairpin test artifacts | HISTORICAL / SUPERSEDED | `archive/legacy_move_scheduler_tests/` and Git history |
 | native Move passthrough diagnostic | HISTORICAL / REJECTED AS PRODUCT ARCHITECTURE | `archive/tpol_t2_experiments/` + Git commit `e9306614156d39ac5e9778fe18d234703bbd7a44` |
+
+## T1.5 coverage addition
+
+| Material | Coverage | Location / caution |
+|---|---|---|
+
+| BSC-TPOL-T1.5 execution lineage | SOURCE + TEST + DECISION coverage | current controller, `archive/tpol_t15_pre_execution_lineage/`, `tests/test_execution_lineage_t15_*`, Decision Log | behavior-neutral structural stage; no WH3 gameplay claim |

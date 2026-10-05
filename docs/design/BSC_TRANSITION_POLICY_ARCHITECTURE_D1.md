@@ -1,6 +1,6 @@
 # BSC Transition Policy Architecture D1
 
-Status: **APPROVED DESIGN — T1H + T1 SHARED EVALUATOR IMPLEMENTED; T2 GAMEPLAY POLICY NOT ACTIVE**  
+Status: **APPROVED DESIGN — T1H + T1 SHARED EVALUATOR + T1.5 EXECUTION LINEAGE IMPLEMENTED; T2 GAMEPLAY POLICY NOT ACTIVE**  
 Design stream: `BSC-TPOL-D1`  
 Runtime baseline: `BSC v1.2.2 / 1.2.2-corepath-rc8` + Native `1.0.17-corepath-wh3-6c104-movevtfix`
 
@@ -169,6 +169,11 @@ If Native is already executing the **immediate** successor:
 - `HARD_BLOCK` → rollback/fail closed.
 
 If Native is executing `i+2` or later, H2 overrides policy and forces rollback.
+
+
+## 6.1 T1.5 execution-lineage input
+
+Before T2 changes any decision zone, exact execution identity is represented with two explicit sources: the original player `capture_identity` and any later BSC `issued_identity`. The evaluator/reconciler may observe the selected lineage as `PLAYER_NATIVE` or `BSC_ISSUED`. T1.5 does not use this value to change permission; it only removes ambiguity so later T2 logic can reason about the source of an exact match without redefining canonical semantics.
 
 ## 7. Hysteresis: the anti-thrashing rule
 

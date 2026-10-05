@@ -53,9 +53,9 @@ The Native Bridge string is an internal compatibility/build identifier, not the 
 
 ## Current architecture status
 
-The current runtime is **BSC-TPOL-T1 behavior-neutral** on top of the existing SC1–SC6 gameplay baseline. T1H provides the hidden immutable PolicyProfile/MCT adapter scaffold; T1 now adds the shared `R1.TransitionPolicy.evaluate()` decision plane used by proactive `advance()`, SC6 reconciliation, and scheduler urgency.
+The current runtime is **BSC-TPOL-T1.5 behavior-neutral** on top of the existing SC1–SC6 gameplay baseline. T1H provides the hidden immutable PolicyProfile/MCT adapter scaffold; T1 provides the shared `R1.TransitionPolicy.evaluate()` decision plane; T1.5 now separates original player-capture execution identity from BSC-issued/ACK identity and records the active execution lineage explicitly.
 
-**T1 intentionally does not change gameplay decisions.** Move→Attack is still strict until current Move semantic completion, and an exact immediate future MOVE in SC6 still follows the legacy rollback behavior. `ADOPT_ONLY` / hysteresis is not active yet.
+**T1.5 still intentionally does not change gameplay decisions.** Move→Attack remains strict until current Move semantic completion, an exact immediate future MOVE in SC6 still follows the legacy rollback behavior, and `ADOPT_ONLY` / hysteresis is not active. T1.5 is a structural prerequisite for T2 so Native-captured queue items and later BSC-issued commands cannot share an ambiguous identity slot.
 
 The 2026-10-05 direct T2-B, T2-A, hairpin and native-passthrough builds are preserved as historical experiments/evidence only. They do not override the staged D1 migration or current runtime source.
 

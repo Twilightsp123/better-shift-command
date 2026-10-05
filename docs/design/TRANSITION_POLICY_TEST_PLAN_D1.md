@@ -6,6 +6,18 @@ Status: **DESIGN GATE**
 
 T1 behavior-neutral shared-evaluator gate: **PASS (2026-10-05)**. Existing gameplay suite is unchanged, deterministic pre-T1/current transition probe is equivalent, and mutation catches bypass of the evaluator in proactive dispatch, SC6 and scheduler urgency. The tests below remain T2/T3 promotion requirements.
 
+
+## 0.5 T1.5 execution-lineage gate
+
+T1.5 is behavior-neutral and must prove:
+
+- original player order identity is retained as `capture_identity`;
+- accepted BSC issue identity is stored separately as `issued_identity`;
+- the authoritative matcher returns the same seq/receipt/lifetime result as T1;
+- `TransitionPolicy.evaluate()`, route/attack geometry and CFG thresholds are unchanged;
+- Native reconciliation receives lineage metadata but does not use it to alter T1 zones;
+- lineage mutation tests catch dropped capture identity, ignored/unstored issued identity, lost lane snapshot/restore, and missing reconcile lineage.
+
 ## 1. Offline policy tests
 
 Every test should assert both decision `zone` and stable `reason`.

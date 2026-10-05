@@ -599,3 +599,14 @@ The project returned to the approved migration order and re-anchored source on t
 - Mutation coverage was extended to catch advance/SC6/scheduler evaluator bypass and H2 future-skip relaxation.
 
 This stage is the structural prerequisite for T2-A, T2-B and T2-C; it is not itself a smoothness behavior change.
+
+
+---
+
+## 23. 2026-10-05 — BSC-TPOL-T1.5 execution-lineage separation
+
+Before re-entering T2, the execution-identity representation was split without changing gameplay decisions. Player-captured Native identity is now preserved as `capture_identity`; a command later issued and accepted by BSC gets a separate `issued_identity`; runtime state records `execution_lane`. The authoritative matcher still returns the same seq/receipt/lifetime decision as T1, but it additionally reports whether the match came from `PLAYER_NATIVE` or `BSC_ISSUED`.
+
+T1.5 deliberately does **not** solve O-09 by itself. Immediate future MOVE still rolls back exactly as T1 did. Its purpose is to prevent the next T2 implementation from confusing an old Native queue item with a BSC-issued execution merely because both correspond to the same canonical action.
+
+Validation added for this stage: structural contract, seven lineage-specific mutations, policy/geometry/CFG byte-equivalence, and a modeled 15,625-state identity-equivalence gate. No Native C++/ASM or WH3 address map is changed.

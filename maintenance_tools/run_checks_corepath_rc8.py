@@ -35,6 +35,9 @@ def main():
       ('exec_identity_v3.txt',L+['tests/test_exec_identity_v3.lua','source/better_shift_command.lua','tests/fixture.lua']),
       ('transition_policy_t1_contract.txt',[sys.executable,'tests/test_transition_policy_t1_contract.py']),
       ('transition_policy_t1_equivalence.txt',[sys.executable,'tests/test_transition_policy_t1_equivalence.py']),
+      ('execution_lineage_t15_contract.txt',[sys.executable,'tests/test_execution_lineage_t15_contract.py']),
+      ('execution_lineage_t15_semantic_equivalence.txt',[sys.executable,'tests/test_execution_lineage_t15_semantic_equivalence.py']),
+      ('execution_lineage_t15_mutations.txt',[sys.executable,'tests/test_execution_lineage_t15_mutations.py']),
       ('tools.txt',[sys.executable,'tests/test_tools.py']),
       ('reverse.txt',[sys.executable,'tests/test_reverse_inventory.py']),
       ('mutations.txt',[sys.executable,'steering_tests/test_mutations_sc5.py'])]

@@ -1,6 +1,6 @@
 # Transition Policy Migration D1
 
-Status: **APPROVED IMPLEMENTATION PLAN — T1H + T1 IMPLEMENTED; T2 PENDING**
+Status: **APPROVED IMPLEMENTATION PLAN — T1H + T1 + T1.5 IMPLEMENTED; T2 PENDING**
 
 The migration deliberately avoids a broad convergence rewrite. Each stage must be independently testable and revertible.
 
@@ -44,6 +44,21 @@ Gate:
 - mutation catches bypass of evaluator.
 
 **T1 implementation result — 2026-10-05:** PASS. Shared evaluator is wired to `advance()`, SC6 and scheduler urgency; deterministic old/new probe is equivalent; full maintenance suite passes; mutation catches evaluator bypass. No T2 behavior is active.
+
+
+### T1.5 — Execution lineage separation (implemented behavior-neutrally)
+
+Before T2, split the identity of the player's captured Native command from the identity of any command later issued and ACKed by BSC. Add explicit execution-lane metadata, route exact matching through one lineage-aware adapter, and pass lineage into Native reconciliation context. Do not change TransitionPolicy zones, route geometry, CFG thresholds or rollback/adopt outcomes.
+
+Gate:
+
+- T1.5 structural contract PASS;
+- old/new identity selector semantic equivalence;
+- TransitionPolicy/geometry/CFG unchanged;
+- lineage-specific mutation protection;
+- Native/address source unchanged.
+
+**T1.5 implementation result — 2026-10-05:** local structural/equivalence gates PASS; full consolidated maintenance rerun required before T2 behavior work.
 
 ## T2 — Smooth-default behavior correction
 

@@ -1,0 +1,8 @@
+CAUGHT drop_capture_identity :: FAIL missing capture_identity={lineage="PLAYER_NATIVE"
+CAUGHT ignore_issued_identity :: FAIL missing local issued=rt.issued_identity
+CAUGHT drop_issued_identity_record :: FAIL missing issued_identity={lineage="BSC_ISSUED"
+CAUGHT drop_previous_lane_snapshot :: FAIL missing previous_execution_lane=st.execution_lane
+CAUGHT drop_ack_lane_switch :: FAIL missing st.execution_lane="BSC_ISSUED"
+CAUGHT drop_reconcile_lineage_context :: FAIL execution_lineage=future_lineage count=1, expected 2
+CAUGHT drop_rollback_lineage_log :: FAIL missing execution_lineage="..clean(execution_lineage)
+TOTAL 7 T1.5 MUTANTS CAUGHT

@@ -12,7 +12,7 @@ local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
 local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
 local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1H_HIDDEN")
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE")
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -936,15 +936,38 @@ local function count_set(t) local n=0;for _ in pairs(t or {}) do n=n+1 end;retur
 -- Authoritative execution identity adapter.
 -- V3 is the production source. V2 is a compatibility fallback only when V3
 -- execution identity is unavailable; a live V3 provider is never mixed with V2.
-local function action_execution_identity(a)
-    if not a then return nil,nil,nil end
+local function identity_triplet(seq,receipt,lifetime,lineage,issue)
+    if not id(seq) or not id(receipt) or not id(lifetime) then return nil,"ACTION_IDENTITY_INCOMPLETE" end
+    return {seq=seq,receipt=receipt,lifetime=lifetime,lineage=lineage,issue=issue},"OK"
+end
+-- T1.5 execution-lineage adapter. Canonical semantics stay on the action while
+-- the command identity that currently authorizes exact execution is explicit.
+-- This is behavior-neutral: BSC-issued identity still takes precedence exactly as
+-- the old accepted_* fallback did; otherwise the original player capture is used.
+function R1.action_execution_identity(a)
+    if not a then return nil,"ACTION_IDENTITY_MISSING" end
     local rt=a.runtime or {}
-    local seq=rt.accepted_receipt and rt.accepted_seq or a.seq
-    if rt.accepted_receipt and not rt.accepted_seq then return nil,nil,nil,"ACCEPTED_WITHOUT_NATIVE_SEQUENCE" end
-    local receipt=rt.accepted_receipt or a.serial
-    local lifetime=rt.accepted_lifetime or a.unit_lifetime
-    if not id(seq) or not id(receipt) or not id(lifetime) then return nil,nil,nil,"ACTION_IDENTITY_INCOMPLETE" end
-    return seq,receipt,lifetime,"OK"
+    local issued=rt.issued_identity
+    if type(issued)=="table" and issued.receipt then
+        if not issued.seq then return nil,"ACCEPTED_WITHOUT_NATIVE_SEQUENCE" end
+        return identity_triplet(issued.seq,issued.receipt,issued.lifetime or a.unit_lifetime,"BSC_ISSUED",issued.issue)
+    end
+    -- Compatibility for a pre-T1.5 action restored from an in-flight runtime table.
+    if rt.accepted_receipt then
+        if not rt.accepted_seq then return nil,"ACCEPTED_WITHOUT_NATIVE_SEQUENCE" end
+        return identity_triplet(rt.accepted_seq,rt.accepted_receipt,rt.accepted_lifetime or a.unit_lifetime,"BSC_ISSUED",nil)
+    end
+    local captured=a.capture_identity
+    if type(captured)=="table" then
+        return identity_triplet(captured.seq,captured.receipt,rt.accepted_lifetime or captured.lifetime or a.unit_lifetime,"PLAYER_NATIVE",nil)
+    end
+    -- Legacy compatibility for archived fixtures/actions created before T1.5.
+    return identity_triplet(a.seq,a.serial,rt.accepted_lifetime or a.unit_lifetime,"PLAYER_NATIVE",nil)
+end
+local function action_execution_identity(a)
+    local x,why=R1.action_execution_identity(a)
+    if not x then return nil,nil,nil,why,nil end
+    return x.seq,x.receipt,x.lifetime,"OK",x.lineage
 end
 local function normalize_active_execution(st,e,provider,schema)
     if type(e)~="table" or e.schema~=schema or e.epoch~=S.epoch or e.unit_uid~=st.uid or e.complete~=true then
@@ -974,8 +997,7 @@ function R1.read_active_execution(st)
     end
     local v2=S.evidence_caps or {}
     if v2.execution_identity==true then
-        if type(bridge.read_active_order_identity_v2)~="function" then return nil,"V2_PROVIDER_UNAVAILABLE" end
-        local ok,e,reason=pcall(bridge.read_active_order_identity_v2,st.uid)
+        if type(bridge.read_active_order_identity_v2)~="function" then return nil,"V2_PROVIDER_UNAVAILABLE" end        local ok,e,reason=pcall(bridge.read_active_order_identity_v2,st.uid)
         if not ok then return nil,"V2_PROVIDER_EXCEPTION" end
         if type(e)~="table" then return nil,reason or "V2_ORDER_IDENTITY_UNAVAILABLE" end
         return normalize_active_execution(st,e,"V2",2)
@@ -987,17 +1009,18 @@ function R1.execution_matches_action(e,a)
     if e.known~=true then return false,"EXECUTION_NOT_MAPPED" end
     if not a or (a.type~="MOVE" and a.type~="ATTACK") then return false,"ACTION_UNSUPPORTED" end
     if e.kind~=a.type then return false,"EXECUTION_KIND_MISMATCH" end
-    local seq,receipt,lifetime,why=action_execution_identity(a)
-    if not seq then return false,why end
-    if e.accepted_journal_serial~=receipt or e.unit_lifetime~=lifetime then return false,"EXECUTION_RECEIPT_OR_LIFETIME_MISMATCH" end
-    if e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH" end
-    if a.type=="ATTACK" and e.target_uid~=a.target_uid then return false,"EXECUTION_TARGET_MISMATCH" end
+    local seq,receipt,lifetime,why,lineage=action_execution_identity(a)
+    if not seq then return false,why,nil end
+    if e.accepted_journal_serial~=receipt or e.unit_lifetime~=lifetime then return false,"EXECUTION_RECEIPT_OR_LIFETIME_MISMATCH",lineage end
+    if e.active_engine_seq~=seq then return false,"EXECUTION_SEQUENCE_MISMATCH",lineage end
+    if a.type=="ATTACK" and e.target_uid~=a.target_uid then return false,"EXECUTION_TARGET_MISMATCH",lineage end
     if a.type=="MOVE" then
         if not a.pos or not finite(e.dest_x) or not finite(e.dest_z)
             or math.abs(e.dest_x-a.pos.x)>0.05 or math.abs(e.dest_z-a.pos.z)>0.05 then
-            return false,"EXECUTION_DESTINATION_MISMATCH"
+            return false,"EXECUTION_DESTINATION_MISMATCH",lineage
         end
-    end    return true,"OK"
+    end
+    return true,"OK",lineage
 end
 function R1.order_evidence(st,a,now)
     local e,why=R1.read_active_execution(st)
@@ -1482,7 +1505,7 @@ end
 function Core.new_state(su,dynamic)
     dynamic=dynamic==true
     return {uid=uid(su.unit),unit=su.unit,uc=su.uc,gen=0,revision=nil,actions={},plan=nil,
-        idx=1,owned=false,terminal=false,blocked=false,require_replace=dynamic,recover_revision=nil,speeds={},pos=nil,prev_pos=nil,last_pos=nil,
+        idx=1,owned=false,execution_lane="PLAYER_NATIVE",terminal=false,blocked=false,require_replace=dynamic,recover_revision=nil,speeds={},pos=nil,prev_pos=nil,last_pos=nil,
         last_sample=nil,origin=nil,moves=0,last_wait=-1000000,refused=nil,phase=dynamic and "WAIT_FOR_REPLACE" or "NATIVE_TRACKING",
         attack=nil,model_step_ms=0,cold_seen=dynamic,cold_idle=nil,queue_reset_cert=nil,restart_idle_candidate=nil,restart_idle_cert=nil,
         dynamic=dynamic,last_seen_scan=nil,block_state={},action_serial=0,action_base=0}
@@ -1651,14 +1674,16 @@ cancel=function(st,reason,now,observe)
         end
     end
     st.gen=st.gen+1; st.actions={}; st.plan=nil; st.idx=1; st.origin=nil
-    st.owned=false; st.terminal=false; st.moves=0; st.refused=nil; st.attack=nil; st.phase="CANCELLED"; st.input_gapped=false; st.tail_reached=false; st.recover_revision=nil
+    st.owned=false; st.execution_lane="PLAYER_NATIVE"; st.terminal=false; st.moves=0; st.refused=nil; st.attack=nil; st.phase="CANCELLED"; st.input_gapped=false; st.tail_reached=false; st.recover_revision=nil
     st.block_state={};st.action_serial=0;st.action_base=0;st.native_arrival=nil;st.unverified_native_successor=nil
     -- A pending native order is NOT relabelled to the new generation.
 end
 local function action(st,r,now)
     if type(r.is_queued)~="boolean" then return nil,"QUEUED_MISSING" end
-    local a={type=r.order_type,serial=r.serial,seq=r.engine_seq_valid and r.engine_seq or nil,
-        revision=r.unit_revision,unit_lifetime=r.unit_lifetime,queued=r.is_queued,origin=point(st.unit),captured_ms=now}
+    local captured_seq=r.engine_seq_valid and r.engine_seq or nil
+    local a={type=r.order_type,serial=r.serial,seq=captured_seq,
+        revision=r.unit_revision,unit_lifetime=r.unit_lifetime,queued=r.is_queued,origin=point(st.unit),captured_ms=now,
+        capture_identity={lineage="PLAYER_NATIVE",seq=captured_seq,receipt=r.serial,lifetime=r.unit_lifetime}}
     if a.type=="MOVE" then
         if not finite(r.dest_x) or not finite(r.dest_y) or not finite(r.dest_z) then return nil,"MOVE_PAYLOAD" end
         a.pos={x=r.dest_x,y=r.dest_y,z=r.dest_z}
@@ -1755,7 +1780,7 @@ function Core.ingest(r,now)
                 and r.unit_revision==st.revision and cmp(st.revision,p.revision)>0
                 and r.order_type==p.kind and r.is_queued==false
                 and (p.kind~="ATTACK" or r.target_uid==p.target_uid) then
-                st.owned=p.previous_owned
+                st.owned=p.previous_owned;st.execution_lane=p.previous_execution_lane or st.execution_lane
                 st.phase=st.attack and (st.attack.previous_eligible and "ATTACK_HOLD" or "ATTACK_APPROACH") or "MOVE_TRACKING"
                 st.input_gapped=true
                 if DEBUG_TELEMETRY then dlog("OWN_STALE_AFTER_APPEND uid="..st.uid.." gen="..st.gen.." issue="..p.issue..
@@ -1788,9 +1813,11 @@ function Core.ingest(r,now)
             q.x,q.y,q.z=r.dest_x,r.dest_y,r.dest_z
         end
         st.revision=r.unit_revision
-        action_runtime(p.action).accepted_seq=r.engine_seq_valid and r.engine_seq or nil
-        action_runtime(p.action).accepted_receipt=r.serial
-        action_runtime(p.action).accepted_lifetime=r.unit_lifetime
+        local accepted_rt=action_runtime(p.action)
+        accepted_rt.accepted_seq=r.engine_seq_valid and r.engine_seq or nil
+        accepted_rt.accepted_receipt=r.serial
+        accepted_rt.accepted_lifetime=r.unit_lifetime
+        accepted_rt.issued_identity={lineage="BSC_ISSUED",seq=accepted_rt.accepted_seq,receipt=r.serial,lifetime=r.unit_lifetime,issue=p.issue}
         if not p.reassert_current then
             local previous=st.plan[p.previous_idx]
             if previous and previous.type=="MOVE" and action_runtime(previous).handoff_committed and not action_runtime(previous).semantic_done then
@@ -1809,7 +1836,7 @@ function Core.ingest(r,now)
                 end
             end
         end
-        st.idx=p.idx; st.owned=true
+        st.idx=p.idx; st.owned=true;st.execution_lane="BSC_ISSUED"
         if not p.reassert_current then st.origin=p.origin end
         local enter_reason=p.reassert_attack and "CURRENT_ATTACK_REASSERT_ACK" or (p.reassert_current and "CURRENT_MOVE_REASSERT_ACK" or "OWN_ACK")
         enter_action(st,st.plan[p.idx],now,enter_reason)
@@ -1969,8 +1996,7 @@ function Core.ingest(r,now)
         end
         st.queue_reset_cert=nil;st.restart_idle_cert=nil;st.restart_idle_candidate=nil
         -- Preserve native queued=true. Do not forge a REPLACE or send a priming order.
-    end
-    if #st.actions>=CFG.max_actions and st.plan and st.idx>1 and not S.pending_by_uid[st.uid] then
+    end    if #st.actions>=CFG.max_actions and st.plan and st.idx>1 and not S.pending_by_uid[st.uid] then
         local n=st.idx-1
         for i=1,#st.actions-n do st.actions[i]=st.actions[i+n] end
         for i=#st.actions,#st.actions-n+1,-1 do st.actions[i]=nil end
@@ -1996,7 +2022,8 @@ function Core.ingest(r,now)
     for i=from,#st.actions do candidate[#candidate+1]=st.actions[i] end
     local supported,why=plan_supported(st,candidate,active)
     if active and not supported then
-        table.remove(st.actions,#st.actions)        if a.block_id and (a.type=="ATTACK" or not st.actions[#st.actions] or st.actions[#st.actions].block_id~=a.block_id) then
+        table.remove(st.actions,#st.actions)
+        if a.block_id and (a.type=="ATTACK" or not st.actions[#st.actions] or st.actions[#st.actions].block_id~=a.block_id) then
             st.block_state[a.block_id]=nil
         end
         log("APPEND_REFUSED uid="..st.uid.." reason="..why.." policy=PRESERVE_EXISTING_ACTIONS");return
@@ -2093,7 +2120,7 @@ function Core.activate(st)
     end
     if not first.origin then return end
     -- Each input payload was already copied at admission. The live native queue is NOT consulted.
-    st.plan=st.actions; st.idx=1; st.origin=copy(first.origin)
+    st.plan=st.actions; st.idx=1; st.origin=copy(first.origin);st.execution_lane="PLAYER_NATIVE"
     enter_action(st,first,clock(),attack_first and "PLAYER_ATTACK_ADOPTED" or "PLAYER_MOVE_ADOPTED")
     if attack_first then first.seed_mode="PLAYER_ATTACK_REPLACE" end
     st.phase=attack_first and "ATTACK_APPROACH" or "MOVE_TRACKING"
@@ -2798,7 +2825,7 @@ local function dispatch(st,index,reason,g,now,opts)
         revision=rev,target_uid=a.target_uid,started=now,after_attack=after_attack,attack_issue=attack_issue,hold_ms=hold_ms,
         source_attack_target_uid=attack_target_uid,reassert_current=opts.reassert_current==true,
         reassert_attack=opts.reassert_attack==true,previous_origin=copy(st.origin),
-        attack_abort=opts.attack_abort,previous_idx=st.idx,previous_owned=st.owned,action=a,saw_append=false,
+        attack_abort=opts.attack_abort,previous_idx=st.idx,previous_owned=st.owned,previous_execution_lane=st.execution_lane,action=a,saw_append=false,
         handoff_geometry={cut_tolerance=g.cut_tolerance,cut_error=g.cut_error,remaining=g.remaining,route_reason=g.route_reason,
             route_mode=g.route_mode,corner_window=g.corner_window,corner_window_base=g.corner_window_base,
             corner_window_early=g.corner_window_early,corner_lookahead=g.corner_lookahead,
@@ -2968,8 +2995,7 @@ function Core.advance_attack(st,now,observe_only)
     if r.reset_hold then
         if DEBUG_TELEMETRY then log("FEG_RELOCK uid="..st.uid.." gen="..st.gen.." issue="..t.issue.." episode="..r.episode..
             " model_ms="..string.format("%.0f",now).." previous_credit_ms="..string.format("%.0f",t.eligible_ms)..
-            " reason="..r.reason) end
-        t.previous_eligible=false;t.ready_logged=false -- R06: preserve already qualified credit on relock
+            " reason="..r.reason) end        t.previous_eligible=false;t.ready_logged=false -- R06: preserve already qualified credit on relock
     end
     if r.just_opened then
         if DEBUG_TELEMETRY then log("FEG_OPEN uid="..st.uid.." gen="..st.gen.." issue="..t.issue.." episode="..r.episode..
@@ -2995,7 +3021,8 @@ function Core.advance_attack(st,now,observe_only)
             " issue="..t.issue.." credited_ms="..credited.." dist="..num_or_nil(r.distance)..
             " bbox_distance="..num_or_nil(contact_distance).." reason="..clean(r.reason)..
             " model_ms="..now) end
-    end    if delta>CFG.attack_observation_gap_ms or st.input_gapped then
+    end
+    if delta>CFG.attack_observation_gap_ms or st.input_gapped then
         if DEBUG_TELEMETRY then log("ATTACK_OBSERVATION_GAP uid="..st.uid.." gen="..st.gen.." issue="..t.issue..
             " delta_ms="..string.format("%.0f",delta).." model_ms="..string.format("%.0f",now).." credited_ms=0") end
     end
@@ -3206,9 +3233,9 @@ function Core.maybe_reassert_exit(st,now)
     return false
 end
 
-local function rollback_native_future_to_current(st,cur,future,future_index,e,now,fault_reason,route_reason,recovery_reason)
+local function rollback_native_future_to_current(st,cur,future,future_index,e,now,fault_reason,route_reason,recovery_reason,execution_lineage)
     st.unverified_native_successor={gen=st.gen,action=cur.action_id,next_action=future and future.action_id or nil,
-        future_index=future_index,ms=now,exact=true,provider=e and e.provider or nil}
+        future_index=future_index,ms=now,exact=true,provider=e and e.provider or nil,execution_lineage=execution_lineage}
     R1.fault(st,cur,"BLOCKED_EXECUTION_IDENTITY",fault_reason,now)
     local budget_ok,budget=v3_recovery_available(st,cur,now,"NATIVE_ROLLBACK")
     if budget_ok and S.pending_count<CFG.max_inflight and reassert_current_move(st,recovery_reason,now) then
@@ -3217,7 +3244,7 @@ local function rollback_native_future_to_current(st,cur,future,future_index,e,no
         log("NATIVE_SUCCESSOR_ROLLBACK uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
             " blocked_successor="..clean(future and future.action_id).." future_index="..clean(future_index)..
             " active_kind="..clean(e and e.kind).." active_engine_seq="..clean(e and e.active_engine_seq)..
-            " provider="..clean(e and e.provider).." route_reason="..clean(route_reason)..
+            " provider="..clean(e and e.provider).." execution_lineage="..clean(execution_lineage).." route_reason="..clean(route_reason)..
             " remaining_budget="..left.." model_ms="..now.." preserved_tail=true shared_budget=true")
         return true
     end
@@ -3246,8 +3273,9 @@ function Core.reconcile_native_successor(st,now)
         return false
     end
 
-    local current_match=R1.execution_matches_action(e,cur)
+    local current_match,_,current_lineage=R1.execution_matches_action(e,cur)
     if current_match then
+        st.observed_execution_lineage=current_lineage
         st.unverified_native_successor=nil
         if cur.runtime and cur.runtime.fault and cur.runtime.fault.code=="BLOCKED_EXECUTION_IDENTITY" then R1.clear_fault(st,cur,now) end
         return false
@@ -3256,10 +3284,10 @@ function Core.reconcile_native_successor(st,now)
     -- The engine may have promoted any captured future queue item before Lua's
     -- canonical cursor advanced. Identify the exact future action, but never skip
     -- intermediate canonical actions just because Native overran them.
-    local future_index=nil;local future=nil
+    local future_index=nil;local future=nil;local future_lineage=nil
     for i=st.idx+1,#st.plan do
-        local match=R1.execution_matches_action(e,st.plan[i])
-        if match then future_index=i;future=st.plan[i];break end
+        local match,_,lineage=R1.execution_matches_action(e,st.plan[i])
+        if match then future_index=i;future=st.plan[i];future_lineage=lineage;break end
     end
     if not future then
         st.unverified_native_successor={gen=st.gen,action=cur.action_id,ms=now,exact=true,provider=e.provider,noncanonical=true}
@@ -3271,25 +3299,25 @@ function Core.reconcile_native_successor(st,now)
 
     local g=geometry(st,future)
     if g and future.type=="ATTACK" then g=attack_geometry(st,future,g) end
-    local decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{consumer="NATIVE_RECONCILE",current_index=st.idx,future_index=future_index})
+    local decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{consumer="NATIVE_RECONCILE",current_index=st.idx,future_index=future_index,execution_lineage=future_lineage})
     if decision.zone=="HARD_BLOCK" then
         return rollback_native_future_to_current(st,cur,future,future_index,e,now,
-            "NATIVE_FUTURE_OVERRUN",decision.reason,"NATIVE_FUTURE_OVERRUN_ROLLBACK_TO_CURRENT_MOVE")
+            "NATIVE_FUTURE_OVERRUN",decision.reason,"NATIVE_FUTURE_OVERRUN_ROLLBACK_TO_CURRENT_MOVE",future_lineage)
     end
     if decision.zone~="ISSUE_READY" then
         return rollback_native_future_to_current(st,cur,future,future_index,e,now,
-            "NATIVE_ADVANCED_BEFORE_PERMISSION",decision.reason,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE")
+            "NATIVE_ADVANCED_BEFORE_PERMISSION",decision.reason,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE",future_lineage)
     end
     local why=decision.route_reason or decision.reason
 
     R1.clear_fault(st,cur,now)
     st.unverified_native_successor=nil
-    st.idx=st.idx+1;st.origin=copy(st.pos);st.owned=false;st.tail_reached=false
+    st.idx=st.idx+1;st.origin=copy(st.pos);st.owned=false;st.execution_lane=future_lineage or "PLAYER_NATIVE";st.observed_execution_lineage=future_lineage;st.tail_reached=false
     enter_action(st,future,now,"NATIVE_SUCCESSOR_ADOPTED")
     begin_attack_history(st,future,now,"NATIVE_CHAIN","0")
     if DEBUG_TELEMETRY then log("NATIVE_SUCCESSOR_ADOPTED uid="..st.uid.." gen="..st.gen.." action="..future.action_id..
         " target="..future.target_uid.." previous_action="..cur.action_id.." active_engine_seq="..e.active_engine_seq..
-        " provider="..clean(e.provider).." route_reason="..clean(why).." model_ms="..now) end
+        " provider="..clean(e.provider).." execution_lineage="..clean(future_lineage).." route_reason="..clean(why).." model_ms="..now) end
     return true
 end
 local function advance(st,now)
@@ -3541,7 +3569,7 @@ function Core.recover_ack_timeout(p,now)
     local ok,res=pcall(bridge.cancel_pending_issue,p.issue)
     if not ok or res~=true then return false end
     S.pending_by_uid[st.uid]=nil;S.pending_by_issue[p.issue]=nil;S.pending_count=math.max(0,S.pending_count-1)
-    st.owned=p.previous_owned
+    st.owned=p.previous_owned;st.execution_lane=p.previous_execution_lane or st.execution_lane
     st.phase=st.attack and (st.attack.previous_eligible and "ATTACK_HOLD" or "ATTACK_APPROACH") or "MOVE_TRACKING"
     st.input_gapped=true
     if p.reassert_attack then

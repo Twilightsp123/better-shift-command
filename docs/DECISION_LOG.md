@@ -113,3 +113,14 @@
 **Evidence:** full existing maintenance suite PASS, deterministic old/new transition probe equivalent, and mutation coverage catches evaluator bypass in advance/SC6/scheduler plus H2 future-skip relaxation.
 
 **Consequence:** T2-A/T2-B/T2-C may now change policy in one place. `ADOPT_ONLY` remains inactive until T2-C.
+
+
+## D-20261005-03 — Separate captured and BSC-issued execution identity before T2
+
+**Decision:** Before enabling T2-A/T2-C, each canonical action keeps the player's original Native capture identity separate from any later BSC-issued/ACK identity. Runtime state records an explicit execution lane (`PLAYER_NATIVE` / `BSC_ISSUED`). `R1.execution_matches_action()` consumes one lineage-aware adapter rather than implicitly folding both identities into `accepted_* or capture` fields.
+
+**Reason:** The direct T2 experiments showed that Native future execution and BSC recovery can interact destructively. The old identity selector was semantically correct but encoded two different command lineages in one implicit fallback. T2 reconciliation needs to know not only *which canonical action* an exact Native order matches, but also *which command lineage* supplied that identity, without changing T1 decisions yet.
+
+**Evidence:** T1.5 leaves `TransitionPolicy.evaluate()`, route/attack geometry and CFG thresholds unchanged; a modeled equivalence gate checks 15,625 capture/accepted identity states against the old selector; seven lineage-specific mutations are caught.
+
+**Consequence:** T1.5 is behavior-neutral. Immediate future MOVE still follows the legacy T1 rollback rule, Move→Attack remains strict, and `ADOPT_ONLY` remains inactive. T2 may consume the lineage metadata later, but T1.5 itself may not use it to widen or narrow transition permission.

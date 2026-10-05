@@ -1,0 +1,2 @@
+$ python tests/test_execution_lineage_t15_semantic_equivalence.py
+PASS: T1.5 semantic equivalence; policy/geometry/CFG unchanged and 15625 identity states equivalent

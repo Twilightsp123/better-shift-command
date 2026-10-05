@@ -94,3 +94,7 @@ Controller-only structural stage; Native Bridge/address map unchanged.
 - archived 2026-10-05 direct T2 runtime evidence as historical experiments.
 
 No Native C++/ASM change and no new reverse-engineered dependency.
+
+## 2026-10-05 — BSC-TPOL-T1.5 execution lineage
+
+Controller-only behavior-neutral stage over restored T1. Player Native capture identity and later BSC-issued/ACK identity are stored separately; `R1.action_execution_identity()` exposes `PLAYER_NATIVE` / `BSC_ISSUED` lineage while preserving the previous identity verdict. TransitionPolicy, route/attack geometry and CFG thresholds are unchanged. Added T1.5 structural, semantic-equivalence and mutation gates. WH3 address/native source is unchanged.

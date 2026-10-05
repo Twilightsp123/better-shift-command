@@ -32,9 +32,9 @@ Current runtime baseline / design stage:
 - Smart Guard runtime: **STAGED_DISABLED**;
 - current runtime stage: Move-VTable correction built and exercised in WH3; gameplay smoothness/lifecycle work remains open;
 - transition design stream: **`BSC-TPOL-D1`**;
-- implemented substages: **`BSC-TPOL-T1H`** hidden profile/MCT scaffold + **`BSC-TPOL-T1`** shared behavior-neutral TransitionPolicy evaluator;
+- implemented substages: **`BSC-TPOL-T1H`** hidden profile/MCT scaffold + **`BSC-TPOL-T1`** shared behavior-neutral TransitionPolicy evaluator + **`BSC-TPOL-T1.5`** execution-lineage separation;
 - visible BSC MCT UI: **not registered**;
-- movement transition behavior: still the pre-T2 CorePath SC1–SC6 baseline; T1 centralizes decisions but does not change them.
+- movement transition behavior: still the pre-T2 CorePath SC1–SC6 baseline; T1 centralizes decisions and T1.5 separates execution lineage, but neither changes transition permission.
 
 ## 3. What each document answers
 

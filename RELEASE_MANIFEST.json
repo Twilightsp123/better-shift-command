@@ -31,23 +31,25 @@
   },
   "policy_architecture": {
     "design_stream": "BSC-TPOL-D1",
-    "implemented_internal_stage": "BSC-TPOL-T1H + BSC-TPOL-T1",
+    "implemented_internal_stage": "BSC-TPOL-T1H + BSC-TPOL-T1 + BSC-TPOL-T1.5",
     "mct_ui": "NOT_REGISTERED",
     "default_policy": "SMOOTH_HIDDEN",
     "minimum_engagement_time_seconds": 3.0,
-    "movement_policy_fields": "RESERVED_NOT_RUNTIME_WIRED_T1_BEHAVIOR_NEUTRAL",
-    "transition_evaluator": "SHARED_IMPLEMENTED_BEHAVIOR_NEUTRAL"
+    "movement_policy_fields": "RESERVED_NOT_RUNTIME_WIRED_T1_5_BEHAVIOR_NEUTRAL",
+    "transition_evaluator": "SHARED_IMPLEMENTED_BEHAVIOR_NEUTRAL_T1_5_LINEAGE_INPUT_ONLY",
+    "execution_lineage": "CAPTURE_IDENTITY_AND_BSC_ISSUED_IDENTITY_SEPARATED_BEHAVIOR_NEUTRAL"
   },
   "validation": {
-    "controller_jobs": "27/27 PASS",
-    "mutations": "43/43 CAUGHT",
+    "controller_jobs": "27/27 RECOVERED T1 BASELINE; T1.5 CONSOLIDATED RERUN PENDING",
+    "mutations": "43/43 RECOVERED T1 + 7/7 T1.5 LINEAGE LOCAL",
     "portable_native_ctest": "13/13 PASS",
     "asan_ubsan_ctest": "13/13 PASS",
     "windows_native_ctest": "14/14 PASS",
-    "mandatory_guards": "16/16 PASS"
+    "mandatory_guards": "16/16 PASS",
+    "t15_identity_equivalence": "15625/15625 LOCAL PASS"
   },
   "current_open_work": [
-    "T2-A immediate-successor MOVE policy through shared evaluator",
+    "T2-A immediate-successor MOVE policy through shared evaluator using explicit execution lineage",
     "T2-B Move-to-Attack terminal handoff reimplementation through shared evaluator",
     "T2-C issue/adopt hysteresis",
     "future visible MCT UI wiring",

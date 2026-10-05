@@ -14,7 +14,7 @@ The project has several independent numbering systems. A bare label such as `RC2
 | Public/formal BSC releases | v1.2.0, v1.2.1, v1.2.2, **v1.3.0** | formal Mod version line | current formal maintained version = **v1.3.0**; v1.2.2 remains upstream behavior ancestry |
 | Native Bridge versions | 0.1.1, 0.4.x, 0.5.x, 1.0.x | native observer/identity/issuing/evidence evolution | current candidate = `1.0.17-corepath-wh3-6c104-movevtfix` |
 | WH3 current-build remap/diagnostic | RC4, RC5, RC6, RC7, RC8 | native map/runtime-gate work for WH3 9.0.1 current EXE | current = **CorePath RC8** |
-| Transition-policy architecture | BSC-TPOL-D1 / T1H / T1 | staged gameplay/MCT architecture; no new Native RE | **T1H + behavior-neutral T1 implemented; T2 pending** |
+| Transition-policy architecture | BSC-TPOL-D1 / T1H / T1 / T1.5 | staged gameplay/MCT architecture; no new Native RE | **T1H + behavior-neutral T1 + T1.5 implemented; T2 pending** |
 | Smart Guard diagnostics | its own RC labels | separate optional Smart Guard investigation | staged disabled; never identify by bare `RCx` in shared docs |
 
 ### Naming rule for new docs
@@ -128,3 +128,8 @@ Implemented 2026-10-05 from the pre-T2 CorePath/T1H behavior baseline. It centra
 - direct T2-A immediate-MOVE adoption: not promoted; fold-back self-compression observed;
 - T2-A hairpin restriction: not promoted; stepwise rollback/reassert observed;
 - Native Move passthrough diagnostic: isolation experiment only; rejected as product architecture because BSC exists to improve Move→Move behavior rather than surrender it to vanilla Shift.
+
+
+## 10. BSC-TPOL-T1.5 — execution lineage
+
+Implemented 2026-10-05 on top of restored T1. It separates the player's captured Native order identity from any later BSC-issued/ACK identity while preserving the exact T1 transition decisions. Runtime exposes `PLAYER_NATIVE` versus `BSC_ISSUED` lineage to the shared reconciliation context. This is a structural prerequisite for T2-A/T2-C, not a gameplay release.
