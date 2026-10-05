@@ -10,7 +10,7 @@ mutants=[
  ('drop_issued_identity_record','accepted_rt.issued_identity={lineage="BSC_ISSUED"','accepted_rt.mutant_identity={lineage="BSC_ISSUED"'),
  ('drop_previous_lane_snapshot','previous_execution_lane=st.execution_lane','previous_lane_snapshot=st.execution_lane'),
  ('drop_ack_lane_switch','st.idx=p.idx; st.owned=true;st.execution_lane="BSC_ISSUED"','st.idx=p.idx; st.owned=true;st.execution_lane="PLAYER_NATIVE"'),
- ('drop_reconcile_lineage_context','future_index=future_index,execution_lineage=future_lineage','future_index=future_index,execution_lineage=nil'),
+ ('drop_reconcile_lineage_context','successor_index=future_index,execution_lineage=future_lineage','successor_index=future_index,execution_lineage=nil'),
  ('drop_rollback_lineage_log','execution_lineage="..clean(execution_lineage)','execution_lineage="..clean(nil)'),
 ]
 base=subprocess.run([python,str(contract)],cwd=ROOT,capture_output=True,text=True)
