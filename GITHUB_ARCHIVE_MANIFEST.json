@@ -6,7 +6,7 @@
   "archive_role": "FULL_GITHUB_MAINTENANCE_SOURCE_AND_EVIDENCE_ARCHIVE",
   "pack_generated_in_this_archive": false,
   "file_count_before_checksum": 346,
-  "current_controller_sha256": "PENDING_T1_7_CI_CHECKSUM",
+  "current_controller_sha256": "1816024fe6112ac29e65c9e8e73f895cb95845c6e0674646a1f3bbb988d5621e",
   "current_native_bridge_binary_sha256": "8fc223c9d1da5834b2034ced8e34ea9f0a8bc0a27964d6704ce931bc9a3b3b0a",
   "native_bridge_compatibility_id": "1.0.17-corepath-wh3-6c104-movevtfix",
   "target_wh3_sha256": "6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297",
@@ -38,8 +38,8 @@
     "hidden_policy_contract": "PASS",
     "documentation_contract": "PASS",
     "prebuild_contract": "PASS",
-    "controller_regression_jobs": "PENDING_T1_7_CI",
-    "mutation_suite": "43/43 CORE + 7/7 T1.5 LINEAGE + 7/7 T1.6 TRANSACTION + T1.7 PENDING_CI",
+    "controller_regression_jobs": "37/37 PASS (GITHUB ACTIONS T1.7 FULL VALIDATION)",
+    "mutation_suite": "43/43 CORE + 7/7 T1.5 LINEAGE + 7/7 T1.6 TRANSACTION + 7/7 T1.7 ENVELOPES",
     "transition_policy_t1_contract": "PASS",
     "transition_policy_t1_equivalence": "PASS",
     "execution_lineage_t15_contract": "PASS",
@@ -49,9 +49,9 @@
     "transition_transaction_t16_equivalence": "PASS",
     "transition_transaction_t16_mutations": "PASS_7_OF_7",
     "transition_transaction_t16_runtime": "PASS_3_OF_3",
-    "policy_envelopes_t17_contract": "PENDING_CI",
-    "policy_envelopes_t17_equivalence": "PENDING_CI",
-    "policy_envelopes_t17_mutations": "PENDING_CI"
+    "policy_envelopes_t17_contract": "PASS",
+    "policy_envelopes_t17_equivalence": "PASS",
+    "policy_envelopes_t17_mutations": "PASS_7_OF_7"
   },
-  "transition_policy_stage": "BSC-TPOL-T1_7_CONSUMER_NEUTRAL_ENVELOPES_PERMISSION_NEUTRAL_VALIDATION_PENDING"
+  "transition_policy_stage": "BSC-TPOL-T1_7_CONSUMER_NEUTRAL_ENVELOPES_PERMISSION_NEUTRAL"
 }
