@@ -1,6 +1,6 @@
 # Transition Policy Migration D1
 
-Status: **APPROVED IMPLEMENTATION PLAN — THROUGH T1.7 IMPLEMENTED CANDIDATE; T2 PENDING**
+Status: **APPROVED IMPLEMENTATION PLAN — THROUGH T1.7 IMPLEMENTED AND VALIDATED; T2 PENDING**
 
 The migration deliberately avoids a broad convergence rewrite. Each stage must be independently testable and revertible.
 
@@ -86,7 +86,7 @@ Gate:
 
 ### T1.7 — Consumer-neutral policy envelopes (permission-neutral)
 
-After T1.6, remove `consumer` from the permission calculation itself. The evaluator emits one edge decision with explicit issue/adopt envelope data; proactive dispatch, Native reconcile and scheduler only interpret that same decision. Initially map the envelopes back to T1.6 outcomes so this stage remains permission-neutral.\n\n**T1.7 implementation result — 2026-10-06:** IMPLEMENTED CANDIDATE. Consumer-specific permission branches are removed; issue/adopt envelopes preserve legacy immediate-MOVE rollback and strict Move→Attack. CI validation is pending.
+After T1.6, remove `consumer` from the permission calculation itself. The evaluator emits one edge decision with explicit issue/adopt envelope data; proactive dispatch, Native reconcile and scheduler only interpret that same decision. Initially map the envelopes back to T1.6 outcomes so this stage remains permission-neutral.\n\n**T1.7 implementation result — 2026-10-06:** PASS. Consumer-specific permission branches are removed; issue/adopt envelopes preserve legacy immediate-MOVE rollback and strict Move→Attack. GitHub Actions full maintenance is 37/37 PASS; T1.7 envelope mutations are 7/7 caught.
 
 ## T2 — Smooth-default behavior correction
 
