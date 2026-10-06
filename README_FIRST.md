@@ -57,7 +57,7 @@ Implemented transition substages: `BSC-TPOL-T1H` → `BSC-TPOL-T1` → `BSC-TPOL
 
 The current development runtime is **BSC-TPOL-T1.7 permission-neutral** on top of the existing SC1–SC6 gameplay baseline. T1H provides the hidden immutable PolicyProfile/MCT adapter scaffold; T1 provides the shared `R1.TransitionPolicy.evaluate()` decision plane; T1.5 separates execution lineage; T1.6 unifies committed-edge execution; T1.7 removes consumer-specific permission calculation and emits one issue/adopt envelope decision for all consumers.
 
-**T1.7 still intentionally does not change transition permission.** Move→Attack remains strict until current Move semantic completion, exact immediate future MOVE adoption remains closed, and no hysteresis tolerance is active. The change is structural: issue permission and Native-adopt permission are represented as separate envelopes produced by the same consumer-neutral evaluator. CI validation for the T1.7 candidate is pending.
+**T1.7 still intentionally does not change transition permission.** Move→Attack remains strict until current Move semantic completion, exact immediate future MOVE adoption remains closed, and no hysteresis tolerance is active. The change is structural: issue permission and Native-adopt permission are represented as separate envelopes produced by the same consumer-neutral evaluator. GitHub Actions full validation is **37/37 PASS**; core mutations are **43/43 CAUGHT**, with T1.5/T1.6/T1.7 stage mutations **7/7 CAUGHT** each.
 
 The 2026-10-05 direct T2-B, T2-A, hairpin and native-passthrough builds are preserved as historical experiments/evidence only. They do not override the staged D1 migration or current runtime source.
 
