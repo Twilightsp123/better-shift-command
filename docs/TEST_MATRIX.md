@@ -4,8 +4,8 @@
 
 | Gate | Result | Meaning |
 |---|---:|---|
-| Maintenance jobs | **PENDING T1.7 CI** | T1.7 adds three permission-neutral envelope gates; prior T1.6 baseline was 34/34 PASS |
-| Mutation suite | **PENDING T1.7 CI** | prior core 43/43 + T1.5 7/7 + T1.6 7/7; T1.7 adds 7 envelope mutants |
+| Maintenance jobs | **37/37 PASS (GITHUB ACTIONS T1.7)** | CorePath/T1/T1.5/T1.6 plus T1.7 contract/equivalence/mutation gates |
+| Mutation suite | **PASS** | core 43/43 + T1.5 7/7 + T1.6 7/7 + T1.7 7/7 CAUGHT |
 | Portable Native CTest | 13/13 PASS | portable native fixtures |
 | ASan/UBSan CTest | 13/13 PASS | sanitizer baseline |
 | Windows VS2019 v142 + MASM | PASS | audited Move-VTable-fix delivery |
@@ -35,7 +35,7 @@
 | T1 shared behavior-neutral evaluator refactor | **PASS** | old/new deterministic decision probe equivalent; existing suite unchanged |
 | T1.5 execution-lineage separation | **PASS / BEHAVIOR-NEUTRAL** | capture/issued identity split; 15,625 identity states equivalent; 7/7 lineage mutants caught; consolidated 30/30 PASS |
 | T1.6 committed-edge transaction | **PASS / PERMISSION-NEUTRAL** | submit is not commit; ACK and exact Native adopt share `commit_transition_edge`; reject aborts; deterministic T1 probe/CFG unchanged; 7/7 transaction mutants; runtime 3/3 |
-| T1.7 consumer-neutral policy envelopes | **IMPLEMENTED CANDIDATE / CI PENDING** | one decision exposes issue/adopt envelopes; T1.6 runtime permission must remain equivalent |
+| T1.7 consumer-neutral policy envelopes | **PASS / PERMISSION-NEUTRAL** | one decision exposes issue/adopt envelopes; T1.6 runtime permission must remain equivalent |
 | T2 immediate-MOVE reconciliation | NOT ACTIVE | implement only after T1.7; offline + mutation + WH3 RT-TP-04/05 |
 | T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1.7 NOT ACTIVE | reimplement through evaluator + rerun offline/WH3 RT-TP-02/03 |
 | T2 hysteresis | NOT ACTIVE | issue/adopt bands required before T2 promotion |
