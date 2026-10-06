@@ -1,0 +1,38 @@
+name: T2-B Arrival Brake Validation
+
+on:
+  push:
+    branches:
+      - ci/t2b-arrival-brake-validation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  t2b-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Lua 5.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+      - name: Compile Python
+        run: python -m compileall -q maintenance_tools tests tools
+      - name: Documentation contract
+        run: python maintenance_tools/check_documentation_contract.py
+      - name: T2-B focused gates
+        run: |
+          lua5.1 tests/test_t2b_attack_handoff.lua source/t2b_attack_handoff.lua
+          python tests/test_t2b_attack_handoff_contract.py
+          python tests/test_t2b_attack_handoff_mutations.py
+          lua5.1 tests/test_t2b_attack_handoff_runtime.lua source/better_shift_command.lua tests/fixture.lua
+      - name: Full maintenance suite
+        run: python maintenance_tools/run_checks_corepath_rc8.py
