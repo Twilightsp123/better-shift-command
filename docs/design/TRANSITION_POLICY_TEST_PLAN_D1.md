@@ -33,7 +33,7 @@ T1.7 is permission-neutral and must prove:
 - deterministic T1.6 transition output and all scalar CFG values remain unchanged;
 - envelope-specific mutation tests catch consumer reintroduction, missing envelopes, widened legacy MOVE adoption, Native adopt-envelope bypass and future-index skipping.
 
-The implementation candidate adds contract/equivalence/mutation jobs; CI validation is pending.
+Validation result: **PASS**. GitHub Actions full maintenance is **37/37 PASS**; the T1.7 contract/equivalence gates pass and all **7/7** envelope mutations are caught.
 
 ## 1. Offline policy tests
 
