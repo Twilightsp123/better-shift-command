@@ -42,8 +42,8 @@
     "policy_envelopes": "ISSUE_AND_ADOPT_EXPLICIT_LEGACY_EQUIVALENT"
   },
   "validation": {
-    "controller_jobs": "PENDING_T1_7_CI",
-    "mutations": "43/43 CORE + 7/7 T1.5 LINEAGE + 7/7 T1.6 TRANSACTION + T1.7 PENDING_CI",
+    "controller_jobs": "37/37 PASS (GITHUB ACTIONS T1.7 FULL VALIDATION)",
+    "mutations": "43/43 CORE + 7/7 T1.5 LINEAGE + 7/7 T1.6 TRANSACTION + 7/7 T1.7 ENVELOPES",
     "portable_native_ctest": "13/13 PASS",
     "asan_ubsan_ctest": "13/13 PASS",
     "windows_native_ctest": "14/14 PASS",
@@ -51,7 +51,9 @@
     "t15_identity_equivalence": "15625/15625 PASS",
     "t16_permission_equivalence": "PASS",
     "t16_runtime": "3/3 PASS",
-    "t17_permission_equivalence": "PENDING_CI"
+    "t17_permission_equivalence": "PASS",
+    "t17_contract": "PASS",
+    "t17_mutations": "PASS_7_OF_7"
   },
   "current_open_work": [
     "T2-B Move-to-Attack terminal handoff reimplementation through shared evaluator/transaction",
