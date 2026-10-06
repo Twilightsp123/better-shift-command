@@ -1,0 +1,49 @@
+name: BSC T1.7 Seal Validation
+
+on:
+  push:
+    branches:
+      - ci/t1.7-seal-validation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-maintenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Generate final checksum
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, pathlib, subprocess
+          skip={'SHA256SUMS.txt','.github/workflows/t17-seal-validation.yml'}
+          paths=sorted(x.decode() for x in subprocess.check_output(['git','ls-files','-z']).split(b'\0') if x)
+          out=[]
+          for rel in paths:
+              if rel in skip: continue
+              out.append(f"{hashlib.sha256(pathlib.Path(rel).read_bytes()).hexdigest()}  {rel}")
+          pathlib.Path('/tmp/SHA256SUMS.txt').write_text('\n'.join(out)+'\n',encoding='utf-8')
+          print(f"checksum_entries={len(out)}")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t17-seal-checksum
+          path: /tmp/SHA256SUMS.txt
+          if-no-files-found: error
+      - name: Install Lua
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3
+      - name: Compile Python
+        run: python -m compileall -q maintenance_tools tests tools steering_tests
+      - name: Documentation contract
+        run: python maintenance_tools/check_documentation_contract.py
+      - name: Full maintenance suite
+        run: python maintenance_tools/run_checks_corepath_rc8.py
