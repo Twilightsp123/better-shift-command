@@ -21,11 +21,11 @@ The Move-VTable correction has been built and exercised in WH3. Native outcome f
 
 ### O-08 — Move→Attack can still brake/stop before Attack
 
-Status: **OPEN / T1 STRUCTURE READY / T2-B RUNTIME CONCEPT PROVEN EXPERIMENTALLY**.
+Status: **OPEN / T2-B CONSTRUCTION CANDIDATE / OFFLINE VALIDATION PENDING**.
 
-Current T1 code deliberately preserves strict Move→Attack until current Move `semantic_done` (`ATTACK_REQUIRES_ROUTE_COMPLETE`). The 2026-10-05 direct T2-B experiment produced repeated smooth `ATTACK_TERMINAL_HANDOFF` events in WH3 9.0.2 and the user reported no pause, but that direct patch is historical evidence rather than current runtime.
+The current construction branch reimplements ordinary Move→Attack through the shared TransitionPolicy + T1.6 transaction path. Permission no longer depends on the historical Attack lead thresholds: route/debt geometry proves semantic legality and ARRIVAL_BRAKE_G1 provides the timing evidence. Exit→Attack remains strict. The 2026-10-05 direct T2-B build remains historical runtime evidence only.
 
-Planned closure: reintroduce T2-B through the shared TransitionPolicy evaluator, then pass T2 regression + WH3 RT-TP-02/03 again.
+Planned closure: pass the T2-B offline contract/mutation/transaction gates, then rerun WH3 RT-TP-02/03 before promotion.
 
 ### O-09 — SC6 rolls back immediate future MOVE
 

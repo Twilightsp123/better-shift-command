@@ -23,9 +23,9 @@ The corrected bridge runs in WH3 without the old `OWNED_OUTCOME_INDETERMINATE` f
 
 ## 3. Current gameplay limitations after T1.7
 
-### 3.1 Strict Move→Attack boundary remains current behavior
+### 3.1 Move→Attack T2-B candidate is active only on the construction branch
 
-T1 deliberately preserves the pre-T2 rule: ordinary Move→Attack remains blocked until current Move `semantic_done` (`ATTACK_REQUIRES_ROUTE_COMPLETE`). A 2026-10-05 direct T2-B experiment demonstrated that bounded terminal handoff can remove the visible pause in WH3 9.0.2, but that experiment is **not current T1.7 runtime**. T2-B must be reintroduced through the shared evaluator.
+The validated release/permission baseline remains T1.7 strict Move→Attack. The current `maintenance/t2b-terminal-attack` construction branch now carries a staged T2-B candidate. It does **not** use the historical hand-tuned Attack lead threshold as permission. Instead, ordinary Move→Attack may open only when prior route debt is clear, the exact successor target geometry preserves the current waypoint corridor or lies inside the current waypoint semantic reach plus one observed poll of travel, and ARRIVAL_BRAKE_G1 proves CA has entered the current waypoint's arrival-braking boundary. Exit→Attack remains strict. The candidate still requires T1.6 ACK/exact-adoption commit before `ATTACK_TERMINAL_HANDOFF` completion credit.
 
 ### 3.2 SC6 immediate-MOVE asymmetry remains current behavior
 

@@ -621,3 +621,12 @@ T1.6 introduces an explicit edge transaction. Submission is `AUTHORIZED/SUBMITTE
 ## 25. 2026-10-06 — BSC-TPOL-T1.7 consumer-neutral policy envelopes
 
 T1.7 removes evaluator permission branches keyed by proactive/Native/scheduler consumer identity. One immediate-edge decision now carries distinct issue and adopt envelopes. Proactive dispatch reads the issue envelope; SC6 reads the adopt envelope; scheduler uses the same route decision. The legacy immediate-MOVE adopt envelope remains closed, strict Move→Attack remains unchanged, and no hysteresis/tolerance is activated. A pre-T1.7 source snapshot and contract/equivalence/mutation gates were added. Final GitHub Actions validation is **37/37 PASS**; T1.7 mutations are **7/7 caught**.
+
+
+## 26. 2026-10-06 — ARRIVAL_BRAKE_G1 and T2-B semantic-corridor candidate
+
+The movement redesign stopped treating WH3 units as fixed-turn-radius vehicles. Ordinary right-click movement can redirect almost immediately; the hidden behavior that matters to BSC is CA's arrival braking at the currently active waypoint.
+
+ARRIVAL_BRAKE_G1 was added first as a behavior-neutral observation layer. It derives total ground speed, radial approach speed, observed deceleration, stopping distance and one-poll synchronization travel from post-entry positions without adding gameplay CFG values. Final G1 GitHub Actions validation passed the focused gates and full 40-job maintenance suite.
+
+The following T2-B construction candidate intentionally changes only ordinary Move→Attack. Existing route/debt semantics determine whether the waypoint can legally be handed off; G1 determines whether CA has entered the arrival-braking boundary. Straight/path-safe Attack chords and a tightly bounded terminal case can receive `ATTACK_TERMINAL_HANDOFF`, but only through the T1.6 shared transaction after verified ACK or exact Native adoption. Exit→Attack and T2-MOVE remain unchanged pending their own stages.

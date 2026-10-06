@@ -153,3 +153,14 @@
 **Reason:** SC1/SC2/SC4 and the historical T2-B experiments accumulated several distance/fraction constants while trying to beat CA's arrival controller. The next architecture should separate route legality from timing. Route/debt geometry answers whether changing command preserves player intent; G1 answers whether CA is actually slowing for the current waypoint. The observer requires simultaneous sustained decrease in ground speed and radial waypoint-approach speed, derives stopping distance from observed deceleration, and derives the future Native-adopt synchronization margin from one actual poll of travel instead of a hand-tuned meter tolerance.
 
 **Consequence:** G1 changes no `CFG` scalar, no issue/adopt permission, no cursor rule, and no transition commit rule. T1.7 remains the permission authority. T2-B and T2-MOVE may later consume G1 only behind the existing hard invariants and T1.6 transaction protocol.
+
+
+## D-20261006-03 — T2-B uses semantic corridor + observed arrival braking, not tuned Attack lead distance
+
+**Decision:** reimplement ordinary Move→Attack as the first intentional T2 gameplay change using the existing semantic route corridor plus ARRIVAL_BRAKE_G1 timing evidence. Historical `attack_lead_*`, angle caps and predictive threshold values remain telemetry only and do not authorize T2-B.
+
+**Reason:** WH3 units can redirect quickly under ordinary right click; the visible pause is caused by CA entering the current waypoint's arrival/braking behavior, not by a vehicle-like minimum turning radius. A new fixed lead distance would merely restart parameter tuning. The model should answer two separate questions: (1) would changing to Attack still preserve the current waypoint semantics, and (2) has CA actually entered the arrival-braking boundary we intend to pre-empt?
+
+**Policy:** prior route debt must be clear; Exit→Attack remains strict; exact immediate successor/target identity remains mandatory. Before current Move semantic completion, G1 must report sustained braking and boundary crossing. If the current-position→target chord passes within the existing Move reach tolerance of the waypoint, the mode is `ATTACK_PATH_SAFE`. Otherwise the unit must already be within `move_reach_tolerance + one observed poll of approach travel`, producing `ATTACK_TERMINAL_CORRIDOR`. Both modes grant `ATTACK_TERMINAL_HANDOFF` credit only after T1.6 transaction commit.
+
+**Consequence:** no new gameplay CFG scalar is introduced. MOVE→MOVE SC1–SC4 is unchanged. T2-MOVE/hysteresis remains inactive. The construction candidate requires offline and WH3 runtime promotion gates.

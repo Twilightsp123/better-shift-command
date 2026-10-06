@@ -11,7 +11,7 @@ if not LUA: raise SystemExit('FAIL: Lua interpreter missing')
 probe=ROOT/'tests/probe_transition_policy_t1.lua'
 fixture=ROOT/'tests/fixture.lua'
 baseline=ROOT/'archive/tpol_t1_pre_shared_evaluator/source/better_shift_command.lua'
-current=ROOT/'source/better_shift_command.lua'
+current=ROOT/'archive/t2b_pre_terminal_attack/source/better_shift_command.lua'
 def run(controller):
     r=subprocess.run(LUA+[str(probe),str(controller),str(fixture)],cwd=ROOT,capture_output=True,text=True)
     if r.returncode:

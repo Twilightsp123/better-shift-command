@@ -2,7 +2,7 @@ from pathlib import Path
 import shutil,subprocess,sys,re
 ROOT=Path(__file__).resolve().parents[1]
 BASE=ROOT/'archive/tpol_t17_pre_policy_envelopes/source/better_shift_command.lua'
-CUR=ROOT/'source/better_shift_command.lua'
+CUR=ROOT/'archive/t2b_pre_terminal_attack/source/better_shift_command.lua'
 PROBE=ROOT/'tests/probe_transition_policy_t1.lua'
 FIX=ROOT/'tests/fixture.lua'
 def fail(msg): print('FAIL '+msg); raise SystemExit(1)

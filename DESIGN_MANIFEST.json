@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "design_stream": "BSC-TPOL-D1",
-  "status": "T1_7_CONSUMER_NEUTRAL_ENVELOPES_IMPLEMENTED_PERMISSION_NEUTRAL_T2_NOT_ACTIVE",
+  "status": "T2B_ARRIVAL_BRAKE_HANDOFF_CANDIDATE_VALIDATION_PENDING",
   "runtime_baseline": {
     "controller": "1.3.0",
     "native_bridge": "1.0.17-corepath-wh3-6c104-movevtfix",
@@ -16,7 +16,8 @@
     "T1_5_EXECUTION_LINEAGE_IMPLEMENTED",
     "T1_6_TRANSITION_TRANSACTION_IMPLEMENTED",
     "T1_7_CONSUMER_NEUTRAL_ENVELOPES_IMPLEMENTED",
-    "T2B_MOVE_ATTACK_PENDING_REIMPLEMENT",
+    "G1_ARRIVAL_BRAKE_OBSERVER_VALIDATED_BEHAVIOR_NEUTRAL",
+    "T2B_ARRIVAL_BRAKE_HANDOFF_CANDIDATE",
     "T2_MOVE_IMMEDIATE_MOVE_WITH_HYSTERESIS_PENDING",
     "T3_VISIBLE_MCT",
     "T4_ATTACK_EXIT_TUNING"
@@ -43,5 +44,6 @@
   },
   "formal_project_version": "1.3.0",
   "formal_version_tag": "v1.3.0",
-  "canonical_pack_name": "zzz_better_shift_command_steam.pack"
+  "canonical_pack_name": "zzz_better_shift_command_steam.pack",
+  "construction_stage": "T2B_SEMANTIC_CORRIDOR_PLUS_ARRIVAL_BRAKE"
 }

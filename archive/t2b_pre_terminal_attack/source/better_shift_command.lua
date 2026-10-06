@@ -12,7 +12,7 @@ local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
 local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
 local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE transaction_stage=TPOL_T1_6_TRANSITION_TRANSACTION envelope_stage=TPOL_T1_7_CONSUMER_NEUTRAL geometry_stage=ARRIVAL_BRAKE_G1_OBSERVE_ONLY t2b_stage=T2B_ARRIVAL_BRAKE_HANDOFF_CANDIDATE")
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE transaction_stage=TPOL_T1_6_TRANSITION_TRANSACTION envelope_stage=TPOL_T1_7_CONSUMER_NEUTRAL geometry_stage=ARRIVAL_BRAKE_G1_OBSERVE_ONLY")
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -900,38 +900,6 @@ R1.ArrivalBrake=(function()
     return A
 end)()
 -- ARRIVAL_BRAKE_G1_MODULE_END
--- T2B_ATTACK_HANDOFF_MODULE_BEGIN
-R1.AttackHandoff=(function()
-    local H={VERSION="T2B_ATTACK_HANDOFF_1"}
-    local HUGE=(type(math.huge)=="number" and math.huge) or 1e300
-    local function finite(n) return type(n)=="number" and n==n and n<HUGE and n>-HUGE end
-    function H.evaluate(f)
-        local d={ready=false,reason="ATTACK_TRANSITION_WAIT",route_mode="BLOCKED",current_credit=nil}
-        if type(f)~="table" then d.reason="ATTACK_HANDOFF_INPUT_INVALID";return d end
-        if f.prior_clear~=true then d.reason="PRIOR_ROUTE_OBLIGATION_PENDING";return d end
-        if f.semantic_done==true then d.ready=true;d.reason="ACTION_COMPLETE";d.route_mode="COMPLETE";return d end
-        if f.exit_route==true then d.reason="ATTACK_REQUIRES_ROUTE_COMPLETE";return d end
-        if f.arrival_braking~=true then d.reason="ATTACK_ARRIVAL_BRAKE_NOT_OBSERVED";return d end
-        if f.brake_boundary~=true then d.reason="ATTACK_BEFORE_ARRIVAL_BRAKE_BOUNDARY";return d end
-        if not finite(f.path_error) or not finite(f.waypoint_tolerance) or f.waypoint_tolerance<0 then
-            d.reason="ATTACK_ROUTE_GEOMETRY_UNAVAILABLE";return d
-        end
-        d.path_error=f.path_error;d.waypoint_tolerance=f.waypoint_tolerance
-        if f.path_error<=f.waypoint_tolerance then
-            d.ready=true;d.reason="ATTACK_PATH_SAFE";d.route_mode="ATTACK_PATH_SAFE";d.current_credit="ATTACK_TERMINAL_HANDOFF";return d
-        end
-        if not finite(f.remaining) or f.remaining<0 then d.reason="ATTACK_REMAINING_UNAVAILABLE";return d end
-        local sync=finite(f.sync_margin) and math.max(0,f.sync_margin) or 0
-        d.sync_margin=sync;d.terminal_limit=f.waypoint_tolerance+sync
-        if f.remaining<=d.terminal_limit then
-            d.ready=true;d.reason="ATTACK_TERMINAL_CORRIDOR";d.route_mode="ATTACK_TERMINAL_CORRIDOR"
-            d.current_credit="ATTACK_TERMINAL_HANDOFF";return d
-        end
-        d.reason="ATTACK_TERMINAL_ROUTE_PROTECT";return d
-    end
-    return H
-end)()
--- T2B_ATTACK_HANDOFF_MODULE_END
 
 -- TPOL-T1H hidden policy scaffold.
 -- No MCT page is registered in this runtime stage.  The schema/profile compiler is
@@ -2576,9 +2544,7 @@ local function transition_geometry_snapshot(g)
         arrival_ground_speed=g.arrival_ground_speed,arrival_approach_speed=g.arrival_approach_speed,
         arrival_ground_deceleration=g.arrival_ground_deceleration,arrival_approach_deceleration=g.arrival_approach_deceleration,
         arrival_brake_stop_distance=g.arrival_brake_stop_distance,arrival_brake_preempt_distance=g.arrival_brake_preempt_distance,
-        arrival_sync_margin=g.arrival_sync_margin,attack_path_error=g.attack_path_error,
-        attack_waypoint_tolerance=g.attack_waypoint_tolerance,attack_terminal_limit=g.attack_terminal_limit,
-        current_credit=g.current_credit}
+        arrival_sync_margin=g.arrival_sync_margin}
 end
 function Core.begin_transition_txn(st,current,successor,reason,now,g,source)
     if st.transition_txn then fail("TRANSITION_TXN_ALREADY_OPEN");return nil end
@@ -2613,14 +2579,7 @@ function Core.commit_transition_edge(st,tx,now,opts)
         Core.mark_handoff_committed(st,current,successor,tx.reason,now,g)
         local rt=action_runtime(current)
         if not rt.semantic_done then
-            if successor.type=="ATTACK" and g.current_credit=="ATTACK_TERMINAL_HANDOFF" then
-                mark_action_complete(st,current,"ATTACK_TERMINAL_HANDOFF",now,g.remaining)
-                if DEBUG_TELEMETRY then log("ATTACK_TERMINAL_HANDOFF uid="..st.uid.." gen="..st.gen.." action="..current.action_id..
-                    " successor="..clean(successor.action_id).." route_mode="..clean(g.route_mode)..
-                    " remaining="..num_or_nil(g.remaining).." path_error="..num_or_nil(g.attack_path_error)..
-                    " waypoint_tolerance="..num_or_nil(g.attack_waypoint_tolerance)..
-                    " sync_margin="..num_or_nil(g.arrival_sync_margin).." model_ms="..now.." source="..clean(tx.source)) end
-            elseif g.route_mode=="STEERING_CORNER" then
+            if g.route_mode=="STEERING_CORNER" then
                 mark_action_complete(st,current,"STEERING_CORNER_HANDOFF",now,g.remaining)
                 if DEBUG_TELEMETRY then dlog("STEERING_CORNER_COMMITTED uid="..st.uid.." gen="..st.gen.." action="..current.action_id..
                     " successor="..clean(successor.action_id).." remaining="..num_or_nil(g.remaining)..
@@ -2824,37 +2783,17 @@ local function exit_gate_ready(st,nexta)
     return rt.semantic_done==true and clear==true
 end
 
-local function attack_transition_handoff_ready(st,g,nexta)
-    local cur=st.plan and st.plan[st.idx]
-    if not cur or cur.type~="MOVE" or not g or not nexta or nexta.type~="ATTACK" then
-        return false,"ATTACK_HANDOFF_INPUT_INVALID"
-    end
-    local prior_clear=block_route_clear(st,cur)
-    if prior_clear then g.route_debt_mode="CLEAR";g.route_debt_count=0
-    else g.route_debt_mode="HARD";g.route_debt_reason="PRIOR_ROUTE_OBLIGATION_PENDING" end
-    local target=g.target_pos
-    local tol=(finite(g.leg) and g.leg>0) and move_reach_tolerance(st,g.leg) or nil
-    local err=(target and st.pos and cur.pos) and point_segment_error(cur.pos,st.pos,target) or nil
-    local result=R1.AttackHandoff.evaluate({
-        prior_clear=prior_clear==true,semantic_done=action_runtime(cur).semantic_done==true,
-        exit_route=cur.block_kind=="EXIT_ROUTE",arrival_braking=g.arrival_braking==true,
-        brake_boundary=g.arrival_brake_boundary==true,path_error=err,waypoint_tolerance=tol,
-        remaining=g.remaining,sync_margin=g.arrival_sync_margin})
-    g.attack_path_error=err;g.attack_waypoint_tolerance=tol;g.attack_terminal_limit=result.terminal_limit
-    g.current_credit=result.current_credit;g.route_safe=result.ready==true;g.route_mode=result.route_mode;g.route_reason=result.reason
-    return result.ready==true,result.reason
-end
 local function transition_handoff_ready(st,g,nexta)
-    -- T2-B widens only ordinary Move->Attack. MOVE->MOVE remains byte/semantic
-    -- owned by route_handoff_ready(), and Exit->Attack remains strict.
-    if nexta and nexta.type=="ATTACK" then return attack_transition_handoff_ready(st,g,nexta) end
-    return route_handoff_ready(st,g,nexta)
+    -- R04/R07: exit evidence never erases ANY Move, including the final one.
+    local route_ok,why=route_handoff_ready(st,g,nexta)
+    if not route_ok then return false,why end
+    return true,why
 end
 
 -- BSC-TPOL-T1 shared TransitionPolicy evaluator.
--- T1_BEHAVIOR_NEUTRAL marks the frozen structural origin. Current construction
--- activates only T2-B ordinary Move->Attack through the same evaluator/transaction.
--- Immediate-MOVE adoption and adopt-only hysteresis remain inactive.
+-- T1_BEHAVIOR_NEUTRAL: this stage centralizes existing decisions only. It does
+-- NOT enable T2 immediate-MOVE adoption, Move->Attack terminal handoff, or
+-- adopt-only hysteresis. Those remain later staged behavior changes.
 R1.TransitionPolicy=R1.TransitionPolicy or {VERSION="TPOL_T1_7"}
 local function transition_envelope(open,reason,hard_violation)
     return {open=open==true,reason=reason or "TRANSITION_WAIT",hard_violation=hard_violation==true}
@@ -2882,7 +2821,7 @@ function R1.TransitionPolicy.evaluate(st,current,successor,g,context)
         issue_window=transition_envelope(false,"TRANSITION_WAIT",false),
         adopt_window=transition_envelope(false,"TRANSITION_WAIT",false),
         metrics=g,profile_id=R1.Policy.active and R1.Policy.active.behavior_preset or "SMOOTH",
-        policy_version=R1.TransitionPolicy.VERSION,behavior_stage="T2B_ARRIVAL_BRAKE_HANDOFF_CANDIDATE"}
+        policy_version=R1.TransitionPolicy.VERSION,behavior_stage="T1_7_CONSUMER_NEUTRAL_PERMISSION_NEUTRAL"}
     if not current or not successor then
         d.reason="TRANSITION_ACTION_MISSING";d.hard_violation=true
         d.issue_window=transition_envelope(false,d.reason,true);d.adopt_window=transition_envelope(false,d.reason,true)
@@ -2905,19 +2844,15 @@ function R1.TransitionPolicy.evaluate(st,current,successor,g,context)
     local route_ok,why
     if successor.type=="ATTACK" then route_ok,why=transition_handoff_ready(st,g,successor) else route_ok,why=route_handoff_ready(st,g,successor) end
     d.route_ok=route_ok==true;d.route_reason=why;d.route_debt_mode=g.route_debt_mode
-    d.current_credit=g.current_credit
     if not route_ok then
         d.issue_window=transition_envelope(false,why or "TRANSITION_ROUTE_BLOCKED",false)
         if successor.type~="MOVE" then d.adopt_window=transition_envelope(false,why or "TRANSITION_ROUTE_BLOCKED",false) end
         return finalize_transition_decision(d)
     end
-    if successor.type=="ATTACK" then
-        d.adopt_window=transition_envelope(true,d.current_credit or why or "NATIVE_IMMEDIATE_SUCCESSOR_READY",false)
-    end
+    if successor.type=="ATTACK" then d.adopt_window=transition_envelope(true,why or "NATIVE_IMMEDIATE_SUCCESSOR_READY",false) end
     local rt=action_runtime(current);local issue_reason=nil
     if successor.type=="ATTACK" then
-        if rt.semantic_done then issue_reason="ATTACK_AFTER_ROUTE_COMPLETE"
-        elseif d.current_credit=="ATTACK_TERMINAL_HANDOFF" then issue_reason="ATTACK_TERMINAL_HANDOFF" end
+        if rt.semantic_done then issue_reason="ATTACK_AFTER_ROUTE_COMPLETE" end
     else
         if rt.semantic_done then issue_reason="MOVE_AFTER_NODE_COMPLETE"
         elseif g.remaining<=CFG.proximity then issue_reason="PROXIMITY_A"
@@ -2991,26 +2926,17 @@ local function dispatch(st,index,reason,g,now,opts)
         cancel(st,"REVISION_CHANGED_BEFORE_DISPATCH",now,true); st.blocked=true; return
     end
     if a.type=="ATTACK" then
+        local cur=st.plan[st.idx]
+        if cur and cur.type=="MOVE" then
+            if not action_runtime(cur).semantic_done or not block_route_clear(st,cur) then
+                if DEBUG_TELEMETRY then log("HANDOFF_POST_DRAIN_DEFER uid="..st.uid.." gen="..st.gen.." reason=R1_GUARD_RECHECK model_ms="..now) end
+                return
+            end
+        end
         local good,why=target_ready(a,now)
         if not good then
             if skip_future_attack_keep_tail(st,index,why,now) then return end
             target_wait(st,why,now);return
-        end
-        local cur=st.plan[st.idx]
-        if cur and cur.type=="MOVE" then
-            local fresh=geometry(st,a)
-            if fresh then fresh=attack_geometry(st,a,fresh) end
-            if fresh then attack_brake_state(fresh) end
-            local fresh_decision=fresh and R1.TransitionPolicy.evaluate(st,cur,a,fresh,{current_index=st.idx,successor_index=index}) or nil
-            local fresh_issue=fresh_decision and fresh_decision.issue_window
-            if not fresh_decision or fresh_decision.hard_violation or not fresh_issue or not fresh_issue.open or not exit_gate_ready(st,a) then
-                if DEBUG_TELEMETRY then log("HANDOFF_POST_DRAIN_DEFER uid="..st.uid.." gen="..st.gen..
-                    " reason="..clean(fresh_decision and fresh_decision.reason or "GEOMETRY_UNAVAILABLE").." model_ms="..now) end
-                return
-            end
-            fresh.current_credit=fresh_decision.current_credit
-            reason=fresh_issue.reason or fresh_decision.issue_reason or reason
-            g=fresh
         end
     end
     if st.attack and not st.attack.done then
@@ -3540,12 +3466,10 @@ function Core.reconcile_native_successor(st,now)
             "NATIVE_ADVANCED_BEFORE_PERMISSION",adopt_window.reason or decision.reason,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE",future_lineage)
     end
     local why=decision.route_reason or adopt_window.reason or decision.reason
-    if g then g.current_credit=decision.current_credit end
-    local commit_reason=decision.current_credit or why
 
     R1.clear_fault(st,cur,now)
     st.unverified_native_successor=nil
-    local tx=Core.begin_transition_txn(st,cur,future,commit_reason,now,g,"NATIVE_RECONCILE")
+    local tx=Core.begin_transition_txn(st,cur,future,why,now,g,"NATIVE_RECONCILE")
     if not tx then return false end
     tx.state="OBSERVED";tx.execution_lineage=future_lineage
     if not Core.commit_transition_edge(st,tx,now,{owned=false,execution_lane=future_lineage or "PLAYER_NATIVE",
@@ -3621,7 +3545,6 @@ local function advance(st,now)
         attack_brake_state(g)
         local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{current_index=st.idx,successor_index=st.idx+1})
         local route_ok,route_reason=decision.route_ok,decision.route_reason or decision.reason
-        g.current_credit=decision.current_credit
         local exit_ok=exit_gate_ready(st,nexta)
         if not exit_ok then
             st.phase="EXIT_ROUTE_PROTECT"
@@ -3761,9 +3684,6 @@ function Core.handoff_urgency(st,now)
         local route_ok=decision.route_ok
         if not exit_gate_ready(st,nexta) then return 50000,"EXIT_BLOCK_PROTECT" end
         if not route_ok then return 50000+(g.cut_error or 0),"ATTACK_ROUTE_PROTECT" end
-        if decision.issue_window and decision.issue_window.open and decision.current_credit=="ATTACK_TERMINAL_HANDOFF" then
-            return -800000,"MOVE_ATTACK_TERMINAL_READY"
-        end
         if rt.semantic_done then return -800000,"MOVE_COMPLETE_ATTACK_READY" end
     else
         local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{current_index=st.idx,successor_index=st.idx+1})

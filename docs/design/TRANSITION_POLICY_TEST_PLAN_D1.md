@@ -68,8 +68,9 @@ Every test should assert both decision `zone` and stable `reason`.
 
 ### Move→Attack
 
-- straight approach, terminal corridor: issue before full stop;
-- 45° / 90° / high-angle approach: bounded by dynamic caps;
+- straight approach: `ATTACK_PATH_SAFE` may issue only after observed arrival-brake boundary crossing;
+- off-corridor approach: `ATTACK_TERMINAL_CORRIDOR` requires existing waypoint reach tolerance plus at most one observed poll of approach travel;
+- no historical Attack lead/angle/execution-cap scalar participates in permission;
 - very short leg: no whole-leg swallow;
 - prior debt unresolved: hard block;
 - wrong/dead target: hard block/skip according to existing target rules;

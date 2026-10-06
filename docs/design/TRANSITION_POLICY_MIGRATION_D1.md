@@ -134,13 +134,16 @@ Immediate Move successor may be adopted/soft-adopted if the current route semant
 
 ### T2-B — MOVE→ATTACK terminal handoff
 
-Promote bounded `attack_geometry` into a real transition policy:
+Current construction candidate replaces the old tuned-lead concept with semantic-corridor + observed-braking permission:
 
 - prior route debt must be clear;
-- target must be exact and viable;
-- bounded progress requirement;
-- path-safe or terminal corridor proof;
-- accepted Attack gives explicit `ATTACK_TERMINAL_HANDOFF` credit.
+- target must be the exact immediate successor target and remain viable at proactive issue time;
+- Exit→Attack remains strict;
+- ARRIVAL_BRAKE_G1 must prove sustained CA deceleration and that the observed stopping-distance + one-poll synchronization boundary has been crossed;
+- `ATTACK_PATH_SAFE` is allowed when the live position→target chord passes within the existing Move reach tolerance of the current waypoint;
+- otherwise `ATTACK_TERMINAL_CORRIDOR` requires current remaining distance ≤ existing Move reach tolerance + one actual observed poll of approach travel;
+- no `attack_lead_*`/angle/execution-cap scalar authorizes the handoff;
+- `ATTACK_TERMINAL_HANDOFF` credit occurs only inside T1.6 shared edge commit after ACK/exact Native adoption.
 
 Gate:
 

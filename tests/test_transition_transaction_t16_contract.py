@@ -25,9 +25,10 @@ need('if st.transition_txn then return BSC_HUGE,"TRANSITION_TXN_OPEN" end',1)
 # The old pre-ACK direct commit call in dispatch must be gone.
 if 'if previous and previous.type=="MOVE" then Core.mark_handoff_committed(st,previous,a,reason,now,g) end' in s:
     fail('dispatch still commits handoff before ACK')
-# T1.6 is permission-neutral: later T2 behavior remains inactive.
-for forbidden in ('ATTACK_TERMINAL_CORRIDOR','NATIVE_MOVE_PASSTHROUGH'):
-    if forbidden in s: fail('T1.6/T1.7 accidentally activates staged T2 behavior: '+forbidden)
+# T1.6's transaction contract must survive later T2 stages. T2-B may now be active,
+# but Native-MOVE passthrough remains forbidden until the staged T2-MOVE policy.
+if 'NATIVE_MOVE_PASSTHROUGH' in s:
+    fail('later stage bypasses T1.6/T2-MOVE architecture')
 need('if successor.type=="MOVE" then',1)
 need('d.adopt_window=transition_envelope(false,"CANONICAL_INTERMEDIATE_ACTIONS_OWED",true)',1)
 print('PASS: T1.6 transition transaction structural contract; T1.7 envelopes retain T1.6 permission')

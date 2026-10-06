@@ -1,7 +1,7 @@
 from pathlib import Path
 import re,sys
 ROOT=Path(__file__).resolve().parents[1]
-p=Path(sys.argv[1]) if len(sys.argv)>1 else ROOT/'source/better_shift_command.lua'
+p=Path(sys.argv[1]) if len(sys.argv)>1 else ROOT/'archive/t2b_pre_terminal_attack/source/better_shift_command.lua'
 s=p.read_text(encoding='utf-8')
 def fail(m): print('FAIL '+m); raise SystemExit(1)
 def need(t,n=1):

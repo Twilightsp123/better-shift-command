@@ -63,8 +63,8 @@ The 2026-10-05 direct T2-B, T2-A, hairpin and native-passthrough builds are pres
 
 The next transition work is therefore:
 
-- validate ARRIVAL_BRAKE_G1 as behavior-neutral observation data; no gameplay promotion is allowed merely because braking was observed;
-- T2-B Move→Attack reintroduced through the shared evaluator/transaction path, with semantic corridor legality separated from observed CA arrival braking;
+- ARRIVAL_BRAKE_G1 is now validated as behavior-neutral observation data;
+- the current construction branch carries a **T2-B candidate** for ordinary Move→Attack: semantic corridor legality is separated from observed CA arrival braking, and the candidate still requires T1.6 ACK/exact-adoption commit; offline validation is pending;
 - T2-MOVE immediate-successor MOVE reconciliation **with hysteresis from the first promotion**, using the observed one-poll travel distance as the synchronization band rather than another hand-tuned meter value;
 - later visible MCT wiring.
 

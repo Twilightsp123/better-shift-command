@@ -48,6 +48,10 @@ def main():
       ('arrival_brake_g1_module.txt',L+['tests/test_arrival_brake_g1.lua','source/arrival_brake_observer.lua']),
       ('arrival_brake_g1_contract.txt',[sys.executable,'tests/test_arrival_brake_g1_contract.py']),
       ('arrival_brake_g1_equivalence.txt',[sys.executable,'tests/test_arrival_brake_g1_equivalence.py']),
+      ('t2b_attack_handoff_module.txt',L+['tests/test_t2b_attack_handoff.lua','source/t2b_attack_handoff.lua']),
+      ('t2b_attack_handoff_contract.txt',[sys.executable,'tests/test_t2b_attack_handoff_contract.py']),
+      ('t2b_attack_handoff_mutations.txt',[sys.executable,'tests/test_t2b_attack_handoff_mutations.py']),
+      ('t2b_attack_handoff_runtime.txt',L+['tests/test_t2b_attack_handoff_runtime.lua','source/better_shift_command.lua','tests/fixture.lua']),
       ('tools.txt',[sys.executable,'tests/test_tools.py']),
       ('reverse.txt',[sys.executable,'tests/test_reverse_inventory.py']),
       ('mutations.txt',[sys.executable,'steering_tests/test_mutations_sc5.py'])]

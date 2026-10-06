@@ -26,7 +26,7 @@ index=read('docs/MAINTAINER_INDEX.md')
 for token in ('Document authority','Implemented TPOL scaffold + approved-next design','Historical narrative','Do not count ContactPair as the 17th mandatory hook','D1 promotion rule'):
     if token not in index: fail('MAINTAINER_INDEX missing rule: '+token)
 arch=read('docs/ARCHITECTURE_STATUS_20260929.md')
-for token in ('Current production/runtime architecture','Strict Move→Attack boundary remains current behavior','SC6 immediate-MOVE asymmetry remains current behavior','T1.5 execution-lineage separation','T1.6 committed-edge transaction','T1.7 consumer-neutral policy envelopes','TPOL-T1H + TPOL-T1 + TPOL-T1.5 + TPOL-T1.6 + TPOL-T1.7 implementation status'):
+for token in ('Current production/runtime architecture','Move→Attack T2-B candidate is active only on the construction branch','SC6 immediate-MOVE asymmetry remains current behavior','T1.5 execution-lineage separation','T1.6 committed-edge transaction','T1.7 consumer-neutral policy envelopes','TPOL-T1H + TPOL-T1 + TPOL-T1.5 + TPOL-T1.6 + TPOL-T1.7 implementation status'):
     if token not in arch: fail('ARCHITECTURE_STATUS missing current/design separation: '+token)
 policy=read('docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md')
 for token in ('T1H + T1 + T1.5 + T1.6 + T1.7 IMPLEMENTED STRUCTURALLY','T1.5 execution-lineage input','T1.6 committed-edge transaction','T1.7 consumer-neutral envelopes','Hard invariants','Hysteresis','MOVE → ATTACK policy','SC6 becomes a coordinator','MCT architecture'):
@@ -44,7 +44,7 @@ issues=read('docs/OPEN_ISSUES.md')
 for token in ('O-08 — Move→Attack','O-09 — SC6 rolls back immediate future MOVE','O-11 — Battle exit/main-menu/desktop hang','T1.6','T1.7','T2/T3 PENDING','TPOL-T1H / T2 outstanding'):
     if token not in issues: fail('OPEN_ISSUES missing current blocker: '+token)
 matrix=read('docs/TEST_MATRIX.md')
-for token in ('Maintenance jobs | **37/37 PASS (GITHUB ACTIONS T1.7)**','Mutation suite | **PASS**','Windows Native CTest | 14/14 PASS','T1H hidden PolicyProfile/MCT scaffold | PASS','T1 shared behavior-neutral evaluator refactor | **PASS**','T1.5 execution-lineage separation | **PASS / BEHAVIOR-NEUTRAL**','T1.6 committed-edge transaction | **PASS / PERMISSION-NEUTRAL**','T1.7 consumer-neutral policy envelopes | **PASS / PERMISSION-NEUTRAL**','T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1.7 NOT ACTIVE','T3 visible MCT adapter/UI wiring | NOT RUN'):
+for token in ('Maintenance jobs | **37/37 PASS (GITHUB ACTIONS T1.7)**','Mutation suite | **PASS**','Windows Native CTest | 14/14 PASS','T1H hidden PolicyProfile/MCT scaffold | PASS','T1 shared behavior-neutral evaluator refactor | **PASS**','T1.5 execution-lineage separation | **PASS / BEHAVIOR-NEUTRAL**','T1.6 committed-edge transaction | **PASS / PERMISSION-NEUTRAL**','T1.7 consumer-neutral policy envelopes | **PASS / PERMISSION-NEUTRAL**','ARRIVAL_BRAKE_G1 observation layer | **PASS / BEHAVIOR-NEUTRAL**','T2 Move→Attack terminal handoff | **CONSTRUCTION CANDIDATE / VALIDATION PENDING**','T3 visible MCT adapter/UI wiring | NOT RUN'):
     if token not in matrix: fail('TEST_MATRIX missing gate: '+token)
 ledger=read('docs/ASSUMPTION_LEDGER.md')
 if '`Entity +0x18 = MovementComponent*` | **RETRACTED**' not in ledger: fail('Assumption ledger lost retracted Entity+0x18 status')
@@ -55,12 +55,12 @@ hist=read('docs/DEVELOPMENT_HISTORY.md')
 for token in ('HISTORICAL DOCUMENT — NOT CURRENT AUTHORITY','## 18. 2026-09-29 — Move VTable closure reveals transition-policy limitations','## 19. 2026-09-29 — TPOL-T1H hidden MCT/profile scaffold','## 21. 2026-10-05 — direct T2 experiments','## 22. 2026-10-05 — BSC-TPOL-T1 shared evaluator implemented behavior-neutrally','## 23. 2026-10-05 — BSC-TPOL-T1.5 execution-lineage separation','## 24. 2026-10-05 — BSC-TPOL-T1.6 committed-edge transaction','## 25. 2026-10-06 — BSC-TPOL-T1.7 consumer-neutral policy envelopes'):
     if token not in hist: fail('DEVELOPMENT_HISTORY missing marker: '+token)
 manifest=json.loads(read('DESIGN_MANIFEST.json'))
-if manifest.get('design_stream')!='BSC-TPOL-D1' or manifest.get('status')!='T1_7_CONSUMER_NEUTRAL_ENVELOPES_IMPLEMENTED_PERMISSION_NEUTRAL_T2_NOT_ACTIVE': fail('DESIGN_MANIFEST identity/status mismatch')
+if manifest.get('design_stream')!='BSC-TPOL-D1' or manifest.get('status') not in ('T2B_ARRIVAL_BRAKE_HANDOFF_CANDIDATE_VALIDATION_PENDING','T2B_ARRIVAL_BRAKE_HANDOFF_CANDIDATE_OFFLINE_VALIDATED_RUNTIME_PENDING'): fail('DESIGN_MANIFEST identity/status mismatch')
 if manifest.get('product_default')!='SMOOTH' or manifest.get('hard_invariants_configurable') is not False: fail('DESIGN_MANIFEST policy contract mismatch')
 if 'T1_SHARED_EVALUATOR_IMPLEMENTED' not in manifest.get('implementation_stages',[]): fail('DESIGN_MANIFEST missing implemented T1 stage')
 if 'T1_5_EXECUTION_LINEAGE_IMPLEMENTED' not in manifest.get('implementation_stages',[]): fail('DESIGN_MANIFEST missing implemented T1.5 stage')
 if 'T1_6_TRANSITION_TRANSACTION_IMPLEMENTED' not in manifest.get('implementation_stages',[]): fail('DESIGN_MANIFEST missing implemented T1.6 stage')
-if 'T1_7_CONSUMER_NEUTRAL_ENVELOPES_IMPLEMENTED' not in manifest.get('implementation_stages',[]) or 'T2_MOVE_IMMEDIATE_MOVE_WITH_HYSTERESIS_PENDING' not in manifest.get('implementation_stages',[]) or 'T2B_MOVE_ATTACK_PENDING_REIMPLEMENT' not in manifest.get('implementation_stages',[]): fail('DESIGN_MANIFEST must mark T1.7 implemented while keeping T2 pending')
+if 'T1_7_CONSUMER_NEUTRAL_ENVELOPES_IMPLEMENTED' not in manifest.get('implementation_stages',[]) or 'T2_MOVE_IMMEDIATE_MOVE_WITH_HYSTERESIS_PENDING' not in manifest.get('implementation_stages',[]) or 'G1_ARRIVAL_BRAKE_OBSERVER_VALIDATED_BEHAVIOR_NEUTRAL' not in manifest.get('implementation_stages',[]) or not any(x.startswith('T2B_ARRIVAL_BRAKE_HANDOFF_CANDIDATE') for x in manifest.get('implementation_stages',[])): fail('DESIGN_MANIFEST must mark G1/T2-B construction while keeping T2-MOVE pending')
 if manifest.get('mct_ui')!='HIDDEN_NOT_REGISTERED': fail('DESIGN_MANIFEST MCT visibility mismatch')
 if manifest.get('formal_project_version')!='1.3.0' or manifest.get('canonical_pack_name')!='zzz_better_shift_command_steam.pack': fail('DESIGN_MANIFEST formal version/pack identity mismatch')
 release=json.loads(read('RELEASE_MANIFEST.json'))
