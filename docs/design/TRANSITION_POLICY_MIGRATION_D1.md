@@ -88,6 +88,29 @@ Gate:
 
 After T1.6, remove `consumer` from the permission calculation itself. The evaluator emits one edge decision with explicit issue/adopt envelope data; proactive dispatch, Native reconcile and scheduler only interpret that same decision. Initially map the envelopes back to T1.6 outcomes so this stage remains permission-neutral.\n\n**T1.7 implementation result — 2026-10-06:** PASS. Consumer-specific permission branches are removed; issue/adopt envelopes preserve legacy immediate-MOVE rollback and strict Move→Attack. GitHub Actions full maintenance is 37/37 PASS; T1.7 envelope mutations are 7/7 caught.
 
+## G1 — Arrival-brake observation, behavior-neutral construction stage
+
+Before widening T2 permission, observe the engine behavior we are actually trying to pre-empt.
+
+- Do **not** infer or tune a minimum turn radius. WH3 ordinary right-click movement can redirect nearly immediately.
+- Retain route corridor/debt geometry as the semantic legality proof.
+- Record consecutive position samples after current Move entry.
+- Derive ground speed and radial waypoint-approach speed from the same intervals.
+- Classify sustained arrival braking only when both decrease over three consecutive intervals.
+- Derive stopping distance from observed radial deceleration.
+- Derive the future hysteresis synchronization margin from the last observed one-poll approach distance.
+- Add no gameplay CFG scalar and do not expose the observation to TransitionPolicy permission yet.
+
+Gate:
+
+- current T1.7 deterministic permission probe unchanged;
+- all scalar CFG values unchanged;
+- pure observer fixtures cover cruise, sustained deceleration, irregular poll spacing, warmup and moving-away cases;
+- static contract proves TransitionPolicy does not read G1 observation fields;
+- Native/address source unchanged.
+
+Only after this gate may T2-B/T2-MOVE consume the observation.
+
 ## T2 — Smooth-default behavior correction
 
 This is the first intentional gameplay change.

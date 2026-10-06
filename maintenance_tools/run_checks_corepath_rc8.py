@@ -45,6 +45,9 @@ def main():
       ('policy_envelopes_t17_contract.txt',[sys.executable,'tests/test_policy_envelopes_t17_contract.py']),
       ('policy_envelopes_t17_equivalence.txt',[sys.executable,'tests/test_policy_envelopes_t17_equivalence.py']),
       ('policy_envelopes_t17_mutations.txt',[sys.executable,'tests/test_policy_envelopes_t17_mutations.py']),
+      ('arrival_brake_g1_module.txt',L+['tests/test_arrival_brake_g1.lua','source/arrival_brake_observer.lua']),
+      ('arrival_brake_g1_contract.txt',[sys.executable,'tests/test_arrival_brake_g1_contract.py']),
+      ('arrival_brake_g1_equivalence.txt',[sys.executable,'tests/test_arrival_brake_g1_equivalence.py']),
       ('tools.txt',[sys.executable,'tests/test_tools.py']),
       ('reverse.txt',[sys.executable,'tests/test_reverse_inventory.py']),
       ('mutations.txt',[sys.executable,'steering_tests/test_mutations_sc5.py'])]

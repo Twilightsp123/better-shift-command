@@ -35,6 +35,20 @@ T1.7 is permission-neutral and must prove:
 
 Validation result: **PASS**. GitHub Actions full maintenance is **37/37 PASS**; the T1.7 contract/equivalence gates pass and all **7/7** envelope mutations are caught.
 
+## 0.8 ARRIVAL_BRAKE_G1 observation gate
+
+G1 is behavior-neutral and must prove:
+
+- no new gameplay CFG scalar is introduced;
+- the observer uses post-entry position history only;
+- ground speed and radial waypoint-approach speed must both show sustained deceleration before `braking=true`;
+- irregular model-time spacing is handled from actual timestamps rather than an assumed 100 ms poll;
+- the derived synchronization margin is exactly one last observed poll of waypoint approach, not a tunable meter constant;
+- `TransitionPolicy.evaluate()` does not read G1 fields;
+- deterministic T1.7 permission output is identical to the pre-G1 controller.
+
+This is a model-validation stage, not a gameplay-success claim.
+
 ## 1. Offline policy tests
 
 Every test should assert both decision `zone` and stable `reason`.

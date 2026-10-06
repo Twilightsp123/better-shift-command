@@ -12,7 +12,7 @@ local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
 local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
 local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE transaction_stage=TPOL_T1_6_TRANSITION_TRANSACTION envelope_stage=TPOL_T1_7_CONSUMER_NEUTRAL")
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE transaction_stage=TPOL_T1_6_TRANSITION_TRANSACTION envelope_stage=TPOL_T1_7_CONSUMER_NEUTRAL geometry_stage=ARRIVAL_BRAKE_G1_OBSERVE_ONLY")
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -838,6 +838,68 @@ end
 -- R1: faults are per-action records, NOT st.blocked. Input draining/observations
 -- remain live and suffixes are preserved. A safe failure is not semantic completion.
 local R1={}
+-- ARRIVAL_BRAKE_G1_MODULE_BEGIN
+R1.ArrivalBrake=(function()
+    local A={VERSION="ARRIVAL_BRAKE_G1"}
+    local HUGE=(type(math.huge)=="number" and math.huge) or 1e300
+    local function finite(n) return type(n)=="number" and n==n and n<HUGE and n>-HUGE end
+    local function valid_point(p) return type(p)=="table" and finite(p.x) and finite(p.z) end
+    local function valid_sample(s) return type(s)=="table" and finite(s.ms) and valid_point(s) end
+    local function distance(a,b)
+        local dx,dz=a.x-b.x,a.z-b.z
+        return math.sqrt(dx*dx+dz*dz)
+    end
+    function A.observe(samples,waypoint,entered_ms)
+        local r={ready=false,braking=false,boundary_crossed=false,reason="WARMUP",sample_count=0}
+        if type(samples)~="table" or not valid_point(waypoint) then r.reason="INPUT_INVALID";return r end
+        if not finite(entered_ms) then r.reason="ENTRY_NOT_ESTABLISHED";return r end
+        local rows={}
+        for i=1,#samples do
+            local s=samples[i]
+            if valid_sample(s) and s.ms>=entered_ms then rows[#rows+1]=s end
+        end
+        r.sample_count=#rows
+        if #rows<4 then return r end
+        local base=#rows-3
+        local rem,ground,approach,dt={},{},{},{}
+        for j=1,4 do rem[j]=distance(rows[base+j-1],waypoint) end
+        for j=1,3 do
+            local a,b=rows[base+j-1],rows[base+j]
+            local span=b.ms-a.ms
+            if span<=0 then r.reason="MODEL_TIME_NOT_STRICT";return r end
+            dt[j]=span/1000
+            ground[j]=distance(a,b)/dt[j]
+            approach[j]=(rem[j]-rem[j+1])/dt[j]
+        end
+        r.ready=true;r.sample_count=4;r.remaining=rem[4]
+        r.ground_speed=ground[3];r.approach_speed=approach[3]
+        r.previous_ground_speed=ground[2];r.previous_approach_speed=approach[2]
+        r.poll_ms=dt[3]*1000
+        r.sync_margin=math.max(0,approach[3])*dt[3]
+        if not (approach[1]>0 and approach[2]>0 and approach[3]>0) then
+            r.reason="NOT_APPROACHING";return r
+        end
+        if not (ground[1]>ground[2] and ground[2]>ground[3] and approach[1]>approach[2] and approach[2]>approach[3]) then
+            r.reason="NO_SUSTAINED_DECELERATION";return r
+        end
+        local mid1=(rows[base].ms+rows[base+1].ms)*0.5
+        local mid3=(rows[base+2].ms+rows[base+3].ms)*0.5
+        local span=(mid3-mid1)/1000
+        if span<=0 then r.reason="DECELERATION_WINDOW_INVALID";return r end
+        local ground_decel=(ground[1]-ground[3])/span
+        local approach_decel=(approach[1]-approach[3])/span
+        if ground_decel<=0 or approach_decel<=0 then r.reason="NO_SUSTAINED_DECELERATION";return r end
+        r.ground_deceleration=ground_decel;r.approach_deceleration=approach_decel
+        r.stopping_distance=(approach[3]*approach[3])/(2*approach_decel)
+        r.preempt_distance=r.stopping_distance+r.sync_margin
+        r.braking=true
+        r.boundary_crossed=r.remaining<=r.preempt_distance
+        r.reason=r.boundary_crossed and "ARRIVAL_BRAKE_BOUNDARY_REACHED" or "ARRIVAL_BRAKE_OBSERVED"
+        return r
+    end
+    return A
+end)()
+-- ARRIVAL_BRAKE_G1_MODULE_END
 
 -- TPOL-T1H hidden policy scaffold.
 -- No MCT page is registered in this runtime stage.  The schema/profile compiler is
@@ -1506,7 +1568,7 @@ end
 function Core.new_state(su,dynamic)
     dynamic=dynamic==true
     return {uid=uid(su.unit),unit=su.unit,uc=su.uc,gen=0,revision=nil,actions={},plan=nil,
-        idx=1,owned=false,execution_lane="PLAYER_NATIVE",terminal=false,blocked=false,require_replace=dynamic,recover_revision=nil,speeds={},pos=nil,prev_pos=nil,last_pos=nil,
+        idx=1,owned=false,execution_lane="PLAYER_NATIVE",terminal=false,blocked=false,require_replace=dynamic,recover_revision=nil,speeds={},motion_samples={},pos=nil,prev_pos=nil,last_pos=nil,
         last_sample=nil,origin=nil,moves=0,last_wait=-1000000,refused=nil,phase=dynamic and "WAIT_FOR_REPLACE" or "NATIVE_TRACKING",
         attack=nil,model_step_ms=0,cold_seen=dynamic,cold_idle=nil,queue_reset_cert=nil,restart_idle_candidate=nil,restart_idle_cert=nil,
         dynamic=dynamic,last_seen_scan=nil,block_state={},action_serial=0,action_base=0}
@@ -1656,6 +1718,12 @@ local function sample(st,now)
         local speed=dist(p,previous)*1000/(now-st.last_sample)
         if finite(speed) then st.speeds[#st.speeds+1]=speed; if #st.speeds>5 then table.remove(st.speeds,1) end end
     end
+    st.motion_samples=st.motion_samples or {}
+    local mh=st.motion_samples;local row={ms=now,x=p.x,z=p.z}
+    if #mh==0 or now>mh[#mh].ms then mh[#mh+1]=row
+    elseif now==mh[#mh].ms then mh[#mh]=row
+    else mh={row};st.motion_samples=mh end
+    while #mh>8 do table.remove(mh,1) end
     st.prev_pos=previous;st.pos=p; st.last_pos=copy(p); st.last_sample=now
 end
 cancel=function(st,reason,now,observe)
@@ -2145,7 +2213,14 @@ local function geometry(st,nexta)
         angle+math.min(CFG.speed_cap,(speed or 0)*CFG.speed_seconds),
         width*(CFG.formation_straight+(CFG.formation_uturn-CFG.formation_straight)*ratio)))
     lead=math.min(lead,leg*(CFG.execution_straight+(CFG.execution_uturn-CFG.execution_straight)*ratio))
-    return {remaining=remain,leg=leg,progress=progress,speed=speed or 0,stall=stall,threshold=lead,ratio=ratio}
+    local brake=R1.ArrivalBrake.observe(st.motion_samples,a.pos,action_runtime(a).entered_ms)
+    return {remaining=remain,leg=leg,progress=progress,speed=speed or 0,stall=stall,threshold=lead,ratio=ratio,
+        arrival_brake_ready=brake.ready,arrival_braking=brake.braking,arrival_brake_boundary=brake.boundary_crossed,
+        arrival_brake_reason=brake.reason,arrival_brake_samples=brake.sample_count,
+        arrival_ground_speed=brake.ground_speed,arrival_approach_speed=brake.approach_speed,
+        arrival_ground_deceleration=brake.ground_deceleration,arrival_approach_deceleration=brake.approach_deceleration,
+        arrival_brake_stop_distance=brake.stopping_distance,arrival_brake_preempt_distance=brake.preempt_distance,
+        arrival_sync_margin=brake.sync_margin}
 end
 local function attack_geometry(st,nexta,g)
     -- Only the immediate ATTACK is inspected; never inspect a post-ATTACK MOVE.
@@ -2463,7 +2538,13 @@ local function transition_geometry_snapshot(g)
         corner_stall_no_progress_ms=g.corner_stall_no_progress_ms,corner_stall_escape_margin=g.corner_stall_escape_margin,
         corner_stall_escape_limit=g.corner_stall_escape_limit,next_leg=g.next_leg,ratio=g.ratio,
         route_debt_mode=g.route_debt_mode,route_debt_count=g.route_debt_count,
-        route_debt_error=g.route_debt_error,route_debt_limit=g.route_debt_limit}
+        route_debt_error=g.route_debt_error,route_debt_limit=g.route_debt_limit,
+        arrival_brake_ready=g.arrival_brake_ready,arrival_braking=g.arrival_braking,arrival_brake_boundary=g.arrival_brake_boundary,
+        arrival_brake_reason=g.arrival_brake_reason,arrival_brake_samples=g.arrival_brake_samples,
+        arrival_ground_speed=g.arrival_ground_speed,arrival_approach_speed=g.arrival_approach_speed,
+        arrival_ground_deceleration=g.arrival_ground_deceleration,arrival_approach_deceleration=g.arrival_approach_deceleration,
+        arrival_brake_stop_distance=g.arrival_brake_stop_distance,arrival_brake_preempt_distance=g.arrival_brake_preempt_distance,
+        arrival_sync_margin=g.arrival_sync_margin}
 end
 function Core.begin_transition_txn(st,current,successor,reason,now,g,source)
     if st.transition_txn then fail("TRANSITION_TXN_ALREADY_OPEN");return nil end

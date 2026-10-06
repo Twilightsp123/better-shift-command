@@ -144,3 +144,12 @@
 **Reason:** T1.6 fixed execution commitment but still encoded the old SC6 asymmetry with `consumer=="NATIVE_RECONCILE"`. Promoting T2 on top of that would keep two permission models hidden inside one function and make hysteresis difficult to prove.
 
 **Consequence:** T1.7 remains permission-neutral. Legacy immediate-MOVE adoption stays closed in the adopt envelope while the issue envelope preserves existing SC1–SC4 timing. Strict Move→Attack remains unchanged. T2-B and T2-MOVE may now widen only the appropriate envelope through one shared policy calculation.
+
+
+## D-20261006-02 — Observe CA arrival braking before tuning another transition threshold
+
+**Decision:** insert ARRIVAL_BRAKE_G1 as an observation-only stage before T2 gameplay promotion. Do not model a WH3 unit turn radius: ordinary right-click movement can redirect almost immediately, so the relevant hidden engine behavior is arrival/braking at the current waypoint rather than a vehicle-like minimum turning radius.
+
+**Reason:** SC1/SC2/SC4 and the historical T2-B experiments accumulated several distance/fraction constants while trying to beat CA's arrival controller. The next architecture should separate route legality from timing. Route/debt geometry answers whether changing command preserves player intent; G1 answers whether CA is actually slowing for the current waypoint. The observer requires simultaneous sustained decrease in ground speed and radial waypoint-approach speed, derives stopping distance from observed deceleration, and derives the future Native-adopt synchronization margin from one actual poll of travel instead of a hand-tuned meter tolerance.
+
+**Consequence:** G1 changes no `CFG` scalar, no issue/adopt permission, no cursor rule, and no transition commit rule. T1.7 remains the permission authority. T2-B and T2-MOVE may later consume G1 only behind the existing hard invariants and T1.6 transaction protocol.

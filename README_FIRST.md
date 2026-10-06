@@ -55,7 +55,7 @@ Implemented transition substages: `BSC-TPOL-T1H` → `BSC-TPOL-T1` → `BSC-TPOL
 
 ## Current architecture status
 
-The current development runtime is **BSC-TPOL-T1.7 permission-neutral** on top of the existing SC1–SC6 gameplay baseline. T1H provides the hidden immutable PolicyProfile/MCT adapter scaffold; T1 provides the shared `R1.TransitionPolicy.evaluate()` decision plane; T1.5 separates execution lineage; T1.6 unifies committed-edge execution; T1.7 removes consumer-specific permission calculation and emits one issue/adopt envelope decision for all consumers.
+The validated permission baseline is **BSC-TPOL-T1.7 permission-neutral** on top of the existing SC1–SC6 gameplay baseline. The current construction branch additionally carries **ARRIVAL_BRAKE_G1**, an observation-only geometry stage: it records parameter-free radial/ground deceleration evidence and a one-poll synchronization margin, but TransitionPolicy does not consume those fields yet. T1H provides the hidden immutable PolicyProfile/MCT adapter scaffold; T1 provides the shared `R1.TransitionPolicy.evaluate()` decision plane; T1.5 separates execution lineage; T1.6 unifies committed-edge execution; T1.7 removes consumer-specific permission calculation and emits one issue/adopt envelope decision for all consumers.
 
 **T1.7 still intentionally does not change transition permission.** Move→Attack remains strict until current Move semantic completion, exact immediate future MOVE adoption remains closed, and no hysteresis tolerance is active. The change is structural: issue permission and Native-adopt permission are represented as separate envelopes produced by the same consumer-neutral evaluator. GitHub Actions full validation is **37/37 PASS**; core mutations are **43/43 CAUGHT**, with T1.5/T1.6/T1.7 stage mutations **7/7 CAUGHT** each.
 
@@ -63,8 +63,9 @@ The 2026-10-05 direct T2-B, T2-A, hairpin and native-passthrough builds are pres
 
 The next transition work is therefore:
 
-- T2-B Move→Attack terminal handoff reintroduced through the shared evaluator/transaction path, using the successful runtime experiment as evidence;
-- T2-MOVE immediate-successor MOVE reconciliation **with hysteresis from the first promotion** (T2-A + former T2-C together);
+- validate ARRIVAL_BRAKE_G1 as behavior-neutral observation data; no gameplay promotion is allowed merely because braking was observed;
+- T2-B Move→Attack reintroduced through the shared evaluator/transaction path, with semantic corridor legality separated from observed CA arrival braking;
+- T2-MOVE immediate-successor MOVE reconciliation **with hysteresis from the first promotion**, using the observed one-poll travel distance as the synchronization band rather than another hand-tuned meter value;
 - later visible MCT wiring.
 
 Battle teardown/hang remains a separate lifecycle stream and must not be mixed into transition-policy changes.

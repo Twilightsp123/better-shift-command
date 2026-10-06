@@ -36,6 +36,7 @@
 | T1.5 execution-lineage separation | **PASS / BEHAVIOR-NEUTRAL** | capture/issued identity split; 15,625 identity states equivalent; 7/7 lineage mutants caught; consolidated 30/30 PASS |
 | T1.6 committed-edge transaction | **PASS / PERMISSION-NEUTRAL** | submit is not commit; ACK and exact Native adopt share `commit_transition_edge`; reject aborts; deterministic T1 probe/CFG unchanged; 7/7 transaction mutants; runtime 3/3 |
 | T1.7 consumer-neutral policy envelopes | **PASS / PERMISSION-NEUTRAL** | one decision exposes issue/adopt envelopes; T1.6 runtime permission must remain equivalent |
+| ARRIVAL_BRAKE_G1 observation layer | **CONSTRUCTION CANDIDATE / BEHAVIOR-NEUTRAL** | pure radial+ground deceleration observer; no CFG/permission change; adds 3 candidate gates beyond the validated 37-job T1.7 baseline |
 | T2 immediate-MOVE reconciliation | NOT ACTIVE | implement only after T1.7; offline + mutation + WH3 RT-TP-04/05 |
 | T2 Move→Attack terminal handoff | HISTORICAL EXPERIMENT PASS; CURRENT T1.7 NOT ACTIVE | reimplement through evaluator + rerun offline/WH3 RT-TP-02/03 |
 | T2 hysteresis | NOT ACTIVE | issue/adopt bands required before T2 promotion |

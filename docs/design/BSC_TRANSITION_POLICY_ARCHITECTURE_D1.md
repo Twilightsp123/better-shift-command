@@ -202,6 +202,19 @@ This acts like a Schmitt trigger. It prevents oscillation where CA advances a fr
 
 `native_successor_tolerance` controls the width of the bounded adoption-only band. It does not allow skipping actions.
 
+## 7.1 Arrival-brake observation: timing evidence, not route permission
+
+WH3 units do not behave like fixed-turn-radius vehicles under ordinary right-click movement; they can redirect very quickly. D1 therefore does not require a Pure-Pursuit/L1/fillet turn-radius model for promotion.
+
+The useful separation is:
+
+1. **semantic legality:** route corridor, route debt, exact successor/target and block semantics decide whether changing command would preserve player intent;
+2. **timing evidence:** observed CA locomotion decides whether the current waypoint is entering an unnecessary arrival/braking profile.
+
+ARRIVAL_BRAKE_G1 observes consecutive post-entry positions and derives both total ground speed and radial approach speed to the current waypoint. A braking observation requires both to decrease over the same three consecutive intervals. The derived stopping-distance estimate and one-poll synchronization margin are not permission in G1; they are candidate inputs for T2.
+
+This keeps future hysteresis tied to actual asynchronous sampling error (`approach_speed × observed_poll_interval`) rather than another manually tuned meter tolerance.
+
 ## 8. MOVE → MOVE policy
 
 SC1–SC4 remain the baseline implementation and are migrated behind the evaluator with no behavior change in the first refactor stage.

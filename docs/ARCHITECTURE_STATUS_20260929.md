@@ -48,6 +48,17 @@ T1.6 removes the remaining ACK-vs-SC6 execution-protocol split without changing 
 
 This specifically closes the pre-T2 hazard where `ACTION_HANDOFF_COMMITTED` could be set while the Native command was only pending. Immediate future MOVE remains legacy rollback, Move→Attack remains strict, and no hysteresis band is active.
 
+### 3.7 ARRIVAL_BRAKE_G1 observation layer is construction-only and permission-neutral
+
+The current construction branch adds a pure `R1.ArrivalBrake` observer without changing T1.7 transition permission. It samples consecutive unit positions after the current Move entry and derives two independent signals from the same intervals:
+
+- ground speed, proving whether locomotion itself is slowing rather than merely changing direction;
+- radial approach speed to the current waypoint, proving whether progress into that waypoint is also slowing.
+
+Four valid position samples provide three movement intervals. G1 reports sustained arrival braking only when both ground speed and waypoint-approach speed decrease across all three intervals. From the observed approach deceleration it derives a stopping-distance estimate, then adds exactly the last observed one-poll approach distance as a synchronization margin. These are observations only; there is no new gameplay CFG scalar and `TransitionPolicy.evaluate()` does not read any G1 field.
+
+This stage exists to replace future “tune another corner/attack meter threshold” work with a testable model of CA's actual arrival braking. T2-B/T2-MOVE may consume it only after the behavior-neutral gate passes.
+
 ## 4. Approved architecture — T1 + T1.5 + T1.6 + T1.7 implemented structurally, T2 pending
 
 `BSC-TPOL-D1` introduces one Transition Policy Plane between canonical semantics and execution coordination. T1 implements the shared evaluator structure, T1.5 makes command-execution lineage explicit, T1.6 unifies edge commitment after ACK / exact Native adoption, and T1.7 moves issue/adopt permission into consumer-neutral envelopes while preserving the same transition outcomes.
