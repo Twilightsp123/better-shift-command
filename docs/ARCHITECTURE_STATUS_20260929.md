@@ -79,7 +79,7 @@ The hidden profile scaffold and shared behavior-neutral TransitionPolicy evaluat
 - T1 old/new deterministic transition probes are equivalent;
 - T1.5 separates `capture_identity` from BSC `issued_identity`, with explicit `execution_lane` tracking;
 - T1.5 semantic-equivalence checks prove the shared policy/geometry/CFG are unchanged and the new identity adapter preserves the old identity result;
-- T1.6 local consolidated maintenance is **34/34 PASS**, with core mutation harness **43/43**, T1.5 lineage mutations **7/7**, T1.6 transaction mutations **7/7**, and T1.6 runtime transaction gates **3/3**;
+- T1.7 consolidated GitHub Actions maintenance is **37/37 PASS**, with core mutation harness **43/43**, T1.5 lineage mutations **7/7**, T1.6 transaction mutations **7/7**, T1.7 envelope mutations **7/7**, and T1.6 runtime transaction gates **3/3**;
 - T1.6 permission equivalence preserves the deterministic T1 transition probe and all CFG scalars;
 - existing SC1–SC6 gameplay regressions remain unchanged;
 - `ADOPT_ONLY`, immediate-MOVE T2-MOVE, and Move→Attack terminal T2-B are **not active in current source**;
@@ -90,4 +90,4 @@ The hidden profile scaffold and shared behavior-neutral TransitionPolicy evaluat
 
 T1.7 removes the last permission calculation keyed by evaluator consumer. The evaluator now computes a single immediate-edge decision containing separate `issue_window` and `adopt_window` envelopes. Proactive dispatch reads the issue envelope; SC6 reads the adopt envelope; scheduler urgency consumes the same route decision without changing permission.
 
-To preserve T1.6 behavior, the legacy immediate-MOVE adopt envelope is explicitly closed while the Move issue envelope keeps the existing SC1–SC4 timing rules. Move→Attack remains strict and no Native tolerance/hysteresis is active. The T1.7 candidate is awaiting CI validation.
+To preserve T1.6 behavior, the legacy immediate-MOVE adopt envelope is explicitly closed while the Move issue envelope keeps the existing SC1–SC4 timing rules. Move→Attack remains strict and no Native tolerance/hysteresis is active. T1.7 GitHub Actions full validation is **37/37 PASS**; core mutations are **43/43 CAUGHT**, and T1.5/T1.6/T1.7 stage mutations are **7/7 CAUGHT** each.
