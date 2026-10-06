@@ -1,0 +1,43 @@
+name: G1 Arrival Brake Validation
+
+on:
+  push:
+    branches:
+      - ci/g1-arrival-brake-validation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  g1-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Lua 5.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+
+      - name: Compile Python
+        run: python -m compileall -q maintenance_tools tests tools
+
+      - name: Documentation contract
+        run: python maintenance_tools/check_documentation_contract.py
+
+      - name: G1 focused gates
+        run: |
+          lua5.1 tests/test_arrival_brake_g1.lua source/arrival_brake_observer.lua
+          python tests/test_arrival_brake_g1_contract.py
+          python tests/test_arrival_brake_g1_equivalence.py
+
+      - name: Full maintenance suite
+        run: python maintenance_tools/run_checks_corepath_rc8.py
