@@ -28,6 +28,7 @@ For each meaningful change, record:
 | `README_FIRST.md` | current stage, next required action, reading order changes |
 | `docs/ARCHITECTURE_STATUS_*.md` | production architecture changes |
 | `docs/OPEN_ISSUES.md` | any blocker/trade-off opens or closes |
+| `docs/MAINTENANCE_TODO.md` | any actionable item starts, blocks, unblocks, completes, or changes order |
 | `docs/ASSUMPTION_LEDGER.md` | reverse-engineered fact status changes |
 | `docs/TEST_MATRIX.md` | any gate is run or a new gate is added |
 | `docs/CURRENT_BUILD_MAP.md` | build identity/RVA/guard changes |
@@ -123,3 +124,19 @@ current docs promoted? yes/no
 ## 11. Hidden policy scaffold rule
 
 A future UI/configuration system may be scaffolded before exposure, but the stage must state which fields are merely reserved and which are runtime-wired. Hidden scaffolding must not silently change gameplay defaults. MCT adapters must feed one profile compiler/snapshot; they must not mutate scattered CFG globals directly.
+
+
+## 12. Operational TODO rule
+
+`docs/MAINTENANCE_TODO.md` is the authoritative operational queue for work that is ready, blocked, deferred, or waiting on an external capability such as WH3 runtime access.
+
+Use it to record:
+
+- the exact candidate/commit/artifact already prepared;
+- why an item is blocked;
+- the exact condition that unblocks it;
+- the test/actions to run once unblocked;
+- actions that are forbidden while blocked;
+- the next item that may proceed independently.
+
+Do not leave a blocked runtime gate only in chat history. A blocked item remains open until the named evidence exists; time passing or offline CI alone does not promote it.

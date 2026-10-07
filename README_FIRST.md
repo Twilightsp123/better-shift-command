@@ -41,17 +41,18 @@ Validated structural substages: `BSC-TPOL-T1H` → `BSC-TPOL-T1` → `BSC-TPOL-T
 4. `docs/VERSION_POLICY.md`
 5. `docs/ARCHITECTURE_STATUS_20260929.md`
 6. `docs/OPEN_ISSUES.md`
-7. `docs/ASSUMPTION_LEDGER.md`
-8. `docs/TEST_MATRIX.md`
-9. `docs/CURRENT_BUILD_MAP.md`
-10. `docs/DECISION_LOG.md`
-11. `docs/VERSION_LINEAGE.md`
-12. `docs/PROVENANCE.md`
-13. `docs/HISTORY_COVERAGE.md`
-14. `docs/design/HIDDEN_MCT_INTERFACE_T1H.md`
-15. `docs/design/MCT_POLICY_SCHEMA_D1.md`
-16. `docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md`
-17. `docs/DEVELOPMENT_HISTORY.md` only for historical context
+7. `docs/MAINTENANCE_TODO.md`
+8. `docs/ASSUMPTION_LEDGER.md`
+9. `docs/TEST_MATRIX.md`
+10. `docs/CURRENT_BUILD_MAP.md`
+11. `docs/DECISION_LOG.md`
+12. `docs/VERSION_LINEAGE.md`
+13. `docs/PROVENANCE.md`
+14. `docs/HISTORY_COVERAGE.md`
+15. `docs/design/HIDDEN_MCT_INTERFACE_T1H.md`
+16. `docs/design/MCT_POLICY_SCHEMA_D1.md`
+17. `docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md`
+18. `docs/DEVELOPMENT_HISTORY.md` only for historical context
 
 ## Current architecture status
 
@@ -61,9 +62,11 @@ The frozen structural/permission baseline remains **BSC-TPOL-T1.7** over SC1–S
 
 The 2026-10-05 direct T2-B, T2-A, hairpin and native-passthrough builds are preserved as historical experiments/evidence only. They do not override the staged D1 migration or current runtime source.
 
+The current actionable queue is maintained in `docs/MAINTENANCE_TODO.md`.
+
 The next transition work is therefore:
 
-- run WH3 **RT-TP-02 / RT-TP-03** against the offline-validated T2-B G1.1 candidate; promote it only if there is no stop-before-Attack and no waypoint-cut regression;
+- WH3 **RT-TP-02 / RT-TP-03** is currently **BLOCKED / DEFERRED because runtime testing is not available**; when testing becomes available, run it against the already-prepared T2-B G1.1 candidate and promote only if there is no stop-before-Attack and no waypoint-cut regression;
 - keep T2-MOVE immediate-successor MOVE reconciliation **with hysteresis from the first promotion**, using observed one-poll travel as the synchronization band rather than another hand-tuned meter value;
 - wire visible MCT only after the Smooth default passes runtime;
 - lifecycle/teardown remains a separate stream.

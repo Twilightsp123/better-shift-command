@@ -7,7 +7,7 @@ This file is the **navigation authority** for this maintenance package. Its purp
 When documents disagree, use this order:
 
 1. **Runtime/source truth:** current source and build-locked guards.
-2. **Current-state docs:** `ARCHITECTURE_STATUS_20260929.md`, `OPEN_ISSUES.md`, `ASSUMPTION_LEDGER.md`, `TEST_MATRIX.md`, `CURRENT_BUILD_MAP.md`.
+2. **Current-state docs:** `ARCHITECTURE_STATUS_20260929.md`, `OPEN_ISSUES.md`, `MAINTENANCE_TODO.md`, `ASSUMPTION_LEDGER.md`, `TEST_MATRIX.md`, `CURRENT_BUILD_MAP.md`.
 3. **Implemented TPOL scaffold + approved-next design:** `docs/design/HIDDEN_MCT_INTERFACE_T1H.md` describes the implemented hidden profile scaffold; `docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md` and companion docs describe later T2/T3 behavior. Implemented source wins where the design remains future-facing.
 4. **Current decisions:** `DECISION_LOG.md`.
 5. **Version identity / provenance:** `VERSION_LINEAGE.md`, `PROVENANCE.md`, `HISTORY_COVERAGE.md`, root `RELEASE_MANIFEST.json`.
@@ -42,7 +42,8 @@ Current runtime baseline / design stage:
 | Document | Use it to answer | Do not use it for |
 |---|---|---|
 | `ARCHITECTURE_STATUS_20260929.md` | What runtime is now vs what D1 is approved to become | Historical archaeology |
-| `OPEN_ISSUES.md` | What is unfinished now | Listing every old failure |
+| `OPEN_ISSUES.md` | What unresolved problems/blockers exist | Listing every old failure |
+| `MAINTENANCE_TODO.md` | What to do next, what is blocked, and the exact unblock procedure | Treating blocked work as already validated |
 | `design/HIDDEN_MCT_INTERFACE_T1H.md` | What policy/MCT scaffold is actually implemented now | Claiming T2 movement behavior is live |
 | `design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md` | Approved next transition architecture | Claiming unimplemented T2/T3 behavior is already live |
 | `design/MCT_POLICY_SCHEMA_D1.md` | Stable user-facing preset/slider model | Raw Native/RE settings |
@@ -63,6 +64,7 @@ Current runtime baseline / design stage:
 
 Before proposing a fix, answer in this order:
 
+0. Check `MAINTENANCE_TODO.md` for a blocked or already-prepared next action. Do not redo completed preparation work.
 1. Is the problem in `OPEN_ISSUES.md`, or is it a newly observed regression?
 2. Which version stream owns it? Use `VERSION_LINEAGE.md`.
 3. Does the proposed fix rely on a reverse-engineered field? Check `ASSUMPTION_LEDGER.md` first.
@@ -87,4 +89,4 @@ When a future maintainer discovers a conflict, fix the navigation/current-state 
 
 ## 7. D1 promotion rule
 
-`BSC-TPOL-D1` remains the design stream. T1H/T1/T1.5/T1.6/T1.7 and behavior-neutral G1 are validated. The current `BSC-TPOL-T2B-G11` ordinary Move→Attack candidate is **offline validated (46/46)** but still requires WH3 RT-TP-02/03; T2-MOVE and T3 visible MCT remain future work. The 2026-10-05 direct T2/passthrough experiments are historical evidence, not current runtime authority. Source behavior wins any disagreement with a design-only or historical section.
+`BSC-TPOL-D1` remains the design stream. T1H/T1/T1.5/T1.6/T1.7 and behavior-neutral G1 are validated. The current `BSC-TPOL-T2B-G11` ordinary Move→Attack candidate is **offline validated (46/46)**; WH3 RT-TP-02/03 is currently **BLOCKED / DEFERRED because runtime testing is not available** and remains the exact promotion gate; T2-MOVE and T3 visible MCT remain future work. The 2026-10-05 direct T2/passthrough experiments are historical evidence, not current runtime authority. Source behavior wins any disagreement with a design-only or historical section.

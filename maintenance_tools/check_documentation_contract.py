@@ -10,7 +10,7 @@ def read(rel):
     return p.read_text(encoding='utf-8')
 required=[
  'README_FIRST.md','VERSION','PACK_NAME','DESIGN_MANIFEST.json','RELEASE_MANIFEST.json','GITHUB_ARCHIVE_MANIFEST.json','docs/VERSION_POLICY.md','docs/MAINTAINER_INDEX.md','docs/ARCHITECTURE_STATUS_20260929.md',
- 'docs/OPEN_ISSUES.md','docs/ASSUMPTION_LEDGER.md','docs/TEST_MATRIX.md','docs/CURRENT_BUILD_MAP.md',
+ 'docs/OPEN_ISSUES.md','docs/MAINTENANCE_TODO.md','docs/ASSUMPTION_LEDGER.md','docs/TEST_MATRIX.md','docs/CURRENT_BUILD_MAP.md',
  'docs/DECISION_LOG.md','docs/VERSION_LINEAGE.md','docs/PROVENANCE.md','docs/HISTORY_COVERAGE.md',
  'docs/DEVELOPMENT_HISTORY.md','docs/MAINTENANCE_PROTOCOL.md','docs/design/BSC_TRANSITION_POLICY_ARCHITECTURE_D1.md',
  'docs/design/HIDDEN_MCT_INTERFACE_T1H.md','docs/design/MCT_POLICY_SCHEMA_D1.md','docs/design/TRANSITION_DECISION_TABLE_D1.md',
@@ -22,8 +22,11 @@ for token in ('Mandatory maintainer reading order','v1.3.0','zzz_better_shift_co
 version_policy=read('docs/VERSION_POLICY.md')
 for token in ('v1.3.0','zzz_better_shift_command_steam.pack','not the Mod version'):
     if token not in version_policy: fail('VERSION_POLICY missing token: '+token)
+todo=read('docs/MAINTENANCE_TODO.md')
+for token in ('P0 — T2-B G1.1 WH3 runtime promotion gate','BLOCKED / DEFERRED','49c9c005d8c39cf8b5eb92cea829e50e0727f665','37561431695','RT-TP-02','RT-TP-03','Do **not**','SHA256SUMS.txt'):
+    if token not in todo: fail('MAINTENANCE_TODO missing operational token: '+token)
 index=read('docs/MAINTAINER_INDEX.md')
-for token in ('Document authority','Implemented TPOL scaffold + approved-next design','Historical narrative','Do not count ContactPair as the 17th mandatory hook','D1 promotion rule'):
+for token in ('Document authority','Implemented TPOL scaffold + approved-next design','Historical narrative','Do not count ContactPair as the 17th mandatory hook','D1 promotion rule','MAINTENANCE_TODO.md'):
     if token not in index: fail('MAINTAINER_INDEX missing rule: '+token)
 arch=read('docs/ARCHITECTURE_STATUS_20260929.md')
 for token in ('Current production/runtime architecture','Move→Attack T2-B G1.1 candidate is offline validated on the construction branch','SC6 immediate-MOVE asymmetry remains current behavior','ARRIVAL_BRAKE_G1 remains behavior-neutral; G1.1 is T2-B policy evidence','T1.5 execution-lineage separation','T1.6 committed-edge transaction','T1.7 consumer-neutral policy envelopes','46/46 PASS'):
@@ -41,7 +44,7 @@ dec=read('docs/DECISION_LOG.md')
 for token in ('D-20260929-02','D-20260929-03','D-20260929-04','D-20260929-05','D-20260929-06','D-20261005-01','D-20261005-02','D-20261005-03','D-20261005-04','D-20261006-01','D-20261007-01','Replace abstract Attack Commitment with direct Minimum Engagement Time'):
     if token not in dec: fail('DECISION_LOG missing decision: '+token)
 issues=read('docs/OPEN_ISSUES.md')
-for token in ('O-08 — Move→Attack','O-09 — SC6 rolls back immediate future MOVE','O-11 — Battle exit/main-menu/desktop hang','T1.6','T1.7','T2-B G1.1 OFFLINE VALIDATED','T2-MOVE/T3 PENDING','TPOL-T1H / T2 outstanding'):
+for token in ('O-08 — Move→Attack','O-09 — SC6 rolls back immediate future MOVE','O-11 — Battle exit/main-menu/desktop hang','T1.6','T1.7','T2-B G1.1 OFFLINE VALIDATED','WH3 RUNTIME BLOCKED-DEFERRED','MAINTENANCE_TODO.md','T2-MOVE/T3 PENDING','TPOL-T1H / T2 outstanding'):
     if token not in issues: fail('OPEN_ISSUES missing current blocker: '+token)
 matrix=read('docs/TEST_MATRIX.md')
 for token in ('Maintenance jobs | **46/46 PASS (GITHUB ACTIONS T2-B G1.1 OFFLINE)**','Mutation suite | **PASS**','Windows Native CTest | 14/14 PASS','T1H hidden PolicyProfile/MCT scaffold | PASS','T1 shared behavior-neutral evaluator refactor | **PASS**','T1.5 execution-lineage separation | **PASS / BEHAVIOR-NEUTRAL**','T1.6 committed-edge transaction | **PASS / PERMISSION-NEUTRAL**','T1.7 consumer-neutral policy envelopes | **PASS / PERMISSION-NEUTRAL**','ARRIVAL_BRAKE_G1 observation layer | **PASS / BEHAVIOR-NEUTRAL**','ARRIVAL_BRAKE_G1.1 coherence layer | **PASS / T2-B POLICY EVIDENCE**','T2 Move→Attack terminal handoff | **OFFLINE PASS / WH3 PENDING**','T3 visible MCT adapter/UI wiring | NOT RUN'):

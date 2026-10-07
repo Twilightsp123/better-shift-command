@@ -21,13 +21,15 @@ The Move-VTable correction has been built and exercised in WH3. Native outcome f
 
 ### O-08 — Move→Attack can still brake/stop before Attack
 
-Status: **OPEN / T2-B G1.1 OFFLINE VALIDATED / WH3 RUNTIME PENDING**.
+Status: **OPEN / T2-B G1.1 OFFLINE VALIDATED / WH3 RUNTIME BLOCKED-DEFERRED**.
 
 The construction branch implements ordinary Move→Attack through the shared TransitionPolicy + T1.6 transaction path with **dual issue/adopt envelopes**. G1.1 requires the observed stopping point to be coherent with the current waypoint; proactive issue never receives the one-poll synchronization margin, while exact Native adoption may use that margin for at most one cached pre-promotion poll. Prior route debt stays blocking, Exit→Attack stays strict, and no historical `attack_lead_*` scalar authorizes permission.
 
 Offline gate: **46/46 maintenance PASS**, core mutations **44/44**, dedicated G1.1/T2-B/cache mutations **13/13**, T2-B runtime fixtures **4/4**.
 
-Required closure: WH3 RT-TP-02 (straight Move→Attack) and RT-TP-03 (high-angle/route-fidelity Move→Attack). Only after those pass may T2-B be promoted from construction candidate.
+Current execution state: WH3 runtime testing is **not currently available**, so RT-TP-02/03 is deliberately deferred. The prepared runtime candidate and exact unblock procedure are recorded in `MAINTENANCE_TODO.md`.
+
+Required closure remains unchanged: WH3 RT-TP-02 (straight Move→Attack) and RT-TP-03 (high-angle/route-fidelity Move→Attack). Only after those pass may T2-B be promoted from construction candidate.
 
 ### O-09 — SC6 rolls back immediate future MOVE
 
