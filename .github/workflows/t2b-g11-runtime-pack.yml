@@ -73,8 +73,8 @@ jobs:
               pack_tools.CONTROLLER_PATH,
               pack_tools.BRIDGE_PATH,
               pack_tools.MINHOOK_PATH,
-              r'script\\better_shift_command\\licenses\\MINHOOK_LICENSE.txt',
-              r'script\\better_shift_command\\licenses\\THIRD_PARTY_NOTICES.txt',
+              r'script\better_shift_command\licenses\MINHOOK_LICENSE.txt',
+              r'script\better_shift_command\licenses\THIRD_PARTY_NOTICES.txt',
           }
 
           def verify(path,debug_expected):
