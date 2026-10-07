@@ -21,11 +21,13 @@ The Move-VTable correction has been built and exercised in WH3. Native outcome f
 
 ### O-08 — Move→Attack can still brake/stop before Attack
 
-Status: **OPEN / T2-B CONSTRUCTION CANDIDATE / OFFLINE VALIDATION PENDING**.
+Status: **OPEN / T2-B G1.1 OFFLINE VALIDATED / WH3 RUNTIME PENDING**.
 
-The current construction branch reimplements ordinary Move→Attack through the shared TransitionPolicy + T1.6 transaction path. Permission no longer depends on the historical Attack lead thresholds: route/debt geometry proves semantic legality and ARRIVAL_BRAKE_G1 provides the timing evidence. Exit→Attack remains strict. The 2026-10-05 direct T2-B build remains historical runtime evidence only.
+The construction branch implements ordinary Move→Attack through the shared TransitionPolicy + T1.6 transaction path with **dual issue/adopt envelopes**. G1.1 requires the observed stopping point to be coherent with the current waypoint; proactive issue never receives the one-poll synchronization margin, while exact Native adoption may use that margin for at most one cached pre-promotion poll. Prior route debt stays blocking, Exit→Attack stays strict, and no historical `attack_lead_*` scalar authorizes permission.
 
-Planned closure: pass the T2-B offline contract/mutation/transaction gates, then rerun WH3 RT-TP-02/03 before promotion.
+Offline gate: **46/46 maintenance PASS**, core mutations **44/44**, dedicated G1.1/T2-B/cache mutations **13/13**, T2-B runtime fixtures **4/4**.
+
+Required closure: WH3 RT-TP-02 (straight Move→Attack) and RT-TP-03 (high-angle/route-fidelity Move→Attack). Only after those pass may T2-B be promoted from construction candidate.
 
 ### O-09 — SC6 rolls back immediate future MOVE
 
@@ -33,13 +35,13 @@ Status: **OPEN / T1 + T1.5 + T1.6 + T1.7 STRUCTURE READY / T2-MOVE NOT ACTIVE**.
 
 Current T1.6 SC6 deliberately preserves the legacy immediate future MOVE rollback; T1.6 is permission-neutral and only changes commit protocol. T1.5 now exposes whether an exact match comes from the original `PLAYER_NATIVE` capture or a later `BSC_ISSUED` ACK identity. Direct T2-A/hairpin experiments on 2026-10-05 were not promotable: permissive adoption produced fold-back self-compression; stricter rollback gates produced stepwise movement. The native-passthrough diagnostic was useful isolation evidence but is not the BSC product architecture.
 
-Planned closure: validate the implemented T1.7 consumer-neutral envelopes, then promote immediate-MOVE reconciliation and bounded adopt hysteresis together as T2-MOVE. No standalone permissive T2-A state is allowed.
+Planned closure: after T2-B completes WH3 RT-TP-02/03, promote immediate-MOVE reconciliation and bounded adopt hysteresis together as T2-MOVE. No standalone permissive T2-A state is allowed.
 
 ### O-10 — Transition policy behavior/MCT only partially implemented
 
-Status: **T1H/T1/T1.5/T1.6/T1.7 IMPLEMENTED CANDIDATE; T2/T3 PENDING**.
+Status: **T1H/T1/T1.5/T1.6/T1.7 + G1 VALIDATED; T2-B G1.1 OFFLINE VALIDATED; T2-MOVE/T3 PENDING**.
 
-The hidden PolicyProfile scaffold, shared evaluator, execution-lineage separation, committed-edge transaction, and consumer-neutral issue/adopt envelope stage are implemented. Smooth/Balanced/Precise movement values remain reserved; visible MCT is still absent. T2 is the first intentional gameplay change.
+The hidden PolicyProfile scaffold, shared evaluator, execution-lineage separation, committed-edge transaction, consumer-neutral envelopes and behavior-neutral G1 observer are validated. The T2-B G1.1 construction candidate intentionally wires ordinary Move→Attack timing but **does not yet count as WH3 runtime promotion**. Smooth/Balanced/Precise movement profile values remain reserved; visible MCT is still absent. T2-MOVE is the next gameplay architecture stage after T2-B runtime closure.
 
 ## C. Lifecycle / teardown stream — separate from gameplay
 
@@ -76,5 +78,5 @@ The 2026-09-29 disassembly reports proved allocator return ABI, top-level constr
 
 - T1H hidden profile scaffold is implemented; visible MCT UI is intentionally deferred.
 - Movement Cornering / Attack Handoff / Route Fidelity / Native Successor Tolerance / Disengage Priority are reserved but not runtime-wired yet.
-- T1 shared evaluator, T1.5 execution-lineage separation, T1.6 committed-edge transaction, and T1.7 consumer-neutral envelopes are implemented without widening transition permission. T2 must still implement Move→Attack terminal handoff and immediate successor MOVE+hysteresis through that evaluator/transaction protocol.
+- T1 shared evaluator, T1.5 execution-lineage separation, T1.6 committed-edge transaction, T1.7 consumer-neutral envelopes and G1 are validated. T2-B G1.1 is implemented and offline validated but still awaits WH3 RT-TP-02/03; T2-MOVE immediate successor MOVE+hysteresis remains unimplemented.
 - Minimum Engagement Time is wired at the legacy-equivalent default 3.0 s; alternate values are not exposed to users in T1H.

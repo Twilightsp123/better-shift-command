@@ -49,6 +49,29 @@ G1 is behavior-neutral and must prove:
 
 This is a model-validation stage, not a gameplay-success claim.
 
+## 0.9 G1.1 / T2-B dual-envelope offline gate
+
+Validation result: **PASS (2026-10-07)**.
+
+The construction candidate proves offline that:
+
+- generic sustained slowing is not enough; G1.1 projects a stopping point and checks waypoint coherence;
+- issue coherence uses only the existing Move reach tolerance;
+- adopt coherence may add exactly one observed poll of approach travel;
+- proactive issue never consumes the one-poll margin;
+- issue permission is always a subset of adopt permission;
+- prior route debt and Exit semantics remain blocking;
+- exact Native early Attack adoption requires a generation/current/successor-scoped pre-promotion decision cache no older than one actual poll;
+- cache geometry is frozen rather than aliased;
+- BSC submission cannot grant `ATTACK_TERMINAL_HANDOFF` before ACK;
+- reject/timeout cannot retain credit;
+- exact Native adoption commits through the same T1.6 edge transaction;
+- immediate future MOVE adoption remains closed.
+
+Evidence: **46/46 maintenance PASS**, core **44/44 mutations CAUGHT**, dedicated G1.1/T2-B/cache **13/13 mutations CAUGHT**, T2-B transaction/runtime fixtures **4/4 PASS**.
+
+This is **not** WH3 runtime promotion. RT-TP-02/03 remain mandatory.
+
 ## 1. Offline policy tests
 
 Every test should assert both decision `zone` and stable `reason`.
@@ -68,16 +91,18 @@ Every test should assert both decision `zone` and stable `reason`.
 
 ### Move→Attack
 
-- straight approach: `ATTACK_PATH_SAFE` may issue only after observed arrival-brake boundary crossing;
-- off-corridor approach: `ATTACK_TERMINAL_CORRIDOR` requires existing waypoint reach tolerance plus at most one observed poll of approach travel;
+- straight/path-safe approach: `ATTACK_PATH_SAFE` issue requires **issue coherence**; adopt may use the wider one-poll **adopt coherence**;
+- off-corridor proactive Attack: `ATTACK_TERMINAL_CORRIDOR` requires `remaining <= existing move_reach_tolerance`; one-poll distance must not widen issue;
+- exact Native immediate Attack may enter `ATTACK_PATH_SAFE_HYSTERESIS` or `ATTACK_TERMINAL_HYSTERESIS` only from a fresh pre-promotion cached decision;
+- cached decision identity must match generation/current action/successor action and be no older than one actual observed poll;
+- generic deceleration whose projected stopping point is not waypoint-coherent must remain WAIT;
 - no historical Attack lead/angle/execution-cap scalar participates in permission;
-- very short leg: no whole-leg swallow;
-- prior debt unresolved: hard block;
-- wrong/dead target: hard block/skip according to existing target rules;
-- Native immediate Attack inside issue window: adopt;
-- Native immediate Attack inside adopt-only band: soft-adopt;
-- Native immediate Attack far early: rollback;
-- Native Attack at `i+2`: rollback.
+- prior debt unresolved: block;
+- Exit route unfinished: block;
+- wrong canonical target / `i+2` future: hard block;
+- confirmed target dead/left: no early credit;
+- BSC issue rejection/timeout: no `ATTACK_TERMINAL_HANDOFF`;
+- ACK and exact Native adoption: both commit through `Core.commit_transition_edge()`.
 
 ### Exit→Attack
 
@@ -96,18 +121,25 @@ Every test should assert both decision `zone` and stable `reason`.
 
 ## 3. Mutation tests
 
-Add mutations that must be caught:
+Required mutations must be caught:
 
 1. allow `future_index > i+1` adoption;
 2. allow Attack target mismatch;
-3. let MCT disable RMB cancel;
-4. let MCT increase recovery retry count without bound;
-5. bypass TransitionPolicy in `advance()`;
-6. bypass TransitionPolicy in SC6 reconciliation;
-7. make adopt window smaller than issue window;
-8. allow Move→Attack with prior debt pending;
-9. classify every future MOVE as overrun (regression to current SC6 limitation);
-10. restore strict `semantic_done` as the only Move→Attack path in Smooth.
+3. bypass TransitionPolicy in proactive advance;
+4. bypass TransitionPolicy in SC6 pre-promotion cache;
+5. bypass TransitionPolicy in SC6 fallback reconciliation;
+6. bypass TransitionPolicy in scheduler preview;
+7. allow Move→Attack with prior route debt pending;
+8. ignore Exit strictness;
+9. remove sustained ground-speed deceleration evidence;
+10. remove sustained radial-approach deceleration evidence;
+11. add one-poll sync margin to proactive issue coherence;
+12. remove the one-poll margin from adopt coherence;
+13. remove cache edge identity or one-poll freshness;
+14. restore strict `semantic_done` as the only Move→Attack path;
+15. classify every future MOVE as permissive passthrough.
+
+Current offline candidate catches the dedicated G1.1/T2-B/cache set **13/13** plus the consolidated core mutation harness **44/44**.
 
 ## 4. WH3 runtime matrix
 

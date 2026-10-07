@@ -4,8 +4,8 @@
 
 | Gate | Result | Meaning |
 |---|---:|---|
-| Maintenance jobs | **37/37 PASS (GITHUB ACTIONS T1.7)** | CorePath/T1/T1.5/T1.6 plus T1.7 contract/equivalence/mutation gates |
-| Mutation suite | **PASS** | core 43/43 + T1.5 7/7 + T1.6 7/7 + T1.7 7/7 CAUGHT |
+| Maintenance jobs | **46/46 PASS (GITHUB ACTIONS T2-B G1.1 OFFLINE)** | CorePath/T1/T1.5/T1.6/T1.7 + G1/G1.1 + T2-B policy/cache/transaction gates |
+| Mutation suite | **PASS** | core 44/44 + T1.5 7/7 + T1.6 7/7 + T1.7 7/7 + G1.1/T2-B/cache 13/13 CAUGHT |
 | Portable Native CTest | 13/13 PASS | portable native fixtures |
 | ASan/UBSan CTest | 13/13 PASS | sanitizer baseline |
 | Windows VS2019 v142 + MASM | PASS | audited Move-VTable-fix delivery |
@@ -19,8 +19,8 @@
 | Behavior | Current result | Status |
 |---|---|---|
 | Move→Move normal steering | operational, but SC6 exact future-MOVE rollback still observed | redesign needed |
-| Move→Attack | strict boundary can brake/stop | redesign needed |
-| SC6 immediate successor ATTACK | current adopt/rollback path exists | migrate to shared evaluator |
+| Move→Attack | G1.1 dual-envelope candidate offline PASS; WH3 runtime not yet rerun | **RT-TP-02/03 pending** |
+| SC6 immediate successor ATTACK | exact-current pre-promotion cache + shared adopt envelope offline PASS | WH3 verification pending with T2-B |
 | SC6 immediate successor MOVE | current code rolls back | **known limitation** |
 | future index > i+1 | rollback | must remain |
 | canonical target identity | enforced | must remain |
@@ -36,10 +36,11 @@
 | T1.5 execution-lineage separation | **PASS / BEHAVIOR-NEUTRAL** | capture/issued identity split; 15,625 identity states equivalent; 7/7 lineage mutants caught; consolidated 30/30 PASS |
 | T1.6 committed-edge transaction | **PASS / PERMISSION-NEUTRAL** | submit is not commit; ACK and exact Native adopt share `commit_transition_edge`; reject aborts; deterministic T1 probe/CFG unchanged; 7/7 transaction mutants; runtime 3/3 |
 | T1.7 consumer-neutral policy envelopes | **PASS / PERMISSION-NEUTRAL** | one decision exposes issue/adopt envelopes; T1.6 runtime permission must remain equivalent |
-| ARRIVAL_BRAKE_G1 observation layer | **PASS / BEHAVIOR-NEUTRAL** | pure radial+ground deceleration observer; final G1 CI passed focused gates + 40-job maintenance suite; no CFG/permission change |
-| T2 immediate-MOVE reconciliation | NOT ACTIVE | implement only after T1.7; offline + mutation + WH3 RT-TP-04/05 |
-| T2 Move→Attack terminal handoff | **CONSTRUCTION CANDIDATE / VALIDATION PENDING** | semantic corridor + ARRIVAL_BRAKE_G1 timing; T1.6 ACK/adopt transaction; offline contract/mutation/runtime + WH3 RT-TP-02/03 required |
-| T2 hysteresis | NOT ACTIVE | issue/adopt bands required before T2 promotion |
+| ARRIVAL_BRAKE_G1 observation layer | **PASS / BEHAVIOR-NEUTRAL** | pure radial+ground deceleration observer; G1 CI passed 40-job maintenance suite; no CFG/permission change |
+| ARRIVAL_BRAKE_G1.1 coherence layer | **PASS / T2-B POLICY EVIDENCE** | separate issue/adopt stopping-point coherence; no new gameplay CFG scalar |
+| T2 immediate-MOVE reconciliation | NOT ACTIVE | T2-MOVE still requires offline + mutation + WH3 RT-TP-04/05 |
+| T2 Move→Attack terminal handoff | **OFFLINE PASS / WH3 PENDING** | dual envelopes + one-poll pre-promotion cache + T1.6 commit; 46/46 maintenance, 13/13 dedicated mutants, 4/4 runtime fixtures; WH3 RT-TP-02/03 required |
+| T2-MOVE hysteresis | NOT ACTIVE | immediate MOVE adopt band must be implemented separately; T2-B Attack hysteresis is not permission for MOVE |
 | T3 visible MCT adapter/UI wiring | NOT RUN | uses existing T1H profile compiler; missing-MCT fallback |
 | T3 MCT runtime comparison | NOT RUN | Smooth/Balanced/Precise differ only in timing/precision |
 | T4 Attack/Exit tuning | DEFERRED | only after T2/T3 stable |

@@ -31,7 +31,7 @@ It is historical/reference material and must not be mistaken for the formal v1.3
 
 The Native Bridge string is an internal compatibility/build identifier, not the Mod version.
 
-Implemented transition substages: `BSC-TPOL-T1H` → `BSC-TPOL-T1` → `BSC-TPOL-T1.5` → `BSC-TPOL-T1.6` → `BSC-TPOL-T1.7`. T2 remains future work.
+Validated structural substages: `BSC-TPOL-T1H` → `BSC-TPOL-T1` → `BSC-TPOL-T1.5` → `BSC-TPOL-T1.6` → `BSC-TPOL-T1.7` → behavior-neutral `ARRIVAL_BRAKE_G1`. The current construction branch additionally carries `BSC-TPOL-T2B-G11` (G1.1 + dual issue/adopt envelopes), which is **offline validated but still awaits WH3 runtime RT-TP-02/03**. T2-MOVE remains pending.
 
 ## Mandatory maintainer reading order
 
@@ -55,17 +55,17 @@ Implemented transition substages: `BSC-TPOL-T1H` → `BSC-TPOL-T1` → `BSC-TPOL
 
 ## Current architecture status
 
-The validated permission baseline is **BSC-TPOL-T1.7 permission-neutral** on top of the existing SC1–SC6 gameplay baseline. The current construction branch additionally carries **ARRIVAL_BRAKE_G1**, an observation-only geometry stage: it records parameter-free radial/ground deceleration evidence and a one-poll synchronization margin, but TransitionPolicy does not consume those fields yet. T1H provides the hidden immutable PolicyProfile/MCT adapter scaffold; T1 provides the shared `R1.TransitionPolicy.evaluate()` decision plane; T1.5 separates execution lineage; T1.6 unifies committed-edge execution; T1.7 removes consumer-specific permission calculation and emits one issue/adopt envelope decision for all consumers.
+The frozen structural/permission baseline remains **BSC-TPOL-T1.7** over SC1–SC6, with behavior-neutral **ARRIVAL_BRAKE_G1** validated separately. The current construction branch intentionally advances ordinary Move→Attack to **BSC-TPOL-T2B-G11**: G1.1 distinguishes generic slowing from waypoint-coherent arrival braking, `TransitionPolicy` emits distinct Attack issue/adopt envelopes, and SC6 may consume a one-poll pre-promotion decision cache for an exact immediate Native Attack. T1H/T1/T1.5/T1.6/T1.7 still own the profile scaffold, shared evaluation, execution lineage, transactional edge commit and consumer-neutral envelope structure.
 
-**T1.7 still intentionally does not change transition permission.** Move→Attack remains strict until current Move semantic completion, exact immediate future MOVE adoption remains closed, and no hysteresis tolerance is active. The change is structural: issue permission and Native-adopt permission are represented as separate envelopes produced by the same consumer-neutral evaluator. GitHub Actions full validation is **37/37 PASS**; core mutations are **43/43 CAUGHT**, with T1.5/T1.6/T1.7 stage mutations **7/7 CAUGHT** each.
+**T1.7 itself remains the frozen permission-neutral baseline**, but the current T2-B construction branch intentionally widens **ordinary Move→Attack only**. Proactive Attack issue never uses the one-poll synchronization margin; that margin may widen only the Native **adopt** envelope. `ATTACK_TERMINAL_HANDOFF` credit is granted only by the T1.6 shared commit path after verified ACK or exact Native observation. Immediate future MOVE adoption is still closed, so T2-MOVE is not active. GitHub Actions offline validation for the current candidate is **46/46 PASS**; core mutations are **44/44 CAUGHT**, T1.5/T1.6/T1.7 stage mutations remain **7/7 CAUGHT** each, and the dedicated G1.1/T2-B/cache mutation set is **13/13 CAUGHT**.
 
 The 2026-10-05 direct T2-B, T2-A, hairpin and native-passthrough builds are preserved as historical experiments/evidence only. They do not override the staged D1 migration or current runtime source.
 
 The next transition work is therefore:
 
-- ARRIVAL_BRAKE_G1 is now validated as behavior-neutral observation data;
-- the current construction branch carries a **T2-B candidate** for ordinary Move→Attack: semantic corridor legality is separated from observed CA arrival braking, and the candidate still requires T1.6 ACK/exact-adoption commit; offline validation is pending;
-- T2-MOVE immediate-successor MOVE reconciliation **with hysteresis from the first promotion**, using the observed one-poll travel distance as the synchronization band rather than another hand-tuned meter value;
-- later visible MCT wiring.
+- run WH3 **RT-TP-02 / RT-TP-03** against the offline-validated T2-B G1.1 candidate; promote it only if there is no stop-before-Attack and no waypoint-cut regression;
+- keep T2-MOVE immediate-successor MOVE reconciliation **with hysteresis from the first promotion**, using observed one-poll travel as the synchronization band rather than another hand-tuned meter value;
+- wire visible MCT only after the Smooth default passes runtime;
+- lifecycle/teardown remains a separate stream.
 
 Battle teardown/hang remains a separate lifecycle stream and must not be mixed into transition-policy changes.

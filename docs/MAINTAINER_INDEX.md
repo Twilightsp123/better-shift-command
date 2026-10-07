@@ -32,10 +32,10 @@ Current runtime baseline / design stage:
 - Smart Guard runtime: **STAGED_DISABLED**;
 - current runtime stage: Move-VTable correction built and exercised in WH3; gameplay smoothness/lifecycle work remains open;
 - transition design stream: **`BSC-TPOL-D1`**;
-- implemented validated substages: **`BSC-TPOL-T1H`** hidden profile/MCT scaffold + **`BSC-TPOL-T1`** shared behavior-neutral TransitionPolicy evaluator + **`BSC-TPOL-T1.5`** execution-lineage separation + **`BSC-TPOL-T1.6`** committed-edge transaction protocol + **`BSC-TPOL-T1.7`** consumer-neutral issue/adopt envelopes;
-- construction-only observation stage: **`ARRIVAL_BRAKE_G1`**, behavior-neutral and not consumed by TransitionPolicy permission;
+- implemented validated structural substages: **`BSC-TPOL-T1H`** + **`BSC-TPOL-T1`** + **`BSC-TPOL-T1.5`** + **`BSC-TPOL-T1.6`** + **`BSC-TPOL-T1.7`**; behavior-neutral **`ARRIVAL_BRAKE_G1`** is also validated; current gameplay construction stage is **`BSC-TPOL-T2B-G11`**, offline validated but WH3 runtime pending;
+- G1/G1.1 distinction: **`ARRIVAL_BRAKE_G1`** remains behavior-neutral observation; **G1.1** derives issue/adopt stopping-point coherence and is consumed only by the T2-B construction candidate;
 - visible BSC MCT UI: **not registered**;
-- movement transition behavior: still the pre-T2 CorePath SC1–SC6 baseline; T1–T1.7 restructure decision/identity/commit permission-neutrally, while G1 only observes arrival braking.
+- movement transition behavior: MOVE→MOVE remains the pre-T2 SC1–SC4/SC6-MOVE baseline, while ordinary Move→Attack is intentionally widened only on the T2-B G1.1 construction branch; T2-MOVE remains closed.
 
 ## 3. What each document answers
 
@@ -87,4 +87,4 @@ When a future maintainer discovers a conflict, fix the navigation/current-state 
 
 ## 7. D1 promotion rule
 
-`BSC-TPOL-D1` remains the design stream. `BSC-TPOL-T1H`, `BSC-TPOL-T1`, `BSC-TPOL-T1.5`, `BSC-TPOL-T1.6`, and permission-neutral `BSC-TPOL-T1.7` are implemented and validated. `ARRIVAL_BRAKE_G1` is construction-only observation data; T2 gameplay behavior and T3 visible MCT remain future work. The 2026-10-05 direct T2/passthrough experiments are historical evidence, not current runtime authority. Source behavior wins any disagreement with a design-only or historical section.
+`BSC-TPOL-D1` remains the design stream. T1H/T1/T1.5/T1.6/T1.7 and behavior-neutral G1 are validated. The current `BSC-TPOL-T2B-G11` ordinary Move→Attack candidate is **offline validated (46/46)** but still requires WH3 RT-TP-02/03; T2-MOVE and T3 visible MCT remain future work. The 2026-10-05 direct T2/passthrough experiments are historical evidence, not current runtime authority. Source behavior wins any disagreement with a design-only or historical section.

@@ -82,3 +82,12 @@ T1.6 begins from canonical maintenance commit `88c06e92ff9278e7f0c80c2724ce28150
 ## 2026-10-06 T1.7 consumer-neutral envelope provenance
 
 T1.7 begins from canonical T1.6 commit `cd679c98de96fb8dafc88b1cee1f74a891b9ba80`. The exact pre-T1.7 controller is preserved at `archive/tpol_t17_pre_policy_envelopes/source/better_shift_command.lua`. The stage changes Lua transition policy representation, tests and documentation only; Native C++/ASM, WH3 candidate maps, generated Native header, relocation tooling and address tests remain unchanged.
+
+
+## 2026-10-07 T2-B G1.1 dual-envelope provenance
+
+The G1.1/T2-B rework is based on construction commit ancestry from `341313f1b7ffbd9513a1474dc665e6aa02f705c1`; the first ready-boolean candidate is preserved under `archive/t2b_g11_pre_rework/`. The rework changes Lua controller/test/documentation surfaces only. Native C++/ASM, `native_maps/`, generated Native headers, address relocation tooling and the locked WH3 target SHA remain unchanged.
+
+Current offline-validated controller SHA256: `1170ecda86806a077ccbf9913e31750a0066ee968fd87db1f4f418990c7c3b41`.
+
+GitHub Actions validation: 46/46 maintenance jobs PASS; core mutations 44/44; dedicated G1.1/T2-B/cache mutations 13/13; T2-B runtime fixtures 4/4. This is offline evidence only; WH3 RT-TP-02/03 remains the runtime promotion gate.

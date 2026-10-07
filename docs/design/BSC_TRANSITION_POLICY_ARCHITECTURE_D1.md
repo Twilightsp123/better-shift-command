@@ -202,18 +202,27 @@ This acts like a Schmitt trigger. It prevents oscillation where CA advances a fr
 
 `native_successor_tolerance` controls the width of the bounded adoption-only band. It does not allow skipping actions.
 
-## 7.1 Arrival-brake observation: timing evidence, not route permission
+## 7.1 Arrival-brake observation and G1.1 policy evidence
 
-WH3 units do not behave like fixed-turn-radius vehicles under ordinary right-click movement; they can redirect very quickly. D1 therefore does not require a Pure-Pursuit/L1/fillet turn-radius model for promotion.
+WH3 units do not behave like fixed-turn-radius vehicles under ordinary right-click movement; they can redirect very quickly. D1 therefore models the hidden problem as **arrival braking**, not turn radius.
 
-The useful separation is:
+The separation is:
 
-1. **semantic legality:** route corridor, route debt, exact successor/target and block semantics decide whether changing command would preserve player intent;
-2. **timing evidence:** observed CA locomotion decides whether the current waypoint is entering an unnecessary arrival/braking profile.
+1. **semantic legality:** canonical edge, route debt, current waypoint corridor, target identity and Exit semantics;
+2. **motion evidence:** whether the observed slowdown predicts stopping at the current waypoint;
+3. **execution synchronization:** how far Native may advance between two Lua observations.
 
-ARRIVAL_BRAKE_G1 observes consecutive post-entry positions and derives both total ground speed and radial approach speed to the current waypoint. A braking observation requires both to decrease over the same three consecutive intervals. The derived stopping-distance estimate and one-poll synchronization margin are not permission in G1; they are candidate inputs for T2.
+Behavior-neutral `ARRIVAL_BRAKE_G1` records ground speed, radial approach speed, observed deceleration, stopping distance and one-poll travel. It grants no permission.
 
-This keeps future hysteresis tied to actual asynchronous sampling error (`approach_speed × observed_poll_interval`) rather than another manually tuned meter tolerance.
+T2-B adds **G1.1**. Using four post-entry position samples, it requires both ground speed and radial approach speed to decrease over three consecutive intervals, then projects a stopping point. It produces two coherence bounds:
+
+`issue_coherent := abs(remaining - d_stop) <= move_reach_tolerance`
+
+`adopt_coherent := abs(remaining - d_stop) <= move_reach_tolerance + one_poll_travel`
+
+The one-poll term is measured from actual approach speed and actual model-time interval. It is not a configurable gameplay distance and may never widen proactive issue.
+
+This distinction prevents an arbitrary terrain/congestion slowdown from becoming sufficient merely because `d_stop` is numerically large.
 
 ## 8. MOVE → MOVE policy
 
@@ -238,40 +247,60 @@ When adopted:
 
 ## 9. MOVE → ATTACK policy
 
-This is the primary new gameplay transition.
+T2-B G1.1 is the first intentional D1 gameplay candidate and is offline validated, but not yet WH3-promoted.
 
 ### 9.1 Hard prerequisites
 
-Move→Attack may never hand off early unless:
+Early ordinary Move→Attack requires:
 
-- successor is exactly `i+1`;
-- target is viable and exact;
-- all **prior** route debt is clear;
-- current action has made the minimum progress required by the profile;
-- no Exit-specific gate applies, or the Exit-specific policy also passes.
+- successor exactly `i+1`;
+- exact canonical target identity;
+- no confirmed terminal target end;
+- all prior route debt clear;
+- ordinary MOVE semantics (not unfinished Exit);
+- T1.6 transaction commitment after submission/observation.
 
-### 9.2 Terminal Attack corridor
+No historical `attack_lead_*`, angle or execution-cap value authorizes permission.
 
-The existing code already computes bounded Attack geometry (`attack_geometry`): angle, speed, formation width, current leg length, dynamic target position, and capped threshold. D1 promotes that geometry into an explicit policy input instead of leaving it telemetry-only.
+### 9.2 Separate issue and adopt envelopes
 
-Two safe modes are allowed:
+The policy exposes independent envelopes rather than a single `ready` boolean.
 
-1. **ATTACK_PATH_SAFE** — the current-position → target chord still respects the current waypoint corridor.
-2. **ATTACK_TERMINAL_CORRIDOR** — the unit is already inside a bounded terminal window near the final Move waypoint, with sufficient route progress, so the waypoint can be treated as approach guidance rather than a mandatory stop point.
+**ATTACK_PATH_SAFE**
 
-On accepted Attack handoff, the current Move receives explicit completion credit:
+The live current-position→exact-target chord passes within the current waypoint's existing Move reach tolerance.
 
-```text
-ATTACK_TERMINAL_HANDOFF
-```
+- proactive issue requires G1.1 **issue coherence**;
+- exact Native adopt may use G1.1 **adopt coherence**;
+- if only adopt coherence is true, the route mode is `ATTACK_PATH_SAFE_HYSTERESIS` and issue remains closed.
 
-No unresolved prior debt is transferred across the Attack boundary.
+**ATTACK_TERMINAL_CORRIDOR**
 
-### 9.3 Default Smooth intent
+If the target chord does not preserve the waypoint corridor:
 
-Smooth should issue Attack **before CA has fully entered arrival braking**, while preserving the caps already present in `attack_geometry` and the hard prerequisites above.
+- proactive issue additionally requires `remaining <= move_reach_tolerance`;
+- exact Native adopt may tolerate `remaining <= move_reach_tolerance + one_poll_travel`;
+- an adopt-only result is `ATTACK_TERMINAL_HYSTERESIS`.
 
-Precise shrinks or disables the terminal corridor and approaches the existing `semantic_done` behavior.
+Thus the one-poll synchronization margin can compensate Native/Lua sampling skew but cannot proactively swallow a waypoint.
+
+### 9.3 Pre-promotion Native decision cache
+
+When exact active execution still matches the current MOVE, SC6 computes the same shared TransitionPolicy decision and caches it with generation, current action identity, immediate successor identity, model timestamp, actual observed poll interval, and a frozen scalar geometry snapshot.
+
+If the next observation shows exact active execution already equals the immediate ATTACK, reconciliation may consume that cached **adopt** envelope only if the cache is no older than one actual observed poll. It must not use post-Attack steering motion to decide whether the previous MOVE had been braking coherently.
+
+### 9.4 Commit semantics
+
+Permission is not completion.
+
+BSC issue: `AUTHORIZED -> SUBMITTED -> ACK -> COMMITTED`
+
+Exact Native successor: `AUTHORIZED/CACHED -> OBSERVED -> COMMITTED`
+
+Only the shared `Core.commit_transition_edge()` grants `ATTACK_TERMINAL_HANDOFF`. Reject, stale generation, timeout or closed adopt envelope leaves the previous Move uncommitted. No unresolved route debt crosses the Attack boundary.
+
+Offline result: **46/46 maintenance PASS**, core **44/44 mutations**, dedicated G1.1/T2-B/cache **13/13 mutations**, runtime fixtures **4/4**. WH3 RT-TP-02/03 remains the promotion gate.
 
 ## 10. EXIT MOVE → ATTACK policy
 
@@ -317,7 +346,7 @@ index > current+1 → hard rollback
         ↓
 index == current+1
         ↓
-call TransitionPolicy.evaluate(..., context=NATIVE_RECONCILE)
+consume the shared TransitionPolicy decision (or the one-poll cached pre-promotion decision for an already-active immediate ATTACK)
         ↓
 ISSUE_READY / ADOPT_ONLY → adopt
 WAIT/HARD_BLOCK outside bounded envelope → rollback
@@ -383,7 +412,7 @@ Those are separate maintenance streams.
 
 ## 16. Promotion rule
 
-The T1 structural layer is now implemented behavior-neutrally. T2/T3/T4 become production behavior only after their staged migration gates pass. Until a T2 stage is promoted, current SC1–SC6 decisions remain runtime authority through the shared evaluator.
+T1–T1.7 and G1 are validated structural/observation layers. T2-B G1.1 is offline validated on the construction branch but becomes production behavior only after WH3 RT-TP-02/03. T2-MOVE, T3 and T4 remain gated separately; the Attack candidate does not authorize immediate future MOVE adoption.
 
 
 ## 14. T1H hidden-profile implementation note

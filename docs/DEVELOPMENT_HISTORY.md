@@ -630,3 +630,20 @@ The movement redesign stopped treating WH3 units as fixed-turn-radius vehicles. 
 ARRIVAL_BRAKE_G1 was added first as a behavior-neutral observation layer. It derives total ground speed, radial approach speed, observed deceleration, stopping distance and one-poll synchronization travel from post-entry positions without adding gameplay CFG values. Final G1 GitHub Actions validation passed the focused gates and full 40-job maintenance suite.
 
 The following T2-B construction candidate intentionally changes only ordinary Move→Attack. Existing route/debt semantics determine whether the waypoint can legally be handed off; G1 determines whether CA has entered the arrival-braking boundary. Straight/path-safe Attack chords and a tightly bounded terminal case can receive `ATTACK_TERMINAL_HANDOFF`, but only through the T1.6 shared transaction after verified ACK or exact Native adoption. Exit→Attack and T2-MOVE remain unchanged pending their own stages.
+
+
+## 27. 2026-10-07 — T2-B G1.1 dual-envelope rework passes offline validation
+
+Audit of the first arrival-brake T2-B candidate rejected three design shortcuts rather than tuning their constants:
+
+1. sustained slowing alone was not sufficient evidence that CA was braking for the current waypoint;
+2. a single `ready` result collapsed T1.7's separate issue/adopt envelopes;
+3. the one-poll synchronization distance had been allowed to widen proactive issue even though it exists only to tolerate Native/Lua observation skew.
+
+The replacement G1.1 observer projects the stopping point from observed radial deceleration. Issue coherence uses the existing Move reach tolerance; adopt coherence may add exactly one observed poll of actual approach travel. T2-B combines that evidence with `ATTACK_PATH_SAFE` or terminal route geometry. Off-corridor proactive issue still requires actual entry into the existing Move reach envelope.
+
+SC6 now caches the same TransitionPolicy decision only while exact current MOVE execution remains proven. If Native advances to the exact immediate ATTACK before the next observation, the cached adopt envelope may be consumed for at most one actual poll; post-Attack motion is not reused as pre-Attack braking evidence.
+
+T1.6 remains authoritative for commitment: submission is not completion, reject/timeout does not grant waypoint credit, and both ACK and exact Native adoption converge on `Core.commit_transition_edge()`.
+
+The rework changes no Native/address source and no gameplay CFG scalar. Final offline GitHub Actions validation is **46/46 PASS**; core mutation harness **44/44**, dedicated G1.1/T2-B/cache mutations **13/13**, T2-B runtime fixtures **4/4**. WH3 RT-TP-02/03 remains required before promotion.

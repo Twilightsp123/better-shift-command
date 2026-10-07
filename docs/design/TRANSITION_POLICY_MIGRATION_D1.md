@@ -1,6 +1,6 @@
 # Transition Policy Migration D1
 
-Status: **APPROVED IMPLEMENTATION PLAN — THROUGH T1.7 IMPLEMENTED AND VALIDATED; T2 PENDING**
+Status: **APPROVED IMPLEMENTATION PLAN — T1–T1.7 + G1 VALIDATED; T2-B G1.1 OFFLINE VALIDATED / WH3 PENDING; T2-MOVE PENDING**
 
 The migration deliberately avoids a broad convergence rewrite. Each stage must be independently testable and revertible.
 
@@ -109,7 +109,7 @@ Gate:
 - static contract proves TransitionPolicy does not read G1 observation fields;
 - Native/address source unchanged.
 
-Only after this gate may T2-B/T2-MOVE consume the observation.
+**G1 implementation result — 2026-10-06:** PASS. The behavior-neutral G1 observer passed its focused gates and the consolidated 40-job maintenance suite. T2-B therefore consumes G1.1 as a separate policy-evidence layer without changing the frozen G1 contract.
 
 ## T2 — Smooth-default behavior correction
 
@@ -134,24 +134,36 @@ Immediate Move successor may be adopted/soft-adopted if the current route semant
 
 ### T2-B — MOVE→ATTACK terminal handoff
 
-Current construction candidate replaces the old tuned-lead concept with semantic-corridor + observed-braking permission:
+**Current construction result — offline validated, WH3 runtime pending.**
 
+T2-B G1.1 intentionally changes only ordinary Move→Attack:
+
+- successor must be the exact canonical `i+1 ATTACK`; later futures remain H2 hard violations;
 - prior route debt must be clear;
-- target must be the exact immediate successor target and remain viable at proactive issue time;
-- Exit→Attack remains strict;
-- ARRIVAL_BRAKE_G1 must prove sustained CA deceleration and that the observed stopping-distance + one-poll synchronization boundary has been crossed;
-- `ATTACK_PATH_SAFE` is allowed when the live position→target chord passes within the existing Move reach tolerance of the current waypoint;
-- otherwise `ATTACK_TERMINAL_CORRIDOR` requires current remaining distance ≤ existing Move reach tolerance + one actual observed poll of approach travel;
-- no `attack_lead_*`/angle/execution-cap scalar authorizes the handoff;
-- `ATTACK_TERMINAL_HANDOFF` credit occurs only inside T1.6 shared edge commit after ACK/exact Native adoption.
+- target identity must remain exact; proactive issue still uses existing `target_ready()`;
+- Exit→Attack remains strict until existing Exit route semantics are satisfied;
+- no `attack_lead_*`, angle cap, execution-cap or new gameplay scalar authorizes the handoff.
 
-Gate:
+G1.1 derives the observed stopping point from four post-entry position samples. It exposes two evidence envelopes:
 
-- no stop-before-Attack in standard straight/turn fixtures;
-- no short-zig-zag waypoint swallowing;
-- no multi-action skip;
-- no target false-adopt;
-- far-early Native successor still rolls back.
+1. **issue coherence** — stopping-point error ≤ existing Move reach tolerance;
+2. **adopt coherence** — stopping-point error ≤ existing Move reach tolerance + exactly one observed poll of approach travel.
+
+Policy combines that evidence with route geometry:
+
+- **ATTACK_PATH_SAFE**: current-position→exact-target chord passes within existing Move reach tolerance. Issue requires issue coherence; adopt may use adopt coherence.
+- **ATTACK_TERMINAL_CORRIDOR**: off-corridor proactive issue additionally requires `remaining <= move_reach_tolerance`.
+- **ATTACK_PATH_SAFE_HYSTERESIS / ATTACK_TERMINAL_HYSTERESIS**: ADOPT_ONLY cases. The one-poll synchronization margin may widen adopt, **never proactive issue**.
+
+While exact current MOVE execution is still proven, SC6 caches the same policy decision with generation/current/successor identity. If Native promotes the exact immediate ATTACK before the next Lua observation, reconciliation may consume that cached decision for at most one actual observed poll; it does not recompute pre-Attack braking from post-Attack motion.
+
+Every successful early transition remains transactional:
+
+`AUTHORIZED -> SUBMITTED/OBSERVED -> COMMITTED`
+
+Only `Core.commit_transition_edge()` may grant `ATTACK_TERMINAL_HANDOFF`; reject/stale/timeout aborts without credit.
+
+**Offline gate result — 2026-10-07:** PASS. GitHub Actions maintenance **46/46**, core mutations **44/44**, dedicated G1.1/T2-B/cache mutations **13/13**, and T2-B runtime fixtures **4/4**. Native/address files are unchanged. Promotion still requires WH3 RT-TP-02/03.
 
 ## T3 — Presets and MCT
 

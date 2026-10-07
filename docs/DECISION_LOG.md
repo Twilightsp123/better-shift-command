@@ -164,3 +164,16 @@
 **Policy:** prior route debt must be clear; Exit→Attack remains strict; exact immediate successor/target identity remains mandatory. Before current Move semantic completion, G1 must report sustained braking and boundary crossing. If the current-position→target chord passes within the existing Move reach tolerance of the waypoint, the mode is `ATTACK_PATH_SAFE`. Otherwise the unit must already be within `move_reach_tolerance + one observed poll of approach travel`, producing `ATTACK_TERMINAL_CORRIDOR`. Both modes grant `ATTACK_TERMINAL_HANDOFF` credit only after T1.6 transaction commit.
 
 **Consequence:** no new gameplay CFG scalar is introduced. MOVE→MOVE SC1–SC4 is unchanged. T2-MOVE/hysteresis remains inactive. The construction candidate requires offline and WH3 runtime promotion gates.
+
+
+## D-20261007-01 — Split T2-B issue/adopt evidence and cache only the pre-promotion decision
+
+**Decision:** replace the first T2-B `ready` candidate with G1.1 + explicit dual issue/adopt envelopes. The one-poll synchronization margin may widen Native Attack adoption only; it may not widen proactive Attack issue. When Native promotes the exact immediate Attack between Lua observations, SC6 consumes a generation/current/successor-scoped decision cached while exact current MOVE execution was still proven, valid for at most one actual observed poll.
+
+**Reason:** three flaws remained in the first arrival-brake candidate. Generic deceleration could be misclassified as waypoint braking; a single `ready` boolean collapsed the T1.7 issue/adopt split; and `move_reach_tolerance + one_poll_distance` was being used for proactive terminal permission even though the one-poll term exists only to compensate asynchronous observation.
+
+**Policy:** G1.1 projects the stopping point. Proactive issue requires stopping-point error within existing Move reach tolerance; adopt may add one observed poll of travel. `ATTACK_PATH_SAFE` preserves the waypoint chord; off-corridor proactive issue requires actual entry into the existing Move reach envelope. Exit→Attack and prior route debt remain strict. No new gameplay CFG scalar is added.
+
+**Execution:** `ATTACK_TERMINAL_HANDOFF` remains commit-only through T1.6. BSC submission cannot credit the Move before ACK; exact Native adoption uses `OBSERVED -> COMMITTED`; reject/stale/timeout aborts without credit.
+
+**Validation:** GitHub Actions T2-B G1.1 offline run passes **46/46 maintenance jobs**. Core mutations are **44/44 caught**; T1.5/T1.6/T1.7 stage mutations remain **7/7** each; dedicated G1.1/T2-B/cache mutations are **13/13 caught**; T2-B runtime fixtures are **4/4 PASS**. WH3 RT-TP-02/03 remains pending.

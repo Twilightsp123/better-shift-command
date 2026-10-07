@@ -31,19 +31,20 @@
   },
   "policy_architecture": {
     "design_stream": "BSC-TPOL-D1",
-    "implemented_internal_stage": "BSC-TPOL-T1H + BSC-TPOL-T1 + BSC-TPOL-T1.5 + BSC-TPOL-T1.6 + BSC-TPOL-T1.7",
+    "implemented_internal_stage": "BSC-TPOL-T1H + T1 + T1.5 + T1.6 + T1.7 + G1; T2-B G1.1 CONSTRUCTION CANDIDATE",
     "mct_ui": "NOT_REGISTERED",
     "default_policy": "SMOOTH_HIDDEN",
     "minimum_engagement_time_seconds": 3,
-    "movement_policy_fields": "RESERVED_NOT_RUNTIME_WIRED_T1_7_PERMISSION_NEUTRAL",
-    "transition_evaluator": "SHARED_T1_7_CONSUMER_NEUTRAL_ISSUE_ADOPT_ENVELOPES",
+    "movement_policy_fields": "MCT_MOVEMENT_FIELDS_RESERVED; T2B_G11_DEFAULT_POLICY_USES_SEMANTIC_AND_OBSERVED_EVIDENCE",
+    "transition_evaluator": "SHARED_T2B_G11_DUAL_ISSUE_ADOPT_ENVELOPES",
     "execution_lineage": "CAPTURE_IDENTITY_AND_BSC_ISSUED_IDENTITY_SEPARATED_BEHAVIOR_NEUTRAL",
     "transition_transaction": "ACK_AND_EXACT_NATIVE_ADOPT_SHARE_COMMIT_EDGE",
-    "policy_envelopes": "ISSUE_AND_ADOPT_EXPLICIT_LEGACY_EQUIVALENT"
+    "policy_envelopes": "ATTACK_ISSUE_AND_ADOPT_DISTINCT; ONE_POLL_MARGIN_ADOPT_ONLY; MOVE_ADOPT_LEGACY_CLOSED",
+    "t2b_runtime_status": "OFFLINE_VALIDATED_WH3_RT_TP_02_03_PENDING"
   },
   "validation": {
-    "controller_jobs": "37/37 PASS (GITHUB ACTIONS T1.7 FULL VALIDATION)",
-    "mutations": "43/43 CORE + 7/7 T1.5 LINEAGE + 7/7 T1.6 TRANSACTION + 7/7 T1.7 ENVELOPES",
+    "controller_jobs": "46/46 PASS (GITHUB ACTIONS T2-B G1.1 OFFLINE VALIDATION)",
+    "mutations": "44/44 CORE + 7/7 T1.5 LINEAGE + 7/7 T1.6 TRANSACTION + 7/7 T1.7 ENVELOPES + 13/13 G1.1/T2-B/CACHE",
     "portable_native_ctest": "13/13 PASS",
     "asan_ubsan_ctest": "13/13 PASS",
     "windows_native_ctest": "14/14 PASS",
@@ -53,10 +54,14 @@
     "t16_runtime": "3/3 PASS",
     "t17_permission_equivalence": "PASS",
     "t17_contract": "PASS",
-    "t17_mutations": "PASS_7_OF_7"
+    "t17_mutations": "PASS_7_OF_7",
+    "arrival_brake_g11": "PASS",
+    "t2b_dual_envelope_contract": "PASS",
+    "t2b_runtime_fixtures": "4/4 PASS",
+    "t2b_wh3_runtime": "PENDING RT-TP-02/03"
   },
   "current_open_work": [
-    "T2-B Move-to-Attack terminal handoff reimplementation through shared evaluator/transaction",
+    "WH3 RT-TP-02/03 validation and promotion decision for T2-B G1.1",
     "T2-MOVE immediate-successor MOVE reconciliation with issue/adopt hysteresis",
     "future visible MCT UI wiring",
     "separate battle lifecycle/teardown closure"

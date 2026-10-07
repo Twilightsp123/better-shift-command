@@ -14,7 +14,7 @@ The project has several independent numbering systems. A bare label such as `RC2
 | Public/formal BSC releases | v1.2.0, v1.2.1, v1.2.2, **v1.3.0** | formal Mod version line | current formal maintained version = **v1.3.0**; v1.2.2 remains upstream behavior ancestry |
 | Native Bridge versions | 0.1.1, 0.4.x, 0.5.x, 1.0.x | native observer/identity/issuing/evidence evolution | current candidate = `1.0.17-corepath-wh3-6c104-movevtfix` |
 | WH3 current-build remap/diagnostic | RC4, RC5, RC6, RC7, RC8 | native map/runtime-gate work for WH3 9.0.1 current EXE | current = **CorePath RC8** |
-| Transition-policy architecture | BSC-TPOL-D1 / T1H / T1 / T1.5 / T1.6 / T1.7 | staged gameplay/MCT architecture; no new Native RE | **through T1.7 implemented structurally; T2 pending** |
+| Transition-policy architecture | BSC-TPOL-D1 / T1H / T1 / T1.5 / T1.6 / T1.7 / G1 / G1.1 / T2-B | staged gameplay/MCT architecture; no new Native RE | **T1–T1.7 + G1 validated; T2-B G1.1 offline validated / WH3 pending; T2-MOVE pending** |
 | Smart Guard diagnostics | its own RC labels | separate optional Smart Guard investigation | staged disabled; never identify by bare `RCx` in shared docs |
 
 ### Naming rule for new docs
@@ -63,7 +63,7 @@ A broad convergence/cleanup attempt modified too many runtime/maintenance surfac
 - v1.2.0: SC1–SC5 behavior closure and release telemetry cleanup.
 - v1.2.1: SC6 V3 exact execution-identity reconciliation.
 - v1.2.2: Lua `math.huge` compatibility update over v1.2.1 behavior.
-- v1.3.0: formal maintained version; current maintenance tree includes the Move-VTable correction, hidden PolicyProfile scaffold, and behavior-neutral shared T1 evaluator while T2 smoothness behavior remains pending.
+- v1.3.0: formal maintained version; current maintenance tree includes the Move-VTable correction, T1–T1.7 architecture, validated G1 observation and an offline-validated T2-B G1.1 construction candidate. This internal candidate does not change the public version and still awaits WH3 runtime promotion.
 - `1.2.2-corepath-rc8`: maintenance candidate, not a public release; changes production Native evidence wiring, not the upstream gameplay baseline.
 
 ## 3. Native Bridge chronology
@@ -111,7 +111,7 @@ D1 is **not** a runtime version. It defines:
 - adoption hysteresis;
 - Smooth/Balanced/Precise/Custom MCT policy profiles.
 
-Implementation promotion stages are T1–T4. T1 is now implemented behavior-neutrally; T2–T4 remain staged. Do not write `D1 fixed` until all relevant source/runtime gates pass.
+Implementation promotion stages remain staged. T1–T1.7 and G1 are validated; T2-B G1.1 is offline validated but not WH3-promoted; T2-MOVE/T3/T4 remain pending. Do not write `D1 fixed` until all relevant runtime gates pass.
 
 ## 7. BSC-TPOL-T1H — hidden policy/MCT scaffold
 
@@ -142,3 +142,10 @@ Implemented 2026-10-05 on top of T1.5. It introduces an explicit edge transactio
 ## 12. BSC-TPOL-T1.7 — consumer-neutral policy envelopes
 
 Implemented as a permission-neutral structural stage on top of T1.6. The evaluator no longer branches transition permission by consumer identity. It emits separate issue/adopt envelopes; advance and SC6 interpret those envelopes while keeping T1.6 gameplay permission unchanged. Immediate future MOVE adoption remains closed and Move→Attack remains strict until T2.
+
+
+## 13. BSC-TPOL-T2B-G11 — ordinary Move→Attack dual-envelope candidate
+
+Implemented/offline-validated 2026-10-07 on the `maintenance/t2b-terminal-attack` stream. G1.1 adds stopping-point coherence on top of behavior-neutral G1. T2-B keeps issue and adopt permission distinct, reserves one-poll travel for adopt-only synchronization, caches exact-current pre-promotion decisions for SC6, and grants `ATTACK_TERMINAL_HANDOFF` only through the T1.6 commit transaction.
+
+This is an internal construction label, **not** a public Mod version. Offline gate is 46/46 PASS; WH3 RT-TP-02/03 remains pending. Immediate future MOVE adoption is not part of this stage.

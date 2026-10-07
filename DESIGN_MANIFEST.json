@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "design_stream": "BSC-TPOL-D1",
-  "status": "T2B_ARRIVAL_BRAKE_HANDOFF_CANDIDATE_VALIDATION_PENDING",
+  "status": "T2B_G11_DUAL_ENVELOPE_OFFLINE_VALIDATED_WH3_RUNTIME_PENDING",
   "runtime_baseline": {
     "controller": "1.3.0",
     "native_bridge": "1.0.17-corepath-wh3-6c104-movevtfix",
@@ -17,7 +17,8 @@
     "T1_6_TRANSITION_TRANSACTION_IMPLEMENTED",
     "T1_7_CONSUMER_NEUTRAL_ENVELOPES_IMPLEMENTED",
     "G1_ARRIVAL_BRAKE_OBSERVER_VALIDATED_BEHAVIOR_NEUTRAL",
-    "T2B_ARRIVAL_BRAKE_HANDOFF_CANDIDATE",
+    "G1_1_ARRIVAL_BRAKE_COHERENCE_VALIDATED_OFFLINE",
+    "T2B_G11_DUAL_ENVELOPE_OFFLINE_VALIDATED_WH3_RUNTIME_PENDING",
     "T2_MOVE_IMMEDIATE_MOVE_WITH_HYSTERESIS_PENDING",
     "T3_VISIBLE_MCT",
     "T4_ATTACK_EXIT_TUNING"
@@ -45,5 +46,12 @@
   "formal_project_version": "1.3.0",
   "formal_version_tag": "v1.3.0",
   "canonical_pack_name": "zzz_better_shift_command_steam.pack",
-  "construction_stage": "T2B_SEMANTIC_CORRIDOR_PLUS_ARRIVAL_BRAKE"
+  "construction_stage": "T2B_G11_DUAL_ENVELOPE",
+  "t2b_offline_validation": {
+    "maintenance_jobs": "46/46 PASS (GITHUB ACTIONS)",
+    "core_mutations": "44/44 CAUGHT",
+    "dedicated_mutations": "13/13 G1.1/T2-B/CACHE CAUGHT",
+    "runtime_fixtures": "4/4 PASS",
+    "wh3_runtime": "PENDING RT-TP-02/03"
+  }
 }
