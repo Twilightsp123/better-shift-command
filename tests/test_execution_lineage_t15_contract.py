@@ -26,12 +26,12 @@ need('successor_index=future_index,execution_lineage=future_lineage',1)
 need('execution_lineage="..clean(execution_lineage)',1)
 need('local current_match,_,current_lineage=R1.execution_matches_action(e,cur)',1)
 need('local match,_,lineage=R1.execution_matches_action(e,st.plan[i])',1)
-# T1.5 must not itself activate the later T2 behavior vocabulary.
-for forbidden in ('ATTACK_TERMINAL_CORRIDOR','NATIVE_MOVE_PASSTHROUGH'):
-    if forbidden in s: fail('T1.5 accidentally activates/retains staged behavior: '+forbidden)
+# Later T2-B vocabulary is allowed in current source; lineage invariants must still
+# reject the still-unimplemented Native MOVE passthrough.
+if 'NATIVE_MOVE_PASSTHROUGH' in s: fail('later stage bypasses T1.5/T2-MOVE architecture')
 # Existing T1 evaluator remains the sole transition decision plane.
 need('function R1.TransitionPolicy.evaluate(',1)
-if s.count('R1.TransitionPolicy.evaluate(st,')!=6: fail('shared evaluator call-site count changed after T1.5')
+if s.count('R1.TransitionPolicy.evaluate(st,')!=8: fail('shared evaluator call-site count must include later T2-B cache/revalidation')
 for legacy in ('consumer="PROACTIVE"','consumer="NATIVE_RECONCILE"','consumer="SCHEDULER"','context.consumer'):
     if legacy in s: fail('later stage reintroduced consumer-specific permission: '+legacy)
 print('PASS: T1.5 execution-lineage structural contract preserved through later permission-neutral stages')

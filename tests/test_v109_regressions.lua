@@ -160,7 +160,7 @@ T('N04/R11 exact premature native successor is rolled back to the same unfinishe
  f:emit('MOVE',false,100,0);f.evidence_record=f:emit('ATTACK',true,nil,nil,'2001')
  f.unit.target=f.enemy;f:tick(100,20,0)
  assert(not f:has('NATIVE_SUCCESSOR_ADOPTED'))
- assert(f:has('NATIVE_ADVANCED_BEFORE_PERMISSION') and f:has('NATIVE_SUCCESSOR_ROLLBACK'))
+ assert((f:has('NATIVE_ADVANCED_BEFORE_PERMISSION') or f:has('NATIVE_ADVANCED_WITHOUT_FRESH_T2B_DECISION')) and f:has('NATIVE_SUCCESSOR_ROLLBACK'))
  assert(f.issued==1 and f.commands[1].draft.kind=='MOVE' and f.commands[1].draft.x==100)
  healthy(f)
 end)

@@ -12,7 +12,7 @@ local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
 local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
 local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE transaction_stage=TPOL_T1_6_TRANSITION_TRANSACTION envelope_stage=TPOL_T1_7_CONSUMER_NEUTRAL geometry_stage=ARRIVAL_BRAKE_G1_OBSERVE_ONLY t2b_stage=T2B_ARRIVAL_BRAKE_HANDOFF_CANDIDATE")
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE transaction_stage=TPOL_T1_6_TRANSITION_TRANSACTION envelope_stage=TPOL_T1_7_CONSUMER_NEUTRAL geometry_stage=ARRIVAL_BRAKE_G1_OBSERVE_ONLY t2b_stage=T2B_G11_DUAL_ENVELOPE_CANDIDATE g11_stage=ARRIVAL_BRAKE_G1_1_POLICY_EVIDENCE")
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -900,38 +900,90 @@ R1.ArrivalBrake=(function()
     return A
 end)()
 -- ARRIVAL_BRAKE_G1_MODULE_END
--- T2B_ATTACK_HANDOFF_MODULE_BEGIN
-R1.AttackHandoff=(function()
-    local H={VERSION="T2B_ATTACK_HANDOFF_1"}
-    local HUGE=(type(math.huge)=="number" and math.huge) or 1e300
-    local function finite(n) return type(n)=="number" and n==n and n<HUGE and n>-HUGE end
-    function H.evaluate(f)
-        local d={ready=false,reason="ATTACK_TRANSITION_WAIT",route_mode="BLOCKED",current_credit=nil}
-        if type(f)~="table" then d.reason="ATTACK_HANDOFF_INPUT_INVALID";return d end
-        if f.prior_clear~=true then d.reason="PRIOR_ROUTE_OBLIGATION_PENDING";return d end
-        if f.semantic_done==true then d.ready=true;d.reason="ACTION_COMPLETE";d.route_mode="COMPLETE";return d end
-        if f.exit_route==true then d.reason="ATTACK_REQUIRES_ROUTE_COMPLETE";return d end
-        if f.arrival_braking~=true then d.reason="ATTACK_ARRIVAL_BRAKE_NOT_OBSERVED";return d end
-        if f.brake_boundary~=true then d.reason="ATTACK_BEFORE_ARRIVAL_BRAKE_BOUNDARY";return d end
-        if not finite(f.path_error) or not finite(f.waypoint_tolerance) or f.waypoint_tolerance<0 then
-            d.reason="ATTACK_ROUTE_GEOMETRY_UNAVAILABLE";return d
-        end
-        d.path_error=f.path_error;d.waypoint_tolerance=f.waypoint_tolerance
-        if f.path_error<=f.waypoint_tolerance then
-            d.ready=true;d.reason="ATTACK_PATH_SAFE";d.route_mode="ATTACK_PATH_SAFE";d.current_credit="ATTACK_TERMINAL_HANDOFF";return d
-        end
-        if not finite(f.remaining) or f.remaining<0 then d.reason="ATTACK_REMAINING_UNAVAILABLE";return d end
-        local sync=finite(f.sync_margin) and math.max(0,f.sync_margin) or 0
-        d.sync_margin=sync;d.terminal_limit=f.waypoint_tolerance+sync
-        if f.remaining<=d.terminal_limit then
-            d.ready=true;d.reason="ATTACK_TERMINAL_CORRIDOR";d.route_mode="ATTACK_TERMINAL_CORRIDOR"
-            d.current_credit="ATTACK_TERMINAL_HANDOFF";return d
-        end
-        d.reason="ATTACK_TERMINAL_ROUTE_PROTECT";return d
-    end
-    return H
+-- ARRIVAL_BRAKE_G1_1_MODULE_BEGIN
+R1.ArrivalBrakeG11=(function()
+    local A={VERSION="ARRIVAL_BRAKE_G1_1"}
+local HUGE=(type(math.huge)=="number" and math.huge) or 1e300
+local function finite(n)return type(n)=="number" and n==n and n<HUGE and n>-HUGE end
+local function point(p)return type(p)=="table" and finite(p.x) and finite(p.z) end
+local function sample(s)return type(s)=="table" and finite(s.ms) and point(s) end
+local function dist(a,b)local dx,dz=a.x-b.x,a.z-b.z;return math.sqrt(dx*dx+dz*dz) end
+function A.observe(samples,waypoint,entered_ms,tol)
+ local r={ready=false,deceleration_observed=false,issue_coherent=false,adopt_coherent=false,reason="WARMUP",sample_count=0}
+ if type(samples)~="table" or not point(waypoint) then r.reason="INPUT_INVALID";return r end
+ if not finite(entered_ms) then r.reason="ENTRY_NOT_ESTABLISHED";return r end
+ if not finite(tol) or tol<0 then r.reason="WAYPOINT_TOLERANCE_INVALID";return r end
+ local rows={};for i=1,#samples do local s=samples[i];if sample(s) and s.ms>=entered_ms then rows[#rows+1]=s end end
+ r.sample_count=#rows;if #rows<4 then return r end
+ local base=#rows-3;local rem,ground,approach,dt={},{},{},{}
+ for j=1,4 do rem[j]=dist(rows[base+j-1],waypoint) end
+ for j=1,3 do local a,b=rows[base+j-1],rows[base+j];local span=b.ms-a.ms;if span<=0 then r.reason="MODEL_TIME_NOT_STRICT";return r end;dt[j]=span/1000;ground[j]=dist(a,b)/dt[j];approach[j]=(rem[j]-rem[j+1])/dt[j] end
+ r.ready=true;r.sample_count=4;r.remaining=rem[4];r.ground_speed=ground[3];r.approach_speed=approach[3];r.previous_ground_speed=ground[2];r.previous_approach_speed=approach[2];r.poll_ms=dt[3]*1000;r.sync_margin=math.max(0,approach[3])*dt[3];r.waypoint_tolerance=tol
+ if not (approach[1]>0 and approach[2]>0 and approach[3]>0) then r.reason="NOT_APPROACHING";return r end
+ if not (ground[1]>ground[2] and ground[2]>ground[3] and approach[1]>approach[2] and approach[2]>approach[3]) then r.reason="NO_SUSTAINED_DECELERATION";return r end
+ local mid1=(rows[base].ms+rows[base+1].ms)*0.5;local mid3=(rows[base+2].ms+rows[base+3].ms)*0.5;local span=(mid3-mid1)/1000;if span<=0 then r.reason="DECELERATION_WINDOW_INVALID";return r end
+ local gd=(ground[1]-ground[3])/span;local ad=(approach[1]-approach[3])/span;if gd<=0 or ad<=0 then r.reason="NO_SUSTAINED_DECELERATION";return r end
+ r.deceleration_observed=true;r.ground_deceleration=gd;r.approach_deceleration=ad
+ local stop=(approach[3]*approach[3])/(2*ad);local err=math.abs(r.remaining-stop);r.stopping_distance=stop;r.stopping_point_error=err
+ r.issue_coherence_limit=tol;r.adopt_coherence_limit=tol+r.sync_margin;r.issue_coherent=err<=r.issue_coherence_limit;r.adopt_coherent=err<=r.adopt_coherence_limit
+ if r.issue_coherent then r.reason="ARRIVAL_BRAKE_ISSUE_COHERENT" elseif r.adopt_coherent then r.reason="ARRIVAL_BRAKE_ADOPT_COHERENT" else r.reason="DECELERATION_OBSERVED_STOP_INCOHERENT" end
+ return r
+end
+    return A
 end)()
--- T2B_ATTACK_HANDOFF_MODULE_END
+-- ARRIVAL_BRAKE_G1_1_MODULE_END
+-- T2B_ATTACK_POLICY_V2_MODULE_BEGIN
+R1.T2BAttackPolicy=(function()
+    local P={VERSION="T2B_ATTACK_POLICY_2"}
+local HUGE=(type(math.huge)=="number" and math.huge) or 1e300
+local function finite(n)return type(n)=="number" and n==n and n<HUGE and n>-HUGE end
+local function env(o,r,h)return {open=o==true,reason=r or "TRANSITION_WAIT",hard_violation=h==true} end
+function P.evaluate(f)
+ local d={reason="ATTACK_TRANSITION_WAIT",hard_violation=false,current_credit=nil,issue_window=env(false,"ATTACK_TRANSITION_WAIT",false),adopt_window=env(false,"ATTACK_TRANSITION_WAIT",false),issue_route_mode="BLOCKED",adopt_route_mode="BLOCKED"}
+ if type(f)~="table" then d.hard_violation=true;d.reason="ATTACK_POLICY_INPUT_INVALID";d.issue_window=env(false,d.reason,true);d.adopt_window=env(false,d.reason,true);return d end
+ if f.immediate_successor~=true then d.hard_violation=true;d.reason="CANONICAL_INTERMEDIATE_ACTIONS_OWED";d.issue_window=env(false,d.reason,true);d.adopt_window=env(false,d.reason,true);return d end
+ if f.target_exact~=true then d.hard_violation=true;d.reason="ATTACK_TARGET_IDENTITY_MISMATCH";d.issue_window=env(false,d.reason,true);d.adopt_window=env(false,d.reason,true);return d end
+ if f.target_terminal_abort==true then d.reason="ATTACK_TARGET_TERMINATED";d.issue_window=env(false,d.reason,false);d.adopt_window=env(false,d.reason,false);return d end
+ if f.prior_route_clear~=true then d.reason="PRIOR_ROUTE_OBLIGATION_PENDING";d.issue_window=env(false,d.reason,false);d.adopt_window=env(false,d.reason,false);return d end
+ if f.semantic_done==true then d.reason="ATTACK_AFTER_ROUTE_COMPLETE";d.issue_route_mode="COMPLETE";d.adopt_route_mode="COMPLETE";d.issue_window=env(true,d.reason,false);d.adopt_window=env(true,d.reason,false);return d end
+ if f.exit_route==true then d.reason="ATTACK_REQUIRES_ROUTE_COMPLETE";d.issue_window=env(false,d.reason,false);d.adopt_window=env(false,d.reason,false);return d end
+ if not finite(f.path_error) or not finite(f.waypoint_tolerance) or f.waypoint_tolerance<0 or not finite(f.remaining) or f.remaining<0 then d.reason="ATTACK_ROUTE_GEOMETRY_UNAVAILABLE";d.issue_window=env(false,d.reason,false);d.adopt_window=env(false,d.reason,false);return d end
+ local sync=finite(f.sync_margin) and math.max(0,f.sync_margin) or 0;local safe=f.path_error<=f.waypoint_tolerance
+ local io,ao=false,false;local ir,ar="ATTACK_ARRIVAL_BRAKE_UNPROVEN","ATTACK_ARRIVAL_BRAKE_UNPROVEN";local im,am="BLOCKED","BLOCKED"
+ if safe then
+  if f.arrival_issue_coherent==true then io=true;ir="ATTACK_PATH_SAFE";im="ATTACK_PATH_SAFE" end
+  if f.arrival_adopt_coherent==true then ao=true;if io then ar="ATTACK_PATH_SAFE";am="ATTACK_PATH_SAFE" else ar="ATTACK_PATH_SAFE_HYSTERESIS";am="ATTACK_PATH_SAFE_HYSTERESIS" end end
+ else
+  if f.arrival_issue_coherent==true and f.remaining<=f.waypoint_tolerance then io=true;ir="ATTACK_TERMINAL_CORRIDOR";im="ATTACK_TERMINAL_CORRIDOR" elseif f.arrival_issue_coherent==true then ir="ATTACK_TERMINAL_WAIT_REACH" end
+  if f.arrival_adopt_coherent==true and f.remaining<=f.waypoint_tolerance+sync then ao=true;if io then ar="ATTACK_TERMINAL_CORRIDOR";am="ATTACK_TERMINAL_CORRIDOR" else ar="ATTACK_TERMINAL_HYSTERESIS";am="ATTACK_TERMINAL_HYSTERESIS" end elseif f.arrival_adopt_coherent==true then ar="ATTACK_TERMINAL_ROUTE_PROTECT" end
+ end
+ d.issue_window=env(io,ir,false);d.adopt_window=env(ao,ar,false);d.issue_route_mode=im;d.adopt_route_mode=am;d.reason=io and ir or (ao and ar or ir);if io or ao then d.current_credit="ATTACK_TERMINAL_HANDOFF" end;return d
+end
+    return P
+end)()
+-- T2B_ATTACK_POLICY_V2_MODULE_END
+-- T2B_EDGE_DECISION_CACHE_MODULE_BEGIN
+R1.T2BEdgeCache=(function()
+    local C={VERSION="T2B_EDGE_DECISION_CACHE_1"}
+local HUGE=(type(math.huge)=="number" and math.huge) or 1e300
+local function finite(n)return type(n)=="number" and n==n and n<HUGE and n>-HUGE end
+local function sid(v)return type(v)=="number" or type(v)=="string" end
+local function ce(e)e=type(e)=="table" and e or {};return {open=e.open==true,reason=e.reason or "TRANSITION_WAIT",hard_violation=e.hard_violation==true} end
+local function gc(g)local o={};for k,v in pairs(g) do local t=type(v);if t=="number" or t=="string" or t=="boolean" then o[k]=v end end;return o end
+function C.capture(e)
+ if type(e)~="table" or not sid(e.gen) or not sid(e.current_action_id) or not sid(e.successor_action_id) or not finite(e.sample_ms) or not finite(e.poll_ms) or e.poll_ms<=0 or type(e.decision)~="table" or type(e.geometry)~="table" then return nil,"CACHE_INPUT_INVALID" end
+ local d=e.decision;return {gen=e.gen,current_action_id=e.current_action_id,successor_action_id=e.successor_action_id,sample_ms=e.sample_ms,poll_ms=e.poll_ms,
+ decision={hard_violation=d.hard_violation==true,reason=d.reason,route_ok=d.route_ok==true,route_reason=d.route_reason,route_debt_mode=d.route_debt_mode,current_credit=d.current_credit,issue_route_mode=d.issue_route_mode,adopt_route_mode=d.adopt_route_mode,issue_window=ce(d.issue_window),adopt_window=ce(d.adopt_window)},geometry=gc(e.geometry)},"OK"
+end
+function C.read(c,q)
+ if type(c)~="table" or type(q)~="table" then return nil,"CACHE_MISSING" end
+ if c.gen~=q.gen or c.current_action_id~=q.current_action_id or c.successor_action_id~=q.successor_action_id then return nil,"CACHE_EDGE_IDENTITY_MISMATCH" end
+ if not finite(q.now_ms) or not finite(q.current_step_ms) or q.current_step_ms<=0 then return nil,"CACHE_CLOCK_INVALID" end
+ local age=q.now_ms-c.sample_ms;if age<0 then return nil,"CACHE_TIME_REVERSED" end;if age>q.current_step_ms then return nil,"CACHE_OLDER_THAN_ONE_OBSERVED_POLL" end;return c,"OK"
+end
+    return C
+end)()
+-- T2B_EDGE_DECISION_CACHE_MODULE_END
 
 -- TPOL-T1H hidden policy scaffold.
 -- No MCT page is registered in this runtime stage.  The schema/profile compiler is
@@ -1776,7 +1828,7 @@ cancel=function(st,reason,now,observe)
     end
     st.gen=st.gen+1; st.actions={}; st.plan=nil; st.idx=1; st.origin=nil
     st.owned=false; st.execution_lane="PLAYER_NATIVE"; st.terminal=false; st.moves=0; st.refused=nil; st.attack=nil; st.phase="CANCELLED"; st.input_gapped=false; st.tail_reached=false; st.recover_revision=nil
-    st.block_state={};st.action_serial=0;st.action_base=0;st.native_arrival=nil;st.unverified_native_successor=nil;st.transition_txn=nil
+    st.block_state={};st.action_serial=0;st.action_base=0;st.native_arrival=nil;st.unverified_native_successor=nil;st.transition_txn=nil;st.t2b_edge_cache=nil
     -- A pending native order is NOT relabelled to the new generation.
 end
 local function action(st,r,now)
@@ -2578,7 +2630,11 @@ local function transition_geometry_snapshot(g)
         arrival_brake_stop_distance=g.arrival_brake_stop_distance,arrival_brake_preempt_distance=g.arrival_brake_preempt_distance,
         arrival_sync_margin=g.arrival_sync_margin,attack_path_error=g.attack_path_error,
         attack_waypoint_tolerance=g.attack_waypoint_tolerance,attack_terminal_limit=g.attack_terminal_limit,
-        current_credit=g.current_credit}
+        arrival_g11_deceleration=g.arrival_g11_deceleration,arrival_g11_issue_coherent=g.arrival_g11_issue_coherent,
+        arrival_g11_adopt_coherent=g.arrival_g11_adopt_coherent,arrival_g11_reason=g.arrival_g11_reason,
+        arrival_g11_stop_distance=g.arrival_g11_stop_distance,arrival_g11_stop_error=g.arrival_g11_stop_error,
+        arrival_g11_issue_limit=g.arrival_g11_issue_limit,arrival_g11_adopt_limit=g.arrival_g11_adopt_limit,
+        t2b_issue_route_mode=g.t2b_issue_route_mode,t2b_adopt_route_mode=g.t2b_adopt_route_mode,current_credit=g.current_credit}
 end
 function Core.begin_transition_txn(st,current,successor,reason,now,g,source)
     if st.transition_txn then fail("TRANSITION_TXN_ALREADY_OPEN");return nil end
@@ -2597,6 +2653,7 @@ function Core.abort_transition_txn(st,tx,reason,now)
     if not tx or tx.state=="COMMITTED" or tx.state=="ABORTED" then return false end
     tx.state="ABORTED";tx.abort_reason=reason;tx.abort_ms=now
     if st.transition_txn==tx then st.transition_txn=nil end
+    st.t2b_edge_cache=nil
     if DEBUG_TELEMETRY then dlog("TRANSITION_EDGE_ABORTED uid="..st.uid.." gen="..clean(tx.gen).." current="..clean(tx.current_action_id)..
         " successor="..clean(tx.successor_action_id).." source="..clean(tx.source).." reason="..clean(reason).." model_ms="..now) end
     return true
@@ -2639,6 +2696,7 @@ function Core.commit_transition_edge(st,tx,now,opts)
     enter_action(st,successor,now,opts.enter_reason or "TRANSITION_EDGE_COMMITTED")
     tx.state="COMMITTED";tx.commit_ms=now;tx.commit_lineage=st.execution_lane
     if st.transition_txn==tx then st.transition_txn=nil end
+    st.t2b_edge_cache=nil
     if DEBUG_TELEMETRY then dlog("TRANSITION_EDGE_COMMITTED uid="..st.uid.." gen="..st.gen.." current="..clean(current.action_id)..
         " successor="..clean(successor.action_id).." source="..clean(tx.source).." lineage="..clean(st.execution_lane)..
         " reason="..clean(tx.reason).." model_ms="..now) end
@@ -2824,31 +2882,13 @@ local function exit_gate_ready(st,nexta)
     return rt.semantic_done==true and clear==true
 end
 
-local function attack_transition_handoff_ready(st,g,nexta)
-    local cur=st.plan and st.plan[st.idx]
-    if not cur or cur.type~="MOVE" or not g or not nexta or nexta.type~="ATTACK" then
-        return false,"ATTACK_HANDOFF_INPUT_INVALID"
-    end
-    local prior_clear=block_route_clear(st,cur)
-    if prior_clear then g.route_debt_mode="CLEAR";g.route_debt_count=0
-    else g.route_debt_mode="HARD";g.route_debt_reason="PRIOR_ROUTE_OBLIGATION_PENDING" end
-    local target=g.target_pos
-    local tol=(finite(g.leg) and g.leg>0) and move_reach_tolerance(st,g.leg) or nil
-    local err=(target and st.pos and cur.pos) and point_segment_error(cur.pos,st.pos,target) or nil
-    local result=R1.AttackHandoff.evaluate({
-        prior_clear=prior_clear==true,semantic_done=action_runtime(cur).semantic_done==true,
-        exit_route=cur.block_kind=="EXIT_ROUTE",arrival_braking=g.arrival_braking==true,
-        brake_boundary=g.arrival_brake_boundary==true,path_error=err,waypoint_tolerance=tol,
-        remaining=g.remaining,sync_margin=g.arrival_sync_margin})
-    g.attack_path_error=err;g.attack_waypoint_tolerance=tol;g.attack_terminal_limit=result.terminal_limit
-    g.current_credit=result.current_credit;g.route_safe=result.ready==true;g.route_mode=result.route_mode;g.route_reason=result.reason
-    return result.ready==true,result.reason
-end
-local function transition_handoff_ready(st,g,nexta)
-    -- T2-B widens only ordinary Move->Attack. MOVE->MOVE remains byte/semantic
-    -- owned by route_handoff_ready(), and Exit->Attack remains strict.
-    if nexta and nexta.type=="ATTACK" then return attack_transition_handoff_ready(st,g,nexta) end
-    return route_handoff_ready(st,g,nexta)
+local function t2b_attack_decision(st,current,successor,g,context)
+ context=context or {};local clear=block_route_clear(st,current);if clear then g.route_debt_mode="CLEAR";g.route_debt_count=0 else g.route_debt_mode="HARD";g.route_debt_reason="PRIOR_ROUTE_OBLIGATION_PENDING" end
+ local tol=(finite(g.leg) and g.leg>0) and move_reach_tolerance(st,g.leg) or nil
+ local b=R1.ArrivalBrakeG11.observe(st.motion_samples,current.pos,action_runtime(current).entered_ms,tol)
+ local target=g.target_pos;local err=(target and st.pos and current.pos) and point_segment_error(current.pos,st.pos,target) or nil
+ local p=R1.T2BAttackPolicy.evaluate({immediate_successor=context.immediate_successor~=false,target_exact=context.target_exact~=false,target_terminal_abort=context.target_terminal_abort==true,prior_route_clear=clear==true,semantic_done=action_runtime(current).semantic_done==true,exit_route=current.block_kind=="EXIT_ROUTE",arrival_issue_coherent=b.issue_coherent==true,arrival_adopt_coherent=b.adopt_coherent==true,path_error=err,waypoint_tolerance=tol,remaining=g.remaining,sync_margin=b.sync_margin})
+ g.arrival_g11_deceleration=b.deceleration_observed;g.arrival_g11_issue_coherent=b.issue_coherent;g.arrival_g11_adopt_coherent=b.adopt_coherent;g.arrival_g11_reason=b.reason;g.arrival_g11_stop_distance=b.stopping_distance;g.arrival_g11_stop_error=b.stopping_point_error;g.arrival_g11_issue_limit=b.issue_coherence_limit;g.arrival_g11_adopt_limit=b.adopt_coherence_limit;g.arrival_sync_margin=b.sync_margin;g.attack_path_error=err;g.attack_waypoint_tolerance=tol;g.t2b_issue_route_mode=p.issue_route_mode;g.t2b_adopt_route_mode=p.adopt_route_mode;g.current_credit=p.current_credit;g.route_safe=(p.issue_window and p.issue_window.open==true) or (p.adopt_window and p.adopt_window.open==true);g.route_mode=(p.issue_window and p.issue_window.open and p.issue_route_mode) or (p.adopt_window and p.adopt_window.open and p.adopt_route_mode) or "BLOCKED";g.route_reason=p.reason;return p
 end
 
 -- BSC-TPOL-T1 shared TransitionPolicy evaluator.
@@ -2873,60 +2913,18 @@ local function finalize_transition_decision(d)
     return d
 end
 function R1.TransitionPolicy.evaluate(st,current,successor,g,context)
-    context=context or {}
-    local current_index=context.current_index or st.idx
-    local successor_index=context.successor_index or context.future_index or (current_index and current_index+1)
-    local d={transition_kind=(current and current.type or "NONE").."->"..(successor and successor.type or "NONE"),
-        zone="WAIT",reason="TRANSITION_WAIT",hard_violation=false,route_ok=false,route_reason=nil,
-        route_debt_mode=g and g.route_debt_mode or nil,current_credit=nil,
-        issue_window=transition_envelope(false,"TRANSITION_WAIT",false),
-        adopt_window=transition_envelope(false,"TRANSITION_WAIT",false),
-        metrics=g,profile_id=R1.Policy.active and R1.Policy.active.behavior_preset or "SMOOTH",
-        policy_version=R1.TransitionPolicy.VERSION,behavior_stage="T2B_ARRIVAL_BRAKE_HANDOFF_CANDIDATE"}
-    if not current or not successor then
-        d.reason="TRANSITION_ACTION_MISSING";d.hard_violation=true
-        d.issue_window=transition_envelope(false,d.reason,true);d.adopt_window=transition_envelope(false,d.reason,true)
-        return finalize_transition_decision(d)
-    end
-    if current_index and successor_index and successor_index~=current_index+1 then
-        d.reason="CANONICAL_INTERMEDIATE_ACTIONS_OWED";d.hard_violation=true
-        d.issue_window=transition_envelope(false,d.reason,true);d.adopt_window=transition_envelope(false,d.reason,true)
-        return finalize_transition_decision(d)
-    end
-    -- T1.7 preserves T1.6 permission as envelope data, not by consumer.
-    -- Proactive MOVE issue remains available under the legacy route window,
-    -- while exact Native immediate-MOVE adoption stays closed until T2-MOVE.
-    if successor.type=="MOVE" then d.adopt_window=transition_envelope(false,"CANONICAL_INTERMEDIATE_ACTIONS_OWED",true) end
-    if not g then
-        d.issue_window=transition_envelope(false,"SUCCESSOR_GEOMETRY_UNAVAILABLE",false)
-        if successor.type~="MOVE" then d.adopt_window=transition_envelope(false,"SUCCESSOR_GEOMETRY_UNAVAILABLE",false) end
-        return finalize_transition_decision(d)
-    end
-    local route_ok,why
-    if successor.type=="ATTACK" then route_ok,why=transition_handoff_ready(st,g,successor) else route_ok,why=route_handoff_ready(st,g,successor) end
-    d.route_ok=route_ok==true;d.route_reason=why;d.route_debt_mode=g.route_debt_mode
-    d.current_credit=g.current_credit
-    if not route_ok then
-        d.issue_window=transition_envelope(false,why or "TRANSITION_ROUTE_BLOCKED",false)
-        if successor.type~="MOVE" then d.adopt_window=transition_envelope(false,why or "TRANSITION_ROUTE_BLOCKED",false) end
-        return finalize_transition_decision(d)
-    end
-    if successor.type=="ATTACK" then
-        d.adopt_window=transition_envelope(true,d.current_credit or why or "NATIVE_IMMEDIATE_SUCCESSOR_READY",false)
-    end
-    local rt=action_runtime(current);local issue_reason=nil
-    if successor.type=="ATTACK" then
-        if rt.semantic_done then issue_reason="ATTACK_AFTER_ROUTE_COMPLETE"
-        elseif d.current_credit=="ATTACK_TERMINAL_HANDOFF" then issue_reason="ATTACK_TERMINAL_HANDOFF" end
-    else
-        if rt.semantic_done then issue_reason="MOVE_AFTER_NODE_COMPLETE"
-        elseif g.remaining<=CFG.proximity then issue_reason="PROXIMITY_A"
-        elseif g.remaining<=CFG.stall_distance and g.stall then issue_reason="PROXIMITY_B_STALL"
-        elseif g.remaining<=g.threshold then issue_reason="PREDICTIVE"
-        elseif g.stall and g.remaining<=math.min(CFG.lead_cap,g.threshold+CFG.brake_extra) then issue_reason="BRAKE_FALLBACK" end
-    end
-    d.issue_window=transition_envelope(issue_reason~=nil,issue_reason or why or "TRANSITION_ROUTE_READY_WAIT_WINDOW",false)
-    return finalize_transition_decision(d)
+ context=context or {}
+ local current_index=context.current_index or st.idx
+ local successor_index=context.successor_index or context.future_index or (current_index and current_index+1)
+ local d={transition_kind=(current and current.type or "NONE").."->"..(successor and successor.type or "NONE"),zone="WAIT",reason="TRANSITION_WAIT",hard_violation=false,route_ok=false,route_reason=nil,route_debt_mode=g and g.route_debt_mode or nil,current_credit=nil,issue_route_mode=nil,adopt_route_mode=nil,issue_window=transition_envelope(false,"TRANSITION_WAIT",false),adopt_window=transition_envelope(false,"TRANSITION_WAIT",false),metrics=g,profile_id=R1.Policy.active and R1.Policy.active.behavior_preset or "SMOOTH",policy_version=R1.TransitionPolicy.VERSION,behavior_stage="T2B_G11_DUAL_ENVELOPE_CANDIDATE"}
+ if not current or not successor then d.reason="TRANSITION_ACTION_MISSING";d.hard_violation=true;d.issue_window=transition_envelope(false,d.reason,true);d.adopt_window=transition_envelope(false,d.reason,true);return finalize_transition_decision(d) end
+ if current_index and successor_index and successor_index~=current_index+1 then d.reason="CANONICAL_INTERMEDIATE_ACTIONS_OWED";d.hard_violation=true;d.issue_window=transition_envelope(false,d.reason,true);d.adopt_window=transition_envelope(false,d.reason,true);return finalize_transition_decision(d) end
+ if successor.type=="MOVE" then d.adopt_window=transition_envelope(false,"CANONICAL_INTERMEDIATE_ACTIONS_OWED",true) end
+ if not g then d.issue_window=transition_envelope(false,"SUCCESSOR_GEOMETRY_UNAVAILABLE",false);if successor.type~="MOVE" then d.adopt_window=transition_envelope(false,"SUCCESSOR_GEOMETRY_UNAVAILABLE",false) end;return finalize_transition_decision(d) end
+ if successor.type=="ATTACK" then local p=t2b_attack_decision(st,current,successor,g,{immediate_successor=true,target_exact=true,target_terminal_abort=context.target_terminal_abort==true});d.route_ok=(p.issue_window and p.issue_window.open==true) or (p.adopt_window and p.adopt_window.open==true);d.route_reason=p.reason;d.route_debt_mode=g.route_debt_mode;d.current_credit=p.current_credit;d.issue_route_mode=p.issue_route_mode;d.adopt_route_mode=p.adopt_route_mode;d.issue_window=p.issue_window;d.adopt_window=p.adopt_window;return finalize_transition_decision(d) end
+ local ok,why=route_handoff_ready(st,g,successor);d.route_ok=ok==true;d.route_reason=why;d.route_debt_mode=g.route_debt_mode;if not ok then d.issue_window=transition_envelope(false,why or "TRANSITION_ROUTE_BLOCKED",false);return finalize_transition_decision(d) end
+ local rt=action_runtime(current);local r=nil;if rt.semantic_done then r="MOVE_AFTER_NODE_COMPLETE" elseif g.remaining<=CFG.proximity then r="PROXIMITY_A" elseif g.remaining<=CFG.stall_distance and g.stall then r="PROXIMITY_B_STALL" elseif g.remaining<=g.threshold then r="PREDICTIVE" elseif g.stall and g.remaining<=math.min(CFG.lead_cap,g.threshold+CFG.brake_extra) then r="BRAKE_FALLBACK" end
+ d.issue_window=transition_envelope(r~=nil,r or why or "TRANSITION_ROUTE_READY_WAIT_WINDOW",false);return finalize_transition_decision(d)
 end
 
 local function attack_metrics(g,now)
@@ -3009,6 +3007,7 @@ local function dispatch(st,index,reason,g,now,opts)
                 return
             end
             fresh.current_credit=fresh_decision.current_credit
+            fresh.route_mode=fresh_decision.issue_route_mode or fresh.route_mode
             reason=fresh_issue.reason or fresh_decision.issue_reason or reason
             g=fresh
         end
@@ -3505,8 +3504,14 @@ function Core.reconcile_native_successor(st,now)
 
     local current_match,_,current_lineage=R1.execution_matches_action(e,cur)
     if current_match then
-        st.observed_execution_lineage=current_lineage
-        st.unverified_native_successor=nil
+        st.observed_execution_lineage=current_lineage;st.unverified_native_successor=nil;st.t2b_edge_cache=nil
+        local nexta=st.plan[st.idx+1]
+        if nexta and nexta.type=="ATTACK" and not action_runtime(cur).semantic_done and (st.model_step_ms or 0)>0 then
+            local viable,vwhy=target_viable(nexta);local terminal_abort=(not viable and abortable_target_reason(vwhy)) or false
+            local cg=geometry(st,nexta);if cg then cg=attack_geometry(st,nexta,cg) end
+            if cg then attack_brake_state(cg);local cd=R1.TransitionPolicy.evaluate(st,cur,nexta,cg,{current_index=st.idx,successor_index=st.idx+1,target_terminal_abort=terminal_abort});cg.current_credit=cd.current_credit;cg.route_mode=cd.adopt_route_mode or cd.issue_route_mode or cg.route_mode
+                local rec=R1.T2BEdgeCache.capture({gen=st.gen,current_action_id=cur.action_id,successor_action_id=nexta.action_id,sample_ms=now,poll_ms=st.model_step_ms,decision=cd,geometry=transition_geometry_snapshot(cg)});st.t2b_edge_cache=rec end
+        end
         if cur.runtime and cur.runtime.fault and cur.runtime.fault.code=="BLOCKED_EXECUTION_IDENTITY" then R1.clear_fault(st,cur,now) end
         return false
     end
@@ -3527,9 +3532,17 @@ function Core.reconcile_native_successor(st,now)
         return false
     end
 
-    local g=geometry(st,future)
-    if g and future.type=="ATTACK" then g=attack_geometry(st,future,g) end
-    local decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{current_index=st.idx,successor_index=future_index,execution_lineage=future_lineage})
+    local g,decision
+    if future_index==st.idx+1 and future.type=="ATTACK" and not action_runtime(cur).semantic_done then
+        local cached,cwhy=R1.T2BEdgeCache.read(st.t2b_edge_cache,{gen=st.gen,current_action_id=cur.action_id,successor_action_id=future.action_id,now_ms=now,current_step_ms=st.model_step_ms or 0})
+        if not cached then return rollback_native_future_to_current(st,cur,future,future_index,e,now,"NATIVE_ADVANCED_WITHOUT_FRESH_T2B_DECISION",cwhy,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE",future_lineage) end
+        local viable,vwhy=target_viable(future);if not viable and abortable_target_reason(vwhy) then return rollback_native_future_to_current(st,cur,future,future_index,e,now,"NATIVE_ATTACK_TARGET_TERMINATED",vwhy,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE",future_lineage) end
+        g=cached.geometry;decision=cached.decision
+    else
+        local terminal_abort=false;if future.type=="ATTACK" then local viable,vwhy=target_viable(future);terminal_abort=(not viable and abortable_target_reason(vwhy)) or false end
+        g=geometry(st,future);if g and future.type=="ATTACK" then g=attack_geometry(st,future,g) end
+        decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{current_index=st.idx,successor_index=future_index,execution_lineage=future_lineage,target_terminal_abort=terminal_abort})
+    end
     local adopt_window=decision.adopt_window or {open=false,reason=decision.reason,hard_violation=decision.hard_violation}
     if decision.hard_violation or adopt_window.hard_violation then
         return rollback_native_future_to_current(st,cur,future,future_index,e,now,
@@ -3540,7 +3553,7 @@ function Core.reconcile_native_successor(st,now)
             "NATIVE_ADVANCED_BEFORE_PERMISSION",adopt_window.reason or decision.reason,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE",future_lineage)
     end
     local why=decision.route_reason or adopt_window.reason or decision.reason
-    if g then g.current_credit=decision.current_credit end
+    if g then g.current_credit=decision.current_credit or g.current_credit;g.route_mode=decision.adopt_route_mode or g.route_mode end
     local commit_reason=decision.current_credit or why
 
     R1.clear_fault(st,cur,now)
@@ -3621,7 +3634,7 @@ local function advance(st,now)
         attack_brake_state(g)
         local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{current_index=st.idx,successor_index=st.idx+1})
         local route_ok,route_reason=decision.route_ok,decision.route_reason or decision.reason
-        g.current_credit=decision.current_credit
+        g.current_credit=decision.current_credit;g.route_mode=decision.issue_route_mode or g.route_mode
         local exit_ok=exit_gate_ready(st,nexta)
         if not exit_ok then
             st.phase="EXIT_ROUTE_PROTECT"
@@ -3633,17 +3646,13 @@ local function advance(st,now)
             end
             return
         end
-        if not route_ok then
-            if DEBUG_TELEMETRY and now-st.last_wait>=1000 then
-                st.last_wait=now
-                if DEBUG_TELEMETRY then dlog("ATTACK_ROUTE_PROTECT uid="..st.uid.." gen="..st.gen.." remaining="..num_or_nil(g.remaining)..
-                    " progress="..num_or_nil(g.progress).." cut_error="..num_or_nil(g.cut_error).." cut_tolerance="..num_or_nil(g.cut_tolerance)..
-                    " route_reason="..clean(route_reason).." model_ms="..now) end
-            end
+        local issue_window=decision.issue_window or {open=false,reason=decision.reason}
+        if not issue_window.open then
+            if DEBUG_TELEMETRY and now-st.last_wait>=1000 then st.last_wait=now;if DEBUG_TELEMETRY then dlog("ATTACK_TRANSITION_WAIT uid="..st.uid.." gen="..st.gen.." remaining="..num_or_nil(g.remaining).." route_reason="..clean(route_reason).." zone="..clean(decision.zone).." issue_reason="..clean(issue_window.reason).." adopt_open="..tostring(decision.adopt_window and decision.adopt_window.open==true).." model_ms="..now) end end
             return
-        elseif decision.issue_window and decision.issue_window.open and not reason then
-            reason=decision.issue_window.reason or decision.issue_reason or "ATTACK_AFTER_ROUTE_COMPLETE"
         end
+        reason=issue_window.reason or decision.issue_reason or "ATTACK_AFTER_ROUTE_COMPLETE"
+
         if DEBUG_TELEMETRY and not reason and now-st.last_wait>=1000 then
             st.last_wait=now
             if DEBUG_TELEMETRY then dlog("ATTACK_TRANSITION_WAIT uid="..st.uid.." gen="..st.gen.." remaining="..string.format("%.6f",g.remaining)..
@@ -3758,13 +3767,9 @@ function Core.handoff_urgency(st,now)
         g=attack_geometry(st,nexta,g);if not g then return BSC_HUGE,"ATTACK_TARGET_POSITION_UNAVAILABLE" end
         attack_brake_state(g)
         local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{current_index=st.idx,successor_index=st.idx+1})
-        local route_ok=decision.route_ok
         if not exit_gate_ready(st,nexta) then return 50000,"EXIT_BLOCK_PROTECT" end
-        if not route_ok then return 50000+(g.cut_error or 0),"ATTACK_ROUTE_PROTECT" end
-        if decision.issue_window and decision.issue_window.open and decision.current_credit=="ATTACK_TERMINAL_HANDOFF" then
-            return -800000,"MOVE_ATTACK_TERMINAL_READY"
-        end
-        if rt.semantic_done then return -800000,"MOVE_COMPLETE_ATTACK_READY" end
+        if decision.issue_window and decision.issue_window.open then return -800000,(decision.current_credit=="ATTACK_TERMINAL_HANDOFF" and "MOVE_ATTACK_T2B_READY" or "MOVE_COMPLETE_ATTACK_READY") end
+        return 50000+(g.remaining or 0),(decision.adopt_window and decision.adopt_window.open and "ATTACK_ADOPT_ONLY" or "ATTACK_WAIT")
     else
         local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{current_index=st.idx,successor_index=st.idx+1})
         local route_ok=decision.route_ok

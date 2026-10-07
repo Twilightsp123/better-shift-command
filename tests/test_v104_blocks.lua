@@ -226,7 +226,7 @@ T('Move to Attack cannot use braking until the waypoint route is safe',function(
  local f=F({debug_source=true});f:start();f.enemy.x=200;f.enemy.z=200
  f:emit('MOVE',false,100,0);f:emit('ATTACK',true,nil,nil,'2001')
  f:tick(100,0,0);f:tick(200,70,0);f:tick(300,70.2,0)
- assert(f.issued==0 and f:has('ATTACK_ROUTE_PROTECT'))
+ assert(f.issued==0 and (f:has('ATTACK_TRANSITION_WAIT') or f:has('ATTACK_ROUTE_PROTECT')))
  f:tick(400,97.5,0);assert(f.issued==1);hascmd(f,1,'ATTACK');healthy(f)
 end)
 

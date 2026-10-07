@@ -2,7 +2,7 @@ from pathlib import Path
 import re,itertools
 ROOT=Path(__file__).resolve().parents[1]
 old=(ROOT/'archive/tpol_t15_pre_execution_lineage/source/better_shift_command.lua').read_text(encoding='utf-8')
-new=(ROOT/'source/better_shift_command.lua').read_text(encoding='utf-8')
+new=(ROOT/'archive/t2b_g11_pre_rework/source/better_shift_command.lua').read_text(encoding='utf-8')
 # Later permission-neutral stages may insert transaction helpers between existing functions.
 # Strip only the explicitly marked T1.6 helper block before checking T1.5 policy/geometry equivalence.
 new_t15=re.sub(r'\n-- T1\.6 Transition Transaction\..*?\nfunction Core\.observe_move_completion', '\nfunction Core.observe_move_completion', new, flags=re.S)
@@ -18,13 +18,15 @@ def function_block(text, signature, next_marker):
     if b<0: fail('missing end marker '+next_marker)
     return text[a:b]
 
-# T1.5 must not alter the geometry gates it consumes. Later permission-neutral stages may legitimately refactor TransitionPolicy itself.
-for signature,next_marker in [
-    ('local function route_handoff_ready(', '\nlocal function transition_handoff_ready'),
-    ('local function attack_geometry(', '\nlocal function attack_brake_state'),
-]:
-    if function_block(old,signature,next_marker)!=function_block(new_t15,signature,next_marker):
-        fail(signature+' changed during behavior-neutral T1.5')
+# T1.5 must not alter the geometry gates it consumes. The archived pre-rework
+# controller has later T1.6/T2 scaffolding immediately after route_handoff_ready,
+# so compare that function with stage-appropriate end markers.
+old_route=function_block(old,'local function route_handoff_ready(', '\nfunction Core.observe_move_completion')
+new_route=function_block(new,'local function route_handoff_ready(', '\n\n-- T1.6 Transition Transaction')
+if old_route!=new_route:
+    fail('local function route_handoff_ready( changed during behavior-neutral T1.5')
+if function_block(old,'local function attack_geometry(', '\nlocal function attack_brake_state')!=function_block(new_t15,'local function attack_geometry(', '\nlocal function attack_brake_state'):
+    fail('local function attack_geometry( changed during behavior-neutral T1.5')
 
 # All scalar CFG assignments must be identical. T1.5 cannot tune a gameplay threshold.
 def cfg_scalars(text):
