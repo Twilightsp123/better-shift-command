@@ -1,0 +1,30 @@
+name: T2-B G1.1 Validation
+
+on:
+  push:
+    branches:
+      - ci/t2b-g11-validation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  t2b-g11:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Lua 5.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+      - name: Compile Python
+        run: python -m compileall -q maintenance_tools tests tools
+      - name: Documentation contract
+        run: python maintenance_tools/check_documentation_contract.py
+      - name: Full maintenance suite
+        run: python maintenance_tools/run_checks_corepath_rc8.py
