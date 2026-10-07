@@ -1,0 +1,195 @@
+name: T2-B G1.1 Runtime Pack
+
+on:
+  push:
+    branches:
+      - ci/t2b-g11-runtime-pack
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-runtime-pack:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Build exact candidate
+        run: |
+          mkdir -p output/t2b-g11-runtime
+          python maintenance_tools/build_corepath_rc8.py \
+            release_artifacts/native/wh3_native_bridge.dll \
+            output/t2b-g11-runtime/zzz_better_shift_command_steam.pack
+
+      - name: Build debug-telemetry candidate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+          ROOT=Path('.').resolve()
+          sys.path.insert(0,str(ROOT/'controller_tools'))
+          import pack_tools
+          controller=(ROOT/'source/better_shift_command.lua').read_bytes()
+          old=b'local DEBUG_TELEMETRY = false'
+          new=b'local DEBUG_TELEMETRY = true'
+          if controller.count(old)!=1:
+              raise SystemExit('DEBUG_TELEMETRY anchor mismatch')
+          controller=controller.replace(old,new,1)
+          bridge=(ROOT/'release_artifacts/native/wh3_native_bridge.dll').read_bytes()
+          minhook=(ROOT/'baseline/minhook.x64.dll').read_bytes()
+          raw=pack_tools.selfcontained(ROOT,controller,bridge,minhook)
+          out=ROOT/'output/t2b-g11-runtime/zzz_better_shift_command_t2b_g11_debug.pack'
+          out.write_bytes(raw)
+          print('debug_pack_sha256='+pack_tools.sha(raw))
+          PY
+
+      - name: Verify deterministic packs and write manifest
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json,sys
+          ROOT=Path('.').resolve()
+          sys.path.insert(0,str(ROOT/'controller_tools'))
+          import pack_tools
+
+          out=ROOT/'output/t2b-g11-runtime'
+          exact=out/'zzz_better_shift_command_steam.pack'
+          debug=out/'zzz_better_shift_command_t2b_g11_debug.pack'
+          controller=(ROOT/'source/better_shift_command.lua').read_bytes()
+          bridge=(ROOT/'release_artifacts/native/wh3_native_bridge.dll').read_bytes()
+          minhook=(ROOT/'baseline/minhook.x64.dll').read_bytes()
+
+          expected_controller='1170ecda86806a077ccbf9913e31750a0066ee968fd87db1f4f418990c7c3b41'
+          if pack_tools.sha(controller)!=expected_controller:
+              raise SystemExit('controller SHA mismatch')
+
+          expected_entries={
+              pack_tools.CONTROLLER_PATH,
+              pack_tools.BRIDGE_PATH,
+              pack_tools.MINHOOK_PATH,
+              r'script\\better_shift_command\\licenses\\MINHOOK_LICENSE.txt',
+              r'script\\better_shift_command\\licenses\\THIRD_PARTY_NOTICES.txt',
+          }
+
+          def verify(path,debug_expected):
+              raw=path.read_bytes()
+              files=pack_tools.parse_pack(raw)
+              if set(files)!=expected_entries:
+                  raise SystemExit(f'{path.name}: pack entries mismatch')
+              embedded_bridge=pack_tools.decode_payload(files[pack_tools.BRIDGE_PATH])
+              embedded_mh=pack_tools.decode_payload(files[pack_tools.MINHOOK_PATH])
+              if embedded_bridge!=bridge or embedded_mh!=minhook:
+                  raise SystemExit(f'{path.name}: embedded native bytes mismatch')
+              pack_tools.native_info(embedded_bridge,embedded_mh)
+              ctl=files[pack_tools.CONTROLLER_PATH]
+              for token in (b'T2B_G11_DUAL_ENVELOPE_CANDIDATE',b'ARRIVAL_BRAKE_G1_1',b'T2B_ATTACK_POLICY_2',b'T2B_EDGE_DECISION_CACHE_1'):
+                  if token not in ctl:
+                      raise SystemExit(f'{path.name}: missing '+token.decode())
+              if (b'local DEBUG_TELEMETRY = true' in ctl)!=debug_expected:
+                  raise SystemExit(f'{path.name}: debug marker mismatch')
+              return pack_tools.sha(raw)
+
+          exact_sha=verify(exact,False)
+          debug_sha=verify(debug,True)
+
+          # Determinism: rebuild the exact bytes independently.
+          rebuilt=pack_tools.selfcontained(ROOT,controller,bridge,minhook)
+          if rebuilt!=exact.read_bytes():
+              raise SystemExit('exact candidate is not deterministic')
+
+          manifest={
+              'schema':1,
+              'purpose':'WH3 RT-TP-02/03 T2-B G1.1 runtime candidate',
+              'source_commit':'49c9c005d8c39cf8b5eb92cea829e50e0727f665',
+              'controller_sha256':expected_controller,
+              'native_bridge_sha256':pack_tools.sha(bridge),
+              'minhook_sha256':pack_tools.sha(minhook),
+              'exact_pack':{'file':exact.name,'sha256':exact_sha,'debug_telemetry':False},
+              'debug_pack':{'file':debug.name,'sha256':debug_sha,'debug_telemetry':True,'only_difference_before_bootstrap':'DEBUG_TELEMETRY false -> true'},
+              'native_rebuilt':False,
+              'native_address_changes':False,
+              'offline_validation':'46/46 PASS',
+              'wh3_runtime':'PENDING RT-TP-02/03'
+          }
+          (out/'RUNTIME_CANDIDATE_MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(manifest,indent=2))
+          PY
+
+      - name: Write runtime test instructions
+        run: |
+          cat > output/t2b-g11-runtime/RT_TP_02_03_README.txt <<'EOF'
+          Better Shift Command v1.3.0 — T2-B G1.1 runtime candidate
+          ===========================================================
+
+          Source seal:
+            49c9c005d8c39cf8b5eb92cea829e50e0727f665
+
+          IMPORTANT
+          ---------
+          This candidate has passed offline validation (46/46) but is NOT yet WH3-runtime-promoted.
+          Native/address bytes are unchanged. Do not install both included packs at once.
+
+          Installation
+          ------------
+          1. Exit Total War: WARHAMMER III completely.
+          2. Back up your current data/zzz_better_shift_command_steam.pack.
+          3. Disable any Workshop/other Better Shift Command provider that contains the same battle script.
+          4. For normal visual testing, install:
+               zzz_better_shift_command_steam.pack
+             into the WH3 data directory.
+          5. For diagnostic logging, instead install ONLY:
+               zzz_better_shift_command_t2b_g11_debug.pack
+             and enable that local pack. Do not keep the exact and debug candidates active together.
+
+          RT-TP-02 — Straight Move -> Attack
+          -----------------------------------
+          Queue one Move waypoint, then Shift-Attack an enemy approximately straight beyond it.
+          Expected:
+          - no visible full stop at the Move waypoint before Attack;
+          - no early long-distance route cut;
+          - Attack target remains the exact queued target.
+
+          RT-TP-03 — Angled / route-fidelity Move -> Attack
+          --------------------------------------------------
+          Repeat with roughly 45–90 degree target geometry and with a waypoint that visibly matters.
+          Expected:
+          - no premature diagonal cut that erases the waypoint intent;
+          - no stop-then-Attack if the terminal/path-safe handoff is legal;
+          - no rollback/reassert oscillation.
+
+          Safety controls
+          ---------------
+          Also test one deliberately strong route constraint (e.g. a waypoint used to route around an obstacle).
+          The mod should preserve that waypoint rather than trading route fidelity for smoothness.
+
+          What to send back
+          -----------------
+          For the debug pack, send the resulting script_log_*.txt plus a short note identifying:
+          A) straight test result,
+          B) angled test result,
+          C) route-fidelity result.
+
+          Promotion rule
+          --------------
+          T2-B is promotable only if RT-TP-02 and RT-TP-03 show smooth Attack handoff without waypoint swallowing,
+          target mismatch, stepwise rollback, or controller failure.
+          EOF
+
+      - name: Record SHA256
+        run: |
+          cd output/t2b-g11-runtime
+          sha256sum *.pack RUNTIME_CANDIDATE_MANIFEST.json RT_TP_02_03_README.txt > SHA256SUMS_RUNTIME_CANDIDATE.txt
+          cat SHA256SUMS_RUNTIME_CANDIDATE.txt
+
+      - name: Upload runtime candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: t2b-g11-rt-tp-02-03-candidate
+          if-no-files-found: error
+          path: output/t2b-g11-runtime/**
