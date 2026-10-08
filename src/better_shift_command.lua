@@ -4019,7 +4019,7 @@ function Core.reconcile_native_successor(st,now)
     st.tail_reached=false
     if future.type=="ATTACK" then begin_attack_history(st,future,now,"NATIVE_CHAIN","0") end
     if DEBUG_TELEMETRY then log("NATIVE_SUCCESSOR_ADOPTED uid="..st.uid.." gen="..st.gen.." action="..future.action_id..
-        " target="..future.target_uid.." previous_action="..cur.action_id.." active_engine_seq="..e.active_engine_seq..
+        " target="..clean(future.target_uid).." previous_action="..cur.action_id.." active_engine_seq="..e.active_engine_seq..
         " provider="..clean(e.provider).." execution_lineage="..clean(future_lineage).." route_reason="..clean(why).." model_ms="..now) end
     return true
 end
