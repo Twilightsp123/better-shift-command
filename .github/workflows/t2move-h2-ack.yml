@@ -1,9 +1,9 @@
-name: T2-MOVE-H2 Proactive ACK Route Credit
+name: T2-MOVE-H2 Active Route Credit
 
 on:
   push:
     branches:
-      - maintenance/t2move-h2-ack-route-credit
+      - maintenance/t2move-h2bcd-h3-route-integrity
   pull_request:
     branches:
       - maintenance/t2move-h1-route-obligation-shadow
@@ -76,27 +76,16 @@ jobs:
       - name: H1 pure-and-controller mutation gate
         run: |
           python maintenance_tools/t2move_a/test_t2move_h1_mutations.py
-      - name: H2-A expected-red baseline (exact two bad credits, no false CI green)
+      - name: H2 active ACK route integrity regression
         run: |
-          python maintenance_tools/t2move_a/test_t2move_h2a_expected_red.py
+          lua5.1 maintenance_tools/t2move_a/test_t2move_h2bcd_controller.lua source/better_shift_command.lua tests/fixture.lua
+      - name: H3 stress and Native parity
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_h3_stress.lua source/better_shift_command.lua tests/fixture.lua
+          lua5.1 maintenance_tools/t2move_h3_native.lua source/better_shift_command.lua tests/fixture.lua
       - name: Documentation contract
         run: |
           python maintenance_tools/check_documentation_contract.py
       - name: Full maintenance suite
         run: |
           python maintenance_tools/run_checks_corepath_rc8.py
-      - name: Seal H2A complete test-only evidence source
-        run: |
-          python maintenance_tools/t2move_a/seal_t2move_h2a_archive.py
-      - name: Upload H2A reproducible red evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: BSC-T2MOVE-H2A-full-source-20261009
-          if-no-files-found: error
-          retention-days: 90
-          path: |
-            output/BSC_T2MOVE_H2A_full_source_20261009.zip
-            output/T2MOVE_H2A_HANDOFF_MANIFEST.json
-            output/READ_THIS_HANDOFF.txt
-            output/FILE_SHA256_MANIFEST.txt
-            output/SHA256SUMS_HANDOFF.txt
