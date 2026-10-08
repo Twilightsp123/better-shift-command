@@ -30,10 +30,7 @@ for a,b in [
  ("function Core.commit_transition_edge(","function Core.observe_move_completion(")
 ]:
     legacy=section(old,a,b)
-    if a=="local function route_handoff_ready(":
-        h1_begin="-- H1 is read-only."
-        now=section(s,a,h1_begin)
-    else:now=section(s,a,b)
+    now=section(s,a,b)
     assert legacy==now,("frozen authority differs",a)
 changed=git("diff","--name-only",G,"HEAD").splitlines()
 for forbidden in ("src/native_bridge/","release_artifacts/native/","docs/CURRENT_BUILD_MAP.md"):
