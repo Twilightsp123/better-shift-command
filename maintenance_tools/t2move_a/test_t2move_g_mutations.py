@@ -12,8 +12,8 @@ lua=shutil.which("lua5.1") or shutil.which("lua")
 if not lua: raise SystemExit("Lua interpreter missing")
 
 cases=[
- ("disable_reverse_waypoint_gate",
-  'if successor_backtrack>waypoint_reach and g.remaining>waypoint_reach then',
+ ("disable_frozen_turnback_adoption_guard",
+  'if backtrack>reach and cached.geometry.remaining>reach then',
   'if false then',
   "G-RT01"),
  ("bypass_PATH_SAFE_chord_error",
