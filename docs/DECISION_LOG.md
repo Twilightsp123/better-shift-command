@@ -205,3 +205,13 @@
 **Decision:** freeze this as a deterministic expected-red H2-A proof before any H2-B gameplay change. Do **not** interpret the green expected-red CI wrapper as a repaired Controller. H2-B must independently reason about execution commit, current waypoint completion, and payable SC3 route debt. A transition already ACKed cannot be retroactively denied or automatically treated as arrival; any issue-time route-fidelity change requires explicit original-SC1 contract review and movement testing. T1.6 stays the single cursor authority.
 
 **Scope:** test-only H2-A does not change BSC command issuance, Native hooks/addresses, gameplay CFG or T2-B/WH3 promotion gates.
+
+## D-20261009-04 — H2 separates execution ACK from route credit and supersedes premature early-steering semantics on an isolated branch
+
+**Decision:** T1.6's single cursor/edge commit remains the only authority proving that a successor is actually executing. MOVE waypoint completion is a separate obligation: `SATISFIED` requires H1's independent arrival evidence, `DEBT_PRESERVED` registers SC3 route debt without fake completion, and `BLOCKED` vetoes new ISSUE/ADOPT when existing reach/chord/debt geometry cannot certify route preservation. Both proactive ISSUE and frozen exact Native i+1 ADOPT consume equivalent route-credit semantics without merging their T1.7 timing windows.
+
+**Reason:** H2-A proved a 40m-unpaid waypoint could be declared `STEERING_CORNER_HANDOFF` after a legitimate early BSC ACK. Merely deferring completion after an unsafe reverse command would retain the fact but make the waypoint unreachable; the direct successor chord must be payable **before** issue. This intentionally overrides the historic SC1 early U-turn/90-degree promotion requirement, which cannot coexist with strict waypoint fidelity for the 0→100→0 case.
+
+**Validation:** CI `37830565468` offline PASS on H2 7/7 real-controller, H3 9/9 stress, 4/4 Native parity and 5/5 H2 mutants, original maintenance suite PASS. Replaced obsolete early-SC1/SC2/SC4 mutation expectations with active route-authority tests; frozen G/H1 source and historical CI remain available. No new tunable meter, speed, angle or timing parameter was introduced.
+
+**Unresolved:** a strict waypoint proof can cause CA braking near corners; neither fixture nor archive proves smooth movement or absence of foldback collisions inside the actual game. Real WH3 RT-TP-02/03/04/05 and lifecycle risks remain pending. Do not promote until real-game evidence meets both fidelity and smoothness requirements.

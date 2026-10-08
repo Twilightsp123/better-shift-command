@@ -12,19 +12,15 @@ LUA=lua_cmd()
 if not LUA:raise SystemExit('A Lua interpreter is required')
 module=(ROOT/'source/fresh_engagement_gate.lua').read_text()
 controller=(ROOT/'source/better_shift_command.lua').read_text()
+# H2 route-integrity supersedes early SC1/SC2/SC4 steering permission as a
+# gameplay requirement. Those 8 historical mutation expectations are preserved
+# on the immutable H1/G baselines, not used to demand premature waypoint credit.
+# Active H2 mutation coverage is in test_t2move_h2bcd_mutations.py.
 mutants=[
  ('attack_accepts_predictive_route_debt',controller,'local clear=block_route_clear(st,current)','local clear=true -- mutant ignores prior route debt','t2b_contract'),
- ('disable_steering_corner',controller,'if g.progress>=min_progress and g.remaining<=corner_window then','if false and g.progress>=min_progress and g.remaining<=corner_window then','blocks'),
- ('steering_corner_creates_return_debt',controller,'if g.route_mode=="STEERING_CORNER" then','if false and g.route_mode=="STEERING_CORNER" then','blocks'),
- ('remove_steering_adjacent_leg_caps',controller,'local base_corner_window=math.min(lookahead*turn_factor,\n        g.leg*CFG.route_corner_current_leg_fraction,\n        next_leg*CFG.route_corner_next_leg_fraction)','local base_corner_window=lookahead*turn_factor','blocks'),
- ('disable_sc2_early_window',controller,'local corner_window=math.max(base_corner_window,early_corner_window)','local corner_window=base_corner_window','blocks'),
  ('disable_sc3_soft_debt',controller,'local soft_ok,soft_reason=move_route_debt_soft_continue(st,cur,nexta,g)','local soft_ok,soft_reason=false,\"MUTANT_HARD_DEBT\"','blocks'),
- ('soft_debt_ignores_deviation',controller,'if path_error>limit then','if false and path_error>limit then','blocks'),
- ('disable_sc4_stall_escape',controller,'if g.progress>=min_progress and stall_escape_signal and g.remaining<=stall_escape_limit then','if false and g.progress>=min_progress and stall_escape_signal and g.remaining<=stall_escape_limit then','blocks'),
  ('disable_sc5_corepath_positive_contact_fallback',controller,'required_stall=CFG.exit_contact_fallback_stall_ms\n            confirmed_candidate=contact_fresh\n            evidence_mode="COREPATH_POSITIVE_CONTACT_FALLBACK"','required_stall=CFG.exit_contact_fallback_stall_ms\n            confirmed_candidate=false\n            evidence_mode="MUTANT_COREPATH_FALLBACK_DISABLED"','blocks'),
  ('sc5_stale_v3_fallback_waits_too_long',controller,'exit_contact_fallback_stall_ms=900','exit_contact_fallback_stall_ms=5000','blocks'),
- ('sc4_stall_escape_immediate',controller,'route_corner_stall_escape_ms=300','route_corner_stall_escape_ms=0','blocks'),
- ('sc4_stall_escape_unbounded_short_leg',controller,'local stall_escape_margin=math.min(CFG.route_corner_stall_escape_extra_m,\n        g.leg*CFG.route_corner_stall_escape_current_leg_fraction,\n        next_leg*CFG.route_corner_stall_escape_next_leg_fraction)','local stall_escape_margin=CFG.route_corner_stall_escape_extra_m','blocks'),
  ('remove_idle_finish_confirmation',controller,'if now-c.since>=CFG.move_idle_finish_confirm_ms then','if now-c.since>=0 then','blocks'),
  ('restore_four_unit_batching',controller,'max_inflight=32','max_inflight=4','contracts'),
  ('single_move_boolean_urgency',controller,'if not nexta then\n        if rt.semantic_done then return -100,"MOVE_COMPLETE_NO_SUCCESSOR" end\n        return BSC_HUGE,"NO_SUCCESSOR"\n    end','if not nexta then return rt.semantic_done and -100,"MOVE_COMPLETE_NO_SUCCESSOR" or BSC_HUGE,"NO_SUCCESSOR" end','contracts'),
