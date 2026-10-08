@@ -177,3 +177,13 @@
 **Execution:** `ATTACK_TERMINAL_HANDOFF` remains commit-only through T1.6. BSC submission cannot credit the Move before ACK; exact Native adoption uses `OBSERVED -> COMMITTED`; reject/stale/timeout aborts without credit.
 
 **Validation:** GitHub Actions T2-B G1.1 offline run passes **46/46 maintenance jobs**. Core mutations are **44/44 caught**; T1.5/T1.6/T1.7 stage mutations remain **7/7** each; dedicated G1.1/T2-B/cache mutations are **13/13 caught**; T2-B runtime fixtures are **4/4 PASS**. WH3 RT-TP-02/03 remains pending.
+
+## D-20261009-01 — Native MOVE adoption must not inherit an unpaid turnback waypoint completion
+
+**Decision:** for isolated T2-MOVE-G, require one-poll *frozen pre-promotion* backtrack/reach geometry before allowing exact immediate Native MOVE adoption through a STEERING_CORNER transition. If the successor endpoint projects back beyond the current waypoint's existing Move reach tolerance and current remaining is still outside that tolerance, reject Native adoption credit. Route legality, timing hysteresis, Native identity and T1.6 commit checks remain independently mandatory.
+
+**Reason:** on the sealed F controller, synthetic 180° and 135° backtracking cases were Native-adopted with the waypoint 30m away even though the route tolerance was 5m; a dense short-leg reversal also adopted early. A proposed direct `route_handoff_ready()` change made those tests pass, but failed existing SC1 U-turn behavior and the T2-B static frozen contract. Those existing tests deliberately allow proactive U-turn steering before a waypoint. G therefore restricts only **Native observation→commit credit**, not the pre-existing proactive SC1 command policy.
+
+**Evidence:** the unmodified F baseline had G controller 4/7 PASS, 3/7 FAIL in GitHub Actions `37822137891`. The isolated G correction passed G 7/7, G active mutants 3/3, E/F controller and mutations, T2-B contract and 46/46 maintenance in `37822771962`.
+
+**Consequence / open decision:** proactive SC1 U-turn route-fidelity remains unresolved and may still trade off early smooth turning versus actual waypoint visitation. Never claim G fixes WH3 hairpin compression or early proactive U-turns. Any future semantic redesign must explicitly reconcile or supersede the old SC1 U-turn test, preserve bounded recovery, and provide new independent runtime/route tests; it must not be hidden inside G or merged to T2-B by offline CI alone.
