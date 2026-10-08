@@ -61,6 +61,9 @@ jobs:
       - name: G adversarial controller geometry, debt and multi-unit
         run: |
           lua5.1 maintenance_tools/t2move_a/test_t2move_g_adversarial.lua source/better_shift_command.lua tests/fixture.lua
+      - name: G route semantics mutation gate
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_g_mutations.py
       - name: Documentation contract
         run: |
           python maintenance_tools/check_documentation_contract.py
