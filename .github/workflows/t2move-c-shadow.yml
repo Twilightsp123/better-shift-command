@@ -1,0 +1,49 @@
+name: T2-MOVE-C Transaction Shadow
+
+on:
+  push:
+    branches:
+      - maintenance/t2move-c-shadow
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  t2move-c-shadow:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Lua 5.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+      - name: Verify frozen runtime bytes
+        run: |
+          test "$(git hash-object source/better_shift_command.lua)" = "e36252b037b4d2dabd7e98cf72979fb41a1ffe80"
+          test "$(git hash-object src/better_shift_command.lua)" = "e36252b037b4d2dabd7e98cf72979fb41a1ffe80"
+          test "$(git hash-object src/better_shift_command_selfcontained.template.lua)" = "70b4db90c4848150a4f3aeab0359fb18b7262064"
+      - name: A/B shadow gates
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_a_shadow.lua maintenance_tools/t2move_a/t2move_a_shadow.lua
+          python maintenance_tools/t2move_a/test_t2move_a_mutations.py
+          lua5.1 maintenance_tools/t2move_a/test_t2move_b_shadow.lua maintenance_tools/t2move_a/t2move_a_shadow.lua maintenance_tools/t2move_a/t2move_b_shadow.lua
+          python maintenance_tools/t2move_a/test_t2move_b_mutations.py
+      - name: T2-MOVE-C T1.6 transaction simulation
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_c_txn_shadow.lua maintenance_tools/t2move_a/t2move_a_shadow.lua maintenance_tools/t2move_a/t2move_b_shadow.lua maintenance_tools/t2move_a/t2move_c_txn_shadow.lua
+      - name: T2-MOVE-C transaction mutations
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_c_mutations.py
+      - name: Controller snapshot blocker audit
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_c_snapshot_contract.py
+          python maintenance_tools/t2move_a/test_t2move_a_scope.py
+      - name: Documentation contract
+        run: python maintenance_tools/check_documentation_contract.py
+      - name: Existing maintenance suite
+        run: python maintenance_tools/run_checks_corepath_rc8.py

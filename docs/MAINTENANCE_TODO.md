@@ -68,7 +68,11 @@ T2-MOVE-A shadow work is isolated on `maintenance/t2move-a-shadow`, based on `2c
 
 T2-MOVE-B mode-specific one-poll adopt-only shadow has now been added on this isolated branch. Its model widens **only the temporal issue frontier** using one actually observed pre-promotion poll; PATH_SAFE, SC1/SC2/SC4 corridors, short adjacent legs, and SC3 debt limits are never widened. Pure Lua local evidence: **28/28 fixtures PASS, 20/20 mutants caught**. See `docs/design/T2_MOVE_B_SHADOW_20261008.md`. The shadow is non-authoritative: live SC6 still rolls back immediate future MOVE.
 
-Next offline work: design Stage C shared T1.6 transactional integration and prove no Native promotion/rollback/reassert oscillation; keep a separate gate for route-preservation and WH3 validation. No gameplay change without a subsequent isolated implementation gate.
+T2-MOVE-C transaction protocol shadow is now implemented **offline only** in `maintenance/t2move-c-shadow`. It exercises the same T1.6 `AUTHORIZED → OBSERVED → COMMITTED` call pattern with a mock Core, including STEERING_CORNER credit, PATH_SAFE route-debt creation, existing SC3 debt preservation, generation/revision/identity validation and rejection without cursor credit. Local fixture gate: **25/25 PASS**; mutations: **14/14 CAUGHT**; repository CI pending.
+
+**Critical blocker before controller integration:** actual `transition_geometry_snapshot()` omits `leg`, `progress`, `route_min_progress`, `threshold`, `stall`, `cut_safe_limit` and other MOVE-specific proof fields required by A/B. A dedicated exact-current MOVE snapshot and a stable prior-debt signature are required before any MOVE adoption is activated. See `docs/design/T2_MOVE_C_SHADOW_20261008.md`.
+
+Next offline step: close the real snapshot/debt-signature mapping and test the observation ordering in an isolated controller fixture; do not turn shadow results into a live MOVE adopt window or a WH3 PASS.
 
 Do not promote a standalone permissive T2-A state. Immediate successor MOVE adoption and its issue/adopt hysteresis must be implemented and promoted together. Existing SC1–SC4 Move→Move route semantics remain authoritative. T2-B G1.1 runtime RT-TP-02/03 is still **BLOCKED / DEFERRED** (P0) and must remain a separate promotion gate.
 
