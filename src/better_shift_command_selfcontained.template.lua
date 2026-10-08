@@ -2914,6 +2914,54 @@ local function move_route_debt_soft_continue(st,cur,nexta,g)
     g.route_debt_reason="PRIOR_ROUTE_OBLIGATION_SOFT_CONTINUE"
     return true,g.route_debt_reason
 end
+-- H1 is read-only. The legacy TransitionPolicy decision remains authoritative.
+function R1.H1ShadowObserve(st,current,successor,context,now,legacy)
+    if not current or current.type~="MOVE" or not successor or successor.type~="MOVE" then return nil end
+    local b=st.block_state and st.block_state[current.block_id] or nil
+    local owed={}
+    if b and b.route_debts then
+        for _,debt in pairs(b.route_debts) do
+            if debt and debt.action then
+                owed[#owed+1]={waypoint=debt.action.pos,
+                    tolerance=debt.tolerance,
+                    semantic_done=action_runtime(debt.action).semantic_done==true}
+            else
+                owed[#owed+1]={}
+            end
+        end
+    end
+    local rt=action_runtime(current)
+    local leg=(st.origin and current.pos) and dist(st.origin,current.pos) or nil
+    local ok,result=pcall(R1.H1RouteObligation.evaluate,{
+        current_pos=st.pos,previous_pos=st.prev_pos,waypoint=current.pos,
+        successor=successor.pos,reach=move_reach_tolerance(st,leg),
+        semantic_done=rt.semantic_done==true,
+        motion_fresh=(st.model_step_ms or 0)>0,
+        prior_debts=owed
+    })
+    if not ok then
+        if DEBUG_TELEMETRY then dlog("H1_SHADOW_ERROR uid="..st.uid.." context="..clean(context)..
+            " reason="..clean(result).." model_ms="..now) end
+        return nil
+    end
+    if DEBUG_TELEMETRY then
+        local issue=legacy and legacy.issue_window and legacy.issue_window.open==true or false
+        local adopt=legacy and legacy.adopt_window and legacy.adopt_window.open==true or false
+        local mode=legacy and (legacy.issue_route_mode or legacy.route_reason or legacy.reason) or "NONE"
+        local conflict=(issue or adopt) and result.state=="BLOCKED"
+            or (issue and result.state=="DEBT_PRESERVED" and mode=="STEERING_CORNER")
+        dlog("H1_SHADOW_"..clean(context).." uid="..st.uid.." gen="..st.gen..
+            " current="..clean(current.action_id).." successor="..clean(successor.action_id)..
+            " verdict="..clean(result.state).." reason="..clean(result.reason)..
+            " legacy_issue="..tostring(issue).." legacy_adopt="..tostring(adopt)..
+            " legacy_route="..clean(mode).." conflict="..tostring(conflict==true)..
+            " remaining="..num_or_nil(result.remaining).." chord_error="..num_or_nil(result.chord_error)..
+            " reach="..num_or_nil(result.reach).." prior_debts="..clean(result.prior_debt_count or 0)..
+            " authoritative=false model_ms="..now)
+    end
+    return result
+end
+
 local function route_handoff_ready(st,g,nexta)
     local cur=st.plan[st.idx]
     local rt=action_runtime(cur)
@@ -3024,54 +3072,6 @@ local function route_handoff_ready(st,g,nexta)
     g.route_safe=false;g.route_mode="BLOCKED"
     g.route_reason=g.progress<min_progress and "ROUTE_PROGRESS_REQUIRED" or "TURN_CORRIDOR_REQUIRED"
     return false,g.route_reason
-end
-
--- H1 is read-only. The legacy TransitionPolicy decision remains authoritative.
-function R1.H1ShadowObserve(st,current,successor,context,now,legacy)
-    if not current or current.type~="MOVE" or not successor or successor.type~="MOVE" then return nil end
-    local b=st.block_state and st.block_state[current.block_id] or nil
-    local owed={}
-    if b and b.route_debts then
-        for _,debt in pairs(b.route_debts) do
-            if debt and debt.action then
-                owed[#owed+1]={waypoint=debt.action.pos,
-                    tolerance=debt.tolerance,
-                    semantic_done=action_runtime(debt.action).semantic_done==true}
-            else
-                owed[#owed+1]={}
-            end
-        end
-    end
-    local rt=action_runtime(current)
-    local leg=(st.origin and current.pos) and dist(st.origin,current.pos) or nil
-    local ok,result=pcall(R1.H1RouteObligation.evaluate,{
-        current_pos=st.pos,previous_pos=st.prev_pos,waypoint=current.pos,
-        successor=successor.pos,reach=move_reach_tolerance(st,leg),
-        semantic_done=rt.semantic_done==true,
-        motion_fresh=(st.model_step_ms or 0)>0,
-        prior_debts=owed
-    })
-    if not ok then
-        if DEBUG_TELEMETRY then dlog("H1_SHADOW_ERROR uid="..st.uid.." context="..clean(context)..
-            " reason="..clean(result).." model_ms="..now) end
-        return nil
-    end
-    if DEBUG_TELEMETRY then
-        local issue=legacy and legacy.issue_window and legacy.issue_window.open==true or false
-        local adopt=legacy and legacy.adopt_window and legacy.adopt_window.open==true or false
-        local mode=legacy and (legacy.issue_route_mode or legacy.route_reason or legacy.reason) or "NONE"
-        local conflict=(issue or adopt) and result.state=="BLOCKED"
-            or (issue and result.state=="DEBT_PRESERVED" and mode=="STEERING_CORNER")
-        dlog("H1_SHADOW_"..clean(context).." uid="..st.uid.." gen="..st.gen..
-            " current="..clean(current.action_id).." successor="..clean(successor.action_id)..
-            " verdict="..clean(result.state).." reason="..clean(result.reason)..
-            " legacy_issue="..tostring(issue).." legacy_adopt="..tostring(adopt)..
-            " legacy_route="..clean(mode).." conflict="..tostring(conflict==true)..
-            " remaining="..num_or_nil(result.remaining).." chord_error="..num_or_nil(result.chord_error)..
-            " reach="..num_or_nil(result.reach).." prior_debts="..clean(result.prior_debt_count or 0)..
-            " authoritative=false model_ms="..now)
-    end
-    return result
 end
 
 -- T1.6 Transition Transaction. Permission remains T1.5; this layer only makes
