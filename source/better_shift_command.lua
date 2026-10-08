@@ -4004,9 +4004,8 @@ function Core.reconcile_native_successor(st,now)
         local proof=st.t2move_d_evidence
         g=proof and transition_geometry_snapshot(proof.geometry) or nil
         decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{current_index=st.idx,
-            successor_index=future_index,execution_lineage=future_lineage,
-            execution_provider=e.provider,move_native_reconcile=true,
-            move_native_evidence=proof,model_ms=now})
+            successor_index=future_index,execution_lineage=future_lineage,execution_provider=e.provider,
+            move_native_reconcile=true,move_native_evidence=proof,model_ms=now})
     else
         local terminal_abort=false;if future.type=="ATTACK" then local viable,vwhy=target_viable(future);terminal_abort=(not viable and abortable_target_reason(vwhy)) or false end
         g=geometry(st,future);if g and future.type=="ATTACK" then g=attack_geometry(st,future,g) end
