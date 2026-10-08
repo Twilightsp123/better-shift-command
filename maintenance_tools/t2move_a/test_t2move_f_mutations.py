@@ -11,7 +11,10 @@ if not lua: raise SystemExit("Lua 5.1 unavailable")
 mutations=[
     ("accept_V2_fallback",'if ctx.execution_provider~="V3" then','if false then',"F-RISK-01"),
     ("skip_live_revision_match",'if live_revision~=st.revision or live_revision~=cached.revision then','if false then',"F-RISK-02"),
-    ("skip_live_revision_availability",'if not ok_revision or not id(live_revision) then','if false then',"F-RISK-05"),
+    ("fabricate_missing_live_revision",
+        'if not ok_revision or not id(live_revision) then\n        return nil,"MOVE_LIVE_REVISION_UNAVAILABLE"\n    end',
+        'if not ok_revision or not id(live_revision) then\n        live_revision=st.revision -- unsafe fabricated fallback\n    end',
+        "F-RISK-05"),
 ]
 def invoke(path):
     return subprocess.run([lua,str(test),str(path),str(fixture)],
