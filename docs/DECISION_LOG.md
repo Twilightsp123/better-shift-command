@@ -197,3 +197,11 @@
 **Evidence:** Initial H1 CI `37825312679` succeeded; expanded `37825955358` also caught the circular `STEERING_CORNER_HANDOFF` completion-provenance mutant, with 15/15 pure, 5/5 real-controller shadow and 6/6 mutations, alongside original G/E/F and 46/46 maintenance checks. `route_handoff_ready()`, the T1.6 `commit_transition_edge()` and gameplay CFG remain byte-for-byte identical to sealed G.
 
 **Next decision (not yet made):** H2 must specify the lifecycle of unpaid waypoint obligations across proactive ISSUE ACK, Native ADOPT and subsequent Native motion. It must distinguish an early steering command from valid route-completion credit without inventing automatic waypoint arrival. Resolve legacy U-turn smoothness versus fidelity via explicit branch-level design and red/green tests; H1 is not proof of WH3 runtime smoothness or release readiness.
+
+## D-20261009-03 — Proactive ACK is an execution fact, not proof of the prior waypoint
+
+**Evidence:** baseline H1 `b5020d9` in H2-A real-controller run `37827397901` issues the 180° successor from x=60, then receives a Native ACK without changing x; the T1.6 edge commits and `ACTION_COMPLETE STEERING_CORNER_HANDOFF remaining=40.000000` is logged. A 90° corner reproduces the same bug. Four control tests prove near-route completion, forward debt, pending-before-ACK and rejected-ACK paths remain distinct.
+
+**Decision:** freeze this as a deterministic expected-red H2-A proof before any H2-B gameplay change. Do **not** interpret the green expected-red CI wrapper as a repaired Controller. H2-B must independently reason about execution commit, current waypoint completion, and payable SC3 route debt. A transition already ACKed cannot be retroactively denied or automatically treated as arrival; any issue-time route-fidelity change requires explicit original-SC1 contract review and movement testing. T1.6 stays the single cursor authority.
+
+**Scope:** test-only H2-A does not change BSC command issuance, Native hooks/addresses, gameplay CFG or T2-B/WH3 promotion gates.
