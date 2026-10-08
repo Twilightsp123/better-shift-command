@@ -1,0 +1,93 @@
+local A=assert(loadfile(assert(arg[1])))()
+local pass=0
+local function T(name,fn)
+ local ok,err=pcall(fn)
+ if not ok then print("FAIL "..name.." "..tostring(err));os.exit(1) end
+ pass=pass+1;print("PASS "..name)
+end
+local function e(m)
+ local x={exact_current_execution=true,gen="3",unit_lifetime="1",current_action_id="11",successor_action_id="12",
+ current_index=1,successor_index=2,current_kind="MOVE",successor_kind="MOVE",sample_ms=400,poll_ms=100,
+ decision={transition_kind="MOVE->MOVE",route_ok=true,hard_violation=false,issue_window={open=true}},
+ geometry={route_mode=m or "STEERING_CORNER",route_debt_mode="CLEAR",remaining=10,leg=100}}
+ return x
+end
+local function q()
+ return {exact_native_successor=true,gen="3",unit_lifetime="1",current_action_id="11",successor_action_id="12",
+ current_index=1,future_index=2,now_ms=500,observed_step_ms=100}
+end
+T("A00 exact i+1 steering mode creates preview only",function()
+ local c,why=A.capture(e());assert(why=="OK")
+ local r=A.preview(c,q());assert(r.preview_open and r.zone=="ISSUE_READY" and r.credit=="STEERING_CORNER_HANDOFF")
+ assert(r.authoritative==false)
+end)
+T("A01 path-safe must register current waypoint debt",function()
+ local c=A.capture(e("PATH_SAFE"));local r=A.preview(c,q());assert(r.credit=="REGISTER_ROUTE_OBLIGATION")
+end)
+T("A02 existing SC3 debt is never silently forgiven",function()
+ local x=e();x.geometry.route_debt_mode="SOFT_PRESERVED";local c=A.capture(x)
+ assert(A.preview(c,q()).preserve_prior_debt==true)
+end)
+T("A03 complete current move cannot earn duplicate route credit",function()
+ local x=e("COMPLETE");x.semantic_done=true;local c=A.capture(x)
+ assert(A.preview(c,q()).credit=="ALREADY_SEMANTIC_DONE")
+end)
+T("A04 pre-promotion evidence requires exact current MOVE",function()
+ local x=e();x.exact_current_execution=false;local c,why=A.capture(x);assert(c==nil and why=="CURRENT_EXECUTION_NOT_EXACT")
+end)
+T("A05 exact Native successor required",function()
+ local c=A.capture(e());local v=q();v.exact_native_successor=false
+ assert(A.preview(c,v).zone=="HARD_BLOCK")
+end)
+T("A06 i+2 never eligible",function()
+ local c=A.capture(e());local v=q();v.future_index=3
+ assert(A.preview(c,v).reason=="CANONICAL_INTERMEDIATE_ACTIONS_OWED")
+end)
+T("A07 wrong generation / unit lifetime fail closed",function()
+ local c=A.capture(e());local v=q();v.gen="4";assert(not A.preview(c,v).preview_open)
+ v=q();v.unit_lifetime="2";assert(not A.preview(c,v).preview_open)
+end)
+T("A08 current / future action mismatch fail closed",function()
+ local c=A.capture(e());local v=q();v.successor_action_id="13";assert(not A.preview(c,v).preview_open)
+ v=q();v.current_action_id="13";assert(not A.preview(c,v).preview_open)
+end)
+T("A09 maximum one observed poll",function()
+ local c=A.capture(e());local v=q();v.now_ms=501;assert(A.preview(c,v).reason=="CACHE_OUTSIDE_ONE_ACTUAL_POLL")
+end)
+T("A10 irregular poll uses actual interval",function()
+ local c=A.capture(e());local v=q();v.now_ms=700;v.observed_step_ms=300
+ assert(A.preview(c,v).preview_open)
+ v.now_ms=701;assert(not A.preview(c,v).preview_open)
+end)
+T("A11 route illegal cannot adopt despite issue flag",function()
+ local x=e();x.decision.route_ok=false;local c=A.capture(x)
+ assert(A.preview(c,q()).reason=="PREPROMOTION_MOVE_ISSUE_NOT_PROVEN")
+end)
+T("A12 issue closed remains closed; no Stage A hysteresis",function()
+ local x=e();x.decision.issue_window.open=false;local c=A.capture(x)
+ assert(A.preview(c,q()).zone=="WAIT")
+end)
+T("A13 current route mode BLOCKED cannot grant credit",function()
+ local c=A.capture(e("BLOCKED"));assert(not A.preview(c,q()).preview_open)
+end)
+T("A14 snapshots immune to caller mutations",function()
+ local x=e();local c=A.capture(x);x.geometry.remaining=200;x.geometry.route_mode="BLOCKED"
+ local r=A.preview(c,q());assert(r.preview_open and r.geometry.remaining==10 and r.credit=="STEERING_CORNER_HANDOFF")
+ r.geometry.remaining=999;assert(c.geometry.remaining==10)
+end)
+T("A15 clock rollback fail closed",function()
+ local c=A.capture(e());local v=q();v.now_ms=399;assert(not A.preview(c,v).preview_open)
+end)
+T("A16 only Move->Move proof accepted",function()
+ local x=e();x.decision.transition_kind="MOVE->ATTACK";local c=A.capture(x);assert(c==nil)
+end)
+T("A17 hard policy violation cannot be cached",function()
+ local x=e();x.decision.hard_violation=true;local c=A.capture(x);assert(c==nil)
+end)
+T("A18 no invented retry budget, no shared commit in shadow",function()
+ local c=A.capture(e());for i=1,3 do local r=A.preview(c,q());assert(r.authoritative==false and r.preview_open) end
+end)
+T("A19 new routes must reauthorize, no stale identity",function()
+ local c=A.capture(e());local v=q();v.current_index=2;v.future_index=3;assert(not A.preview(c,v).preview_open)
+end)
+print("TOTAL "..pass.." PASS 0 FAIL; SHADOW ONLY, NOT WH3 GAMEPLAY")

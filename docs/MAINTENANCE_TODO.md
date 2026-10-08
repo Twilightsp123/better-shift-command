@@ -2,7 +2,7 @@
 
 This file is the **current actionable maintenance queue**. It complements `OPEN_ISSUES.md`: Open Issues records unresolved problems and promotion blockers; this file records what a maintainer should actually do next, what is blocked, and what must not be done while blocked.
 
-Last updated: **2026-10-07**
+Last updated: **2026-10-08**
 
 ## P0 — T2-B G1.1 WH3 runtime promotion gate
 
@@ -62,11 +62,13 @@ Allowed work while blocked:
 
 ## P1 — T2-MOVE immediate-successor MOVE + hysteresis
 
-Status: **PENDING AFTER T2-B RUNTIME CLOSURE.**
+Status: **OFFLINE SHADOW DESIGN ACTIVE; GAMEPLAY PROMOTION PENDING AFTER T2-B RUNTIME CLOSURE.**
 
-Do not promote a standalone permissive T2-A state. Immediate successor MOVE adoption and its issue/adopt hysteresis must be designed and promoted together. Existing SC1–SC4 Move→Move route semantics remain authoritative until this stage begins.
+T2-MOVE-A shadow work is isolated on `maintenance/t2move-a-shadow`, based on `2c2187edae771e8a5bf9b56f29b65d34786eb119`. It audits the exact `i+1 MOVE` SC6 rollback asymmetry and proves a non-authoritative pre-promotion decision-cache model. Pure Lua evidence: **20/20 fixture PASS**, **12/12 mutants caught**. The live controller and MOVE adopt permission remain unchanged. Full spec: `docs/design/T2_MOVE_A_SHADOW_20261008.md`.
 
-Offline architectural work is allowed, but gameplay promotion should wait until P0 is no longer blocked and T2-B has a clear WH3 runtime result.
+Next offline work: T2-MOVE-B mode-specific one-poll adopt-only hysteresis, requiring separate proofs of short-leg caps, previous SC3 debt, turn/hairpin route fidelity, temporal freshness and transactional completion credit. No new tuned meter/percentage knobs.
+
+Do not promote a standalone permissive T2-A state. Immediate successor MOVE adoption and its issue/adopt hysteresis must be implemented and promoted together. Existing SC1–SC4 Move→Move route semantics remain authoritative. T2-B G1.1 runtime RT-TP-02/03 is still **BLOCKED / DEFERRED** (P0) and must remain a separate promotion gate.
 
 ## P2 — Lifecycle / teardown stream
 
