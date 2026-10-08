@@ -16,7 +16,7 @@ need('issue_window=transition_envelope(false,"TRANSITION_WAIT",false)',1)
 need('adopt_window=transition_envelope(false,"TRANSITION_WAIT",false)',1)
 need('d.adopt_window=transition_envelope(false,"CANONICAL_INTERMEDIATE_ACTIONS_OWED",true)',1)
 need('local adopt_window=decision.adopt_window or {open=false,reason=decision.reason,hard_violation=decision.hard_violation}',1)
-need('decision.issue_window and decision.issue_window.open',2)
+need('decision.issue_window and decision.issue_window.open',3)
 if s.count('R1.TransitionPolicy.evaluate(st,')!=9: fail('shared evaluator call-site count includes T2-MOVE-D exact-current read-only snapshot')
 for legacy in ('consumer="PROACTIVE"','consumer="NATIVE_RECONCILE"','consumer="SCHEDULER"','context.consumer'):
     if legacy in s: fail('consumer-specific permission remains: '+legacy)
