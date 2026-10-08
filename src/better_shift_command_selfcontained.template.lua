@@ -984,6 +984,136 @@ end
     return C
 end)()
 -- T2B_EDGE_DECISION_CACHE_MODULE_END
+-- T2MOVE_D_EVIDENCE_MODULE_BEGIN
+-- T2MOVE_D_EVIDENCE_OBSERVER_1
+-- Pure deterministic evidence. No issue/adopt/commit/cursor authority.
+R1.T2MoveEvidence=(function()
+local D={VERSION="T2MOVE_D_EVIDENCE_OBSERVER_1",authoritative=false}
+local huge=math.huge or 1e300
+local function finite(v)return type(v)=="number" and v==v and v<huge and v>-huge end
+local function identity(v)return type(v)=="string" or (finite(v) and v>=0) end
+local function encode(v)
+ if type(v)=="string" then return "s"..#v..":"..v end
+ if finite(v) then return "n"..string.format("%.17g",v) end
+ if type(v)=="boolean" then return v and "b1" or "b0" end
+ return nil
+end
+local function pack(items)
+ local out={}
+ for _,v in ipairs(items) do local s=encode(v);if not s then return nil end;out[#out+1]=#s..":"..s end
+ return table.concat(out,"|")
+end
+local function copy_scalars(g)
+ local out={}
+ for k,v in pairs(g) do if type(k)=="string" and (type(v)=="string" or type(v)=="boolean" or finite(v)) then out[k]=v end end
+ return out
+end
+local common={"remaining","leg","next_leg","progress","route_min_progress","threshold","stall","route_mode","route_debt_mode","arrival_brake_ready","arrival_sync_margin"}
+local by_mode={PATH_SAFE={"cut_error","cut_safe_limit","cut_tolerance"},STEERING_CORNER={"corner_window","corner_window_base","corner_window_early"}}
+D.REQUIRED_GEOMETRY=common;D.MODE_FIELDS=by_mode
+function D.copy_move_geometry(g)
+ if type(g)~="table" or not by_mode[g.route_mode] then return nil,"MOVE_ROUTE_MODE_NOT_PROVEN" end
+ for _,key in ipairs(common) do if g[key]==nil then return nil,"MOVE_SNAPSHOT_MISSING_"..key end end
+ for _,key in ipairs(by_mode[g.route_mode]) do if g[key]==nil then return nil,"MOVE_SNAPSHOT_MISSING_"..key end end
+ for _,key in ipairs({"remaining","leg","next_leg","progress","route_min_progress","threshold","arrival_sync_margin"}) do
+  if not finite(g[key]) then return nil,"MOVE_SNAPSHOT_INVALID_"..key end
+ end
+ for _,key in ipairs(by_mode[g.route_mode]) do if not finite(g[key]) then return nil,"MOVE_SNAPSHOT_INVALID_"..key end end
+ if type(g.stall)~="boolean" or type(g.arrival_brake_ready)~="boolean" then return nil,"MOVE_SNAPSHOT_BOOLEAN_INVALID" end
+ if g.route_debt_mode~="CLEAR" and g.route_debt_mode~="SOFT_PRESERVED" then return nil,"MOVE_SNAPSHOT_DEBT_NOT_PROVEN" end
+ if g.route_debt_mode=="SOFT_PRESERVED" then
+  for _,key in ipairs({"route_debt_count","route_debt_error","route_debt_limit"}) do
+   if not finite(g[key]) then return nil,"MOVE_SNAPSHOT_MISSING_"..key end
+  end
+ end
+ return copy_scalars(g),"OK"
+end
+function D.route_debt_signature(st,current)
+ if type(st)~="table" or type(current)~="table" or not identity(current.action_id)
+    or not identity(current.block_id) then return nil,"DEBT_OWNER_UNPROVEN" end
+ local blocks=st.block_state
+ if blocks~=nil and type(blocks)~="table" then return nil,"BLOCK_STATE_UNAVAILABLE" end
+ local block=blocks and blocks[current.block_id] or nil
+ if block~=nil and type(block)~="table" then return nil,"BLOCK_IDENTITY_INVALID" end
+ if block and block.route_debts~=nil and type(block.route_debts)~="table" then return nil,"DEBT_MAP_INVALID" end
+ local items={}
+ local debt_map=block and block.route_debts or nil
+ if debt_map then
+  for key,debt in pairs(debt_map) do
+   if not identity(key) or type(debt)~="table" or type(debt.action)~="table"
+     or not identity(debt.action.action_id) or debt.action.action_id~=key
+     or not identity(debt.action.block_id) or debt.action.block_id~=current.block_id
+     or debt.action.type~="MOVE" or not finite(debt.tolerance)
+     or debt.tolerance<0 or type(debt.action.pos)~="table"
+     or not finite(debt.action.pos.x) or not finite(debt.action.pos.z) then
+    return nil,"DEBT_RECORD_UNPROVEN"
+   end
+   local rt=debt.action.runtime
+   local done=rt and rt.semantic_done==true or false
+   local record=pack({key,debt.action.block_id,debt.action.action_id,
+     debt.tolerance,debt.action.pos.x,debt.action.pos.z,done})
+   if not record then return nil,"DEBT_RECORD_UNPROVEN" end
+   items[#items+1]=record
+  end
+ end
+ table.sort(items)
+ local header=pack({current.block_id,current.action_id,current.block_kind or "NONE",
+   block and block.id or current.block_id,block and block.kind or current.block_kind or "NONE",
+   block and block.closed==true or false,#items})
+ if not header then return nil,"DEBT_HEADER_UNPROVEN" end
+ return header.."#"..table.concat(items,"#"),"OK"
+end
+function D.capture(f)
+ if type(f)~="table" or f.exact_current_execution~=true or f.current_kind~="MOVE"
+    or f.successor_kind~="MOVE" or f.successor_index~=f.current_index+1
+    or not identity(f.gen) or not identity(f.revision) or not identity(f.unit_lifetime)
+    or not identity(f.current_action_id) or not identity(f.successor_action_id)
+    or not finite(f.now_ms) or not finite(f.poll_ms) or f.poll_ms<=0
+    or not finite(f.current_index) or not identity(f.debt_signature) then
+  return nil,"MOVE_CAPTURE_IDENTITY_INVALID"
+ end
+ local g,why=D.copy_move_geometry(f.geometry);if not g then return nil,why end
+ local history=f.motion_samples
+ if type(history)~="table" or #history<2 then return nil,"MOVE_CAPTURE_SAMPLES_MISSING" end
+ local prev,cur=history[#history-1],history[#history]
+ if type(prev)~="table" or type(cur)~="table" or not finite(prev.ms)
+    or not finite(cur.ms) or not finite(prev.x) or not finite(prev.z)
+    or not finite(cur.x) or not finite(cur.z) or cur.ms~=f.now_ms
+    or cur.ms-prev.ms~=f.poll_ms then return nil,"MOVE_CAPTURE_SAMPLE_CLOCK_MISMATCH" end
+ if not finite(f.waypoint_x) or not finite(f.waypoint_z) then return nil,"MOVE_CAPTURE_WAYPOINT_MISSING" end
+ local function distance(x,z)local dx,dz=x-f.waypoint_x,z-f.waypoint_z;return math.sqrt(dx*dx+dz*dz) end
+ local before=distance(prev.x,prev.z);local after=distance(cur.x,cur.z)
+ if math.abs(after-g.remaining)>1e-7*math.max(1,after,g.remaining) then
+  return nil,"MOVE_CAPTURE_GEOMETRY_NOT_CURRENT"
+ end
+ local dx,dz=cur.x-prev.x,cur.z-prev.z
+ local evidence={previous_sample_ms=prev.ms,current_sample_ms=cur.ms,
+   previous_remaining=before,current_remaining=after,ground_distance=math.sqrt(dx*dx+dz*dz)}
+ return {version=D.VERSION,authoritative=false,gen=f.gen,revision=f.revision,
+   current_action_id=f.current_action_id,successor_action_id=f.successor_action_id,
+   current_index=f.current_index,successor_index=f.successor_index,
+   unit_lifetime=f.unit_lifetime,sample_ms=f.now_ms,poll_ms=f.poll_ms,
+   debt_signature=f.debt_signature,route_ok=f.route_ok==true,issue_open=f.issue_open==true,
+   geometry=g,evidence=evidence},"OK"
+end
+function D.revalidate(c,f)
+ if type(c)~="table" or type(f)~="table" then return false,"MOVE_D_EVIDENCE_MISSING" end
+ for _,key in ipairs({"gen","revision","unit_lifetime","current_action_id","successor_action_id",
+   "current_index","successor_index","debt_signature"}) do
+  if c[key]~=f[key] then return false,"MOVE_D_REVALIDATE_"..key end
+ end
+ if f.exact_native_successor~=true or f.successor_index~=f.current_index+1 then
+  return false,"MOVE_D_NATIVE_NOT_IMMEDIATE"
+ end
+ if not finite(f.now_ms) or not finite(f.observed_step_ms) or f.observed_step_ms<=0
+    or f.now_ms<c.sample_ms or f.now_ms-c.sample_ms>f.observed_step_ms then
+  return false,"MOVE_D_STALE_OBSERVATION"
+ end
+ return true,"OK"
+end
+return D
+end)()
+-- T2MOVE_D_EVIDENCE_MODULE_END
 
 -- TPOL-T1H hidden policy scaffold.
 -- No MCT page is registered in this runtime stage.  The schema/profile compiler is
@@ -1828,7 +1958,7 @@ cancel=function(st,reason,now,observe)
     end
     st.gen=st.gen+1; st.actions={}; st.plan=nil; st.idx=1; st.origin=nil
     st.owned=false; st.execution_lane="PLAYER_NATIVE"; st.terminal=false; st.moves=0; st.refused=nil; st.attack=nil; st.phase="CANCELLED"; st.input_gapped=false; st.tail_reached=false; st.recover_revision=nil
-    st.block_state={};st.action_serial=0;st.action_base=0;st.native_arrival=nil;st.unverified_native_successor=nil;st.transition_txn=nil;st.t2b_edge_cache=nil
+    st.block_state={};st.action_serial=0;st.action_base=0;st.native_arrival=nil;st.unverified_native_successor=nil;st.transition_txn=nil;st.t2b_edge_cache=nil;st.t2move_d_evidence=nil
     -- A pending native order is NOT relabelled to the new generation.
 end
 local function action(st,r,now)
@@ -2615,12 +2745,14 @@ end
 -- execution commitment atomic across BSC ACK and exact Native adoption.
 local function transition_geometry_snapshot(g)
     g=g or {}
-    return {cut_tolerance=g.cut_tolerance,cut_error=g.cut_error,remaining=g.remaining,route_reason=g.route_reason,
+    return {cut_tolerance=g.cut_tolerance,cut_error=g.cut_error,cut_safe_limit=g.cut_safe_limit,remaining=g.remaining,
+        leg=g.leg,progress=g.progress,route_min_progress=g.route_min_progress,threshold=g.threshold,stall=g.stall,
+        route_reason=g.route_reason,
         route_mode=g.route_mode,corner_window=g.corner_window,corner_window_base=g.corner_window_base,
         corner_window_early=g.corner_window_early,corner_lookahead=g.corner_lookahead,
         corner_turn_factor=g.corner_turn_factor,corner_stall_escape=g.corner_stall_escape,
         corner_stall_no_progress_ms=g.corner_stall_no_progress_ms,corner_stall_escape_margin=g.corner_stall_escape_margin,
-        corner_stall_escape_limit=g.corner_stall_escape_limit,next_leg=g.next_leg,ratio=g.ratio,
+        corner_stall_escape_limit=g.corner_stall_escape_limit,corner_stall_escape=g.corner_stall_escape,next_leg=g.next_leg,ratio=g.ratio,
         route_debt_mode=g.route_debt_mode,route_debt_count=g.route_debt_count,
         route_debt_error=g.route_debt_error,route_debt_limit=g.route_debt_limit,
         arrival_brake_ready=g.arrival_brake_ready,arrival_braking=g.arrival_braking,arrival_brake_boundary=g.arrival_brake_boundary,
@@ -2653,7 +2785,7 @@ function Core.abort_transition_txn(st,tx,reason,now)
     if not tx or tx.state=="COMMITTED" or tx.state=="ABORTED" then return false end
     tx.state="ABORTED";tx.abort_reason=reason;tx.abort_ms=now
     if st.transition_txn==tx then st.transition_txn=nil end
-    st.t2b_edge_cache=nil
+    st.t2b_edge_cache=nil;st.t2move_d_evidence=nil
     if DEBUG_TELEMETRY then dlog("TRANSITION_EDGE_ABORTED uid="..st.uid.." gen="..clean(tx.gen).." current="..clean(tx.current_action_id)..
         " successor="..clean(tx.successor_action_id).." source="..clean(tx.source).." reason="..clean(reason).." model_ms="..now) end
     return true
@@ -2696,7 +2828,7 @@ function Core.commit_transition_edge(st,tx,now,opts)
     enter_action(st,successor,now,opts.enter_reason or "TRANSITION_EDGE_COMMITTED")
     tx.state="COMMITTED";tx.commit_ms=now;tx.commit_lineage=st.execution_lane
     if st.transition_txn==tx then st.transition_txn=nil end
-    st.t2b_edge_cache=nil
+    st.t2b_edge_cache=nil;st.t2move_d_evidence=nil
     if DEBUG_TELEMETRY then dlog("TRANSITION_EDGE_COMMITTED uid="..st.uid.." gen="..st.gen.." current="..clean(current.action_id)..
         " successor="..clean(successor.action_id).." source="..clean(tx.source).." lineage="..clean(st.execution_lane)..
         " reason="..clean(tx.reason).." model_ms="..now) end
@@ -3479,6 +3611,37 @@ local function rollback_native_future_to_current(st,cur,future,future_index,e,no
     end
     return false
 end
+-- T2-MOVE-D observe-only: record proof while exact current Native MOVE is still active.
+-- This never opens MOVE adopt permission, creates a transaction or moves the cursor.
+function R1.observe_t2move_d(st,cur,now)
+    st.t2move_d_evidence=nil
+    local nexta=st.plan and st.plan[st.idx+1]
+    if not nexta or nexta.type~="MOVE" or action_runtime(cur).semantic_done
+        or not st.model_step_ms or st.model_step_ms<=0 then return end
+    local g=geometry(st,nexta)
+    if not g then return end
+    local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{current_index=st.idx,successor_index=st.idx+1})
+    if decision.hard_violation or not decision.route_ok then return end
+    local debt_sig=R1.T2MoveEvidence.route_debt_signature(st,cur)
+    if not debt_sig then return end
+    local frozen=transition_geometry_snapshot(g)
+    local cert,why=R1.T2MoveEvidence.capture({
+        exact_current_execution=true,current_kind="MOVE",successor_kind="MOVE",
+        gen=st.gen,revision=st.revision,unit_lifetime=cur.unit_lifetime,
+        current_action_id=cur.action_id,successor_action_id=nexta.action_id,
+        current_index=st.idx,successor_index=st.idx+1,
+        now_ms=now,poll_ms=st.model_step_ms,waypoint_x=cur.pos.x,waypoint_z=cur.pos.z,
+        debt_signature=debt_sig,route_ok=decision.route_ok,
+        issue_open=decision.issue_window and decision.issue_window.open==true,
+        geometry=frozen,motion_samples=st.motion_samples})
+    st.t2move_d_evidence=cert
+    if DEBUG_TELEMETRY and cert then
+        dlog("T2MOVE_D_SHADOW_CAPTURE uid="..st.uid.." gen="..st.gen..
+            " action="..cur.action_id.." successor="..nexta.action_id..
+            " route_mode="..clean(frozen.route_mode).." issue_open="..tostring(cert.issue_open)..
+            " model_ms="..now.." authoritative=false")
+    end
+end
 function Core.reconcile_native_successor(st,now)
     if not st.plan or st.blocked or S.pending_by_uid[st.uid] or st.transition_txn then return false end
     local cur=st.plan[st.idx]
@@ -3505,6 +3668,7 @@ function Core.reconcile_native_successor(st,now)
     local current_match,_,current_lineage=R1.execution_matches_action(e,cur)
     if current_match then
         st.observed_execution_lineage=current_lineage;st.unverified_native_successor=nil;st.t2b_edge_cache=nil
+        R1.observe_t2move_d(st,cur,now)
         local nexta=st.plan[st.idx+1]
         if nexta and nexta.type=="ATTACK" and not action_runtime(cur).semantic_done and (st.model_step_ms or 0)>0 then
             local viable,vwhy=target_viable(nexta);local terminal_abort=(not viable and abortable_target_reason(vwhy)) or false

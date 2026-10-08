@@ -72,7 +72,9 @@ T2-MOVE-C transaction protocol shadow is now implemented **offline only** in `ma
 
 **Critical blocker before controller integration:** actual `transition_geometry_snapshot()` omits `leg`, `progress`, `route_min_progress`, `threshold`, `stall`, `cut_safe_limit` and other MOVE-specific proof fields required by A/B. A dedicated exact-current MOVE snapshot and a stable prior-debt signature are required before any MOVE adoption is activated. See `docs/design/T2_MOVE_C_SHADOW_20261008.md`.
 
-Next offline step: close the real snapshot/debt-signature mapping and test the observation ordering in an isolated controller fixture; do not turn shadow results into a live MOVE adopt window or a WH3 PASS.
+T2-MOVE-D now supplies an **isolated controller evidence-only candidate** on `maintenance/t2move-d-evidence`. It adds the six previously missing MOVE snapshot fields, preserves SC4 escape state, captures deterministic current-block route-debt identity (debt action IDs/tolerance/waypoint/semantic_done sorted), and observes only while the Native order still exactly matches current MOVE. The snapshot is not used for permission; `adopt_window` stays hard-closed for MOVE. D requires pure Lua / mutation / controller runtime fixture / full maintenance CI gates before its observation-only stage is treated as passed. See `docs/design/T2_MOVE_D_EVIDENCE_20261008.md`.
+
+Next offline step after D passes: implement Stage E **joint A+B+C controller integration** in another isolated candidate, including post-promotion debt revalidation and transactional adoption. Do not activate live MOVE adopt until the combined proof and all regressions are green; WH3 gameplay promotion remains blocked.
 
 Do not promote a standalone permissive T2-A state. Immediate successor MOVE adoption and its issue/adopt hysteresis must be implemented and promoted together. Existing SC1–SC4 Move→Move route semantics remain authoritative. T2-B G1.1 runtime RT-TP-02/03 is still **BLOCKED / DEFERRED** (P0) and must remain a separate promotion gate.
 
