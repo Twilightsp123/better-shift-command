@@ -134,8 +134,8 @@ T('SC3 soft debt becomes a hard block when the proposed successor chord cuts awa
  f:deliver();f:tick(300,80,0);assert(f:has('ROUTE_OBLIGATION_TRANSFERRED'))
  f:tick(400,92,0);f:tick(1400,92,0)
  assert(f.issued==1,'deviating successor must remain blocked until the old debt is actually satisfied')
- assert(f:has('route_reason=PRIOR_ROUTE_OBLIGATION_DEVIATION'),'hard-block reason must identify debt-corridor deviation')
- assert(f:has('debt_mode=HARD'),'diagnostic must distinguish hard debt from SC3 soft continuation')
+ assert(f:has('H2_ROUTE_ISSUE_BLOCKED'),'H2 must reject an unpaid previous waypoint')
+ assert(f:has('reason=H1_PRIOR_DEBT_CHORD_MISSED'),'route block must identify the prior debt that cannot be repaid')
  healthy(f)
 end)
 
