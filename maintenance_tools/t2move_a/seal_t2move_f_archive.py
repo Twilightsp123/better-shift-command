@@ -59,7 +59,7 @@ for begin, end in [
 
 old = git("show", BASE_E + ":source/better_shift_command.lua")
 def cfg(text):
-    m = re.search(r"^local CFG=\\{.*?^\\}", text, re.M | re.S)
+    m = re.search(r"^local CFG=\{.*?^\}", text, re.M | re.S)
     if m is None:
         raise SystemExit("GAMEPLAY CFG BLOCK NOT FOUND")
     return m.group(0)
