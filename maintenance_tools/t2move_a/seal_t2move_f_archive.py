@@ -59,10 +59,10 @@ for begin, end in [
 
 old = git("show", BASE_E + ":source/better_shift_command.lua")
 def cfg(text):
-    m = re.search(r"^local CFG=\{.*?^\}", text, re.M | re.S)
-    if m is None:
-        raise SystemExit("GAMEPLAY CFG BLOCK NOT FOUND")
-    return m.group(0)
+    # The CFG table ends on the final property line, not on a standalone brace.
+    begin = text.index("local CFG={")
+    end = text.index("\nlocal bmgr,bridge", begin)
+    return text[begin:end]
 if cfg(old) != cfg(src):
     raise SystemExit("GAMEPLAY CFG CHANGED SINCE E")
 
