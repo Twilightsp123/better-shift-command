@@ -70,3 +70,18 @@ jobs:
       - name: Full maintenance suite
         run: |
           python maintenance_tools/run_checks_corepath_rc8.py
+      - name: Seal complete G tracked source and byte-level baseline integrity
+        run: |
+          python maintenance_tools/t2move_a/seal_t2move_g_archive.py
+      - name: Upload G source and SHA256 handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: BSC-T2MOVE-G-full-source-20261009
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            output/BSC_T2MOVE_G_full_source_20261009.zip
+            output/T2MOVE_G_HANDOFF_MANIFEST.json
+            output/READ_THIS_HANDOFF.txt
+            output/FILE_SHA256_MANIFEST.txt
+            output/SHA256SUMS_HANDOFF.txt
