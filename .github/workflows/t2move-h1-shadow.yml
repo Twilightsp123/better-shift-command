@@ -64,6 +64,9 @@ jobs:
       - name: G route semantics mutation gate
         run: |
           python maintenance_tools/t2move_a/test_t2move_g_mutations.py
+      - name: H1 frozen-authority and controller mirrors contract
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_h1_contract.py
       - name: H1 pure route-credit proof cases
         run: |
           lua5.1 maintenance_tools/t2move_a/test_t2move_h1_pure.lua source/t2move_h1_route_obligation.lua
