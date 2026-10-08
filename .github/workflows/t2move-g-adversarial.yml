@@ -1,0 +1,69 @@
+name: T2-MOVE-G Route Adversarial
+
+on:
+  push:
+    branches:
+      - maintenance/t2move-g-adversarial
+  pull_request:
+    branches:
+      - maintenance/t2move-f-audit-hardening
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  move-e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Lua 5.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+      - name: Compile Python and verify isolated E code contract
+        run: |
+          python -m compileall -q maintenance_tools tests
+          python maintenance_tools/t2move_a/test_t2move_e_contract.py
+          python maintenance_tools/t2move_a/test_t2move_d_snapshot_contract.py
+      - name: Stage A/B pure evidence plus mutations
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_a_shadow.lua maintenance_tools/t2move_a/t2move_a_shadow.lua
+          python maintenance_tools/t2move_a/test_t2move_a_mutations.py
+          lua5.1 maintenance_tools/t2move_a/test_t2move_b_shadow.lua maintenance_tools/t2move_a/t2move_a_shadow.lua maintenance_tools/t2move_a/t2move_b_shadow.lua
+          python maintenance_tools/t2move_a/test_t2move_b_mutations.py
+      - name: Stage C/D evidence and transaction gates
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_c_txn_shadow.lua maintenance_tools/t2move_a/t2move_a_shadow.lua maintenance_tools/t2move_a/t2move_b_shadow.lua maintenance_tools/t2move_a/t2move_c_txn_shadow.lua
+          python maintenance_tools/t2move_a/test_t2move_c_mutations.py
+          lua5.1 maintenance_tools/t2move_a/test_t2move_d_evidence.lua source/t2move_d_evidence.lua
+          python maintenance_tools/t2move_a/test_t2move_d_mutations.py
+      - name: E real-controller Native immediate MOVE regression
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_e_controller.lua source/better_shift_command.lua tests/fixture.lua
+          lua5.1 maintenance_tools/t2move_a/test_t2move_d_controller.lua source/better_shift_command.lua tests/fixture.lua
+      - name: E active controller mutation gate
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_e_mutations.py
+      - name: F real-controller boundary regression
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_f_boundaries.lua source/better_shift_command.lua tests/fixture.lua
+      - name: F safety-guard controller mutation gate
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_f_mutations.py
+      - name: G adversarial controller geometry, debt and multi-unit
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_g_adversarial.lua source/better_shift_command.lua tests/fixture.lua
+      - name: Documentation contract
+        run: |
+          python maintenance_tools/check_documentation_contract.py
+      - name: Full maintenance suite
+        run: |
+          python maintenance_tools/run_checks_corepath_rc8.py
