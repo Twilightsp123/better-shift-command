@@ -3266,6 +3266,21 @@ function R1.T2MoveEPreview(st,current,successor,ctx)
     if ctx.execution_lineage~="PLAYER_NATIVE" and ctx.execution_lineage~="BSC_ISSUED" then
         return nil,"MOVE_EXECUTION_LINEAGE_UNPROVEN"
     end
+    -- Stage F: MOVE adoption is V3-only even though the shared adapter still
+    -- supports V2 compatibility for existing non-E consumers.
+    if ctx.execution_provider~="V3" then
+        return nil,"MOVE_V3_EXECUTION_REQUIRED"
+    end
+    -- A Journal snapshot can be older than the Native order observation.
+    -- A new manual command must invalidate the frozen pre-promotion route proof
+    -- even when its Journal row has not yet been drained by Lua.
+    local ok_revision,live_revision=pcall(bridge.get_unit_revision,st.uid)
+    if not ok_revision or not id(live_revision) then
+        return nil,"MOVE_LIVE_REVISION_UNAVAILABLE"
+    end
+    if live_revision~=st.revision or live_revision~=cached.revision then
+        return nil,"MOVE_LIVE_REVISION_CHANGED"
+    end
     local debt_sig=R1.T2MoveEvidence.route_debt_signature(st,current)
     if not debt_sig then return nil,"MOVE_DEBT_IDENTITY_UNAVAILABLE" end
     local query={gen=st.gen,revision=st.revision,unit_lifetime=current.unit_lifetime,
@@ -3990,7 +4005,8 @@ function Core.reconcile_native_successor(st,now)
         g=proof and transition_geometry_snapshot(proof.geometry) or nil
         decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{current_index=st.idx,
             successor_index=future_index,execution_lineage=future_lineage,
-            move_native_reconcile=true,move_native_evidence=proof,model_ms=now})
+            execution_provider=e.provider,move_native_reconcile=true,
+            move_native_evidence=proof,model_ms=now})
     else
         local terminal_abort=false;if future.type=="ATTACK" then local viable,vwhy=target_viable(future);terminal_abort=(not viable and abortable_target_reason(vwhy)) or false end
         g=geometry(st,future);if g and future.type=="ATTACK" then g=attack_geometry(st,future,g) end
