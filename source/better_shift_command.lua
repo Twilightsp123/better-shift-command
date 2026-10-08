@@ -2891,24 +2891,6 @@ local function route_handoff_ready(st,g,nexta)
         return true,g.route_reason
     end
 
-    -- G route-fidelity invariant: a successor endpoint that lies materially
-    -- behind the current waypoint on the inbound axis cannot earn early
-    -- STEERING_CORNER completion. Such a fold-back would bypass the waypoint
-    -- even though the original SC1/SC2 timing corridor says "near enough".
-    -- This is a geometric route obligation, not an angle or timing parameter.
-    -- PATH_SAFE above is unchanged and already proves the waypoint chord.
-    local inbound_x,inbound_z=cur.pos.x-st.origin.x,cur.pos.z-st.origin.z
-    local inbound_len=math.sqrt(inbound_x*inbound_x+inbound_z*inbound_z)
-    if inbound_len>0.000001 then
-        local successor_backtrack=((cur.pos.x-q.x)*inbound_x+(cur.pos.z-q.z)*inbound_z)/inbound_len
-        local waypoint_reach=move_reach_tolerance(st,g.leg)
-        if successor_backtrack>waypoint_reach and g.remaining>waypoint_reach then
-            g.route_safe=false;g.route_mode="BLOCKED"
-            g.route_reason="TURNBACK_WAYPOINT_UNPAID"
-            return false,g.route_reason
-        end
-    end
-
     -- B. SC1 steering corridor. A waypoint is an intermediate navigation guide,
     -- not an arrival target. Predict a bounded turn-start distance from live speed,
     -- formation width and turn severity, then cap it by BOTH adjacent legs so short
@@ -3307,6 +3289,20 @@ function R1.T2MoveEPreview(st,current,successor,ctx)
         now_ms=ctx.model_ms,observed_step_ms=st.model_step_ms or 0,exact_native_successor=true}
     local revalidated,why=R1.T2MoveEvidence.revalidate(cached,query)
     if not revalidated then return nil,why end
+    -- G: legacy SC1 may proactively start a U-turn early, but its steering
+    -- corridor alone cannot grant Native adoption completion credit if the
+    -- frozen successor endpoint would turn back short of the owed waypoint.
+    -- All values below were captured while Native still executed current MOVE.
+    if cached.geometry and cached.geometry.route_mode=="STEERING_CORNER" then
+        local backtrack=cached.geometry.frozen_successor_backtrack
+        local reach=cached.geometry.frozen_waypoint_reach
+        if not finite(backtrack) or not finite(reach) or reach<0 then
+            return nil,"MOVE_TURNBACK_FROZEN_PROOF_MISSING"
+        end
+        if backtrack>reach and cached.geometry.remaining>reach then
+            return nil,"MOVE_TURNBACK_WAYPOINT_UNPAID"
+        end
+    end
     local a,awhy=R1.T2MoveA.capture({
         exact_current_execution=true,gen=cached.gen,unit_lifetime=cached.unit_lifetime,
         current_action_id=cached.current_action_id,successor_action_id=cached.successor_action_id,
@@ -3934,6 +3930,17 @@ function R1.observe_t2move_d(st,cur,now)
     local debt_sig=R1.T2MoveEvidence.route_debt_signature(st,cur)
     if not debt_sig then return end
     local frozen=transition_geometry_snapshot(g)
+    -- Freeze the incoming-leg projection *before* Native promotion.
+    -- Do not inspect post-promotion position/heading to justify old MOVE credit.
+    if st.origin and cur.pos and nexta.pos then
+        local ix,iz=cur.pos.x-st.origin.x,cur.pos.z-st.origin.z
+        local ilen=math.sqrt(ix*ix+iz*iz)
+        if ilen>0.000001 then
+            frozen.frozen_successor_backtrack=((cur.pos.x-nexta.pos.x)*ix+
+                (cur.pos.z-nexta.pos.z)*iz)/ilen
+            frozen.frozen_waypoint_reach=move_reach_tolerance(st,g.leg)
+        end
+    end
     local cert,why=R1.T2MoveEvidence.capture({
         exact_current_execution=true,current_kind="MOVE",successor_kind="MOVE",
         gen=st.gen,revision=st.revision,unit_lifetime=cur.unit_lifetime,
