@@ -3147,7 +3147,7 @@ function Core.commit_transition_edge(st,tx,now,opts)
                     " remaining="..num_or_nil(g.remaining).." path_error="..num_or_nil(g.attack_path_error)..
                     " waypoint_tolerance="..num_or_nil(g.attack_waypoint_tolerance)..
                     " sync_margin="..num_or_nil(g.arrival_sync_margin).." model_ms="..now.." source="..clean(tx.source)) end
-            elseif successor.type=="MOVE" then
+            elseif successor.type=="MOVE" and g.h2_route_credit then
                 -- H2-B: ACK/ADOPT proves execution, never proves waypoint arrival.
                 -- Route credit is frozen BEFORE issue/Native promotion. BLOCKED
                 -- edges are refused upstream in H2-C/D; do not invent completion.
