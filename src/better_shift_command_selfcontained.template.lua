@@ -2891,6 +2891,24 @@ local function route_handoff_ready(st,g,nexta)
         return true,g.route_reason
     end
 
+    -- G route-fidelity invariant: a successor endpoint that lies materially
+    -- behind the current waypoint on the inbound axis cannot earn early
+    -- STEERING_CORNER completion. Such a fold-back would bypass the waypoint
+    -- even though the original SC1/SC2 timing corridor says "near enough".
+    -- This is a geometric route obligation, not an angle or timing parameter.
+    -- PATH_SAFE above is unchanged and already proves the waypoint chord.
+    local inbound_x,inbound_z=cur.pos.x-st.origin.x,cur.pos.z-st.origin.z
+    local inbound_len=math.sqrt(inbound_x*inbound_x+inbound_z*inbound_z)
+    if inbound_len>0.000001 then
+        local successor_backtrack=((cur.pos.x-q.x)*inbound_x+(cur.pos.z-q.z)*inbound_z)/inbound_len
+        local waypoint_reach=move_reach_tolerance(st,g.leg)
+        if successor_backtrack>waypoint_reach and g.remaining>waypoint_reach then
+            g.route_safe=false;g.route_mode="BLOCKED"
+            g.route_reason="TURNBACK_WAYPOINT_UNPAID"
+            return false,g.route_reason
+        end
+    end
+
     -- B. SC1 steering corridor. A waypoint is an intermediate navigation guide,
     -- not an arrival target. Predict a bounded turn-start distance from live speed,
     -- formation width and turn severity, then cap it by BOTH adjacent legs so short
