@@ -4,7 +4,7 @@ import subprocess,tempfile,shutil
 ROOT=Path(__file__).resolve().parent
 lua=shutil.which('lua5.1') or shutil.which('texlua') or shutil.which('lua')
 if not lua:raise SystemExit('Lua interpreter missing')
-src=(ROOT/'t2move_d_evidence.lua').read_text()
+src=(ROOT.parents[1]/'source/t2move_d_evidence.lua').read_text()
 test=ROOT/'test_t2move_d_evidence.lua'
 mutants=[
  ('exact_current','f.exact_current_execution~=true','false'),
@@ -19,7 +19,7 @@ mutants=[
  ('geometry_snapshot_copy','geometry=g,evidence=evidence','geometry=f.geometry,evidence=evidence'),
 ]
 def run(p):return subprocess.run([lua,str(test),str(p)],capture_output=True,text=True,timeout=15)
-baseline=run(ROOT/'t2move_d_evidence.lua')
+baseline=run(ROOT.parents[1]/'source/t2move_d_evidence.lua')
 if baseline.returncode:raise SystemExit('BASE FAILED\n'+baseline.stdout+baseline.stderr)
 for name,old,new in mutants:
  if old not in src:raise SystemExit('ANCHOR MISSING '+name)
