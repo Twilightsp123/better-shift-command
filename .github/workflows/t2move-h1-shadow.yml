@@ -70,6 +70,9 @@ jobs:
       - name: H1 real controller observational equivalence
         run: |
           lua5.1 maintenance_tools/t2move_a/test_t2move_h1_controller.lua source/better_shift_command.lua tests/fixture.lua
+      - name: H1 pure-and-controller mutation gate
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_h1_mutations.py
       - name: Documentation contract
         run: |
           python maintenance_tools/check_documentation_contract.py
