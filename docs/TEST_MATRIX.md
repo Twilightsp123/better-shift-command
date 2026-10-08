@@ -21,7 +21,7 @@
 | Move→Move normal steering | operational, but SC6 exact future-MOVE rollback still observed | redesign needed |
 | Move→Attack | G1.1 dual-envelope candidate offline PASS; WH3 runtime not yet rerun | **RT-TP-02/03 pending** |
 | SC6 immediate successor ATTACK | exact-current pre-promotion cache + shared adopt envelope offline PASS | WH3 verification pending with T2-B |
-| SC6 immediate successor MOVE | current code rolls back | **known limitation** |
+| SC6 immediate successor MOVE | T2-B/release retains rollback; isolated E/F can adopt with frozen proof | **E/F offline only, WH3 pending** |
 | future index > i+1 | rollback | must remain |
 | canonical target identity | enforced | must remain |
 
@@ -39,6 +39,7 @@
 | ARRIVAL_BRAKE_G1 observation layer | **PASS / BEHAVIOR-NEUTRAL** | pure radial+ground deceleration observer; G1 CI passed 40-job maintenance suite; no CFG/permission change |
 | ARRIVAL_BRAKE_G1.1 coherence layer | **PASS / T2-B POLICY EVIDENCE** | separate issue/adopt stopping-point coherence; no new gameplay CFG scalar |
 | T2 immediate-MOVE reconciliation | **E ISOLATED OFFLINE PASS / PRODUCTION INACTIVE** | E controller 11/11, active mutations 8/8, original maintenance 46/46; WH3 RT-TP-04/05 BLOCKED |
+| T2-MOVE-F evidence safety (V3 / native revision / SC3 debt) | **F ISOLATED OFFLINE PASS / PRODUCTION INACTIVE** | CI `37819203083`: E baseline F-risk 1/3 PASS, 2/3 FAIL; CI `37820591847`: F controller 5/5 PASS, F mutants 3/3 CAUGHT, E controller 11/11, E mutants 8/8 CAUGHT, 46/46 maintenance; WH3 RT-TP-04/05 BLOCKED |
 | T2 Move→Attack terminal handoff | **OFFLINE PASS / WH3 PENDING** | dual envelopes + one-poll pre-promotion cache + T1.6 commit; 46/46 maintenance, 13/13 dedicated mutants, 4/4 runtime fixtures; WH3 RT-TP-02/03 required |
 | T2-MOVE hysteresis | **E ISOLATED OFFLINE PASS / WH3 BLOCKED** | temporal adopt-only band requires prior route proof and one exact pre-promotion poll; not merged/published |
 | T3 visible MCT adapter/UI wiring | NOT RUN | uses existing T1H profile compiler; missing-MCT fallback |
