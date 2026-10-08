@@ -1,0 +1,107 @@
+name: T2-MOVE-E Complete Source Handoff
+
+on:
+  push:
+    branches:
+      - maintenance/t2move-e-integration
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  handoff:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Full tracked source archive
+        run: |
+          mkdir -p output
+          git archive --format=zip --output=output/BSC_T2MOVE_E_full_source_20261008.zip HEAD
+
+      - name: Archive manifest and handoff
+        run: |
+          python - <<'PY'
+          import pathlib,hashlib,json,subprocess,zipfile
+          root=pathlib.Path('.')
+          out=root/'output'
+          archive=out/'BSC_T2MOVE_E_full_source_20261008.zip'
+          source=root/'source/better_shift_command.lua'
+          native=root/'release_artifacts/native/wh3_native_bridge.dll'
+          def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+          head=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          with zipfile.ZipFile(archive) as z:
+              names=z.namelist()
+              if not {'source/better_shift_command.lua','src/better_shift_command.lua',
+                'src/better_shift_command_selfcontained.template.lua',
+                'maintenance_tools/t2move_a/test_t2move_e_controller.lua',
+                'maintenance_tools/t2move_a/test_t2move_e_mutations.py',
+                'docs/MAINTENANCE_TODO.md'}<=set(names):
+                  raise SystemExit('SOURCE HANDOFF MISSING REQUIRED FILES')
+              if z.read('source/better_shift_command.lua')!=source.read_bytes():
+                  raise SystemExit('SOURCE HANDOFF CONTROLLER BYTES CHANGED')
+          manifest={
+            'stage':'T2-MOVE-E','branch':'maintenance/t2move-e-integration',
+            'commit':head,
+            'type':'COMPLETE_TRACKED_SOURCE_HANDOFF_NOT_INSTALLABLE',
+            'archive_sha256':sha(archive),
+            'controller_sha256':sha(source),
+            'native_bridge_sha256':sha(native),
+            'repository_entries':len(names),
+            'validation':{
+                'actions_run':37733220962,
+                'controller_runtime_fixtures':'11/11 PASS',
+                'active_controller_mutations':'8/8 CAUGHT',
+                'original_maintenance':'46/46 PASS',
+                'A_B_C_D':'PASS'},
+            'wh3_runtime':'NOT TESTED / BLOCKED',
+            'release_promotion':False,
+            't2b_development_branch_unchanged':True,
+            'root_SHA256SUMS_note':'STALE; use this handoff manifest and SHA256SUMS_HANDOFF.txt'
+          }
+          (out/'T2MOVE_E_HANDOFF_MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print(json.dumps(manifest,indent=2))
+          PY
+
+      - name: Handoff notes and SHA256
+        run: |
+          cat > output/READ_THIS_HANDOFF.txt <<'EOF'
+          Better Shift Command T2-MOVE-E full source handoff (2026-10-08)
+
+          This is the COMPLETE git-tracked source tree for the isolated E candidate.
+          It includes controller source, Native source/reference binaries, tests,
+          documents, workflows, historical archives and build scripts.
+          NOT a WH3 installable production pack; do NOT publish as a Steam update.
+
+          T2-MOVE-E: exact immediate Native MOVE can be adopted from prior exact-current
+          route and motion evidence, without expanding route/debt/corner boundaries.
+          All accepted edges use the existing T1.6 transaction COMMIT.
+          No i+2 skip; no Native/address source changes.
+
+          Offline CI: run 37733220962 SUCCESS; E controller 11/11;
+          active mutations 8/8; original maintenance 46/46.
+
+          WH3 real testing is UNAVAILABLE. T2-MOVE RT-TP-04/05 is still BLOCKED.
+          The original T2-B RT-TP-02/03 remains BLOCKED too.
+          Do not merge this E branch into T2-B or publish without runtime validation.
+
+          Root SHA256SUMS.txt in this source tree predates E and is stale.
+          This delivery has an independent SHA256SUMS_HANDOFF.txt.
+          EOF
+          cd output
+          sha256sum BSC_T2MOVE_E_full_source_20261008.zip T2MOVE_E_HANDOFF_MANIFEST.json READ_THIS_HANDOFF.txt > SHA256SUMS_HANDOFF.txt
+          cat SHA256SUMS_HANDOFF.txt
+
+      - name: Upload complete handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: BSC-T2MOVE-E-full-source-20261008
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            output/BSC_T2MOVE_E_full_source_20261008.zip
+            output/T2MOVE_E_HANDOFF_MANIFEST.json
+            output/READ_THIS_HANDOFF.txt
+            output/SHA256SUMS_HANDOFF.txt
