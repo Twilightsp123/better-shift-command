@@ -19,6 +19,10 @@ C therefore requires a *dedicated move-only pre-promotion snapshot* containing t
 
 `test_t2move_c_snapshot_contract.py` explicitly detects these missing fields as an expected blocker, verifies T2-B stage and live MOVE hard-closed state, and must be converted into a positive mapping contract before any gameplay enablement.
 
+## GitHub validation — 2026-10-08
+
+GitHub Actions run `37718568414` **SUCCESS**. Exact source/template snapshot audit found six missing mandatory MOVE-proof fields: `cut_safe_limit`, `leg`, `progress`, `route_min_progress`, `stall`, `threshold`. A/B and the existing maintenance suite remain green. No controller byte changed.
+
 ## Validation and next work
 
 - C simulated T1.6 scenarios: **25/25 PASS**.
