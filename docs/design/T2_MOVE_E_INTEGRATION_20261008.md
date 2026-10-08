@@ -26,3 +26,11 @@ This is the **first live-controller code candidate** that can adopt an exact Nat
 ## Verification
 
 Require direct controller fixture: PATH_SAFE and STEERING_CORNER adopt with correct commit/debt credit; too-early/overrun/revision/identity rejects; no duplicate Native issue; no repeated rollback on an adopted current successor. Retain full 46-job maintenance and all A/B/C/D tests. Do not claim WH3-PASS from simulated fixtures.
+
+## Verified isolated offline integration — 2026-10-08
+
+E controller + prior A/B/C/D offline validation is **SUCCESS** in GitHub Actions run `37733220962`. Direct controller fixture: **11/11 PASS**, including exact immediate Native MOVE adoption, PATH_SAFE waypoint obligation, STEERING_CORNER completion, no cache, `i+2` overrun, changed revision, mismatched V3 identity, bounded adopt-only one-poll margin, and post-adoption rollback stability. Active controller mutation gate: **8/8 CAUGHT**, including falsely opening ISSUE, losing frozen geometry, skipping cache revalidation, expanding hysteresis, and bypassing T1.6 OBSERVED. Original **46/46 maintenance jobs PASS**, T2-B G1.1 regression PASS. All checks are **offline**, not WH3 process tests.
+
+The candidate exposed and fixed one additional integration bug: Native-successor success telemetry previously concatenated ATTACK-only `target_uid`, which is nil for MOVE. It now safely formats the optional target field without altering route permission.
+
+**Promotion remains blocked.** This behavior-changing controller lives only on `maintenance/t2move-e-integration`; `maintenance/t2b-terminal-attack` is unchanged. WH3 RT-TP-04/05 and T2-B RT-TP-02/03 cannot run currently. The root `SHA256SUMS.txt` remains stale and must not be treated as the E package hash.

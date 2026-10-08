@@ -33,11 +33,11 @@ Required closure remains unchanged: WH3 RT-TP-02 (straight Move→Attack) and RT
 
 ### O-09 — SC6 rolls back immediate future MOVE
 
-Status: **OPEN / T1 + T1.5 + T1.6 + T1.7 STRUCTURE READY / T2-MOVE NOT ACTIVE**.
+Status: **OPEN / T2-MOVE-E ISOLATED OFFLINE PASS / NOT RELEASED / WH3 RUNTIME BLOCKED-DEFERRED**.
 
 Current T1.6 SC6 deliberately preserves the legacy immediate future MOVE rollback; T1.6 is permission-neutral and only changes commit protocol. T1.5 now exposes whether an exact match comes from the original `PLAYER_NATIVE` capture or a later `BSC_ISSUED` ACK identity. Direct T2-A/hairpin experiments on 2026-10-05 were not promotable: permissive adoption produced fold-back self-compression; stricter rollback gates produced stepwise movement. The native-passthrough diagnostic was useful isolation evidence but is not the BSC product architecture.
 
-Planned closure: after T2-B completes WH3 RT-TP-02/03, promote immediate-MOVE reconciliation and bounded adopt hysteresis together as T2-MOVE. No standalone permissive T2-A state is allowed.
+Current isolation: `maintenance/t2move-e-integration` uses A/B/C/D exact-current evidence with T1.6 committed-edge transaction; offline CI `37733220962` passes 11/11 controller cases, 8/8 active mutations and existing 46/46 maintenance. It is an **experimental branch, not a production or WH3-validated implementation**. Planned closure: after T2-B completes WH3 RT-TP-02/03, run T2-MOVE RT-TP-04/05, including hairpin/short-leg/SC3 debt cases, then make an explicit promotion decision. No standalone permissive T2-A state is allowed.
 
 ### O-10 — Transition policy behavior/MCT only partially implemented
 

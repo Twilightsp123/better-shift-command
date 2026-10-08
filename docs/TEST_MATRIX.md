@@ -38,9 +38,9 @@
 | T1.7 consumer-neutral policy envelopes | **PASS / PERMISSION-NEUTRAL** | one decision exposes issue/adopt envelopes; T1.6 runtime permission must remain equivalent |
 | ARRIVAL_BRAKE_G1 observation layer | **PASS / BEHAVIOR-NEUTRAL** | pure radial+ground deceleration observer; G1 CI passed 40-job maintenance suite; no CFG/permission change |
 | ARRIVAL_BRAKE_G1.1 coherence layer | **PASS / T2-B POLICY EVIDENCE** | separate issue/adopt stopping-point coherence; no new gameplay CFG scalar |
-| T2 immediate-MOVE reconciliation | NOT ACTIVE | T2-MOVE still requires offline + mutation + WH3 RT-TP-04/05 |
+| T2 immediate-MOVE reconciliation | **E ISOLATED OFFLINE PASS / PRODUCTION INACTIVE** | E controller 11/11, active mutations 8/8, original maintenance 46/46; WH3 RT-TP-04/05 BLOCKED |
 | T2 Move→Attack terminal handoff | **OFFLINE PASS / WH3 PENDING** | dual envelopes + one-poll pre-promotion cache + T1.6 commit; 46/46 maintenance, 13/13 dedicated mutants, 4/4 runtime fixtures; WH3 RT-TP-02/03 required |
-| T2-MOVE hysteresis | NOT ACTIVE | immediate MOVE adopt band must be implemented separately; T2-B Attack hysteresis is not permission for MOVE |
+| T2-MOVE hysteresis | **E ISOLATED OFFLINE PASS / WH3 BLOCKED** | temporal adopt-only band requires prior route proof and one exact pre-promotion poll; not merged/published |
 | T3 visible MCT adapter/UI wiring | NOT RUN | uses existing T1H profile compiler; missing-MCT fallback |
 | T3 MCT runtime comparison | NOT RUN | Smooth/Balanced/Precise differ only in timing/precision |
 | T4 Attack/Exit tuning | DEFERRED | only after T2/T3 stable |

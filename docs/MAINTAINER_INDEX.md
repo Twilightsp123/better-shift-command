@@ -35,7 +35,7 @@ Current runtime baseline / design stage:
 - implemented validated structural substages: **`BSC-TPOL-T1H`** + **`BSC-TPOL-T1`** + **`BSC-TPOL-T1.5`** + **`BSC-TPOL-T1.6`** + **`BSC-TPOL-T1.7`**; behavior-neutral **`ARRIVAL_BRAKE_G1`** is also validated; current gameplay construction stage is **`BSC-TPOL-T2B-G11`**, offline validated but WH3 runtime pending;
 - G1/G1.1 distinction: **`ARRIVAL_BRAKE_G1`** remains behavior-neutral observation; **G1.1** derives issue/adopt stopping-point coherence and is consumed only by the T2-B construction candidate;
 - visible BSC MCT UI: **not registered**;
-- movement transition behavior: MOVE→MOVE remains the pre-T2 SC1–SC4/SC6-MOVE baseline, while ordinary Move→Attack is intentionally widened only on the T2-B G1.1 construction branch; T2-MOVE remains closed.
+- movement transition behavior: the T2-B branch and release baseline retain pre-T2 SC1–SC4 and closed Native MOVE adoption; **only `maintenance/t2move-e-integration` experiments with exact `i+1 MOVE` adoption under frozen A/B/D proof and T1.6 commit.** This isolated E behavior is offline-validated, not WH3-promoted.
 
 ## 3. What each document answers
 
@@ -89,4 +89,4 @@ When a future maintainer discovers a conflict, fix the navigation/current-state 
 
 ## 7. D1 promotion rule
 
-`BSC-TPOL-D1` remains the design stream. T1H/T1/T1.5/T1.6/T1.7 and behavior-neutral G1 are validated. The current `BSC-TPOL-T2B-G11` ordinary Move→Attack candidate is **offline validated (46/46)**; WH3 RT-TP-02/03 is currently **BLOCKED / DEFERRED because runtime testing is not available** and remains the exact promotion gate; T2-MOVE and T3 visible MCT remain future work. The 2026-10-05 direct T2/passthrough experiments are historical evidence, not current runtime authority. Source behavior wins any disagreement with a design-only or historical section.
+`BSC-TPOL-D1` remains the design stream. T1H/T1/T1.5/T1.6/T1.7 and behavior-neutral G1 are validated. The current `BSC-TPOL-T2B-G11` ordinary Move→Attack candidate is **offline validated (46/46)**; WH3 RT-TP-02/03 is currently **BLOCKED / DEFERRED because runtime testing is not available** and remains the exact promotion gate; the isolated T2-MOVE-E branch has offline tests green but WH3 RT-TP-04/05 and release promotion remain future work; T3 visible MCT remains pending. The 2026-10-05 direct T2/passthrough experiments are historical evidence, not current runtime authority. Source behavior wins any disagreement with a design-only or historical section.
