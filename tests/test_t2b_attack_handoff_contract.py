@@ -28,7 +28,7 @@ need('decision.adopt_window or {open=false,reason=decision.reason,hard_violation
 need('d.adopt_window=transition_envelope(false,"CANONICAL_INTERMEDIATE_ACTIONS_OWED",true)',1)
 if 'R1.AttackHandoff' in s: fail('legacy ready-boolean AttackHandoff survived')
 if 'NATIVE_MOVE_PASSTHROUGH' in s: fail('T2-MOVE passthrough activated')
-if s.count('R1.TransitionPolicy.evaluate(st,')!=9: fail('expected 9 shared evaluator calls including D shadow observer')
+if s.count('R1.TransitionPolicy.evaluate(st,')!=10: fail('expected 10 shared evaluator calls including E native MOVE adoption')
 old=base.read_text(encoding='utf-8')
 if block(s,'local function route_handoff_ready(', '\n\n-- T1.6 Transition Transaction') != block(old,'local function route_handoff_ready(', '\n\n-- T1.6 Transition Transaction'): fail('MOVE->MOVE route_handoff_ready changed')
 if cfg(s)!=cfg(old): fail('CFG scalar values changed')

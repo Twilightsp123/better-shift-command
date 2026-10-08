@@ -1,0 +1,92 @@
+-- T2-MOVE-E: exact-current cached Native immediate MOVE integration regression.
+local F=assert(loadfile(assert(arg[2])))().new
+local pass,fail=0,0
+local function T(label,fn)
+ local ok,err=pcall(fn)
+ if ok then pass=pass+1;print("PASS "..label) else fail=fail+1;print("FAIL "..label.." :: "..tostring(err)) end
+end
+local function order_v3(f,u)
+ local r=f.evidence_record
+ if not r or r.unit_uid~=u then return nil,"NO_ORDER" end
+ return {schema=3,epoch="1",unit_uid=u,unit_lifetime=r.unit_lifetime,complete=true,active=true,known=true,
+    accepted_journal_serial=r.serial,active_engine_seq=r.engine_seq,kind=r.order_type,target_uid=r.target_uid,
+    dest_x=r.dest_x,dest_z=r.dest_z}
+end
+local function setup(x,z)
+ local f=F({cold_idle=true,debug_source=true,no_calibration=true,width=20,native_order_evidence_v3=order_v3})
+ f:start();f.unit.idle=false;f.unit.moving=true
+ local first=f:emit("MOVE",false,100,0)
+ local second=f:emit("MOVE",true,x or 200,z or 0)
+ f.evidence_record=first
+ return f,first,second
+end
+local function warm(f)
+ f:tick(100,0,0);f:tick(200,30,0);f:tick(300,50,0);f:tick(400,70,0)
+end
+local function healthy(f)
+ for _,l in ipairs(f.logs) do assert(not l:find("CONTROLLER_FAIL",1,true),l) end
+end
+T("E-RT00 exact immediate MOVE consumes prepromotion proof and T1.6 commits",function()
+ local f,first,second=setup();warm(f)
+ assert(f:has("T2MOVE_D_SHADOW_CAPTURE"),"no exact-current proof")
+ f.evidence_record=second;f:tick(500,72,0)
+ assert(f:has("NATIVE_SUCCESSOR_ADOPTED"),"expected exact MOVE adoption")
+ assert(f:has("TRANSITION_EDGE_COMMITTED"),"expected T1.6 transaction commit")
+ assert(f:has("ACTION_HANDOFF_COMMITTED"),"handoff credit must be commit-gated")
+ assert(f.issued==0,"must not duplicate Native issued Move")
+ healthy(f)
+end)
+T("E-RT01 PATH_SAFE preserves old waypoint as route obligation",function()
+ local f,first,second=setup();warm(f);f.evidence_record=second;f:tick(500,72,0)
+ assert(f:has("NATIVE_SUCCESSOR_ADOPTED"),"PATH_SAFE adopt required")
+ assert(f:has("ROUTE_OBLIGATION_TRANSFERRED"),"must not silently swallow waypoint")
+ healthy(f)
+end)
+T("E-RT02 no cache: premature Native MOVE remains denied",function()
+ local f,first,second=setup()
+ f:tick(100,10,0);f.evidence_record=second;f:tick(200,20,0)
+ assert(not f:has("NATIVE_SUCCESSOR_ADOPTED"),"unproven transition promoted")
+ assert(not f:has("TRANSITION_EDGE_COMMITTED"),"unproven transition credited")
+ healthy(f)
+end)
+T("E-RT03 i+2 MOVE is always canonical hard overrun",function()
+ local f,first,second=setup();local third=f:emit("MOVE",true,300,0)
+ warm(f);f.evidence_record=third;f:tick(500,72,0)
+ assert(not f:has("NATIVE_SUCCESSOR_ADOPTED"),"intermediate waypoint skipped")
+ assert(f:has("NATIVE_FUTURE_OVERRUN"),"canonical overrun must be explicit")
+ healthy(f)
+end)
+T("E-RT04 revision changed between proof and Native MOVE must revoke",function()
+ local f,first,second=setup();warm(f);f:emit("MOVE",true,300,0)
+ f.evidence_record=second;f:tick(500,72,0)
+ assert(not f:has("NATIVE_SUCCESSOR_ADOPTED"),"stale revision authorized")
+ assert(not f:has("TRANSITION_EDGE_COMMITTED"),"stale proof earned completion")
+ healthy(f)
+end)
+T("E-RT05 adopted immediate MOVE stays current without rollback oscillation",function()
+ local f,first,second=setup();warm(f);f.evidence_record=second;f:tick(500,72,0)
+ assert(f:has("NATIVE_SUCCESSOR_ADOPTED"),"setup must adopt")
+ local rollback_before=f:count("NATIVE_SUCCESSOR_ROLLBACK")
+ for t=600,1000,100 do f:tick(t,72+(t-500)/5,0) end
+ assert(f:count("NATIVE_SUCCESSOR_ROLLBACK")==rollback_before,"rollback oscillation after adopt")
+ assert(f.issued==0,"unexpected reassert/duplicate issuance")
+ healthy(f)
+end)
+T("E-RT06 90-degree corner requires original corridor and steering credit",function()
+ local f,first,second=setup(100,100);warm(f)
+ assert(f:has("T2MOVE_D_SHADOW_CAPTURE"),"corner route proof not captured")
+ f.evidence_record=second;f:tick(500,72,0)
+ assert(f:has("NATIVE_SUCCESSOR_ADOPTED"),"corner exact successor should adopt when previously legal")
+ assert(f:has("STEERING_CORNER_COMMITTED"),"must use original SC1 corner credit")
+ healthy(f)
+end)
+T("E-RT07 target identity mismatch cannot falsely adopt MOVE",function()
+ local f,first,second=setup();warm(f)
+ f.evidence_record={unit_uid="1001",unit_lifetime="1",serial="bad",engine_seq="bad",
+    order_type="MOVE",dest_x=200,dest_z=0}
+ f:tick(500,72,0)
+ assert(not f:has("NATIVE_SUCCESSOR_ADOPTED"),"mismatched Native identity adopted")
+ healthy(f)
+end)
+print("TOTAL "..pass.." PASS "..fail.." FAIL; ISOLATED E, NOT WH3")
+os.exit(fail==0 and 0 or 1)

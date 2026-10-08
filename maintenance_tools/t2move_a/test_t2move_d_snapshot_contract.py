@@ -22,7 +22,7 @@ for name,s in [('source',controller),('template',template)]:
  assert s.count('R1.observe_t2move_d(st,cur,now)')==2,(name,'observation def+call required')
  assert 'd.adopt_window=transition_envelope(false,"CANONICAL_INTERMEDIATE_ACTIONS_OWED",true)' in s,(name,'MOVE permission widened')
  assert 'NATIVE_MOVE_PASSTHROUGH' not in s
- assert s.count('R1.TransitionPolicy.evaluate(st,')==9,(name,'D shared evaluator site count')
+ assert s.count('R1.TransitionPolicy.evaluate(st,')==10,(name,'E shared evaluator site count')
  assert 'st.t2move_d_evidence=nil' in s
  observer=s.split('function R1.observe_t2move_d(st,cur,now)',1)[1].split('function Core.reconcile_native_successor',1)[0]
  assert 'R1.TransitionPolicy.evaluate' in observer
@@ -34,4 +34,4 @@ reconcile=controller.split('function Core.reconcile_native_successor(st,now)',1)
 assert reconcile.index('if current_match then')<reconcile.index('R1.observe_t2move_d(st,cur,now)')
 assert 'if decision.hard_violation or adopt_window.hard_violation then' in reconcile
 assert controller.count('T2B_G11_DUAL_ENVELOPE_CANDIDATE')>=1
-print('PASS: T2-MOVE-D all required MOVE proof fields mapped; exact-current observation only; MOVE adopt still closed')
+print('PASS: T2-MOVE-D field mapping intact inside isolated E candidate')

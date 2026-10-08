@@ -11,7 +11,7 @@ if not mutated:
     if s != src: fail('source/src controller mirrors diverged')
 else: tpl=''
 if s.count('function R1.TransitionPolicy.evaluate(')!=1: fail('shared TransitionPolicy evaluator missing or duplicated')
-if s.count('R1.TransitionPolicy.evaluate(st,')!=9: fail('advance/SC6/scheduler/post-drain plus pre-promotion cache must keep nine shared evaluator call sites after T2-MOVE-D observation')
+if s.count('R1.TransitionPolicy.evaluate(st,')!=10: fail('advance/SC6/scheduler/post-drain plus pre-promotion cache must keep ten shared evaluator sites including E cached Native MOVE adoption')
 for legacy in ('consumer="PROACTIVE"','consumer="NATIVE_RECONCILE"','consumer="SCHEDULER"','context.consumer'):
     if legacy in s: fail('consumer-specific policy permission path remains: '+legacy)
 if 'if current_index and successor_index and successor_index~=current_index+1 then' not in s: fail('immediate-successor invariant missing')

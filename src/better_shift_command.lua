@@ -1114,6 +1114,215 @@ end
 return D
 end)()
 -- T2MOVE_D_EVIDENCE_MODULE_END
+-- T2MOVE_E_POLICY_MODULE_BEGIN
+R1.T2MoveA=(function()
+-- BSC-TPOL-T2MOVE-A-SHADOW-1
+-- Pure offline pre-promotion decision cache + reconciliation preview.
+-- No gameplay permission, dispatch, cursor advancement or Native APIs.
+local A={VERSION="T2MOVE_A_SHADOW_1"}
+local function scalar(v) return type(v)=="string" or type(v)=="number" end
+local function finite(v) return type(v)=="number" and v==v and v<math.huge and v>-math.huge end
+local modes={PATH_SAFE=true,STEERING_CORNER=true,COMPLETE=true}
+local function copy_scalars(t)
+    local out={}
+    if type(t)=="table" then
+        for k,v in pairs(t) do
+            if type(k)=="string" and (type(v)=="string" or type(v)=="boolean" or finite(v)) then
+                out[k]=v
+            end
+        end
+    end
+    return out
+end
+local function deny(reason,hard)
+    return {preview_open=false,zone=hard and "HARD_BLOCK" or "WAIT",reason=reason,
+        authoritative=false,credit=nil,geometry=nil}
+end
+function A.capture(e)
+    if type(e)~="table" or e.exact_current_execution~=true then return nil,"CURRENT_EXECUTION_NOT_EXACT" end
+    if not scalar(e.gen) or not scalar(e.current_action_id) or not scalar(e.successor_action_id)
+        or not scalar(e.unit_lifetime) or not finite(e.sample_ms) or not finite(e.poll_ms)
+        or e.poll_ms<=0 or not finite(e.current_index) or not finite(e.successor_index)
+        or e.successor_index~=e.current_index+1 then return nil,"EDGE_IDENTITY_INVALID" end
+    if type(e.decision)~="table" or type(e.geometry)~="table"
+        or e.current_kind~="MOVE" or e.successor_kind~="MOVE" then return nil,"MOVE_EDGE_INPUT_INVALID" end
+    local d=e.decision
+    if d.transition_kind~="MOVE->MOVE" or d.hard_violation==true then
+        return nil,"CANONICAL_POLICY_PROOF_INVALID"
+    end
+    local g=copy_scalars(e.geometry)
+    return {
+        gen=e.gen,unit_lifetime=e.unit_lifetime,
+        current_action_id=e.current_action_id,successor_action_id=e.successor_action_id,
+        current_index=e.current_index,successor_index=e.successor_index,
+        sample_ms=e.sample_ms,poll_ms=e.poll_ms,
+        issue_open=type(d.issue_window)=="table" and d.issue_window.open==true,
+        route_ok=d.route_ok==true,route_reason=d.route_reason,
+        route_mode=g.route_mode,prior_debt_mode=g.route_debt_mode,
+        semantic_done=e.semantic_done==true,geometry=g,
+    },"OK"
+end
+function A.preview(c,q)
+    if type(q)~="table" or q.exact_native_successor~=true then
+        return deny("EXACT_NATIVE_SUCCESSOR_NOT_PROVEN",true)
+    end
+    if not finite(q.current_index) or not finite(q.future_index) or q.future_index~=q.current_index+1 then
+        return deny("CANONICAL_INTERMEDIATE_ACTIONS_OWED",true)
+    end
+    if type(c)~="table" then return deny("PREPROMOTION_CACHE_MISSING",false) end
+    if q.gen~=c.gen or q.unit_lifetime~=c.unit_lifetime
+       or q.current_action_id~=c.current_action_id or q.successor_action_id~=c.successor_action_id
+       or q.current_index~=c.current_index or q.future_index~=c.successor_index then
+        return deny("PREPROMOTION_EDGE_IDENTITY_MISMATCH",true)
+    end
+    if not finite(q.now_ms) or not finite(q.observed_step_ms) or q.observed_step_ms<=0 then
+        return deny("OBSERVATION_CLOCK_INVALID",false)
+    end
+    local age=q.now_ms-c.sample_ms
+    if age<0 or age>q.observed_step_ms then return deny("CACHE_OUTSIDE_ONE_ACTUAL_POLL",false) end
+    -- Stage A shadow only: no adopt-only hysteresis and no route relaxation.
+    if not c.issue_open or not c.route_ok or not modes[c.route_mode] then
+        return deny("PREPROMOTION_MOVE_ISSUE_NOT_PROVEN",false)
+    end
+    local credit
+    if c.semantic_done or c.route_mode=="COMPLETE" then
+        credit="ALREADY_SEMANTIC_DONE"
+    elseif c.route_mode=="STEERING_CORNER" then
+        credit="STEERING_CORNER_HANDOFF"
+    else
+        credit="REGISTER_ROUTE_OBLIGATION"
+    end
+    return {preview_open=true,zone="ISSUE_READY",reason="SHADOW_MOVE_EXACT_ISSUE_READY",
+        authoritative=false,credit=credit,geometry=copy_scalars(c.geometry),
+        preserve_prior_debt=c.prior_debt_mode=="SOFT_PRESERVED"}
+end
+return A
+
+end)()
+R1.T2MoveB=(function()
+-- T2MOVE_B_HYSTERESIS_SHADOW_1
+-- Non-authoritative: one-poll travel widens temporal issue frontier ONLY.
+local B={VERSION="T2MOVE_B_HYSTERESIS_SHADOW_1"}
+local huge=math.huge or 1e300
+local function finite(n) return type(n)=="number" and n==n and n<huge and n>-huge end
+local function valid_nonnegative(v) return finite(v) and v>=0 end
+local function copy_scalars(t)
+    local out={}
+    for k,v in pairs(t) do
+        if type(k)=="string" and (type(v)=="string" or type(v)=="boolean" or finite(v)) then
+            out[k]=v
+        end
+    end
+    return out
+end
+local function deny(reason,hard)
+    return {preview_open=false,zone=hard and "HARD_BLOCK" or "WAIT",reason=reason,
+        authoritative=false,credit=nil,one_poll_travel=nil}
+end
+function B.preview(A,c,q,evidence,timing)
+    if type(A)~="table" or type(A.preview)~="function" then
+        return deny("STAGE_A_REQUIRED",true)
+    end
+    local stage_a=A.preview(c,q)
+    if stage_a.preview_open then return stage_a end
+    if stage_a.reason~="PREPROMOTION_MOVE_ISSUE_NOT_PROVEN" then return stage_a end
+    if type(c)~="table" or c.issue_open or c.route_ok~=true then
+        return deny("PRIOR_ROUTE_OR_ISSUE_PROOF_NOT_READY",false)
+    end
+    if c.semantic_done then return deny("CURRENT_ALREADY_SEMANTIC_DONE",false) end
+    local g=c.geometry
+    if type(g)~="table" or (c.route_mode~="PATH_SAFE" and c.route_mode~="STEERING_CORNER") then
+        return deny("MOVE_ROUTE_MODE_NOT_PROVEN",false)
+    end
+    if c.prior_debt_mode~="CLEAR" and c.prior_debt_mode~="SOFT_PRESERVED" then
+        return deny("PRIOR_ROUTE_DEBT_NOT_PROVEN",true)
+    end
+    if c.prior_debt_mode=="SOFT_PRESERVED" then
+        if not valid_nonnegative(g.route_debt_error) or not valid_nonnegative(g.route_debt_limit)
+            or not finite(g.route_debt_count) or g.route_debt_count<=0
+            or g.route_debt_error>g.route_debt_limit then
+            return deny("SC3_DEBT_CORRIDOR_UNPROVEN",true)
+        end
+    end
+    if not valid_nonnegative(g.remaining) or not finite(g.leg) or g.leg<=0
+        or not finite(g.next_leg) or g.next_leg<=0
+        or not finite(g.progress) or not valid_nonnegative(g.route_min_progress)
+        or g.progress<g.route_min_progress then
+        return deny("ADJACENT_LEG_OR_PROGRESS_UNPROVEN",false)
+    end
+    if c.route_mode=="PATH_SAFE" then
+        if c.route_reason~="PATH_DEVIATION_SAFE_WITH_MARGIN"
+            or not valid_nonnegative(g.cut_error) or not valid_nonnegative(g.cut_safe_limit)
+            or not valid_nonnegative(g.cut_tolerance)
+            or g.cut_error>g.cut_safe_limit or g.cut_safe_limit>g.cut_tolerance
+            or g.cut_safe_limit>math.max(1,g.next_leg) then
+            return deny("PATH_SAFE_SPATIAL_PROOF_UNCHANGED",false)
+        end
+    else
+        if c.route_reason~="TURN_CORRIDOR_ENTERED" and c.route_reason~="TURN_CORRIDOR_STALL_ESCAPE" then
+            return deny("STEERING_CORNER_REASON_UNPROVEN",false)
+        end
+        if not valid_nonnegative(g.corner_window)
+            or not valid_nonnegative(g.corner_window_base)
+            or not valid_nonnegative(g.corner_window_early)
+            or g.corner_window~=math.max(g.corner_window_base,g.corner_window_early)
+            or g.remaining>g.corner_window
+            or g.corner_window>math.min(g.leg,g.next_leg) then
+            return deny("STEERING_CORNER_ADJACENT_CAP_UNPROVEN",false)
+        end
+        if c.route_reason=="TURN_CORRIDOR_STALL_ESCAPE" and g.corner_stall_escape~=true then
+            return deny("SC4_STALL_ESCAPE_UNPROVEN",false)
+        end
+    end
+    if type(timing)~="table" or not valid_nonnegative(timing.proximity)
+        or not valid_nonnegative(timing.stall_distance)
+        or not valid_nonnegative(timing.lead_cap)
+        or not valid_nonnegative(timing.brake_extra)
+        or not valid_nonnegative(g.threshold) then
+        return deny("ISSUE_TIMING_BOUNDARY_UNAVAILABLE",false)
+    end
+    local temporal_frontier=math.max(timing.proximity,g.threshold)
+    if g.stall==true then
+        temporal_frontier=math.max(temporal_frontier,timing.stall_distance,
+            math.min(timing.lead_cap,g.threshold+timing.brake_extra))
+    end
+    if g.remaining<=temporal_frontier then
+        return deny("SHARED_ISSUE_WINDOW_CONTRADICTION",true)
+    end
+    if type(evidence)~="table" or not finite(evidence.previous_sample_ms)
+        or not finite(evidence.current_sample_ms)
+        or not finite(evidence.previous_remaining) or not finite(evidence.current_remaining)
+        or not finite(evidence.ground_distance) then
+        return deny("PREPROMOTION_MOTION_EVIDENCE_MISSING",false)
+    end
+    if evidence.current_sample_ms~=c.sample_ms
+        or evidence.current_sample_ms-evidence.previous_sample_ms~=c.poll_ms
+        or evidence.current_remaining~=g.remaining then
+        return deny("MOTION_SAMPLE_NOT_ALIGNED_WITH_CACHE",false)
+    end
+    local radial_travel=evidence.previous_remaining-evidence.current_remaining
+    if radial_travel<=0 or evidence.ground_distance<radial_travel then
+        return deny("ONE_POLL_APPROACH_NOT_PROVEN",false)
+    end
+    if g.arrival_brake_ready~=true or not valid_nonnegative(g.arrival_sync_margin)
+        or math.abs(g.arrival_sync_margin-radial_travel)>
+           (8*2^-52)*math.max(1,radial_travel,g.arrival_sync_margin) then
+        return deny("G1_ONE_POLL_MEASUREMENT_MISMATCH",false)
+    end
+    local one_poll_travel=math.min(radial_travel,g.arrival_sync_margin)
+    if g.remaining>temporal_frontier+one_poll_travel then
+        return deny("OUTSIDE_ONE_POLL_TIMING_BAND",false)
+    end
+    local credit=c.route_mode=="STEERING_CORNER" and "STEERING_CORNER_HANDOFF" or "REGISTER_ROUTE_OBLIGATION"
+    return {preview_open=true,zone="ADOPT_ONLY",reason="MOVE_ONE_POLL_TIMING_HYSTERESIS",
+        authoritative=false,credit=credit,preserve_prior_debt=c.prior_debt_mode=="SOFT_PRESERVED",
+        one_poll_travel=one_poll_travel,temporal_frontier=temporal_frontier,
+        route_mode=c.route_mode,geometry=copy_scalars(g)}
+end
+return B
+
+end)()
+-- T2MOVE_E_POLICY_MODULE_END
 
 -- TPOL-T1H hidden policy scaffold.
 -- No MCT page is registered in this runtime stage.  The schema/profile compiler is
@@ -3044,6 +3253,60 @@ local function finalize_transition_decision(d)
     end
     return d
 end
+-- Isolated T2-MOVE-E policy bridge. Only SC6 exact immediate MOVE supplies
+-- the previously captured exact-current observation; never trust post-promotion geometry.
+function R1.T2MoveEPreview(st,current,successor,ctx)
+    local cached=ctx and ctx.move_native_evidence
+    if type(cached)~="table" then return nil,"MOVE_PREPROMOTION_CACHE_MISSING" end
+    if cached.current_ref~=current or cached.successor_ref~=successor
+       or st.plan[st.idx]~=current or st.plan[st.idx+1]~=successor
+       or st.blocked or st.terminal or S.pending_by_uid[st.uid] or st.transition_txn then
+        return nil,"MOVE_PREPROMOTION_CANONICAL_IDENTITY_CHANGED"
+    end
+    if ctx.execution_lineage~="PLAYER_NATIVE" and ctx.execution_lineage~="BSC_ISSUED" then
+        return nil,"MOVE_EXECUTION_LINEAGE_UNPROVEN"
+    end
+    local debt_sig=R1.T2MoveEvidence.route_debt_signature(st,current)
+    if not debt_sig then return nil,"MOVE_DEBT_IDENTITY_UNAVAILABLE" end
+    local query={gen=st.gen,revision=st.revision,unit_lifetime=current.unit_lifetime,
+        current_action_id=current.action_id,successor_action_id=successor.action_id,
+        current_index=st.idx,successor_index=st.idx+1,debt_signature=debt_sig,
+        now_ms=ctx.model_ms,observed_step_ms=st.model_step_ms or 0,exact_native_successor=true}
+    local revalidated,why=R1.T2MoveEvidence.revalidate(cached,query)
+    if not revalidated then return nil,why end
+    local a,awhy=R1.T2MoveA.capture({
+        exact_current_execution=true,gen=cached.gen,unit_lifetime=cached.unit_lifetime,
+        current_action_id=cached.current_action_id,successor_action_id=cached.successor_action_id,
+        current_index=cached.current_index,successor_index=cached.successor_index,
+        current_kind="MOVE",successor_kind="MOVE",sample_ms=cached.sample_ms,poll_ms=cached.poll_ms,
+        semantic_done=cached.current_semantic_done==true,
+        decision={transition_kind="MOVE->MOVE",route_ok=cached.route_ok,
+            route_reason=cached.route_reason,hard_violation=false,issue_window={open=cached.issue_open}},
+        geometry=cached.geometry})
+    if not a then return nil,awhy end
+    local p=R1.T2MoveB.preview(R1.T2MoveA,a,
+        {exact_native_successor=true,gen=query.gen,unit_lifetime=query.unit_lifetime,
+            current_action_id=query.current_action_id,successor_action_id=query.successor_action_id,
+            current_index=query.current_index,future_index=query.successor_index,
+            now_ms=query.now_ms,observed_step_ms=query.observed_step_ms},
+        cached.evidence,{proximity=CFG.proximity,stall_distance=CFG.stall_distance,
+            lead_cap=CFG.lead_cap,brake_extra=CFG.brake_extra})
+    if not p or p.preview_open~=true or p.authoritative~=false
+       or (p.zone~="ISSUE_READY" and p.zone~="ADOPT_ONLY") then
+        return nil,p and p.reason or "MOVE_PREPROMOTION_POLICY_CLOSED"
+    end
+    if p.credit~="STEERING_CORNER_HANDOFF" and p.credit~="REGISTER_ROUTE_OBLIGATION" then
+        return nil,"MOVE_UNSUPPORTED_COMPLETION_CREDIT"
+    end
+    if p.preserve_prior_debt~=(cached.geometry.route_debt_mode=="SOFT_PRESERVED") then
+        return nil,"MOVE_PRIOR_DEBT_PRESERVATION_MISMATCH"
+    end
+    local g=transition_geometry_snapshot(cached.geometry)
+    if g.route_mode~="STEERING_CORNER" and g.route_mode~="PATH_SAFE" then
+        return nil,"MOVE_UNSUPPORTED_ROUTE_MODE"
+    end
+    return {preview=p,geometry=g,reason=p.reason},"OK"
+end
 function R1.TransitionPolicy.evaluate(st,current,successor,g,context)
  context=context or {}
  local current_index=context.current_index or st.idx
@@ -3052,6 +3315,19 @@ function R1.TransitionPolicy.evaluate(st,current,successor,g,context)
  if not current or not successor then d.reason="TRANSITION_ACTION_MISSING";d.hard_violation=true;d.issue_window=transition_envelope(false,d.reason,true);d.adopt_window=transition_envelope(false,d.reason,true);return finalize_transition_decision(d) end
  if current_index and successor_index and successor_index~=current_index+1 then d.reason="CANONICAL_INTERMEDIATE_ACTIONS_OWED";d.hard_violation=true;d.issue_window=transition_envelope(false,d.reason,true);d.adopt_window=transition_envelope(false,d.reason,true);return finalize_transition_decision(d) end
  if successor.type=="MOVE" then d.adopt_window=transition_envelope(false,"CANONICAL_INTERMEDIATE_ACTIONS_OWED",true) end
+ if successor.type=="MOVE" and context.move_native_reconcile==true then
+    local proof,why=R1.T2MoveEPreview(st,current,successor,context)
+    if not proof then
+        d.reason=why or "MOVE_NATIVE_ADOPT_DENIED"
+        d.adopt_window=transition_envelope(false,d.reason,false)
+        return finalize_transition_decision(d)
+    end
+    d.route_ok=true;d.route_reason=proof.reason;d.route_debt_mode=proof.geometry.route_debt_mode
+    d.adopt_route_mode=proof.geometry.route_mode
+    d.adopt_window=transition_envelope(true,proof.reason,false)
+    d.issue_window=transition_envelope(false,"NATIVE_MOVE_ALREADY_ACTIVE",false)
+    return finalize_transition_decision(d)
+ end
  if not g then d.issue_window=transition_envelope(false,"SUCCESSOR_GEOMETRY_UNAVAILABLE",false);if successor.type~="MOVE" then d.adopt_window=transition_envelope(false,"SUCCESSOR_GEOMETRY_UNAVAILABLE",false) end;return finalize_transition_decision(d) end
  if successor.type=="ATTACK" then local p=t2b_attack_decision(st,current,successor,g,{immediate_successor=true,target_exact=true,target_terminal_abort=context.target_terminal_abort==true});d.route_ok=(p.issue_window and p.issue_window.open==true) or (p.adopt_window and p.adopt_window.open==true);d.route_reason=p.reason;d.route_debt_mode=g.route_debt_mode;d.current_credit=p.current_credit;d.issue_route_mode=p.issue_route_mode;d.adopt_route_mode=p.adopt_route_mode;d.issue_window=p.issue_window;d.adopt_window=p.adopt_window;return finalize_transition_decision(d) end
  local ok,why=route_handoff_ready(st,g,successor);d.route_ok=ok==true;d.route_reason=why;d.route_debt_mode=g.route_debt_mode;if not ok then d.issue_window=transition_envelope(false,why or "TRANSITION_ROUTE_BLOCKED",false);return finalize_transition_decision(d) end
@@ -3634,6 +3910,11 @@ function R1.observe_t2move_d(st,cur,now)
         debt_signature=debt_sig,route_ok=decision.route_ok,
         issue_open=decision.issue_window and decision.issue_window.open==true,
         geometry=frozen,motion_samples=st.motion_samples})
+    if cert then
+        cert.current_ref=cur;cert.successor_ref=nexta
+        cert.current_semantic_done=action_runtime(cur).semantic_done==true
+        cert.route_reason=decision.route_reason
+    end
     st.t2move_d_evidence=cert
     if DEBUG_TELEMETRY and cert then
         dlog("T2MOVE_D_SHADOW_CAPTURE uid="..st.uid.." gen="..st.gen..
@@ -3702,6 +3983,14 @@ function Core.reconcile_native_successor(st,now)
         if not cached then return rollback_native_future_to_current(st,cur,future,future_index,e,now,"NATIVE_ADVANCED_WITHOUT_FRESH_T2B_DECISION",cwhy,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE",future_lineage) end
         local viable,vwhy=target_viable(future);if not viable and abortable_target_reason(vwhy) then return rollback_native_future_to_current(st,cur,future,future_index,e,now,"NATIVE_ATTACK_TARGET_TERMINATED",vwhy,"NATIVE_SUCCESSOR_ROLLBACK_TO_CURRENT_MOVE",future_lineage) end
         g=cached.geometry;decision=cached.decision
+    elseif future_index==st.idx+1 and future.type=="MOVE" then
+        -- An already-executing exact successor may consume only the prior
+        -- exact-current MOVE proof, never geometry recomputed after Native promotion.
+        local proof=st.t2move_d_evidence
+        g=proof and transition_geometry_snapshot(proof.geometry) or nil
+        decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{current_index=st.idx,
+            successor_index=future_index,execution_lineage=future_lineage,
+            move_native_reconcile=true,move_native_evidence=proof,model_ms=now})
     else
         local terminal_abort=false;if future.type=="ATTACK" then local viable,vwhy=target_viable(future);terminal_abort=(not viable and abortable_target_reason(vwhy)) or false end
         g=geometry(st,future);if g and future.type=="ATTACK" then g=attack_geometry(st,future,g) end
