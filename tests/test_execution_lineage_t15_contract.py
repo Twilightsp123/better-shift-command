@@ -31,7 +31,7 @@ need('local match,_,lineage=R1.execution_matches_action(e,st.plan[i])',1)
 if 'NATIVE_MOVE_PASSTHROUGH' in s: fail('later stage bypasses T1.5/T2-MOVE architecture')
 # Existing T1 evaluator remains the sole transition decision plane.
 need('function R1.TransitionPolicy.evaluate(',1)
-if s.count('R1.TransitionPolicy.evaluate(st,')!=8: fail('shared evaluator call-site count must include later T2-B cache/revalidation')
+if s.count('R1.TransitionPolicy.evaluate(st,')!=9: fail('shared evaluator calls include D exact-current read-only snapshot')
 for legacy in ('consumer="PROACTIVE"','consumer="NATIVE_RECONCILE"','consumer="SCHEDULER"','context.consumer'):
     if legacy in s: fail('later stage reintroduced consumer-specific permission: '+legacy)
 print('PASS: T1.5 execution-lineage structural contract preserved through later permission-neutral stages')
