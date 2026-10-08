@@ -18,6 +18,9 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -61,3 +64,18 @@ jobs:
       - name: Full maintenance suite
         run: |
           python maintenance_tools/run_checks_corepath_rc8.py
+      - name: Seal exact F complete tracked source
+        run: |
+          python maintenance_tools/t2move_a/seal_t2move_f_archive.py
+      - name: Upload F full source handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: BSC-T2MOVE-F-full-source-20261009
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            output/BSC_T2MOVE_F_full_source_20261009.zip
+            output/T2MOVE_F_HANDOFF_MANIFEST.json
+            output/READ_THIS_HANDOFF.txt
+            output/FILE_SHA256_MANIFEST.txt
+            output/SHA256SUMS_HANDOFF.txt
