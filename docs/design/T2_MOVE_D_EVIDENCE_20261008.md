@@ -27,3 +27,9 @@ Parent: `maintenance/t2move-c-shadow` at `fcdf356671012ce7101ea0709565fb8ef028db
 - No `i+2` promotion or escape from previous SC3 obligations.
 - T2-MOVE's joint A+B+C active adoption is a separate Stage E, not enabled here.
 - T2-B RT-TP-02/03 remains **BLOCKED / DEFERRED**, with artifact documented in `docs/MAINTENANCE_TODO.md`.
+
+## Verified offline result — 2026-10-08
+
+The isolated D controller candidate passed GitHub Actions run `37720282921` on `maintenance/t2move-d-evidence`: D pure Lua **23/23 PASS**, D mutation **10/10 CAUGHT**, real-controller exact-current observation **3/3 PASS**, prior A/B/C offline suites, documentation contract and the existing **46/46 maintenance suite PASS**. The three controller mirrors are in sync. Source/Native addresses and gameplay CFG scalars remain untouched except for controller evidence-only plumbing. MOVE adopt is still explicitly hard-closed; T2-B WH3 RT-TP-02/03 is still blocked.
+
+The next work is a separately scoped Stage E joining A/B/C with this live D observation and T1.6 transaction checks, **not** production promotion or WH3 testing.
