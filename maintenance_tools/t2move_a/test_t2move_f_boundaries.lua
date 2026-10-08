@@ -57,5 +57,25 @@ T("F-RISK-03 normal V3 immediate MOVE remains adoptable",function()
  assert(f:has("TRANSITION_EDGE_COMMITTED"),"legitimate V3 commit missing")
  healthy(f)
 end)
+T("F-RISK-04 changing SC3 debt completion invalidates frozen D proof",function()
+ local f=F({cold_idle=true,debug_source=true,no_calibration=true,width=20,
+   native_order_evidence_v3=order(3)})
+ f:start();f.unit.idle=false;f.unit.moving=true
+ local p1=f:emit("MOVE",false,100,0)
+ local p2=f:emit("MOVE",true,105,0)
+ local p3=f:emit("MOVE",true,200,0)
+ f.evidence_record=p1
+ for _,p in ipairs({{100,0},{200,30},{300,50},{400,70}}) do f:tick(p[1],p[2],0) end
+ assert(f:has("T2MOVE_D_SHADOW_CAPTURE"),"no P1-to-P2 route proof")
+ f.evidence_record=p2;f:tick(500,72,0)
+ assert(f:count("NATIVE_SUCCESSOR_ADOPTED")==1,"P1-to-P2 setup must adopt")
+ assert(f:has("ROUTE_OBLIGATION_TRANSFERRED"),"P1 debt must be registered")
+ f:tick(600,85,0)
+ assert(f:count("T2MOVE_D_SHADOW_CAPTURE")>=2,"no P2-to-P3 proof with P1 debt")
+ f.evidence_record=p3;f:tick(700,102,0) -- crosses owed P1 at x=100.
+ assert(f:count("NATIVE_SUCCESSOR_ADOPTED")==1,"changed route debt consumed stale proof")
+ assert(f:has("MOVE_D_REVALIDATE_debt_signature"),"debt signature must invalidate frozen cache")
+ healthy(f)
+end)
 print("TOTAL "..pass.." PASS "..fail.." FAIL; ISOLATED F NOT WH3")
 os.exit(fail==0 and 0 or 1)
