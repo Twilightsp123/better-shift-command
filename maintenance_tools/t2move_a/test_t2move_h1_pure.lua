@@ -10,7 +10,8 @@ end
 local function proof(pos,waypoint,successor,reach,opts)
  opts=opts or {}
  return H.evaluate({current_pos=pos,waypoint=waypoint,successor=successor,
-  reach=reach,semantic_done=opts.done==true,prior_debts=opts.debts,
+  reach=reach,semantic_done=opts.done==true,done_reason=opts.done_reason,
+  prior_debts=opts.debts,
   motion_fresh=opts.fresh,previous_pos=opts.previous})
 end
 local function expect(r,state,reason)
@@ -50,9 +51,15 @@ case("H1-05 motion-segment crossing supports completion only if fresh",function(
  expect(proof(P(105,0),P(100,0),P(105,100),1,opt),
   "BLOCKED","H1_SUCCESSOR_CHORD_MISSES_WAYPOINT")
 end)
-case("H1-06 canonical semantic completion counts only with safe debts",function()
- expect(proof(P(60,0),P(100,0),P(0,0),5,{done=true}),
-  "SATISFIED","H1_CANONICAL_ALREADY_COMPLETE")
+case("H1-06 only verified canonical arrival completion counts with safe debts",function()
+ expect(proof(P(60,0),P(100,0),P(0,0),5,
+    {done=true,done_reason="ROUTE_NODE_REACHED"}),
+  "SATISFIED","H1_VERIFIED_CANONICAL_COMPLETE")
+end)
+case("H1-14 legacy STEERING_CORNER semantic_done alone cannot prove arrival",function()
+ expect(proof(P(60,0),P(100,0),P(0,0),5,
+    {done=true,done_reason="STEERING_CORNER_HANDOFF"}),
+  "BLOCKED","H1_SUCCESSOR_CHORD_MISSES_WAYPOINT")
 end)
 case("H1-07 two prior waypoint debts can remain geometrically payable",function()
  local debts={{waypoint=P(100,0),tolerance=5,semantic_done=false},
