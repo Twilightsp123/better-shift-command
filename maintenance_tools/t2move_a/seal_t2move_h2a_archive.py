@@ -70,7 +70,7 @@ subprocess.run(["python", "maintenance_tools/t2move_a/test_t2move_h1_contract.py
                cwd=ROOT, check=True)
 subprocess.run(["python", "maintenance_tools/t2move_a/test_t2move_h2a_expected_red.py"],
                cwd=ROOT, check=True)
-controller_old = git("show", BASE_H1 + ":source/better_shift_command.lua").encode("utf-8")
+controller_old = subprocess.check_output(["git","show",BASE_H1+":source/better_shift_command.lua"],cwd=ROOT)
 if controller_old != src_path.read_bytes():
     raise SystemExit("H2A IS TEST-ONLY BUT GAMEPLAY CONTROLLER DIVERGED")
 
