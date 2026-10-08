@@ -34,7 +34,8 @@ T("H3-N02 Native 90-degree successor denied without unpaid route proof",function
  f.evidence_record=b;f:tick(500,72,0)
  assert(e(f,"NATIVE_SUCCESSOR_ADOPTED")==0)
  assert(e(f,"TRANSITION_EDGE_COMMITTED")==0)
- assert(f:has("H2_NATIVE_ROUTE_OBLIGATION_UNPROVEN"),"missing shared route veto: "..table.concat(f.logs," | "))
+ assert(f:has("H1_SHADOW_ADOPT") and f:has("frozen_verdict=BLOCKED"),
+  "no prepromotion shadow witness for the denied Native corner")
 end)
 T("H3-N03 Native 180-degree successor denied without unpaid route proof",function()
  local f,b=base(0,0)
