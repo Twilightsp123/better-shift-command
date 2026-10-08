@@ -33,6 +33,12 @@ jobs:
       - name: T2-MOVE-A shadow mutations
         run: |
           python maintenance_tools/t2move_a/test_t2move_a_mutations.py
+      - name: T2-MOVE-B timing-only shadow fixtures
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_b_shadow.lua maintenance_tools/t2move_a/t2move_a_shadow.lua maintenance_tools/t2move_a/t2move_b_shadow.lua
+      - name: T2-MOVE-B mutation gate
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_b_mutations.py
       - name: No gameplay activation contract
         run: |
           python maintenance_tools/t2move_a/test_t2move_a_scope.py
