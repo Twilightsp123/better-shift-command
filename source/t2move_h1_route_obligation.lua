@@ -54,8 +54,12 @@ function H.evaluate(f)
  local path_error=chord_error(f.waypoint,f.current_pos,f.successor)
  local metrics={remaining=remaining,chord_error=path_error,
    reach=f.reach,prior_debt_count=prior_debt_count}
- if f.semantic_done then
-    return reply("SATISFIED","H1_CANONICAL_ALREADY_COMPLETE",metrics)
+ -- A legacy steering-completion flag is not independent arrival evidence.
+ -- Trust only completion reasons backed by observed waypoint/route motion.
+ local verified_done={ROUTE_NODE_REACHED=true,ROUTE_NODE_PASSED=true,
+    HANDOFF_ROUTE_OBLIGATION_SATISFIED=true,NATIVE_IDLE_ROUTE_FINISH=true}
+ if f.semantic_done and verified_done[f.done_reason]==true then
+    return reply("SATISFIED","H1_VERIFIED_CANONICAL_COMPLETE",metrics)
  end
  if remaining<=f.reach then
     return reply("SATISFIED","H1_WAYPOINT_REACHED",metrics)
