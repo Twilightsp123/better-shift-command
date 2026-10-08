@@ -59,3 +59,11 @@ not implied PASS merely by the F evidence-guard tests.
 
 The E source handoff artifact `11530553790` is an **E** archive, not a F archive.
 Root `SHA256SUMS.txt` predates F and must not be used as a F package manifest.
+
+## Verified CI evidence
+
+- Original E regression exposure: [Actions `37819203083`](https://github.com/Twilightsp123/better-shift-command/actions/runs/37819203083): F-RISK-01 and F-RISK-02 FAIL on unchanged E, F-RISK-03 PASS.
+- Hardened F candidate: [Actions `37820591847`](https://github.com/Twilightsp123/better-shift-command/actions/runs/37820591847) SUCCESS: all A/B/C/D/E and F gates, documentation contract and full maintenance.
+- F real controller **5/5 PASS**. F guard mutants **3/3 CAUGHT** (V2 fallback, live revision drift, fabricated missing revision).
+- E real controller **11/11 PASS**. E active controller mutants **8/8 CAUGHT**, including an expanded dynamic SC3 debt-completion fixture catching bypassed D revalidation.
+- Existing maintenance suite **46/46 PASS** (see Actions job for individual test output). **WH3 gameplay: NOT TESTED**.
