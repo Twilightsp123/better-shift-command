@@ -187,3 +187,13 @@
 **Evidence:** the unmodified F baseline had G controller 4/7 PASS, 3/7 FAIL in GitHub Actions `37822137891`. The isolated G correction passed G 7/7, G active mutants 3/3, E/F controller and mutations, T2-B contract and 46/46 maintenance in `37822771962`.
 
 **Consequence / open decision:** proactive SC1 U-turn route-fidelity remains unresolved and may still trade off early smooth turning versus actual waypoint visitation. Never claim G fixes WH3 hairpin compression or early proactive U-turns. Any future semantic redesign must explicitly reconcile or supersede the old SC1 U-turn test, preserve bounded recovery, and provide new independent runtime/route tests; it must not be hidden inside G or merged to T2-B by offline CI alone.
+
+## D-20261009-02 — H1 separates prospective route obligation from execution handoff without changing permissions
+
+**Decision:** add a **read-only** `RouteObligation` shadow on isolated H1. Its verdicts are `SATISFIED`, `DEBT_PRESERVED`, and `BLOCKED`. A geometric debt-preservation chord is at most a necessary opportunity for the engine to visit the waypoint, never proof that it did. Legacy proactive Move→Move ISSUE and exact Native MOVE ADOPT retain identical G permissions; the same H1 pure observer logs the legacy issue decision and frozen pre-promotion evidence, but has no cursor, commit, dispatch, or Native bridge authority.
+
+**Reason:** G's Frozen Native turnback guard closes one unsafe adoption path but does not address proactive SC1 `STEERING_CORNER`. The legacy SC1 U-turn test explicitly expects early handoff and the T1.6 commit marks the old waypoint complete on steering credit. H1 therefore preserves the legacy test while documenting that early 90° and 180° routes can differ from strict waypoint arrival obligations.
+
+**Evidence:** Initial H1 CI `37825312679` succeeded; expanded `37825955358` also caught the circular `STEERING_CORNER_HANDOFF` completion-provenance mutant, with 15/15 pure, 5/5 real-controller shadow and 6/6 mutations, alongside original G/E/F and 46/46 maintenance checks. `route_handoff_ready()`, the T1.6 `commit_transition_edge()` and gameplay CFG remain byte-for-byte identical to sealed G.
+
+**Next decision (not yet made):** H2 must specify the lifecycle of unpaid waypoint obligations across proactive ISSUE ACK, Native ADOPT and subsequent Native motion. It must distinguish an early steering command from valid route-completion credit without inventing automatic waypoint arrival. Resolve legacy U-turn smoothness versus fidelity via explicit branch-level design and red/green tests; H1 is not proof of WH3 runtime smoothness or release readiness.

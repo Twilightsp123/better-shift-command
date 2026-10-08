@@ -1324,6 +1324,86 @@ return B
 end)()
 -- T2MOVE_E_POLICY_MODULE_END
 
+-- T2MOVE_H1_SHADOW_MODULE_BEGIN
+R1.H1RouteObligation=(function()
+-- BSC T2-MOVE-H1 pure route-obligation shadow model.
+-- No Native bridge, dispatch, transaction, cursor, or gameplay permission authority.
+-- A DEBT_PRESERVED verdict proves *geometric opportunity*, not actual CA movement.
+local H={VERSION="T2MOVE_H1_ROUTE_OBLIGATION_SHADOW_1",authoritative=false}
+local huge=math.huge or 1e300
+local function finite(n)return type(n)=="number" and n==n and n<huge and n>-huge end
+local function valid_point(p)return type(p)=="table" and finite(p.x) and finite(p.z) end
+local function distance(a,b)local dx,dz=a.x-b.x,a.z-b.z;return math.sqrt(dx*dx+dz*dz) end
+local function chord_error(p,a,b)
+ local x,z=b.x-a.x,b.z-a.z
+ local sq=x*x+z*z
+ if sq<=0 then return distance(p,a) end
+ local projection=((p.x-a.x)*x+(p.z-a.z)*z)/sq
+ local t=math.max(0,math.min(1,projection))
+ local dx,dz=p.x-(a.x+x*t),p.z-(a.z+z*t)
+ return math.sqrt(dx*dx+dz*dz)
+end
+local function reply(state,reason,extra)
+ local r={state=state,reason=reason,authoritative=false,
+    route_credit=state=="SATISFIED" and "CURRENT_WAYPOINT_COMPLETE"
+       or (state=="DEBT_PRESERVED" and "REGISTER_ROUTE_OBLIGATION" or "NONE"),
+    permits_issue=false,permits_adopt=false,
+    proof_scope="GEOMETRIC_NECESSARY_CONDITION_ONLY"}
+ if extra then for k,v in pairs(extra) do r[k]=v end end
+ return r
+end
+function H.evaluate(f)
+ if type(f)~="table" or not valid_point(f.current_pos)
+   or not valid_point(f.waypoint) or not valid_point(f.successor)
+   or not finite(f.reach) or f.reach<0
+   or type(f.semantic_done)~="boolean" then
+    return reply("BLOCKED","H1_INPUT_NOT_PROVEN")
+ end
+ if f.prior_debts~=nil and type(f.prior_debts)~="table" then
+    return reply("BLOCKED","H1_PRIOR_DEBTS_INVALID")
+ end
+ local prior_debt_count=0
+ -- Never count an unverified/stale prior-debt record as paid.
+ for _,d in pairs(f.prior_debts or {}) do
+    if type(d)~="table" or type(d.semantic_done)~="boolean"
+       or not valid_point(d.waypoint) or not finite(d.tolerance)
+       or d.tolerance<0 then
+        return reply("BLOCKED","H1_PRIOR_DEBT_UNPROVEN")
+    end
+    if not d.semantic_done then
+       prior_debt_count=prior_debt_count+1
+       if chord_error(d.waypoint,f.current_pos,f.successor)>d.tolerance then
+          return reply("BLOCKED","H1_PRIOR_DEBT_CHORD_MISSED",
+             {prior_debt_count=prior_debt_count})
+       end
+    end
+ end
+ local remaining=distance(f.current_pos,f.waypoint)
+ local path_error=chord_error(f.waypoint,f.current_pos,f.successor)
+ local metrics={remaining=remaining,chord_error=path_error,
+   reach=f.reach,prior_debt_count=prior_debt_count}
+ -- A legacy steering-completion flag is not independent arrival evidence.
+ -- Trust only completion reasons backed by observed waypoint/route motion.
+ local verified_done={ROUTE_NODE_REACHED=true,ROUTE_NODE_PASSED=true,
+    HANDOFF_ROUTE_OBLIGATION_SATISFIED=true,NATIVE_IDLE_ROUTE_FINISH=true}
+ if f.semantic_done and verified_done[f.done_reason]==true then
+    return reply("SATISFIED","H1_VERIFIED_CANONICAL_COMPLETE",metrics)
+ end
+ if remaining<=f.reach then
+    return reply("SATISFIED","H1_WAYPOINT_REACHED",metrics)
+ end
+ if f.motion_fresh==true and valid_point(f.previous_pos)
+    and chord_error(f.waypoint,f.previous_pos,f.current_pos)<=f.reach then
+    return reply("SATISFIED","H1_WAYPOINT_PASSED_OBSERVED",metrics)
+ end
+ if path_error<=f.reach then
+    return reply("DEBT_PRESERVED","H1_SUCCESSOR_CHORD_PRESERVES_WAYPOINT",metrics)
+ end
+ return reply("BLOCKED","H1_SUCCESSOR_CHORD_MISSES_WAYPOINT",metrics)
+end
+return H
+end)()
+-- T2MOVE_H1_SHADOW_MODULE_END
 -- TPOL-T1H hidden policy scaffold.
 -- No MCT page is registered in this runtime stage.  The schema/profile compiler is
 -- intentionally present now so a future MCT adapter can provide values without
@@ -2838,6 +2918,54 @@ local function move_route_debt_soft_continue(st,cur,nexta,g)
     g.route_debt_reason="PRIOR_ROUTE_OBLIGATION_SOFT_CONTINUE"
     return true,g.route_debt_reason
 end
+-- H1 is read-only. The legacy TransitionPolicy decision remains authoritative.
+function R1.H1ShadowObserve(st,current,successor,context,now,legacy)
+    if not current or current.type~="MOVE" or not successor or successor.type~="MOVE" then return nil end
+    local b=st.block_state and st.block_state[current.block_id] or nil
+    local owed={}
+    if b and b.route_debts then
+        for _,debt in pairs(b.route_debts) do
+            if debt and debt.action then
+                owed[#owed+1]={waypoint=debt.action.pos,
+                    tolerance=debt.tolerance,
+                    semantic_done=action_runtime(debt.action).semantic_done==true}
+            else
+                owed[#owed+1]={}
+            end
+        end
+    end
+    local rt=action_runtime(current)
+    local leg=(st.origin and current.pos) and dist(st.origin,current.pos) or nil
+    local ok,result=pcall(R1.H1RouteObligation.evaluate,{
+        current_pos=st.pos,previous_pos=st.prev_pos,waypoint=current.pos,
+        successor=successor.pos,reach=move_reach_tolerance(st,leg),
+        semantic_done=rt.semantic_done==true,done_reason=rt.done_reason,
+        motion_fresh=(st.model_step_ms or 0)>0,
+        prior_debts=owed
+    })
+    if not ok then
+        if DEBUG_TELEMETRY then dlog("H1_SHADOW_ERROR uid="..st.uid.." context="..clean(context)..
+            " reason="..clean(result).." model_ms="..now) end
+        return nil
+    end
+    if DEBUG_TELEMETRY then
+        local issue=legacy and legacy.issue_window and legacy.issue_window.open==true or false
+        local adopt=legacy and legacy.adopt_window and legacy.adopt_window.open==true or false
+        local mode=legacy and (legacy.issue_route_mode or legacy.route_reason or legacy.reason) or "NONE"
+        local conflict=(issue or adopt) and result.state=="BLOCKED"
+            or (issue and result.state=="DEBT_PRESERVED" and mode=="STEERING_CORNER")
+        dlog("H1_SHADOW_"..clean(context).." uid="..st.uid.." gen="..st.gen..
+            " current="..clean(current.action_id).." successor="..clean(successor.action_id)..
+            " verdict="..clean(result.state).." reason="..clean(result.reason)..
+            " legacy_issue="..tostring(issue).." legacy_adopt="..tostring(adopt)..
+            " legacy_route="..clean(mode).." conflict="..tostring(conflict==true)..
+            " remaining="..num_or_nil(result.remaining).." chord_error="..num_or_nil(result.chord_error)..
+            " reach="..num_or_nil(result.reach).." prior_debts="..clean(result.prior_debt_count or 0)..
+            " authoritative=false model_ms="..now)
+    end
+    return result
+end
+
 local function route_handoff_ready(st,g,nexta)
     local cur=st.plan[st.idx]
     local rt=action_runtime(cur)
@@ -3926,6 +4054,8 @@ function R1.observe_t2move_d(st,cur,now)
     local g=geometry(st,nexta)
     if not g then return end
     local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{current_index=st.idx,successor_index=st.idx+1})
+    -- Freeze a separate non-authoritative H1 verdict while current Native MOVE is exact.
+    local h1=R1.H1ShadowObserve(st,cur,nexta,"CURRENT",now,decision)
     if decision.hard_violation or not decision.route_ok then return end
     local debt_sig=R1.T2MoveEvidence.route_debt_signature(st,cur)
     if not debt_sig then return end
@@ -3954,6 +4084,7 @@ function R1.observe_t2move_d(st,cur,now)
         cert.current_ref=cur;cert.successor_ref=nexta
         cert.current_semantic_done=action_runtime(cur).semantic_done==true
         cert.route_reason=decision.route_reason
+        cert.h1_shadow=h1 -- diagnostic only; E/F/G proof and commit never read it.
     end
     st.t2move_d_evidence=cert
     if DEBUG_TELEMETRY and cert then
@@ -4031,6 +4162,14 @@ function Core.reconcile_native_successor(st,now)
         decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{current_index=st.idx,
             successor_index=future_index,execution_lineage=future_lineage,execution_provider=e.provider,
             move_native_reconcile=true,move_native_evidence=proof,model_ms=now})
+        if DEBUG_TELEMETRY and proof and proof.h1_shadow then
+            dlog("H1_SHADOW_ADOPT uid="..st.uid.." gen="..st.gen..
+                " current="..cur.action_id.." successor="..future.action_id..
+                " frozen_verdict="..clean(proof.h1_shadow.state)..
+                " frozen_reason="..clean(proof.h1_shadow.reason)..
+                " legacy_adopt="..tostring(decision.adopt_window and decision.adopt_window.open==true)..
+                " authoritative=false model_ms="..now)
+        end
     else
         local terminal_abort=false;if future.type=="ATTACK" then local viable,vwhy=target_viable(future);terminal_abort=(not viable and abortable_target_reason(vwhy)) or false end
         g=geometry(st,future);if g and future.type=="ATTACK" then g=attack_geometry(st,future,g) end
@@ -4154,6 +4293,7 @@ local function advance(st,now)
         end
     else
         local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{current_index=st.idx,successor_index=st.idx+1})
+        R1.H1ShadowObserve(st,cur,nexta,"ISSUE",now,decision)
         local route_ok,route_reason=decision.route_ok,decision.route_reason or decision.reason
         if not route_ok then
             if DEBUG_TELEMETRY and now-st.last_wait>=1000 then
