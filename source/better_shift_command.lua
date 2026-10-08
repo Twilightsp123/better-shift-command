@@ -3098,6 +3098,7 @@ local function transition_geometry_snapshot(g)
         arrival_ground_deceleration=g.arrival_ground_deceleration,arrival_approach_deceleration=g.arrival_approach_deceleration,
         arrival_brake_stop_distance=g.arrival_brake_stop_distance,arrival_brake_preempt_distance=g.arrival_brake_preempt_distance,
         arrival_sync_margin=g.arrival_sync_margin,attack_path_error=g.attack_path_error,
+        h2_route_credit=g.h2_route_credit,h2_route_reason=g.h2_route_reason,
         attack_waypoint_tolerance=g.attack_waypoint_tolerance,attack_terminal_limit=g.attack_terminal_limit,
         arrival_g11_deceleration=g.arrival_g11_deceleration,arrival_g11_issue_coherent=g.arrival_g11_issue_coherent,
         arrival_g11_adopt_coherent=g.arrival_g11_adopt_coherent,arrival_g11_reason=g.arrival_g11_reason,
@@ -3146,12 +3147,20 @@ function Core.commit_transition_edge(st,tx,now,opts)
                     " remaining="..num_or_nil(g.remaining).." path_error="..num_or_nil(g.attack_path_error)..
                     " waypoint_tolerance="..num_or_nil(g.attack_waypoint_tolerance)..
                     " sync_margin="..num_or_nil(g.arrival_sync_margin).." model_ms="..now.." source="..clean(tx.source)) end
-            elseif g.route_mode=="STEERING_CORNER" then
-                mark_action_complete(st,current,"STEERING_CORNER_HANDOFF",now,g.remaining)
-                if DEBUG_TELEMETRY then dlog("STEERING_CORNER_COMMITTED uid="..st.uid.." gen="..st.gen.." action="..current.action_id..
-                    " successor="..clean(successor.action_id).." remaining="..num_or_nil(g.remaining)..
-                    " corner_window="..num_or_nil(g.corner_window).." lookahead="..num_or_nil(g.corner_lookahead)..
-                    " turn_factor="..num_or_nil(g.corner_turn_factor).." model_ms="..now) end
+            elseif successor.type=="MOVE" then
+                -- H2-B: ACK/ADOPT proves execution, never proves waypoint arrival.
+                -- Route credit is frozen BEFORE issue/Native promotion. BLOCKED
+                -- edges are refused upstream in H2-C/D; do not invent completion.
+                if g.h2_route_credit=="SATISFIED" then
+                    mark_action_complete(st,current,"H2_ROUTE_SATISFIED_OBSERVED",now,g.remaining)
+                    if DEBUG_TELEMETRY then dlog("H2_WAYPOINT_CREDIT uid="..st.uid..
+                        " action="..current.action_id.." reason="..clean(g.h2_route_reason).." model_ms="..now) end
+                else
+                    register_route_obligation(st,current,g,now)
+                    if DEBUG_TELEMETRY then dlog("H2_EXECUTION_COMMITTED_ROUTE_OWED uid="..st.uid..
+                        " action="..current.action_id.." verdict="..clean(g.h2_route_credit)..
+                        " debt_reason="..clean(g.h2_route_reason).." model_ms="..now) end
+                end
             else
                 register_route_obligation(st,current,g,now)
             end
@@ -3417,6 +3426,13 @@ function R1.T2MoveEPreview(st,current,successor,ctx)
         now_ms=ctx.model_ms,observed_step_ms=st.model_step_ms or 0,exact_native_successor=true}
     local revalidated,why=R1.T2MoveEvidence.revalidate(cached,query)
     if not revalidated then return nil,why end
+    -- H2-D consumes the SAME frozen waypoint-obligation proof as proactive ISSUE.
+    -- G turnback is a stricter legacy subset, not a second independent permission.
+    local obligation=cached.h1_shadow
+    if type(obligation)~="table" or
+       (obligation.state~="SATISFIED" and obligation.state~="DEBT_PRESERVED") then
+        return nil,"H2_NATIVE_ROUTE_OBLIGATION_UNPROVEN"
+    end
     -- G: legacy SC1 may proactively start a U-turn early, but its steering
     -- corridor alone cannot grant Native adoption completion credit if the
     -- frozen successor endpoint would turn back short of the owed waypoint.
@@ -3552,6 +3568,20 @@ local function dispatch(st,index,reason,g,now,opts)
     -- Do NOT replace rev with current. That would reauthorize a stale plan.
     if current~=rev then
         cancel(st,"REVISION_CHANGED_BEFORE_DISPATCH",now,true); st.blocked=true; return
+    end
+    if a.type=="MOVE" and not opts.reassert_current then
+        local cur=st.plan[st.idx]
+        if cur and cur.type=="MOVE" then
+            -- Re-evaluate proof AFTER journal drain and immediately before Native ISSUE.
+            -- A newly completed prior debt or changed canonical edge revokes stale proof.
+            local h2=R1.H1ShadowObserve(st,cur,a,"H2_PREISSUE",now,nil)
+            if not h2 or h2.state=="BLOCKED" then
+                if DEBUG_TELEMETRY then dlog("H2_PREISSUE_DENIED uid="..st.uid..
+                    " reason="..clean(h2 and h2.reason or "UNAVAILABLE").." model_ms="..now) end
+                return
+            end
+            g.h2_route_credit=h2.state;g.h2_route_reason=h2.reason
+        end
     end
     if a.type=="ATTACK" then
         local good,why=target_ready(a,now)
@@ -4159,6 +4189,10 @@ function Core.reconcile_native_successor(st,now)
         -- exact-current MOVE proof, never geometry recomputed after Native promotion.
         local proof=st.t2move_d_evidence
         g=proof and transition_geometry_snapshot(proof.geometry) or nil
+        if g then
+            g.h2_route_credit=proof and proof.h1_shadow and proof.h1_shadow.state
+            g.h2_route_reason=proof and proof.h1_shadow and proof.h1_shadow.reason
+        end
         decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{current_index=st.idx,
             successor_index=future_index,execution_lineage=future_lineage,execution_provider=e.provider,
             move_native_reconcile=true,move_native_evidence=proof,model_ms=now})
@@ -4293,7 +4327,16 @@ local function advance(st,now)
         end
     else
         local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{current_index=st.idx,successor_index=st.idx+1})
-        R1.H1ShadowObserve(st,cur,nexta,"ISSUE",now,decision)
+        local h2=R1.H1ShadowObserve(st,cur,nexta,"ISSUE",now,decision)
+        -- H2-C: never issue a successor that cannot repay the old waypoint.
+        -- Preserve the original T1.7 timing/window; no new meter/angle gates.
+        if not h2 or h2.state=="BLOCKED" then
+            if DEBUG_TELEMETRY then dlog("H2_ROUTE_ISSUE_BLOCKED uid="..st.uid..
+                " gen="..st.gen.." action="..cur.action_id.." successor="..nexta.action_id..
+                " reason="..clean(h2 and h2.reason or "ROUTE_PROOF_UNAVAILABLE").." model_ms="..now) end
+            return
+        end
+        g.h2_route_credit=h2.state;g.h2_route_reason=h2.reason
         local route_ok,route_reason=decision.route_ok,decision.route_reason or decision.reason
         if not route_ok then
             if DEBUG_TELEMETRY and now-st.last_wait>=1000 then
