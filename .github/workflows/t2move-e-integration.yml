@@ -43,6 +43,9 @@ jobs:
         run: |
           lua5.1 maintenance_tools/t2move_a/test_t2move_e_controller.lua source/better_shift_command.lua tests/fixture.lua
           lua5.1 maintenance_tools/t2move_a/test_t2move_d_controller.lua source/better_shift_command.lua tests/fixture.lua
+      - name: E active controller mutation gate
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_e_mutations.py
       - name: Documentation contract
         run: |
           python maintenance_tools/check_documentation_contract.py
