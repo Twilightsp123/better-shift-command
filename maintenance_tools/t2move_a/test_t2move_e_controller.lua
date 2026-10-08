@@ -42,6 +42,19 @@ T("E-RT01 PATH_SAFE preserves old waypoint as route obligation",function()
  assert(f:has("ROUTE_OBLIGATION_TRANSFERRED"),"must not silently swallow waypoint")
  healthy(f)
 end)
+T("E-RT10 T1.6 commits frozen prepromotion MOVE geometry, not post-MOVE sample",function()
+ local f,first,second=setup()
+ warm(f)
+ f.evidence_record=second;f:tick(500,72,0)
+ local handoff=nil
+ for _,line in ipairs(f.logs) do
+   if line:find("ACTION_HANDOFF_COMMITTED",1,true) then handoff=line end
+ end
+ assert(handoff,"commit evidence absent")
+ local remain=tonumber(handoff:match("remaining=([%d%.]+)"))
+ assert(remain and math.abs(remain-30)<0.0001,"commit must use prior exact-current remaining=30, not post-promotion remaining=28: "..handoff)
+ healthy(f)
+end)
 T("E-RT02 no cache: premature Native MOVE remains denied",function()
  local f,first,second=setup()
  f:tick(100,10,0);f.evidence_record=second;f:tick(200,20,0)
