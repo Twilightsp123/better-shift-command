@@ -85,3 +85,18 @@ jobs:
       - name: Full maintenance suite
         run: |
           python maintenance_tools/run_checks_corepath_rc8.py
+      - name: Seal H2A complete test-only evidence source
+        run: |
+          python maintenance_tools/t2move_a/seal_t2move_h2a_archive.py
+      - name: Upload H2A reproducible red evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: BSC-T2MOVE-H2A-full-source-20261009
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            output/BSC_T2MOVE_H2A_full_source_20261009.zip
+            output/T2MOVE_H2A_HANDOFF_MANIFEST.json
+            output/READ_THIS_HANDOFF.txt
+            output/FILE_SHA256_MANIFEST.txt
+            output/SHA256SUMS_HANDOFF.txt
