@@ -54,6 +54,9 @@ jobs:
       - name: H3 stress real controller deterministic routes
         run: |
           lua5.1 maintenance_tools/t2move_a/test_t2move_h3_stress.lua source/better_shift_command.lua tests/fixture.lua
+      - name: H3 Native exact successor route-credit parity
+        run: |
+          lua5.1 maintenance_tools/t2move_h3_native.lua source/better_shift_command.lua tests/fixture.lua
       - name: Documentation contract
         run: |
           python maintenance_tools/check_documentation_contract.py
