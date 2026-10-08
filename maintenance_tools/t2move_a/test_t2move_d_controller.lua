@@ -30,7 +30,7 @@ T('D-RT01 exact future MOVE still follows old SC6 rollback (permission CLOSED)',
  f:tick(500,72,0)
  assert(not f:has('NATIVE_SUCCESSOR_ADOPTED'),'MOVE adopt must stay closed')
  assert(f:has('NATIVE_FUTURE_OVERRUN'),'future MOVE must retain legacy hard-close')
- assert(f:has('NATIVE_SUCCESSOR_ROLLBACK'),'legacy recovery retained')
+ assert(not f:has('TRANSITION_EDGE_COMMITTED'),'no MOVE credit on closed adopt envelope')
 end)
 T('D-RT02 no pre-promotion evidence on cold start',function()
  local f=mk();f:tick(100,10,0)
