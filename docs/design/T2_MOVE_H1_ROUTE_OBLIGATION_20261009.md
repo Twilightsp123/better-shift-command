@@ -33,12 +33,21 @@ as `reach`, H1 independently determines one of:
 
 | State | Evidence | Proposed H2 credit (not active in H1) |
 |---|---|---|
-| `SATISFIED` | Current action already semantically complete, actually inside existing reach, or a fresh observed motion segment crossed the reach envelope; unresolved prior debts must remain geometrically payable | `CURRENT_WAYPOINT_COMPLETE` |
+| `SATISFIED` | Current action has a trusted completion reason backed by actual route arrival/observation (not legacy steering completion), position is inside existing reach, or a fresh observed motion segment crossed the reach envelope; unresolved prior debts must remain geometrically payable | `CURRENT_WAYPOINT_COMPLETE` |
 | `DEBT_PRESERVED` | The `X→Q` successor chord passes inside the reach envelope around `P`, and every unresolved previous SC3 debt also remains inside its recorded existing tolerance | `REGISTER_ROUTE_OBLIGATION` |
 | `BLOCKED` | Missing or invalid evidence, old debt would be cut, or successor chord cannot repay current waypoint | `NONE` |
 
 A preserved chord proves **necessary geometric opportunity only**, not that
 the CA engine will follow it. It must never be treated as actual completion.
+**Completion provenance is mandatory:** the old `semantic_done=true` flag alone
+is not accepted as arrival evidence. In particular,
+`done_reason=STEERING_CORNER_HANDOFF` can have been set by the very
+handoff we are auditing, so trusting it would make the proof circular.
+H1 recognizes only route-observation completion reasons such as
+`ROUTE_NODE_REACHED`, `ROUTE_NODE_PASSED`,
+`HANDOFF_ROUTE_OBLIGATION_SATISFIED`, or `NATIVE_IDLE_ROUTE_FINISH`.
+Unrecognized reasons must rely on separate live geometry instead.
+
 A fresh motion segment is proof only when its two samples belong to an
 observed forward model-time step. Unknown debt records fail closed.
 
@@ -92,6 +101,15 @@ U-turn test in H1; preserve it as conflict evidence for the next decision.
 
 Record precise Actions run, commit and manifest only after final CI results.
 `WH3_RUNTIME: NOT TESTED / BLOCKED`.
+
+## 5.1 Additional provenance-hardening verification
+
+After the initial 14-case proof set, H1 added a dedicated synthetic case
+`H1-14`: an early steering handoff marked `semantic_done` still returns
+`BLOCKED` when geometry misses the waypoint. A sixth behavioral mutant
+attempts to trust every `semantic_done` flag and must be caught. This
+does not alter the original G controller's completion logic; it only prevents
+H1's independent analysis from inheriting G's circular assumption.
 
 ## 6. H2 gate (not implemented here)
 
