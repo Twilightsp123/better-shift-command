@@ -78,7 +78,7 @@ T("F-RISK-04 changing SC3 debt completion invalidates frozen D proof",function()
  assert(count_adoptions(f)==1,"P1-to-P2 setup must adopt: "..table.concat(f.logs," | "))
  assert(f:has("ROUTE_OBLIGATION_TRANSFERRED"),"P1 debt must be registered")
  f:tick(600,85,0)
- assert(f:count("T2MOVE_D_SHADOW_CAPTURE")>=2,"no P2-to-P3 proof with P1 debt")
+ assert(f:count("T2MOVE_D_SHADOW_CAPTURE")>=2,"no P2-to-P3 proof with P1 debt: "..table.concat(f.logs," | "))
  f.evidence_record=p3;f:tick(700,102,0) -- crosses owed P1 at x=100.
  assert(count_adoptions(f)==1,"changed route debt consumed stale proof")
  assert(f:has("MOVE_D_REVALIDATE_debt_signature"),"debt signature must invalidate frozen cache")
