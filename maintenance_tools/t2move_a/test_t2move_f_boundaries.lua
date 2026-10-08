@@ -68,7 +68,7 @@ T("F-RISK-04 changing SC3 debt completion invalidates frozen D proof",function()
  for _,p in ipairs({{100,0},{200,30},{300,50},{400,70}}) do f:tick(p[1],p[2],0) end
  assert(f:has("T2MOVE_D_SHADOW_CAPTURE"),"no P1-to-P2 route proof")
  f.evidence_record=p2;f:tick(500,72,0)
- assert(f:count("NATIVE_SUCCESSOR_ADOPTED")==1,"P1-to-P2 setup must adopt")
+ assert(f:count("NATIVE_SUCCESSOR_ADOPTED")==1,"P1-to-P2 setup must adopt: "..table.concat(f.logs," | "))
  assert(f:has("ROUTE_OBLIGATION_TRANSFERRED"),"P1 debt must be registered")
  f:tick(600,85,0)
  assert(f:count("T2MOVE_D_SHADOW_CAPTURE")>=2,"no P2-to-P3 proof with P1 debt")
