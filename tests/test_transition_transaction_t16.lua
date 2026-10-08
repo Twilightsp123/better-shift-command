@@ -11,19 +11,21 @@ end
 
 T('T16-00 BSC successor submit does not commit edge before ACK',function()
  local f=F({cold_idle=true,debug_source=true,width=20});f:start();f.unit.idle=false;f.unit.moving=true
- f:emit('MOVE',false,100,0);f:emit('MOVE',true,100,100)
+ f:emit('MOVE',false,100,0);f:emit('MOVE',true,200,0)
  f:tick(100,0,0);f:tick(200,70,0)
  assert(f.issued==1,'expected successor submission')
  assert(not f:has('ACTION_HANDOFF_COMMITTED'),'submission is not commitment')
  f:deliver();f:tick(300,72,0)
  assert(f:has('ACTION_HANDOFF_COMMITTED'),'ACK must commit edge')
  assert(f:has('TRANSITION_EDGE_COMMITTED'),'transaction commit telemetry missing')
+ assert(f:has('ROUTE_OBLIGATION_TRANSFERRED'),'ACK transfers unpaid waypoint; does not invent arrival')
+ assert(not f:has('reason=STEERING_CORNER_HANDOFF'),'T1.6 commit is not a synthetic waypoint')
  healthy(f)
 end)
 
 T('T16-01 rejected successor never commits previous waypoint handoff',function()
  local f=F({cold_idle=true,debug_source=true,width=20,reject_native=true});f:start();f.unit.idle=false;f.unit.moving=true
- f:emit('MOVE',false,100,0);f:emit('MOVE',true,100,100)
+ f:emit('MOVE',false,100,0);f:emit('MOVE',true,200,0)
  f:tick(100,0,0);f:tick(200,70,0)
  assert(f.issued==1 and not f:has('ACTION_HANDOFF_COMMITTED'))
  f:deliver();f:tick(300,72,0)
