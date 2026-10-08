@@ -66,3 +66,20 @@ jobs:
       - name: Full maintenance suite
         run: |
           python maintenance_tools/run_checks_corepath_rc8.py
+      - name: Build test PACK and SHA256 sealed full-source archive
+        run: |
+          python maintenance_tools/t2move_a/seal_t2move_h2h3.py
+      - name: Upload complete H2BCD-H3 source + ordinary/diagnostic Windows test PACK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BSC-T2MOVE-H2BCD-H3-full-source-testpack-20261009
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            output/BSC_T2MOVE_H2BCD_H3_full_source_20261009.zip
+            output/zzz_better_shift_command_steam.pack
+            output/zzz_better_shift_command_steam_H2H3_debug.pack
+            output/H2H3_MANIFEST.json
+            output/H2H3_SOURCE_FILE_SHA256.txt
+            output/H2H3_HANDOFF_SHA256SUMS.txt
+            output/READ_THIS_BEFORE_TESTING.txt
