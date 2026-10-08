@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - maintenance/t2move-f-audit-hardening
+  pull_request:
+    branches:
+      - maintenance/t2move-e-integration
   workflow_dispatch:
 
 permissions:
