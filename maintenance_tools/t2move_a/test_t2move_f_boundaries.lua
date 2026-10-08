@@ -32,6 +32,13 @@ end
 local function healthy(f)
  for _,line in ipairs(f.logs) do assert(not line:find("CONTROLLER_FAIL",1,true),line) end
 end
+local function count_adoptions(f)
+ local n=0
+ for _,line in ipairs(f.logs) do
+  if line:find("] NATIVE_SUCCESSOR_ADOPTED uid=",1,true) then n=n+1 end
+ end
+ return n
+end
 T("F-RISK-01 matching V2 future MOVE cannot consume V3-only proof",function()
  local f,_,nexta=setup({cold_idle=true,debug_source=true,no_calibration=true,
    width=20,disable_v3_evidence=true,native_order_evidence=order(2)})
@@ -68,12 +75,12 @@ T("F-RISK-04 changing SC3 debt completion invalidates frozen D proof",function()
  for _,p in ipairs({{100,0},{200,30},{300,50},{400,70}}) do f:tick(p[1],p[2],0) end
  assert(f:has("T2MOVE_D_SHADOW_CAPTURE"),"no P1-to-P2 route proof")
  f.evidence_record=p2;f:tick(500,72,0)
- assert(f:count("NATIVE_SUCCESSOR_ADOPTED")==1,"P1-to-P2 setup must adopt: "..table.concat(f.logs," | "))
+ assert(count_adoptions(f)==1,"P1-to-P2 setup must adopt: "..table.concat(f.logs," | "))
  assert(f:has("ROUTE_OBLIGATION_TRANSFERRED"),"P1 debt must be registered")
  f:tick(600,85,0)
  assert(f:count("T2MOVE_D_SHADOW_CAPTURE")>=2,"no P2-to-P3 proof with P1 debt")
  f.evidence_record=p3;f:tick(700,102,0) -- crosses owed P1 at x=100.
- assert(f:count("NATIVE_SUCCESSOR_ADOPTED")==1,"changed route debt consumed stale proof")
+ assert(count_adoptions(f)==1,"changed route debt consumed stale proof")
  assert(f:has("MOVE_D_REVALIDATE_debt_signature"),"debt signature must invalidate frozen cache")
  healthy(f)
 end)
