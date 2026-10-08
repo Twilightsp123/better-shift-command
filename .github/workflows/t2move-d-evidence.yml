@@ -1,0 +1,53 @@
+name: T2-MOVE-D Evidence Observer
+
+on:
+  push:
+    branches:
+      - maintenance/t2move-d-evidence
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  t2move-d-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Lua 5.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+      - name: D positive controller snapshot and permission-neutral contract
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_d_snapshot_contract.py
+          python maintenance_tools/t2move_a/test_t2move_a_scope.py
+      - name: D Lua evidence fixtures
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_d_evidence.lua source/t2move_d_evidence.lua
+      - name: D evidence mutation gate
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_d_mutations.py
+      - name: D real-controller exact-current sampling
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_d_controller.lua source/better_shift_command.lua tests/fixture.lua
+      - name: A/B shadow gates
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_a_shadow.lua maintenance_tools/t2move_a/t2move_a_shadow.lua
+          python maintenance_tools/t2move_a/test_t2move_a_mutations.py
+          lua5.1 maintenance_tools/t2move_a/test_t2move_b_shadow.lua maintenance_tools/t2move_a/t2move_a_shadow.lua maintenance_tools/t2move_a/t2move_b_shadow.lua
+          python maintenance_tools/t2move_a/test_t2move_b_mutations.py
+      - name: T2-MOVE-C T1.6 transaction simulation
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_c_txn_shadow.lua maintenance_tools/t2move_a/t2move_a_shadow.lua maintenance_tools/t2move_a/t2move_b_shadow.lua maintenance_tools/t2move_a/t2move_c_txn_shadow.lua
+      - name: T2-MOVE-C transaction mutations
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_c_mutations.py
+      - name: Documentation contract
+        run: python maintenance_tools/check_documentation_contract.py
+      - name: Existing maintenance suite
+        run: python maintenance_tools/run_checks_corepath_rc8.py
