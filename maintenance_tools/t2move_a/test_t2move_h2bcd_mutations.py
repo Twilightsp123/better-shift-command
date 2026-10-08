@@ -16,10 +16,10 @@ base=invoke(src_path)
 for n,r in enumerate(base):
  if r.returncode:raise SystemExit("BASE FAILED "+tests[n].name+"\n"+r.stdout+r.stderr)
 cases=[
- ("remove_issue_fidelity_gate",'        if not h2 or h2.state=="BLOCKED" then',
-  '        if false then',"H2-RT01"),
- ("remove_preissue_identity_guard",'            if not h2 or h2.state=="BLOCKED" then',
-  '            if false then',"H2-RT01"),
+ ("remove_issue_fidelity_gates",'if not h2 or h2.state=="BLOCKED" then',
+  'if false then',"H2-RT01"),
+ ("deny_all_preissue_proof",'local h2=R1.H1ShadowObserve(st,cur,a,"H2_PREISSUE",now,nil)',
+  'local h2=nil -- lost required fresh proof',"H2-RT04"),
  ("remove_native_obligation_guard",
   'if type(obligation)~="table" or\n       (obligation.state~="SATISFIED" and obligation.state~="DEBT_PRESERVED") then',
   'if false then',"H3-N02"),
@@ -31,9 +31,10 @@ cases=[
   '                else\n                    do end -- illegal lost route debt\n                    if DEBUG_TELEMETRY then dlog("H2_EXECUTION_COMMITTED_ROUTE_OWED',"H2-RT04"),
 ]
 for name,old,new,expected in cases:
- if src.count(old)!=1:raise SystemExit("BAD MUTATION ANCHOR "+name+" "+str(src.count(old)))
+ expected_count=2 if name=="remove_issue_fidelity_gates" else 1
+ if src.count(old)!=expected_count:raise SystemExit("BAD MUTATION ANCHOR "+name+" "+str(src.count(old)))
  with tempfile.TemporaryDirectory() as td:
-  p=Path(td)/"mutant.lua";p.write_text(src.replace(old,new,1),encoding="utf-8")
+  p=Path(td)/"mutant.lua";p.write_text(src.replace(old,new,expected_count),encoding="utf-8")
   results=invoke(p)
   failures=[x for r in results for x in r.stdout.splitlines() if x.startswith("FAIL ")]
   if all(r.returncode==0 for r in results) or not any(expected in f for f in failures):
