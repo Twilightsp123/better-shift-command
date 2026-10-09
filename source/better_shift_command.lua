@@ -4211,7 +4211,7 @@ local function rollback_native_future_to_current(st,cur,future,future_index,e,no
             " move_cache="..(type(move_cert)=="table" and "PRESENT" or "MISSING")..
             " move_cache_age_ms="..num_or_nil(move_cert and move_cert.sample_ms and (now-move_cert.sample_ms))..
             " move_cache_issue_open="..tostring(move_cert and move_cert.issue_open==true)..
-            " remaining_budget="..left.." model_ms="..now.." preserved_tail=true shared_budget=true")
+            " remaining_budget="..left.." model_ms="..now.." preserved_tail=true lua_tail_preserved=true native_tail_proven=false shared_budget=true")
         return true
     end
     return false

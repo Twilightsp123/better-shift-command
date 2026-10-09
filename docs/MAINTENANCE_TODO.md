@@ -128,3 +128,11 @@ Evidence: `script_log_091026_1144.txt` (H4S). Bridge/Observer PASS; 4 soft corne
 - [x] Add per-step forward-plane near-pass retirement after Native ACK; six positive/negative fixture gates.
 - [ ] Real WH3 replay of uid1006 12:10 9-node route and video confirmation, especially no step loss/stalls.
 - [ ] Address independent Native i+1/i+2/i+3 pre-promotion separately; H6 does not fix it.
+
+## H8 static / offline architecture pass (2026-10-09)
+- [x] Fix G11-only Shift ATTACK liveness for the physically stationary exact-current Native MOVE case without touching numeric tuning or EXE hooks.
+- [x] Add 9 pure policy, 4 shipped-controller synthetic negative/positive tests, and architecture source audit to CI.
+- [x] Distinguish Lua tail preservation from native queue preservation: Native tail is NOT proven after a nonqueued MOVE recovery.
+- [ ] P0: determine MinHook first-MOVE allocation subcause with separately approved v142 Win64 instrumentation; process-state retry ownership remains fail-closed.
+- [ ] P2: Native+Lua single-writer queue handoff design with precise original-order suppression or compensation proof; do not assert existing nonqueued rollback preserves Native tail.
+- [ ] Required eventual WH3 validation after P0/P2 are designed; avoid repeated user trials for individual H8 heuristics.

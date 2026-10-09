@@ -10,6 +10,7 @@ assert "native_current_move_witness_ms=e.provider==\"V3\" and now or nil" in ctl
 assert "ATTACK_NATIVE_MOVE_STALL_TERMINAL" in ctl and "ATTACK_NATIVE_MOVE_STALL_TERMINAL" in templ
 assert "ATTACK_NATIVE_MOVE_STALL_TERMINAL" in (root/"source/t2b_attack_policy_v2.lua").read_text()
 assert 'local issue_args={a.type,false,st.uid,rev,function()' in ctl
+assert "lua_tail_preserved=true native_tail_proven=false" in ctl
 start=bridge.index("std::uint32_t BridgeHost::order(")
 end=bridge.index("void* BridgeHost::allocate(",start)
 section=bridge[start:end]

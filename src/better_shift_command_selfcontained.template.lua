@@ -4159,7 +4159,7 @@ local function rollback_native_future_to_current(st,cur,future,future_index,e,no
             " blocked_successor="..clean(future and future.action_id).." future_index="..clean(future_index)..
             " active_kind="..clean(e and e.kind).." active_engine_seq="..clean(e and e.active_engine_seq)..
             " provider="..clean(e and e.provider).." execution_lineage="..clean(execution_lineage).." route_reason="..clean(route_reason)..
-            " remaining_budget="..left.." model_ms="..now.." preserved_tail=true shared_budget=true")
+            " remaining_budget="..left.." model_ms="..now.." preserved_tail=true lua_tail_preserved=true native_tail_proven=false shared_budget=true")
         return true
     end
     return false
