@@ -4099,10 +4099,17 @@ local function rollback_native_future_to_current(st,cur,future,future_index,e,no
     if budget_ok and S.pending_count<CFG.max_inflight and reassert_current_move(st,recovery_reason,now) then
         local consumed,rwhy,left=v3_recovery_commit(budget,"NATIVE_ROLLBACK",now)
         if not consumed then R1.fault(st,cur,"BLOCKED_EXECUTION","RECOVERY_ACCOUNTING_"..clean(rwhy),now);return false end
+        -- H5 diagnostics only: expose frozen proof and canonical gap, not permission.
+        local move_cert=st.t2move_d_evidence
         log("NATIVE_SUCCESSOR_ROLLBACK uid="..st.uid.." gen="..st.gen.." action="..cur.action_id..
             " blocked_successor="..clean(future and future.action_id).." future_index="..clean(future_index)..
             " active_kind="..clean(e and e.kind).." active_engine_seq="..clean(e and e.active_engine_seq)..
             " provider="..clean(e and e.provider).." execution_lineage="..clean(execution_lineage).." route_reason="..clean(route_reason)..
+            " current_index="..clean(st.idx).." plan_length="..clean(st.plan and #st.plan)..
+            " canonical_gap="..clean(future_index and st.idx and (future_index-st.idx))..
+            " move_cache="..(type(move_cert)=="table" and "PRESENT" or "MISSING")..
+            " move_cache_age_ms="..num_or_nil(move_cert and move_cert.sample_ms and (now-move_cert.sample_ms))..
+            " move_cache_issue_open="..tostring(move_cert and move_cert.issue_open==true)..
             " remaining_budget="..left.." model_ms="..now.." preserved_tail=true shared_budget=true")
         return true
     end

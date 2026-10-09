@@ -95,3 +95,14 @@ Battle teardown/suspend-resume is a separate stream and must not be marked PASS 
 | Genuine WH3 movement speed through 90°/180° and dense short legs | **NOT TESTED H4S** | Need actual script logs, unit video and observable stop/jitter before promotion |
 | WH3 Move→Attack, rollback/reassert flood, shutdown | **OPEN** | Must not infer from plain MOVE synthetic success |
 
+## H5 runtime reconciliation audit (isolated, no permission changes)
+
+| Gate | Status | Evidence |
+|---|---|---|
+| H4S WH3 9.0.2 smoke and early steering | **OBSERVED** | 11:44 real-game log: 4 early issue/ACK; 11 predictive MOVEs; no controller failure. Video smoothness still unverified |
+| H2 veto after SC window opened | **0 observed** | 80 blockers all before logged issue-open transition; 78 current-chord / 2 prior-debt |
+| H5RN-01 missing prepromotion evidence | **CI REQUIRED** | fail-closed Native exact i+1 first-poll race; no unjustified adopt |
+| H5RN-02 Native i+2 overrun | **CI REQUIRED** | no skip or false T1.6 cursor commit |
+| Exit contact stall | **OPEN / VIDEO REQUIRED** | one Exit reassert at model 82400, 900ms no progress |
+
+H5 code changes only DEBUG/rollback diagnostic fields; Native DLL/address unchanged. Do not infer H5 WH3 gameplay PASS from CI.

@@ -78,3 +78,7 @@ Battle teardown/hang remains a separate lifecycle stream and must not be mixed i
 
 
 **H4 speed-first soft waypoint experimental candidate:** `maintenance/t2move-h4-soft-corner-speed`. The real 9.0.2 test showed severe stop-and-go while strict H2 withheld corner changes until near each waypoint. As requested, continuity now takes priority over exact intermediate coordinate contact. Reuses bounded SC1/SC2 steering window; marks `H4_SOFT_WAYPOINT_ACCEPTED` only after actual ACK, not `ROUTE_NODE_REACHED`. Existing older unpaid SC3 debt, short-leg safety, Move→Attack and Native order provenance remain guarded. H4 offline CI PASS; WH3 H4 runtime **NOT TESTED**. Source of truth: `docs/design/T2_MOVE_H4_SPEED_SOFT_20261009.md`.
+
+## H5 WH3 9.0.2 real-log audit — 2026-10-09
+
+Evidence: `script_log_091026_1144.txt` (H4S). Bridge/Observer PASS; 4 soft corners ISSUE/ACK in 300–400 model-ms; 11 predictive MOVEs; no CONTROLLER_FAIL, MOVE_AFTER_NODE_COMPLETE or NATIVE_IDLE_ROUTE_FINISH. All 80 H2 veto observations preceded the corresponding SC issue-open window (0 late-window vetoes). Three initial Native rollback races remain: one i+1 without frozen prepromotion proof, two i+2 canonical overruns. One separate 900ms-contact-stall Exit reassert. Smoothness remains UNASSESSED without same-route video. H5 isolated branch `maintenance/t2move-h5-runtime-reconcile-audit` adds logging and two negative Native Controller fixtures without loosening policies or changing 9.0.2 Native DLL. See `docs/design/T2_MOVE_H5_RUNTIME_RECONCILE_AUDIT_20261009.md`. No release promotion.

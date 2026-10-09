@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - maintenance/t2move-h4-soft-corner-speed
+      - maintenance/t2move-h5-runtime-reconcile-audit
   workflow_dispatch:
 
 permissions:
