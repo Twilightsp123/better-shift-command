@@ -215,3 +215,12 @@
 **Validation:** CI `37830565468` offline PASS on H2 7/7 real-controller, H3 9/9 stress, 4/4 Native parity and 5/5 H2 mutants, original maintenance suite PASS. Replaced obsolete early-SC1/SC2/SC4 mutation expectations with active route-authority tests; frozen G/H1 source and historical CI remain available. No new tunable meter, speed, angle or timing parameter was introduced.
 
 **Unresolved:** a strict waypoint proof can cause CA braking near corners; neither fixture nor archive proves smooth movement or absence of foldback collisions inside the actual game. Real WH3 RT-TP-02/03/04/05 and lifecycle risks remain pending. Do not promote until real-game evidence meets both fidelity and smoothness requirements.
+
+
+## D-20261009-05 — Integrate already-derived 9.0.2 map by Windows build-local overlay, not hash bypass
+
+**Incident:** a prior H2/H3 source+PACK seal embedded the old 9.0.1 Native DLL and produced a live WH3 `OBSERVER_HOST_EXE_SHA256_MISMATCH` before any route algorithm could execute. The maintained 9.0.2 addresses, guards, Full Move VTable `0x03913618`, Attack VTable `0x03912988`, and EXE SHA256 `fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785` were already present on `maintenance/wh3-9.0.2-map-candidate`.
+
+**Decision:** preserve the H2/H3 Controller and its MASM-safe v142 CMake, copy the 9.0.2 canonical candidate map for provenance, cross-check every core RVA/guard and VTable with its existing staged candidate, then compile 9.0.2 only with `WH3_NATIVE_MAP_INCLUDE_DIR` instead of promoting the default `native_maps/CURRENT`. Update the Lua/Native/packer version identity to 1.0.18. The packaging job must depend on a successful Windows Native CTest, consume that exact newly built DLL, and reject the known 9.0.1 DLL and missing 9.0.2 EXE hash.
+
+**Evidence:** GitHub Actions `37877024598` Windows v142/MASM PASS, CTest 14/14, Linux H2/H3/maintenance PASS, full-source and ordinary/DEBUG PACK seal PASS. This is build and packaging evidence only. **WH3 runtime has NOT been tested**, and neither H2/H3 smoothness nor observer initialization may be promoted from this result. Draft review only; no merge/Steam update.

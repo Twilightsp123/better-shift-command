@@ -1,0 +1,424 @@
+{
+  "schema": 1,
+  "map_id": "WH3_9.0.2_fec656f4_COREPATH_CANDIDATE",
+  "game": {
+    "name": "Total War: WARHAMMER III",
+    "version": "9.0.2",
+    "platform": "Windows x64",
+    "exe_name": "Warhammer3.exe",
+    "sha256": "fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785"
+  },
+  "policy": {
+    "mandatory_core_hooks": 16,
+    "optional_sites_are_release_gates": false,
+    "runtime_mapping": "STATIC_FAIL_CLOSED",
+    "physical_evidence": "QUARANTINED",
+    "contact_pair_runtime": "STAGED_DISABLED",
+    "smart_guard_runtime": "STAGED_DISABLED"
+  },
+  "core": {
+    "move": {
+      "rva": "0x030351AC",
+      "guard": "488bc4488958104889701848897820554154415541564157488da888feffff48",
+      "role": "order_core",
+      "required": true,
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "EXACT_RELATION_RESOLVED"
+      }
+    },
+    "attack": {
+      "rva": "0x03033544",
+      "guard": "488bc448895808488968104889701857415641574883ec30498b18488bf1488b",
+      "role": "order_core",
+      "required": true,
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "EXACT_UNIQUE"
+      }
+    },
+    "allocator": {
+      "rva": "0x02F53128",
+      "guard": "48895c240855488d6c24c04881ec40010000488bd984d2752083b9102d000000",
+      "role": "order_core",
+      "required": true,
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "EXACT_UNIQUE"
+      }
+    },
+    "halt": {
+      "rva": "0x0301C5E0",
+      "guard": "48895c24084889742410574883ec20488bf18ada4881c188020000e8b406f2ff",
+      "role": "order_core",
+      "required": true,
+      "normalization": {
+        "kind": "relocation_mask",
+        "mask_ranges": [
+          [
+            28,
+            32
+          ]
+        ],
+        "note": "mask CALL rel32 displacement"
+      },
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "NORMALIZED_UNIQUE"
+      }
+    },
+    "lua_move": {
+      "rva": "0x02ED6404",
+      "guard": "488bc44889580848897018488978205541564157488d68d84881ec1001000048",
+      "role": "lua_ingress",
+      "required": true,
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "EXACT_RELATION_RESOLVED"
+      }
+    },
+    "lua_attack": {
+      "rva": "0x02ED5C9C",
+      "guard": "48895c240848896c2410488974241857415641574881ecd0000000458af8488b",
+      "role": "lua_ingress",
+      "required": true,
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "EXACT_UNIQUE"
+      }
+    },
+    "publish_move": {
+      "rva": "0x01CAFDDC",
+      "guard": "48895c2418574883ec408b0520cb3b02488bd9488d4c245089442450488bfae8",
+      "role": "command_publication",
+      "required": true,
+      "normalization": {
+        "kind": "relocation_mask",
+        "mask_ranges": [
+          [
+            12,
+            16
+          ]
+        ],
+        "rip_target": {
+          "disp_offset": 12,
+          "instruction_end_offset": 16
+        },
+        "note": "mask first RIP-relative global displacement"
+      },
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "NORMALIZED_RELATION_RESOLVED"
+      }
+    },
+    "publish_attack": {
+      "rva": "0x02DF3410",
+      "guard": "48895c2418574883ec408b05c0932701488bd9488d4c245089442450488bfae8",
+      "role": "command_publication",
+      "required": true,
+      "normalization": {
+        "kind": "relocation_mask",
+        "mask_ranges": [
+          [
+            12,
+            16
+          ]
+        ],
+        "rip_target": {
+          "disp_offset": 12,
+          "instruction_end_offset": 16
+        },
+        "note": "mask first RIP-relative global displacement"
+      },
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "NORMALIZED_RELATION_RESOLVED"
+      }
+    },
+    "writer_begin": {
+      "rva": "0x01BCBE28",
+      "guard": "48895c24084c8bda488bd94c89590833d2668911418b8300500000894110418b",
+      "role": "packet_pipeline",
+      "required": true,
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "EXACT_UNIQUE"
+      }
+    },
+    "writer_finalize": {
+      "rva": "0x01BCF144",
+      "guard": "8039004c8bc9753180790100752b488b51088b4114440fb7820050000066442b",
+      "role": "packet_pipeline",
+      "required": true,
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "EXACT_UNIQUE"
+      }
+    },
+    "copy": {
+      "rva": "0x01BACFB4",
+      "guard": "488bc44889581048897018574883ec20488bfa4c8d40088b920050000033db88",
+      "role": "packet_pipeline",
+      "required": true,
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "EXACT_UNIQUE"
+      }
+    },
+    "stage": {
+      "rva": "0x01BAE7B8",
+      "guard": "48895c24084889742410574883ec20488bd98bf2488b4918498bf8e830330000",
+      "role": "packet_pipeline",
+      "required": true,
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "EXACT_UNIQUE"
+      }
+    },
+    "move_handler": {
+      "rva": "0x02ECFCD0",
+      "guard": "48895c241048897c242055488d6c24a94881ec00010000488bfa488bd9488bd1",
+      "role": "packet_pipeline",
+      "required": true,
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "EXACT_RELATION_RESOLVED"
+      }
+    },
+    "attack_handler": {
+      "rva": "0x02ECF79C",
+      "guard": "488bc448895810555657488d68a84881ec40010000488bf20f2970d8488bd148",
+      "role": "packet_pipeline",
+      "required": true,
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "EXACT_UNIQUE"
+      }
+    },
+    "selection": {
+      "rva": "0x02F04F70",
+      "guard": "40555356574157488d6c24c94881ecc00000004533ff4c8d456f488bda44897d",
+      "role": "packet_pipeline",
+      "required": true,
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "EXACT_UNIQUE"
+      }
+    },
+    "free": {
+      "rva": "0x00537420",
+      "guard": "4883ec584885c90f8412010000f6056c40a30302",
+      "role": "packet_pipeline",
+      "required": true,
+      "normalization": {
+        "kind": "relocation_mask",
+        "mask_ranges": [
+          [
+            9,
+            13
+          ],
+          [
+            15,
+            19
+          ]
+        ],
+        "note": "mask near Jcc rel32 and RIP-relative global displacement"
+      },
+      "relocation": {
+        "source_build": "9.0.1",
+        "source_rva": "recorded_in_parent_map",
+        "method": "NORMALIZED_UNIQUE"
+      }
+    }
+  },
+  "optional": {
+    "contact_pair": {
+      "rva": "0x030A4505",
+      "guard": "488b47184885c07418488b88e8020000",
+      "role": "physical_research",
+      "required": false,
+      "runtime": "STAGED_DISABLED",
+      "relocation_status": "EXACT_UNIQUE_RELOCATED"
+    },
+    "smart_guard": {
+      "rva": "0x030E319C",
+      "guard": "48895c24084889742410574883ec20488b02488bf1488bca418af8488bdaff90",
+      "role": "smart_guard",
+      "required": false,
+      "runtime": "STAGED_DISABLED",
+      "relocation_status": "EXACT_UNIQUE_RELOCATED"
+    }
+  },
+  "derived": {
+    "full_move_vtable": {
+      "rva": "0x03913618",
+      "proof": "LEVEL-1_STATIC_DATAFLOW_CANDIDATE",
+      "note": "Top-level Order::issue_move outcome type"
+    },
+    "simple_intercept_move_vtable": {
+      "rva": "0x03910438",
+      "proof": "SIBLING_CONSTRUCTOR_STATIC_CANDIDATE",
+      "release_use": false,
+      "note": "Explicitly not the BSC top-level Move outcome type"
+    },
+    "attack_vtable": {
+      "rva": "0x03912988",
+      "proof": "LEVEL-1_STATIC_DATAFLOW_CANDIDATE"
+    },
+    "order_constructors": {
+      "base": "0x0300B518",
+      "full_move": "0x0300BDC0",
+      "simple_intercept_move": "0x0300BD64",
+      "attack": "0x0300B8C4"
+    }
+  },
+  "source_of_truth": {
+    "authoritative_for_address_pipeline": true,
+    "scope": "maintenance/wh3-9.0.2-map-candidate branch only until runtime promotion",
+    "parent_map": "native_maps/wh3_9.0.1_6c104a63.json",
+    "promotion_rule": "Windows v142/MASM build + Windows Native CTest + WH3 runtime smoke required before release"
+  },
+  "relationships": [
+    {
+      "id": "move_attack_cluster",
+      "type": "rva_delta",
+      "left": "move",
+      "right": "attack",
+      "expected_delta": 7272,
+      "tolerance": 128,
+      "weight": 4
+    },
+    {
+      "id": "lua_pair",
+      "type": "rva_delta",
+      "left": "lua_move",
+      "right": "lua_attack",
+      "expected_delta": 1896,
+      "tolerance": 16,
+      "weight": 6
+    },
+    {
+      "id": "handler_pair",
+      "type": "rva_delta",
+      "left": "move_handler",
+      "right": "attack_handler",
+      "expected_delta": 1332,
+      "tolerance": 16,
+      "weight": 6
+    },
+    {
+      "id": "publish_global_pair",
+      "type": "rip_target_delta",
+      "left": "publish_move",
+      "right": "publish_attack",
+      "expected_delta": 300,
+      "tolerance": 0,
+      "weight": 8
+    },
+    {
+      "id": "move_handler_calls_selection",
+      "type": "calls",
+      "caller": "move_handler",
+      "callee": "selection",
+      "weight": 5
+    },
+    {
+      "id": "attack_handler_calls_selection",
+      "type": "calls",
+      "caller": "attack_handler",
+      "callee": "selection",
+      "weight": 5
+    },
+    {
+      "id": "publish_move_calls_writer_begin",
+      "type": "calls",
+      "caller": "publish_move",
+      "callee": "writer_begin",
+      "weight": 5
+    },
+    {
+      "id": "publish_move_calls_writer_finalize",
+      "type": "calls",
+      "caller": "publish_move",
+      "callee": "writer_finalize",
+      "weight": 5
+    },
+    {
+      "id": "publish_attack_calls_writer_begin",
+      "type": "calls",
+      "caller": "publish_attack",
+      "callee": "writer_begin",
+      "weight": 5
+    },
+    {
+      "id": "publish_attack_calls_writer_finalize",
+      "type": "calls",
+      "caller": "publish_attack",
+      "callee": "writer_finalize",
+      "weight": 5
+    },
+    {
+      "id": "publish_move_regional_shift",
+      "type": "regional_shift",
+      "site": "publish_move",
+      "anchors": [
+        "writer_begin",
+        "writer_finalize",
+        "copy",
+        "stage"
+      ],
+      "tolerance": 2048,
+      "weight": 3
+    },
+    {
+      "id": "publish_attack_regional_shift",
+      "type": "regional_shift",
+      "site": "publish_attack",
+      "anchors": [
+        "attack_handler",
+        "lua_attack",
+        "selection",
+        "allocator"
+      ],
+      "tolerance": 1024,
+      "weight": 3
+    }
+  ],
+  "candidate": {
+    "status": "STATIC_VERIFIED_WINDOWS_AND_RUNTIME_PENDING",
+    "release_authorized": false,
+    "source_map_id": "WH3_9.0.1_6c104a63_COREPATH_RC8",
+    "core_resolution": "16/16",
+    "optional_resolution": "2/2",
+    "order_identity_proof": "ALLOCATOR_TO_CONSTRUCTOR_TO_VTABLE_STATIC_DATAFLOW",
+    "required_next_gates": [
+      "generate runtime source map",
+      "prebuild contract",
+      "Windows v142/MASM build",
+      "Windows Native CTest",
+      "WH3 native smoke"
+    ],
+    "static_validation": {
+      "exe_sha256_match": true,
+      "mandatory_guards": "16/16 BYTE_EXACT",
+      "optional_guards": "2/2 BYTE_EXACT",
+      "order_identity": "ALLOCATOR_TO_CONSTRUCTOR_TO_VTABLE_REDERIVED",
+      "stage_1_to_6": "PASS"
+    }
+  }
+}

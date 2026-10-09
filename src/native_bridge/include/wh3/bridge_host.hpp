@@ -340,7 +340,7 @@ private:
  std::uint64_t next_client_id_{0};
  std::atomic<bool> smart_guard_client_active_{false};
 };
-static constexpr const char* kDiagnosticBridgeVersion = "1.0.17-corepath-wh3-6c104-movevtfix";
+static constexpr const char* kDiagnosticBridgeVersion = "1.0.18-corepath-wh3-fec656f4-map902";
 
 struct DiagnosticLayoutPair {
     std::size_t entity_component_offset{0};

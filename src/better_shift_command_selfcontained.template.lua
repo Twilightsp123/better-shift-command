@@ -4761,10 +4761,10 @@ function Core.boot()
         "r1_evidence_capabilities_v3","read_active_order_identity_v3"}) do
         if type(bridge[k])~="function" then error("MISSING_BRIDGE_API "..k) end
     end
-    if bridge.version()~="1.0.17-corepath-wh3-6c104-movevtfix" then error("WRONG_BRIDGE_VERSION") end
+    if bridge.version()~="1.0.18-corepath-wh3-fec656f4-map902" then error("WRONG_BRIDGE_VERSION") end
     local n,f=bridge.number_abi_probe(); local a,c=bridge.exact_id_probe()
     if n~=16777215 or f~=1.5 or a~="4294967295" or c~="16777217" then error("BRIDGE_ABI_SELFTEST") end
-    log("BRIDGE_OK version=1.0.17-corepath-wh3-6c104-movevtfix")
+    log("BRIDGE_OK version=1.0.18-corepath-wh3-fec656f4-map902")
     if DEBUG_TELEMETRY then log("FEG_CONFIG version="..FEG.VERSION.." enabled=true confirmation_ms="..FEG.DEFAULTS.confirm_ms..
         " close_confirmation_ms="..FEG.DEFAULTS.close_confirm_ms.." sample_window_ms="..FEG.DEFAULTS.window_ms..
         " sustained_contact_ms="..FEG.DEFAULTS.contact_confirm_ms.." geometry_confirm_ms="..FEG.DEFAULTS.geometry_confirm_ms.." hold_ms="..CFG.attack_hold_ms.." charging_required=false native_changed=true max_inflight="..CFG.max_inflight) end

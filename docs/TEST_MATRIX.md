@@ -68,3 +68,17 @@ Battle teardown/suspend-resume is a separate stream and must not be marked PASS 
 | existing evidence wiring | PASS |
 | Native code changed | NO |
 | visible MCT UI runtime test | N/A — intentionally absent |
+
+
+## WH3 9.0.2 Native bootstrap and H2/H3 integration (isolated candidate)
+
+| Gate | Status | Evidence |
+|---|---|---|
+| 9.0.2 address map / 16 mandatory hook guards / Full Move and Attack VTable | **PASS STATIC** | Existing `maintenance/wh3-9.0.2-map-candidate`, cross-checked against integrated `native_maps/candidates/wh3_9.0.2_fec656f4.json` |
+| H2/H3 Controller 7/7, H3 stress 9/9, Native parity 4/4, H2 mutations 5/5, full maintenance | **PASS OFFLINE** | GitHub Actions `37877024598` Linux |
+| Windows x64 v142 + MASM compilation | **PASS** | Same Actions run: build-local 9.0.2 generated map, MASM-safe CXX-only flags |
+| Windows Native CTest | **14/14 PASS** | Same Actions run |
+| New 9.0.2 DLL version/hash/pack byte integration | **PASS BUILD** | Windows-built 1.0.18 DLL; plain+DEBUG PFH5 packed and SHA256 sealed |
+| WH3 in-game Observer initialization and standard MOVE/ATTACK smoke | **NOT TESTED** | Await script logs on supported 9.0.2 Windows game process |
+| WH3 Move/Attack choreography, foldback/no-stutter, multi-unit, teardown | **NOT TESTED** | RT-TP-02/03/04/05 remain blocked |
+

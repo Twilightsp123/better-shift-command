@@ -109,3 +109,8 @@ Whenever an item changes from BLOCKED/PENDING to ACTIVE/PASS/FAILED:
 3. update `TEST_MATRIX.md` if a gate ran;
 4. record a meaningful architecture decision/result in `DECISION_LOG.md` or `DEVELOPMENT_HISTORY.md` when appropriate;
 5. run `maintenance_tools/check_documentation_contract.py`.
+
+
+## P0.5 — WH3 9.0.2 H2/H3 Native test handoff
+
+**Status: WINDOWS NATIVE COMPILE + CTEST PASS / WH3 RUNTIME NOT TESTED.** The 2026-10-09 BSC logs confirmed `OBSERVER_HOST_EXE_SHA256_MISMATCH` because the prior H2/H3 PACK embedded a 9.0.1 DLL. The completed 9.0.2 address work already existed at `maintenance/wh3-9.0.2-map-candidate`; no relocation rerun or guessed RVA was necessary. Independent integration `maintenance/t2move-h2h3-wh3-902-integration` preserves `native_maps/CURRENT` as 9.0.1 while compiling a 9.0.2 overlay with the documented 16 core hooks and Full Move/Attack VTables. GitHub Actions `37877024598`: Linux H2/H3 regression PASS, MSVC v142 + MASM Windows build PASS, Windows Native CTest **14/14 PASS**, binary 9.0.2 version/hash check PASS, and Windows-built DLL/plain/DEBUG PACK/full-source SHA256 seal PASS. **Next action is WH3 9.0.2 startup smoke**: exact target EXE hash, enable one diagnostic BSC candidate, confirm `OBSERVER_READY`/`START`/`READY`, run a normal Move/Attack capture and Quit-to-Windows clean stop. Only then rerun H2/H3 route smoothness + fidelity RT-TP-04/05 and T2-B RT-TP-02/03. Do not change gameplay movement parameters to hide a startup failure. Details in `docs/design/T2MOVE_H2H3_WH3_902_INTEGRATION_20261009.md`.

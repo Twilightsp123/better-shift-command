@@ -1,0 +1,148 @@
+name: H2H3 WH3 9.0.2 Native Candidate (No Release)
+
+on:
+  push:
+    branches:
+      - maintenance/t2move-h2h3-wh3-902-integration
+  pull_request:
+    branches:
+      - maintenance/t2move-h2bcd-h3-route-integrity
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    name: H2H3 + 9.0.2 Contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Lua 5.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+      - name: Compare preserved 9.0.2 address map, Lua and Native identifiers
+        run: |
+          python maintenance_tools/t2move_a/check_h2h3_902_integration.py
+          python maintenance_tools/check_native_map_contract.py
+          python tools/prebuild_contract_check.py
+          python maintenance_tools/check_documentation_contract.py
+      - name: Regress address pipeline and Windows candidate build lane
+        run: |
+          python tests/test_address_pipeline.py
+          python tests/test_candidate_build_lane.py
+      - name: H2/H3 real Controller, Native, mutation and pure observer
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_h1_pure.lua source/t2move_h1_route_obligation.lua
+          lua5.1 maintenance_tools/t2move_a/test_t2move_h2bcd_controller.lua source/better_shift_command.lua tests/fixture.lua
+          lua5.1 maintenance_tools/t2move_a/test_t2move_h3_stress.lua source/better_shift_command.lua tests/fixture.lua
+          lua5.1 maintenance_tools/t2move_h3_native.lua source/better_shift_command.lua tests/fixture.lua
+          python maintenance_tools/t2move_a/test_t2move_h2bcd_mutations.py
+      - name: Full CorePath original maintenance regressions
+        run: |
+          python maintenance_tools/run_checks_corepath_rc8.py
+
+  windows_native_902:
+    name: Real Windows v142 DLL + CTest
+    runs-on: windows-2022
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Preserve original repository text bytes
+        shell: pwsh
+        run: |
+          git config core.autocrlf false
+          git reset --hard HEAD
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Check 16/16 address mapping and v142 MASM isolation
+        shell: pwsh
+        run: |
+          python maintenance_tools/t2move_a/check_h2h3_902_integration.py
+          python maintenance_tools/check_native_map_contract.py
+          python tools/prebuild_contract_check.py
+      - name: Generate exact 9.0.2 build-only Native header
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path build-map/include/wh3 | Out-Null
+          python maintenance_tools/generate_native_header.py --map native_maps/candidates/wh3_9.0.2_fec656f4.json --out build-map/include/wh3/generated_native_map.hpp
+          python maintenance_tools/check_native_map_contract.py --map native_maps/candidates/wh3_9.0.2_fec656f4.json --generated build-map/include/wh3/generated_native_map.hpp
+      - name: Configure MSVC v142 and ASM_MASM with 9.0.2 overlay
+        shell: pwsh
+        run: |
+          $Overlay = Join-Path $env:GITHUB_WORKSPACE 'build-map/include'
+          cmake -S src/native_bridge -B build-902 -G 'Visual Studio 17 2022' -A x64 -T v142 "-DWH3_NATIVE_MAP_INCLUDE_DIR=$Overlay"
+      - name: Build 9.0.2 WinX64 Native Bridge
+        shell: pwsh
+        run: cmake --build build-902 --config Release --parallel
+      - name: Windows Native CTest
+        shell: pwsh
+        run: ctest --test-dir build-902 -C Release --output-on-failure
+      - name: Verify built DLL is not locked 9.0.1 binary
+        shell: pwsh
+        run: |
+          $Dll = 'build-902/Release/wh3_native_bridge.dll'
+          if (!(Test-Path $Dll)) { throw 'Built Native Bridge DLL missing' }
+          $Bytes = [System.IO.File]::ReadAllBytes((Resolve-Path $Dll).Path)
+          $Latin = [System.Text.Encoding]::Latin1.GetString($Bytes)
+          if (!$Latin.Contains('1.0.18-corepath-wh3-fec656f4-map902')) { throw 'New Bridge version missing from DLL' }
+          if (!$Latin.Contains('fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785')) { throw '9.0.2 EXE SHA missing from DLL' }
+          New-Item -ItemType Directory -Force native-delivery | Out-Null
+          Copy-Item $Dll native-delivery/wh3_native_bridge.dll
+          Copy-Item build-map/include/wh3/generated_native_map.hpp native-delivery/generated_native_map.hpp
+          $Hash = (Get-FileHash $Dll -Algorithm SHA256).Hash.ToLowerInvariant()
+          "bridge_sha256=$Hash" | Out-File -Encoding utf8 native-delivery/build_hash.txt
+          "native_version=1.0.18-corepath-wh3-fec656f4-map902" | Add-Content native-delivery/build_hash.txt
+          "exe_sha256=fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785" | Add-Content native-delivery/build_hash.txt
+      - name: Upload Windows-built DLL and generated 9.0.2 address header
+        uses: actions/upload-artifact@v4
+        with:
+          name: H2H3-WH3-902-native-v142
+          if-no-files-found: error
+          retention-days: 90
+          path: native-delivery/
+
+  handoff:
+    name: Seal full source and ordinary/DEBUG candidate PACKs
+    needs: [offline, windows_native_902]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v4
+        with:
+          name: H2H3-WH3-902-native-v142
+          path: input_902
+      - name: Validate real Windows DLL and seal full-source ordinary/DEBUG PACKs
+        run: python maintenance_tools/t2move_a/seal_h2h3_902.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BSC-H2H3-WH3-902-source-testpack-handoff
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            output/BSC_H2H3_902_full_source.zip
+            output/zzz_better_shift_command_steam.pack
+            output/zzz_better_shift_command_steam_H2H3_902_debug.pack
+            output/H2H3_902_MANIFEST.json
+            output/H2H3_902_SOURCE_SHA256.txt
+            output/H2H3_902_SHA256SUMS.txt
+            output/READ_THIS_902.txt

@@ -82,3 +82,8 @@ The 2026-09-29 disassembly reports proved allocator return ABI, top-level constr
 - Movement Cornering / Attack Handoff / Route Fidelity / Native Successor Tolerance / Disengage Priority are reserved but not runtime-wired yet.
 - T1 shared evaluator, T1.5 execution-lineage separation, T1.6 committed-edge transaction, T1.7 consumer-neutral envelopes and G1 are validated. T2-B G1.1 is implemented and offline validated but still awaits WH3 RT-TP-02/03; T2-MOVE exact immediate successor MOVE+hysteresis is implemented **only in the isolated E/F/G offline branches**, not in T2-B, release or any WH3-promoted build.
 - Minimum Engagement Time is wired at the legacy-equivalent default 3.0 s; alternate values are not exposed to users in T1H.
+
+
+### O-09a — WH3 9.0.2 Native bootstrap compatibility
+
+**OFFLINE/WINDOWS BUILD RESOLVED; WH3 RUNTIME OPEN.** The previous H2/H3 test PACK used 9.0.1 Native and failed `OBSERVER_HOST_EXE_SHA256_MISMATCH` before the route algorithm could execute. The separate 9.0.2 integration branch now compiles a fresh 1.0.18 Native DLL against the existing complete 9.0.2 address candidate and passes v142/MASM build plus Native CTest 14/14 (Actions `37877024598`). Normal/DEBUG test PACKs have been sealed, but WH3 process attachment, move/attack hook smoke, teardown, and H2/H3 movement are **NOT TESTED**. Keep O-09 OPEN until game logs independently confirm startup and behavior. Never bypass EXE SHA or hook-byte guards.
