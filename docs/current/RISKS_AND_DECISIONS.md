@@ -26,6 +26,8 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 
 | NQ-020 | EXACT FILE STATIC EVIDENCE | Original ring pop at 0x02F4FD10 increments aliased head (+0x2D04 from UnitRoot+0x288), decrements count (+0x2D00), and wraps at 40; five verified direct calls. This is a risky *mutating lifecycle primitive*, NOT a patch recommendation. | identify caller-specific MOVE completion and native braking independently |
 
+| NQ-021 | EXACT FILE MOVE STATUS DATAFLOW | Native MOVE constructor 0x030090BC writes VTable 0x0390B4F0. Virtual +0x10 resolves to 0x030440F8, setting object+0x20 from (related_state+0x240 == 0). In state path 0x030433B0 this flag gates ring pop. Original meaning of related-state+0x240, MOVE terminal brake, and next activation remain OPEN. | trace related-state writer, MOVE virtual +0x08, and native successor activation; see N1_903_MOVE_STATUS_CHAIN.md |
+
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
 - No guessed new Hook location, signature, VTable, native queue write offset or mutation without independent evidence.
@@ -45,5 +47,7 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 - 2026-10-09 / D-NQ-008: N1 tooling is read-only, must never auto-promote bytes/offsets to confirmed Hook or patch. Offline test successes are tooling contracts only. Require actual exact-build MOVE completion/braking dataflow before N2.
 
 - 2026-10-09 / D-NQ-009: user-provided 9.0.3-labelled EXE statically analyzed; native ring pop and callers identified. No runtime Hook, ABI or gameplay claim promoted; see N1_903_ORDER_LIFECYCLE_STATIC.md.
+
+- 2026-10-09 / D-NQ-010: exact-file MOVE constructor/virtual status dataflow identified; cannot equate status zero-check with physical arrival or authorize head manipulation.
 
 Do not call any proposal 'implemented' until committed code and the corresponding tests exist.
