@@ -1,0 +1,37 @@
+name: NQTR document migration and authority gates
+
+on:
+  push:
+    branches:
+      - architecture/native-queue-transition-rewrite-docs
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Archive byte preservation and current-doc authority
+        run: python maintenance_tools/nqtr_docs_contract.py
+      - name: Historical D1 contracts plus new NQTR source guidance
+        run: python maintenance_tools/check_documentation_contract.py
+      - name: Prepare Lua for frozen controller maintenance tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+      - name: CorePath and H8 frozen regressions (no PACK build)
+        run: python maintenance_tools/run_checks_corepath_rc8.py
+      - name: WH3 9.0.2 static Native map and controller mirrors
+        run: |
+          python maintenance_tools/t2move_a/check_h2h3_902_integration.py
+          python maintenance_tools/check_native_map_contract.py
+          python tools/prebuild_contract_check.py

@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
-"""Fail-closed documentation contract for BSC-TPOL-D1 staged handoffs."""
+"""Preserve legacy D1 document contract and validate NQTR current-document hierarchy."""
 from pathlib import Path
 import json
 ROOT=Path(__file__).resolve().parents[1]
 def fail(msg): print('FAIL:',msg); raise SystemExit(1)
+# LEGACY-D1 contract: archive paths preserve historical bytes/tokens,
+# but these documents no longer direct current native queue architecture.
 def read(rel):
-    p=ROOT/rel
-    if not p.exists(): fail('missing required documentation file: '+rel)
+    if rel=='README_FIRST.md':
+        p=ROOT/'docs/past_doc/root/README_FIRST.md'
+    elif rel.startswith('docs/'):
+        p=ROOT/'docs/past_doc'/rel[5:]
+    else:
+        p=ROOT/rel
+    if not p.exists(): fail('missing required historical documentation file: '+rel)
     return p.read_text(encoding='utf-8')
 required=[
  'README_FIRST.md','VERSION','PACK_NAME','DESIGN_MANIFEST.json','RELEASE_MANIFEST.json','GITHUB_ARCHIVE_MANIFEST.json','docs/VERSION_POLICY.md','docs/MAINTAINER_INDEX.md','docs/ARCHITECTURE_STATUS_20260929.md',
@@ -73,4 +80,30 @@ gh=json.loads(read('GITHUB_ARCHIVE_MANIFEST.json'))
 if gh.get('validation',{}).get('controller_regression_jobs')!='46/46 PASS (GITHUB ACTIONS T2-B G1.1 OFFLINE VALIDATION)': fail('GITHUB_ARCHIVE_MANIFEST T2-B validation mismatch')
 if gh.get('validation',{}).get('execution_lineage_t15_contract')!='PASS' or gh.get('validation',{}).get('execution_lineage_t15_mutations')!='PASS_7_OF_7': fail('GITHUB_ARCHIVE_MANIFEST T1.5 gate mismatch')
 if gh.get('validation',{}).get('transition_transaction_t16_contract')!='PASS' or gh.get('validation',{}).get('transition_transaction_t16_mutations')!='PASS_7_OF_7' or gh.get('validation',{}).get('transition_transaction_t16_runtime')!='PASS_3_OF_3': fail('GITHUB_ARCHIVE_MANIFEST T1.6 gate mismatch')
-print('PASS: v1.3.0 documentation contract; T2-B G1.1 offline validated, WH3 RT-TP-02/03 pending, T2-MOVE inactive')
+print('PASS: archived v1.3.0/D1 documentation tokens retained; HISTORICAL ONLY')
+# NQTR authoritative documents are separated from legacy D1 content.
+current=['README.md','PRODUCT_CONTRACT.md','CURRENT_BASELINE.md','NATIVE_RESEARCH_MAP.md',
+         'TARGET_ARCHITECTURE.md','IMPLEMENTATION_PLAN.md','VERIFICATION.md',
+         'RISKS_AND_DECISIONS.md','MAINTENANCE_RULES.md']
+for name in current:
+    p=ROOT/'docs/current'/name
+    if not p.is_file():fail('missing active NQTR documentation: '+name)
+    if p.stat().st_size<500:fail('active NQTR documentation too short: '+name)
+active=(ROOT/'docs/current/README.md').read_text(encoding='utf-8')
+plan=(ROOT/'docs/current/IMPLEMENTATION_PLAN.md').read_text(encoding='utf-8')
+mapdoc=(ROOT/'docs/current/NATIVE_RESEARCH_MAP.md').read_text(encoding='utf-8')
+for token in ('single','docs/past_doc','H8','NQTR'):
+    if token.lower() not in (active+' '+plan).lower():fail('NQTR reading/plan missing '+token)
+for token in ('Stage 0','Stage 1','Stage 2','Stage 3','Stage 4','Stage 5','Stage 6',
+              'WH3','Native','MOVE','ATTACK'):
+    if token.lower() not in plan.lower():fail('NQTR plan missing '+token)
+for token in ('not','0x030351AC','0x03033544','OrderHead','VTable'):
+    if token.lower() not in mapdoc.lower():fail('NQTR reverse map missing '+token)
+if not (ROOT/'docs/past_doc/README.md').is_file():fail('past_doc index missing')
+if not (ROOT/'docs/README.md').is_file():fail('docs entry missing')
+old_names=['ARCHITECTURE_STATUS_20260929.md','CURRENT_BUILD_MAP.md','DECISION_LOG.md',
+           'DEVELOPMENT_HISTORY.md','MAINTAINER_INDEX.md','MAINTENANCE_TODO.md',
+           'OPEN_ISSUES.md','TEST_MATRIX.md']
+for name in old_names:
+    if (ROOT/'docs'/name).exists(): fail('superseded root doc still active: '+name)
+print('PASS: NQTR active docs, stage plan, historical D1 contract and docs/past_doc separation')
