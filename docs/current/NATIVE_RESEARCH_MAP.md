@@ -9,7 +9,7 @@ See native_maps/candidates/wh3_9.0.2_fec656f4.json and generated_native_map.hpp.
 | Lua MOVE 0x02ED6404, Lua ATTACK 0x02ED5C9C | Lua API ingress | player Shift click originates here |
 | publish_move 0x01CAFDDC, publish_attack 0x02DF3410 | command publication hooks | a safe, lossless 'replace progression policy' lever |
 | writer_begin, writer_finalize, copy, stage, handlers, selection, free | packet pipeline / lifetime observation | authority to suppress arbitrary game commands |
-| active order: count root+0x2F88, head root+0x2F8C | read-only stable-snapshot order head | queue-head writer lock/lifetime protection |
+| active order: count root+0x2F88, head root+0x2F8C | optimistic read-only double-read of active-order head (NOT an atomic/locked queue snapshot) | queue-head writer lock/lifetime protection |
 | slots root+0x288, stride 0x120, VTable +0x18, seq +0x20 | read-only type/sequence identity | direct safe mutation of slot/queue index |
 | Full Move VTable RVA 0x03913618 | top-level MOVE outcome identity | all MOVE subclasses are equivalent |
 | Attack VTable RVA 0x03912988 | ATTACK outcome identity | permission to skip target/lifetime verification |
@@ -23,6 +23,9 @@ See native_maps/candidates/wh3_9.0.2_fec656f4.json and generated_native_map.hpp.
 5. Connect each observed undesirable behavior to a particular original native decision branch, including whether only queued Shift commands pass it. Do not assume one universal queue-advance Hook exists.
 6. Re-derive guards and VTables for 9.0.2, grade evidence STATIC/WINDOWS/WH3, and assess reversible narrow patch feasibility. Do not directly write OrderHead/slots based on read-only probes.
 7. Verify every localized modification leaves WH3's original queue identity, future tail, lifetime, attack target, REPLACE and ordinary RMB behavior intact. **No Lua or C++ replacement order queue.**
+
+## N1 repository audit checkpoint
+See [N1_STATIC_FINDINGS.md](N1_STATIC_FINDINGS.md): the current source observes **order construction and active order reads**, but contains no verified original per-frame MOVE completion, braking, OrderHead writer, or successor activation function. The optional Smart Guard `state_transition` handler is **not** a demonstrated Shift advance hook. Target 9.0.2 EXE/disassembly required for the next reverse-engineering step. No queue writes permitted.
 
 ## Missing high-priority evidence
 - No verified location yet for the original engine's MOVE terminal braking/desired-speed calculation.
