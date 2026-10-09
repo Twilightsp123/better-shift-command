@@ -80,7 +80,8 @@ gh=json.loads(read('GITHUB_ARCHIVE_MANIFEST.json'))
 if gh.get('validation',{}).get('controller_regression_jobs')!='46/46 PASS (GITHUB ACTIONS T2-B G1.1 OFFLINE VALIDATION)': fail('GITHUB_ARCHIVE_MANIFEST T2-B validation mismatch')
 if gh.get('validation',{}).get('execution_lineage_t15_contract')!='PASS' or gh.get('validation',{}).get('execution_lineage_t15_mutations')!='PASS_7_OF_7': fail('GITHUB_ARCHIVE_MANIFEST T1.5 gate mismatch')
 if gh.get('validation',{}).get('transition_transaction_t16_contract')!='PASS' or gh.get('validation',{}).get('transition_transaction_t16_mutations')!='PASS_7_OF_7' or gh.get('validation',{}).get('transition_transaction_t16_runtime')!='PASS_3_OF_3': fail('GITHUB_ARCHIVE_MANIFEST T1.6 gate mismatch')
-print('PASS: archived v1.3.0/D1 documentation tokens retained; HISTORICAL ONLY')\n# NQTR authoritative documents are separated from legacy D1 content.
+print('PASS: archived v1.3.0/D1 documentation tokens retained; HISTORICAL ONLY')
+# NQTR authoritative documents are separated from legacy D1 content.
 current=['README.md','PRODUCT_CONTRACT.md','CURRENT_BASELINE.md','NATIVE_RESEARCH_MAP.md',
          'TARGET_ARCHITECTURE.md','IMPLEMENTATION_PLAN.md','VERIFICATION.md',
          'RISKS_AND_DECISIONS.md','MAINTENANCE_RULES.md']
