@@ -1,0 +1,62 @@
+name: T2-MOVE-H4A WH3 Continuity Expected Red (No Runtime Change)
+
+on:
+  push:
+    branches:
+      - maintenance/t2move-h4-continuity-red
+  pull_request:
+    branches:
+      - maintenance/t2move-h2h3-wh3-902-integration
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  red_baseline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Lua 5.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+      - name: Check H4-A exactly two continuity deficits and all safety controls
+        run: |
+          python maintenance_tools/t2move_a/test_t2move_h4a_expected_red.py
+      - name: H2/H3 existing behavior and Native execution fixtures
+        run: |
+          lua5.1 maintenance_tools/t2move_a/test_t2move_h2bcd_controller.lua source/better_shift_command.lua tests/fixture.lua
+          lua5.1 maintenance_tools/t2move_a/test_t2move_h3_stress.lua source/better_shift_command.lua tests/fixture.lua
+          lua5.1 maintenance_tools/t2move_h3_native.lua source/better_shift_command.lua tests/fixture.lua
+          python maintenance_tools/t2move_a/test_t2move_h2bcd_mutations.py
+      - name: Verify H4-A does not change shipped gameplay runtime
+        run: |
+          git show 1dedee4a31dff3daa8ce0e9ca584f1a35b3be9b7:source/better_shift_command.lua | cmp - source/better_shift_command.lua
+          git show 1dedee4a31dff3daa8ce0e9ca584f1a35b3be9b7:src/native_bridge/CMakeLists.txt | cmp - src/native_bridge/CMakeLists.txt
+          git show 1dedee4a31dff3daa8ce0e9ca584f1a35b3be9b7:src/native_bridge/include/wh3/bridge_host.hpp | cmp - src/native_bridge/include/wh3/bridge_host.hpp
+          python maintenance_tools/t2move_a/check_h2h3_902_integration.py
+      - name: Existing 46-job full maintenance suite
+        run: python maintenance_tools/run_checks_corepath_rc8.py
+      - name: Seal complete tracked source and checksum as an experimental failure baseline
+        run: |
+          mkdir -p output
+          git archive --format=zip --output=output/BSC_T2MOVE_H4A_EXPECTED_RED_FULL_SOURCE.zip HEAD
+          sha256sum output/BSC_T2MOVE_H4A_EXPECTED_RED_FULL_SOURCE.zip > output/H4A_FULL_SOURCE_SHA256.txt
+          printf '%s\n' 'H4-A expected-red SOURCE ONLY, NOT INSTALLABLE, NO GAMEPLAY FIX.' 'WH3 9.0.2 H2/H3 remains running but movement pauses at waypoints.' 'Two early run-through deficit cases must FAIL; three safety controls must PASS.' 'Do not merge to production or use as substitute for a tested H4-B implementation.' > output/READ_H4A_FIRST.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BSC-H4A-source-expected-red-20261009
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            output/BSC_T2MOVE_H4A_EXPECTED_RED_FULL_SOURCE.zip
+            output/H4A_FULL_SOURCE_SHA256.txt
+            output/READ_H4A_FIRST.txt
