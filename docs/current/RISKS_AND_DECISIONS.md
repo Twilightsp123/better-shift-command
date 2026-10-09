@@ -21,6 +21,7 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 | NQ-015 | OPEN / N1 BLOCKER | No matching WH3 9.0.2 EXE/disassembly in accessed materials; current repository identifies issuer and optimistic order-reader but not native MOVE update/head writer/next activation. | hash-verified EXE/Ghidra xrefs and read/write dataflow; see N1_STATIC_FINDINGS.md |
 | NQ-016 | SOURCE-VERIFIED NEGATIVE | Optional Smart Guard `state_transition_hook` is a filtered Pursue/TakeUpPositions path, NOT established Shift queue progression despite its name. | separately reverse native per-frame queue consumer; do not reuse Hook17 blindly |
 | NQ-017 | SOURCE-VERIFIED LIMITATION | EvidenceProbe::active_order double-reads count/head/slot; it is not synchronized and does not grant queue mutation/lifetime authority. | investigate original thread ownership, atomics/locks and retirement |
+| NQ-018 | 9.0.3 BLOCKER | WH3 9.0.3 is the current target; EXE SHA, all applicable RVAs/VTables/guards and actual completion/steering/activation graph are unverified. | obtain exact 9.0.3 binary/disassembly, rebuild source/map evidence; see WH3_9_0_3_NATIVE_PATCH_DESIGN.md |
 
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
@@ -36,6 +37,7 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 - 2026-10-09 / D-NQ-004: Retain native mapping as evidence only; never write the game queue based on guessed fields.
 - 2026-10-09 / D-NQ-005 (user correction): **Directly patch original WH3 Shift behavior.** Reject the proposal for a BSC-specific Native transition decision owner or an alternative order scheduler. Research original queued MOVE terminal braking, completion and native ATTACK handoff before choosing any hook.
 
-- 2026-10-09 / D-NQ-006: N1 first static source/map triage recorded; no new RVA/ABI promoted, no original shift patch authorized. Require actual 9.0.2 EXE-level consumer dataflow before N2.
+- 2026-10-09 / D-NQ-006: N1 first static source/map triage recorded; no new RVA/ABI promoted, no original shift patch authorized.
+- 2026-10-09 / D-NQ-007: switch current executable target to WH3 9.0.3; preserve all 9.0.2 source/maps as historical evidence, do not treat previous RVAs as runtime-compatible with 9.0.3. Require actual 9.0.2 EXE-level consumer dataflow before N2.
 
 Do not call any proposal 'implemented' until committed code and the corresponding tests exist.
