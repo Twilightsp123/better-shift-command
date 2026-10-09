@@ -28,6 +28,8 @@ jobs:
         run: lua5.1 maintenance_tools/t2move_a/test_t2move_h4_soft_controller.lua source/better_shift_command.lua tests/fixture.lua
       - name: H4 Native V3 exact successor parity
         run: lua5.1 maintenance_tools/t2move_a/test_t2move_h4_soft_native.lua source/better_shift_command.lua tests/fixture.lua
+      - name: H4 soft corner behavior mutation gates
+        run: python maintenance_tools/t2move_a/test_t2move_h4_soft_mutations.py
       - name: 9.0.2 source Native map and CXX MASM contracts
         run: |
           python maintenance_tools/t2move_a/check_h2h3_902_integration.py
