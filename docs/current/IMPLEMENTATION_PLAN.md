@@ -1,5 +1,7 @@
 # Native Shift Patch — Implementation Plan (original engine behavior, no replacement)
 
+**Version update 2026-10-09:** target executable is now **WH3 9.0.3**. The active version-specific plan is [WH3_9_0_3_NATIVE_PATCH_DESIGN.md](WH3_9_0_3_NATIVE_PATCH_DESIGN.md). All 9.0.2 RVAs, VTables and guards are historical clues only; the actual 9.0.3 EXE SHA and original codepath must be established before implementing a Hook. All stages below describe process, not already verified 9.0.3 behavior.
+
 **Scope correction 2026-10-09:** the task is to patch existing WH3 Shift behavior directly. The former "Native queue transition owner" / alternative single-writer scheduling proposal is REJECTED. Working branch retains its historical NQTR label but this document is authoritative for **direct original-engine modification**. H8 baseline: e711e716f2411599d75184618fc1ee5cb85bcd54. Documentation-only stage; no Native patch implemented.
 
 ## Stage 0 — Freeze existing work and align docs (NOW)
