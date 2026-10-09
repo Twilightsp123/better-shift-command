@@ -87,3 +87,8 @@ The 2026-09-29 disassembly reports proved allocator return ABI, top-level constr
 ### O-09a — WH3 9.0.2 Native bootstrap compatibility
 
 **OFFLINE/WINDOWS BUILD RESOLVED; WH3 RUNTIME OPEN.** The previous H2/H3 test PACK used 9.0.1 Native and failed `OBSERVER_HOST_EXE_SHA256_MISMATCH` before the route algorithm could execute. The separate 9.0.2 integration branch now compiles a fresh 1.0.18 Native DLL against the existing complete 9.0.2 address candidate and passes v142/MASM build plus Native CTest 14/14 (Actions `37877024598`). Normal/DEBUG test PACKs have been sealed, but WH3 process attachment, move/attack hook smoke, teardown, and H2/H3 movement are **NOT TESTED**. Keep O-09 OPEN until game logs independently confirm startup and behavior. Never bypass EXE SHA or hook-byte guards.
+
+
+### H4S — 9.0.2 moving speed vs soft waypoint acceptance
+
+**H4S FIX CANDIDATE OFFLINE PASS, GAMEPLAY OPEN.** User reported real WH3 9.0.2 H2/H3 stop-at-each-waypoint movement. On a separate development branch H4S now treats intermediate waypoints as approximate bounded steering guides, restores early SC1/SC2 continuous corner issues, and distinguishes `H4_SOFT_WAYPOINT_ACCEPTED` from actual physical arrival. Exact Native i+1 adoption consumes frozen proof, but real-game queued i+2 overruns, false-proof rollbacks, genuine speed and corner aesthetics remain UNVERIFIED. H4 6/6 controller, 4/4 Native and 4/4 mutation checks PASS offline; no runtime promotion. Do not solve by fixed arbitrary meters/angles or assume H4-A auxiliary Q extension is required. More: `docs/design/T2_MOVE_H4_SPEED_SOFT_20261009.md`.

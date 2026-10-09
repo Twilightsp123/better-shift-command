@@ -224,3 +224,14 @@
 **Decision:** preserve the H2/H3 Controller and its MASM-safe v142 CMake, copy the 9.0.2 canonical candidate map for provenance, cross-check every core RVA/guard and VTable with its existing staged candidate, then compile 9.0.2 only with `WH3_NATIVE_MAP_INCLUDE_DIR` instead of promoting the default `native_maps/CURRENT`. Update the Lua/Native/packer version identity to 1.0.18. The packaging job must depend on a successful Windows Native CTest, consume that exact newly built DLL, and reject the known 9.0.1 DLL and missing 9.0.2 EXE hash.
 
 **Evidence:** GitHub Actions `37877024598` Windows v142/MASM PASS, CTest 14/14, Linux H2/H3/maintenance PASS, full-source and ordinary/DEBUG PACK seal PASS. This is build and packaging evidence only. **WH3 runtime has NOT been tested**, and neither H2/H3 smoothness nor observer initialization may be promoted from this result. Draft review only; no merge/Steam update.
+
+
+## D-20261009-06 — Relax intermediate MOVE node geometry, preserve speed-first handoff
+
+**Authority:** user clarified intermediate waypoints are approximate navigation guides, not mandatory exact arrival positions. Maintaining momentum/continuous movement is primary. In WH3 9.0.2 H2/H3 the hard H1 chord-to-reach gate blocked 259 early issues; 14 of 20 MOVE issues were after node completion and noticeable stop-and-go occurred. Consequently H2 strict proximity semantics are superseded only for eligible MOVE→MOVE steering within the existing bounded SC1/SC2/SC4 window.
+
+**Mechanism:** retain T1.6 ACK/Native-ADOPT single-commit and strict physical `SATISFIED` vs payable `DEBT_PRESERVED` credit; add separately named `CORNER_SOFT_ACCEPTED` route-guidance credit on verified ACK of an early bounded steering MOVE. No impossible return-to-node debt or claimed physical `ROUTE_NODE_REACHED`. Enforce full prior SC3 debt clearance, short leg and time-window guards; Native exact i+1 soft adoption must use a frozen prepromotion certificate. Do not relax Attack, Exit, revision or i+2 safety.
+
+**Implementation:** isolated branch `maintenance/t2move-h4-soft-corner-speed`; no new tuneable distance or angle knobs, no speculative H4-A run-through Q command, no Native source rebuild. H4 Controller 6/6, Native 4/4 and 4 mutations caught, original full maintenance PASS; existing 9.0.2 Windows v142 Native CTest 14/14 used byte-for-byte in deterministic test packs.
+
+**Unresolved:** offline proof says successor commands issue earlier, not that WH3 units preserve actual motion speed. User's real-game video/log needed before smoothness claim. Prior Native rollback and i+2 overruns must be measured separately; no merge or Steam release.
