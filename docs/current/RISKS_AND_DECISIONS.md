@@ -18,6 +18,9 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 | NQ-012 | FACT | Native 9.0.2 mapping is static candidate; native_maps/CURRENT stays 9.0.1. | map and build provenance |
 | NQ-013 | OPEN | Does the original Shift stop arise in terminal braking, arrival state, queue pop or successor activation? A new queue owner would not establish this. | comparative original native instruction dataflow and Windows fixture |
 | NQ-014 | DECIDED GOAL | Lua may provide optional settings/diagnostics but cannot issue replacement MOVE/ATTACK, rollback or advance original native orders in the redesigned mode. | source contract + negative instrumentation test |
+| NQ-015 | OPEN / N1 BLOCKER | No matching WH3 9.0.2 EXE/disassembly in accessed materials; current repository identifies issuer and optimistic order-reader but not native MOVE update/head writer/next activation. | hash-verified EXE/Ghidra xrefs and read/write dataflow; see N1_STATIC_FINDINGS.md |
+| NQ-016 | SOURCE-VERIFIED NEGATIVE | Optional Smart Guard `state_transition_hook` is a filtered Pursue/TakeUpPositions path, NOT established Shift queue progression despite its name. | separately reverse native per-frame queue consumer; do not reuse Hook17 blindly |
+| NQ-017 | SOURCE-VERIFIED LIMITATION | EvidenceProbe::active_order double-reads count/head/slot; it is not synchronized and does not grant queue mutation/lifetime authority. | investigate original thread ownership, atomics/locks and retirement |
 
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
@@ -32,5 +35,7 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 - 2026-10-09 / D-NQ-003: preserve old design/experiments byte-identically in docs/past_doc, make current directory only active documentation.
 - 2026-10-09 / D-NQ-004: Retain native mapping as evidence only; never write the game queue based on guessed fields.
 - 2026-10-09 / D-NQ-005 (user correction): **Directly patch original WH3 Shift behavior.** Reject the proposal for a BSC-specific Native transition decision owner or an alternative order scheduler. Research original queued MOVE terminal braking, completion and native ATTACK handoff before choosing any hook.
+
+- 2026-10-09 / D-NQ-006: N1 first static source/map triage recorded; no new RVA/ABI promoted, no original shift patch authorized. Require actual 9.0.2 EXE-level consumer dataflow before N2.
 
 Do not call any proposal 'implemented' until committed code and the corresponding tests exist.
