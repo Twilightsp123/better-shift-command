@@ -1,30 +1,15 @@
-# Better Shift Command v1.3.0
+# Better Shift Command (BSC)
 
-Long-term GitHub maintenance archive for the Warhammer III Better Shift Command project.
+Windows x64 mod for Total War: WARHAMMER III.
 
-## Stable project identity
+**Current development direction:** research and redesign the native Shift order queue transition/completion mechanism to avoid competing Lua/Native command ownership. This is a proposed next architecture, not an existing native patch.
 
-- Formal version: **v1.3.0**
-- Steam pack filename: **`zzz_better_shift_command_steam.pack`**
-- Platform: Windows x64
-- Current WH3 build lock: `6c104a63aacc4d865f78e6d198185f830a43255ae18367ad6be906f5f3433297`
+- [Read current engineering docs](docs/current/README.md)
+- [Native queue research map](docs/current/NATIVE_RESEARCH_MAP.md)
+- [Phased implementation plan](docs/current/IMPLEMENTATION_PLAN.md)
+- [Active risks and decisions](docs/current/RISKS_AND_DECISIONS.md)
+- [Historical archive — not default reading](docs/past_doc/README.md)
 
-Internal names such as `RC8`, `D1`, `T1H`, or `movevtfix` describe maintenance history, architecture stages, or Native ABI provenance. They must not be used as the user-facing version number.
+Experimental source starting point: H8 commit e711e716f2411599d75184618fc1ee5cb85bcd54. Formal public Mod version v1.3.0 / Steam pack name zzz_better_shift_command_steam.pack have not been changed by this documentation work.
 
-## What is preserved here
-
-This archive intentionally contains the full current maintenance tree:
-
-- current Lua controller source;
-- Native Bridge C++/ASM source;
-- tests and fixtures;
-- build/verification tools;
-- current build map and static reverse-engineering evidence;
-- SC1–SC6 development history;
-- decision log and assumption ledger;
-- Transition Policy / future MCT architecture;
-- runtime logs and Windows delivery evidence;
-- archived older maintenance trees, patches, and rejected/retired research;
-- third-party notices and the MinHook runtime needed by the existing build pipeline.
-
-Start with `README_FIRST.md`.
+Source lives in source/, src/native_bridge/, tests/, maintenance_tools/ and native_maps/. Existing archive/ and runtime_evidence/ remain preserved. **Nothing on this branch represents an approved WH3 9.0.2 runtime release.**

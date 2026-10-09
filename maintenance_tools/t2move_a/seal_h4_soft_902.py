@@ -61,8 +61,8 @@ run("git","archive","--format=zip","--output="+str(archive),"HEAD")
 required={"source/better_shift_command.lua","native_maps/wh3_9.0.2_fec656f4.json",
  "native_maps/candidates/wh3_9.0.2_fec656f4.json","maintenance_tools/t2move_a/check_h2h3_902_integration.py",
  "maintenance_tools/t2move_a/seal_h2h3_902.py",".github/workflows/h2h3-wh3-902-integration.yml",
- "docs/design/T2MOVE_H2H3_WH3_902_INTEGRATION_20261009.md",
- "docs/design/T2_MOVE_H4_SPEED_SOFT_20261009.md",
+ "docs/past_doc/design/T2MOVE_H2H3_WH3_902_INTEGRATION_20261009.md",
+ "docs/past_doc/design/T2_MOVE_H4_SPEED_SOFT_20261009.md",
  ".github/workflows/t2move-h4-soft-corner.yml",
  "maintenance_tools/t2move_a/test_t2move_h4_soft_controller.lua",
  "maintenance_tools/t2move_a/test_t2move_h6_near_pass.lua",
@@ -70,12 +70,19 @@ required={"source/better_shift_command.lua","native_maps/wh3_9.0.2_fec656f4.json
  "maintenance_tools/t2move_a/test_t2move_h8_terminal_policy.lua",
  "maintenance_tools/t2move_a/test_t2move_h8_terminal_controller.lua",
  "maintenance_tools/t2move_a/test_t2move_h8_architecture_contract.py",
- "docs/design/T2_MOVE_H8_TERMINAL_LIVENESS_AND_OWNERSHIP_20261009.md",
- "docs/design/T2_MOVE_H7_NATIVE_ATTACK_TERMINAL_20261009.md",
- "docs/design/T2_MOVE_H6_ROUTE_NEAR_PASS_20261009.md",
+ "docs/past_doc/design/T2_MOVE_H8_TERMINAL_LIVENESS_AND_OWNERSHIP_20261009.md",
+ "docs/past_doc/design/T2_MOVE_H7_NATIVE_ATTACK_TERMINAL_20261009.md",
+ "docs/past_doc/design/T2_MOVE_H6_ROUTE_NEAR_PASS_20261009.md",
  "maintenance_tools/t2move_a/test_t2move_h4_soft_native.lua",
  "maintenance_tools/t2move_a/test_t2move_h4_soft_mutations.py",
- "maintenance_tools/t2move_a/seal_h4_soft_902.py"}
+ "maintenance_tools/t2move_a/seal_h4_soft_902.py",
+ "docs/README.md","docs/past_doc/README.md",
+ "docs/current/README.md","docs/current/PRODUCT_CONTRACT.md",
+ "docs/current/CURRENT_BASELINE.md","docs/current/NATIVE_RESEARCH_MAP.md",
+ "docs/current/TARGET_ARCHITECTURE.md","docs/current/IMPLEMENTATION_PLAN.md",
+ "docs/current/VERIFICATION.md","docs/current/RISKS_AND_DECISIONS.md",
+ "docs/current/MAINTENANCE_RULES.md",
+ "docs/past_doc/MAINTENANCE_TODO.md","docs/past_doc/OPEN_ISSUES.md"}
 with zipfile.ZipFile(archive) as z:
  missing=required-set(z.namelist())
  if missing:raise SystemExit("SOURCE ARCHIVE INCOMPLETE "+str(missing))
