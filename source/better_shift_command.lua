@@ -12,7 +12,7 @@ local DEBUG_TELEMETRY = false
 local CENTER_A2_MODE = true
 local PHYSICAL_EVIDENCE_MODE = "QUARANTINED" -- RC8: Entity/Component/Alive/ContactPair are not release-critical.
 local function physical_evidence_enabled() return PHYSICAL_EVIDENCE_MODE=="ENABLED" end
-out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE transaction_stage=TPOL_T1_6_TRANSITION_TRANSACTION envelope_stage=TPOL_T1_7_CONSUMER_NEUTRAL geometry_stage=ARRIVAL_BRAKE_G1_OBSERVE_ONLY t2b_stage=T2B_G11_DUAL_ENVELOPE_CANDIDATE g11_stage=ARRIVAL_BRAKE_G1_1_POLICY_EVIDENCE")
+out(TAG .. "ENTER version=" .. CONTROLLER_VERSION .. " run=" .. RUN_ID .. " phase=" .. CONTROLLER_PHASE .. " build=BETTER_SHIFT_COMMAND_V1.3.0 debug_telemetry=" .. tostring(DEBUG_TELEMETRY).." physical_evidence="..PHYSICAL_EVIDENCE_MODE.." policy_stage=TPOL_T1_5_EXECUTION_LINEAGE transaction_stage=TPOL_T1_6_TRANSITION_TRANSACTION envelope_stage=TPOL_T1_7_CONSUMER_NEUTRAL geometry_stage=ARRIVAL_BRAKE_G1_OBSERVE_ONLY t2b_stage=T2B_G11_DUAL_ENVELOPE_CANDIDATE g11_stage=ARRIVAL_BRAKE_G1_1_POLICY_EVIDENCE audit_stage=H8_P1_STATIONARY_NATIVE_MOVE_TERMINAL")
 
 -- out is callable; it need not have Lua type "function".
 local function log(s) out(TAG .. tostring(s)) end
@@ -3164,7 +3164,9 @@ local function transition_geometry_snapshot(g)
         arrival_sync_margin=g.arrival_sync_margin,attack_path_error=g.attack_path_error,
         h2_route_credit=g.h2_route_credit,h2_route_reason=g.h2_route_reason,
         attack_waypoint_tolerance=g.attack_waypoint_tolerance,attack_terminal_limit=g.attack_terminal_limit,
-        arrival_g11_ready=g.arrival_g11_ready,arrival_g11_deceleration=g.arrival_g11_deceleration,arrival_g11_issue_coherent=g.arrival_g11_issue_coherent,
+        arrival_g11_ready=g.arrival_g11_ready,attack_terminal_stall_observed=g.attack_terminal_stall_observed,
+        attack_terminal_stall_limit=g.attack_terminal_stall_limit,
+        arrival_g11_deceleration=g.arrival_g11_deceleration,arrival_g11_issue_coherent=g.arrival_g11_issue_coherent,
         arrival_g11_adopt_coherent=g.arrival_g11_adopt_coherent,arrival_g11_reason=g.arrival_g11_reason,
         arrival_g11_stop_distance=g.arrival_g11_stop_distance,arrival_g11_stop_error=g.arrival_g11_stop_error,
         arrival_g11_issue_limit=g.arrival_g11_issue_limit,arrival_g11_adopt_limit=g.arrival_g11_adopt_limit,
@@ -3430,12 +3432,53 @@ local function exit_gate_ready(st,nexta)
     return rt.semantic_done==true and clear==true
 end
 
+-- H8: a second, non-brake completion lane for a genuinely stationary MOVE.
+-- H7 only adopts an already-active ATTACK; this independent lane lets the
+-- Controller actively ISSUE the immediate ATTACK when Native still owns MOVE.
+-- It requires *this poll's* V3 exact current MOVE witness and actual position
+-- stability inside the existing idle-completion envelope. No timed-only escape.
+local function attack_terminal_stall_evidence(st,current,g,now)
+    local rt=action_runtime(current)
+    if not st or current.block_kind~="MOVE_ROUTE" or not st.plan or not st.pos or
+        not rt.entered_ms or not rt.movement_seen or
+        st.native_current_move_witness_ms~=now then return false,nil,"NO_EXACT_CURRENT_MOVE_PROOF" end
+    if not finite(g.remaining) or not finite(g.leg) or g.leg<=0 or
+        not finite(g.progress) or g.progress<CFG.route_attack_min_progress then
+        return false,nil,"ROUTE_PROGRESS_REQUIRED"
+    end
+    local terminal_limit=math.min(Core.move_idle_finish_envelope(st),
+        math.max(CFG.move_reach_floor_m,g.leg*CFG.move_idle_finish_leg_fraction))
+    if g.remaining>terminal_limit then return false,terminal_limit,"OUTSIDE_BOUNDED_TERMINAL" end
+    local samples=st.motion_samples
+    if not samples or #samples<4 or samples[#samples].ms~=now then
+        return false,terminal_limit,"FRESH_MOTION_WINDOW_UNAVAILABLE"
+    end
+    local latest_speed=st.speeds and st.speeds[#st.speeds]
+    if not finite(latest_speed) or latest_speed>CFG.stall_speed then
+        return false,terminal_limit,"UNIT_STILL_MOVING"
+    end
+    local count,first_ms=0,now
+    for i=#samples,1,-1 do
+        local row=samples[i]
+        if row.ms<rt.entered_ms or
+            dist(st.pos,row)>CFG.move_idle_finish_drift_m then break end
+        count=count+1;first_ms=row.ms
+    end
+    if count<4 or now-first_ms<CFG.move_idle_finish_confirm_ms then
+        return false,terminal_limit,"TERMINAL_POSITION_NOT_YET_STABLE"
+    end
+    return true,terminal_limit,"ACTUAL_MOTION_CONFIRMED_NEAR_STOP"
+end
+
 local function t2b_attack_decision(st,current,successor,g,context)
  context=context or {};local clear=block_route_clear(st,current);if clear then g.route_debt_mode="CLEAR";g.route_debt_count=0 else g.route_debt_mode="HARD";g.route_debt_reason="PRIOR_ROUTE_OBLIGATION_PENDING" end
  local tol=(finite(g.leg) and g.leg>0) and move_reach_tolerance(st,g.leg) or nil
  local b=R1.ArrivalBrakeG11.observe(st.motion_samples,current.pos,action_runtime(current).entered_ms,tol)
  local target=g.target_pos;local err=(target and st.pos and current.pos) and point_segment_error(current.pos,st.pos,target) or nil
- local p=R1.T2BAttackPolicy.evaluate({immediate_successor=context.immediate_successor~=false,target_exact=context.target_exact~=false,target_terminal_abort=context.target_terminal_abort==true,prior_route_clear=clear==true,semantic_done=action_runtime(current).semantic_done==true,exit_route=current.block_kind=="EXIT_ROUTE",arrival_issue_coherent=b.issue_coherent==true,arrival_adopt_coherent=b.adopt_coherent==true,path_error=err,waypoint_tolerance=tol,remaining=g.remaining,sync_margin=b.sync_margin})
+ local stable,terminal_limit,stall_reason=attack_terminal_stall_evidence(st,current,g,clock())
+ g.attack_terminal_stall_observed=stable;g.attack_terminal_stall_limit=terminal_limit;g.attack_terminal_stall_reason=stall_reason
+ local p=R1.T2BAttackPolicy.evaluate({terminal_stall_ready=stable,native_current_exact=st.native_current_move_witness_ms==clock(),
+  terminal_stall_limit=terminal_limit,route_progress=g.progress,immediate_successor=context.immediate_successor~=false,target_exact=context.target_exact~=false,target_terminal_abort=context.target_terminal_abort==true,prior_route_clear=clear==true,semantic_done=action_runtime(current).semantic_done==true,exit_route=current.block_kind=="EXIT_ROUTE",arrival_issue_coherent=b.issue_coherent==true,arrival_adopt_coherent=b.adopt_coherent==true,path_error=err,waypoint_tolerance=tol,remaining=g.remaining,sync_margin=b.sync_margin})
  g.arrival_g11_ready=b.ready;g.arrival_g11_deceleration=b.deceleration_observed;g.arrival_g11_issue_coherent=b.issue_coherent;g.arrival_g11_adopt_coherent=b.adopt_coherent;g.arrival_g11_reason=b.reason;g.arrival_g11_stop_distance=b.stopping_distance;g.arrival_g11_stop_error=b.stopping_point_error;g.arrival_g11_issue_limit=b.issue_coherence_limit;g.arrival_g11_adopt_limit=b.adopt_coherence_limit;g.arrival_sync_margin=b.sync_margin;g.attack_path_error=err;g.attack_waypoint_tolerance=tol;g.t2b_issue_route_mode=p.issue_route_mode;g.t2b_adopt_route_mode=p.adopt_route_mode;g.current_credit=p.current_credit;g.route_safe=(p.issue_window and p.issue_window.open==true) or (p.adopt_window and p.adopt_window.open==true);g.route_mode=(p.issue_window and p.issue_window.open and p.issue_route_mode) or (p.adopt_window and p.adopt_window.open and p.adopt_route_mode) or "BLOCKED";g.route_reason=p.reason;return p
 end
 
@@ -4215,6 +4258,8 @@ function Core.reconcile_native_successor(st,now)
     if not st.plan or st.blocked or S.pending_by_uid[st.uid] or st.transition_txn then return false end
     local cur=st.plan[st.idx]
     if not cur or cur.type~="MOVE" then return false end
+    -- Reset at each Native observation: prior-poll identity is never ISSUE proof.
+    st.native_current_move_witness_ms=nil
 
     -- Read the native active execution exactly once. V3 is authoritative in the
     -- production build; V2 is used only on a genuinely V3-unavailable compatibility
@@ -4236,6 +4281,7 @@ function Core.reconcile_native_successor(st,now)
 
     local current_match,_,current_lineage=R1.execution_matches_action(e,cur)
     if current_match then
+        st.native_current_move_witness_ms=e.provider=="V3" and now or nil
         st.observed_execution_lineage=current_lineage;st.unverified_native_successor=nil;st.t2b_edge_cache=nil
         R1.observe_t2move_d(st,cur,now)
         local nexta=st.plan[st.idx+1]
