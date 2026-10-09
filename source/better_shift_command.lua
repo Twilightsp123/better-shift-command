@@ -950,6 +950,17 @@ function P.evaluate(f)
  if not finite(f.path_error) or not finite(f.waypoint_tolerance) or f.waypoint_tolerance<0 or not finite(f.remaining) or f.remaining<0 then d.reason="ATTACK_ROUTE_GEOMETRY_UNAVAILABLE";d.issue_window=env(false,d.reason,false);d.adopt_window=env(false,d.reason,false);return d end
  local sync=finite(f.sync_margin) and math.max(0,f.sync_margin) or 0;local safe=f.path_error<=f.waypoint_tolerance
  local io,ao=false,false;local ir,ar="ATTACK_ARRIVAL_BRAKE_UNPROVEN","ATTACK_ARRIVAL_BRAKE_UNPROVEN";local im,am="BLOCKED","BLOCKED"
+ -- H7 regression: a real near-terminal MOVE can settle without four samples
+ -- of monotonically decelerating motion. Existing natural-finish evidence
+ -- (position, progress, stall and last-progress age) authorizes handoff
+ -- *only* inside the already bounded native idle-finish envelope.
+ if f.terminal_stall_proven==true and finite(f.terminal_stall_limit)
+    and f.terminal_stall_limit>=0 and f.remaining<=f.terminal_stall_limit then
+  d.reason="ATTACK_TERMINAL_STALL_VERIFIED";d.current_credit="ATTACK_TERMINAL_HANDOFF"
+  d.issue_route_mode="ATTACK_TERMINAL_STALL";d.adopt_route_mode="ATTACK_TERMINAL_STALL"
+  d.issue_window=env(true,d.reason,false);d.adopt_window=env(true,d.reason,false)
+  return d
+ end
  if safe then
   if f.arrival_issue_coherent==true then io=true;ir="ATTACK_PATH_SAFE";im="ATTACK_PATH_SAFE" end
   if f.arrival_adopt_coherent==true then ao=true;if io then ar="ATTACK_PATH_SAFE";am="ATTACK_PATH_SAFE" else ar="ATTACK_PATH_SAFE_HYSTERESIS";am="ATTACK_PATH_SAFE_HYSTERESIS" end end
@@ -3435,7 +3446,22 @@ local function t2b_attack_decision(st,current,successor,g,context)
  local tol=(finite(g.leg) and g.leg>0) and move_reach_tolerance(st,g.leg) or nil
  local b=R1.ArrivalBrakeG11.observe(st.motion_samples,current.pos,action_runtime(current).entered_ms,tol)
  local target=g.target_pos;local err=(target and st.pos and current.pos) and point_segment_error(current.pos,st.pos,target) or nil
- local p=R1.T2BAttackPolicy.evaluate({immediate_successor=context.immediate_successor~=false,target_exact=context.target_exact~=false,target_terminal_abort=context.target_terminal_abort==true,prior_route_clear=clear==true,semantic_done=action_runtime(current).semantic_done==true,exit_route=current.block_kind=="EXIT_ROUTE",arrival_issue_coherent=b.issue_coherent==true,arrival_adopt_coherent=b.adopt_coherent==true,path_error=err,waypoint_tolerance=tol,remaining=g.remaining,sync_margin=b.sync_margin})
+ -- H7: when a unit has actually travelled toward this waypoint and ceased
+ -- progressing within the same bounded native idle-finish envelope, avoid
+ -- deadlocking Move->Attack solely because G1.1 monotone braking is absent.
+ -- No extra distance scalar, no weakening for Exit, prior debt or i+2.
+ local rt=action_runtime(current)
+ local now=clock()
+ local terminal_limit=(finite(g.leg) and g.leg>0) and
+     math.min(Core.move_idle_finish_envelope(st),
+         math.max(CFG.move_reach_floor_m,g.leg*CFG.move_idle_finish_leg_fraction)) or 0
+ local stable_ms=math.max(0,now-math.max(rt.last_progress_ms or now,rt.entered_ms or now))
+ local terminal_stall=(g.stall==true and rt.movement_seen==true
+     and finite(g.progress) and g.progress>=CFG.move_idle_finish_progress
+     and finite(g.remaining) and g.remaining<=terminal_limit
+     and stable_ms>=CFG.move_idle_finish_confirm_ms)
+ local p=R1.T2BAttackPolicy.evaluate({immediate_successor=context.immediate_successor~=false,target_exact=context.target_exact~=false,target_terminal_abort=context.target_terminal_abort==true,prior_route_clear=clear==true,semantic_done=rt.semantic_done==true,exit_route=current.block_kind=="EXIT_ROUTE",arrival_issue_coherent=b.issue_coherent==true,arrival_adopt_coherent=b.adopt_coherent==true,path_error=err,waypoint_tolerance=tol,remaining=g.remaining,sync_margin=b.sync_margin,terminal_stall_proven=terminal_stall,terminal_stall_limit=terminal_limit})
+ g.attack_terminal_stall_ms=stable_ms;g.attack_terminal_stall_limit=terminal_limit;g.attack_terminal_stall_proven=terminal_stall
  g.arrival_g11_deceleration=b.deceleration_observed;g.arrival_g11_issue_coherent=b.issue_coherent;g.arrival_g11_adopt_coherent=b.adopt_coherent;g.arrival_g11_reason=b.reason;g.arrival_g11_stop_distance=b.stopping_distance;g.arrival_g11_stop_error=b.stopping_point_error;g.arrival_g11_issue_limit=b.issue_coherence_limit;g.arrival_g11_adopt_limit=b.adopt_coherence_limit;g.arrival_sync_margin=b.sync_margin;g.attack_path_error=err;g.attack_waypoint_tolerance=tol;g.t2b_issue_route_mode=p.issue_route_mode;g.t2b_adopt_route_mode=p.adopt_route_mode;g.current_credit=p.current_credit;g.route_safe=(p.issue_window and p.issue_window.open==true) or (p.adopt_window and p.adopt_window.open==true);g.route_mode=(p.issue_window and p.issue_window.open and p.issue_route_mode) or (p.adopt_window and p.adopt_window.open and p.adopt_route_mode) or "BLOCKED";g.route_reason=p.reason;return p
 end
 

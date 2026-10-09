@@ -101,3 +101,8 @@ Evidence: `script_log_091026_1144.txt` (H4S). Bridge/Observer PASS; 4 soft corne
 - uid1006 G1 action5 guide debt best 5.112033m vs strict tolerance 3.889415m; action6 idle then block at model_ms74000, no action6->7 ACK.
 - H6 optionally retires only after real forward-plane crossing within existing SC3 1.5m soft margin and native ACK. This is not yet proven to fix WH3; the full position trace was not in the log.
 - Native i+1/i+2/i+3 premature futures remain separate unresolved issue. No Native Hook changes.
+
+
+## H7 — WH3 9.0.2 Shift Move→Attack severe wait / native rollback (2026-10-09)
+
+**OPEN / CONFIRMED IN REAL GAME, CODE CANDIDATE NOT RUNTIME-VALIDATED.** On H6-like installed controller, `uid=1010` accepted queued Shift ATTACK at model 41000; held `ATTACK_ARRIVAL_BRAKE_UNPROVEN` near 13.4m, rolled back genuine Native ATTACK at 69800, only dispatched BSC attack at 75700 after idle-completion. Two Attack dispatches exist, so regression is conditional handoff delay/rollback rather than input failure. Isolated H7 source candidate adds bounded real near-terminal movement/stall evidence without changing MOVE→MOVE or Native. Await pure Lua + focused/full regression and true WH3 RT-TP-02/03/obstacle safety before any pack/release promotion. See `docs/fixes/H7_SHIFT_ATTACK_TERMINAL_STALL_REGRESSION_20261009.md`.

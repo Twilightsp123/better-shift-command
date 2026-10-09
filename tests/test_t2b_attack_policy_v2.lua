@@ -22,4 +22,34 @@ T('beyond poll blocks',function()local d=C{remaining=3.5001,sync_margin=0.5};ass
 T('sync never widens issue',function()for _,r in ipairs({3.1,3.5,4,6,20})do local seen=nil;for _,s in ipairs({0,.1,.5,1,5,50})do local d=C{remaining=r,sync_margin=s};if seen==nil then seen=d.issue_window.open else assert(d.issue_window.open==seen)end end end end)
 T('issue subset adopt',function()for _,p in ipairs({0,2,3,3.1,8,100})do for _,r in ipairs({0,2,3,3.2,4,20})do for _,s in ipairs({0,.5,2,20})do local d=C{path_error=p,remaining=r,sync_margin=s};assert(not d.issue_window.open or d.adopt_window.open)end end end end)
 T('terminated closes',function()local d=C{path_error=2,target_terminal_abort=true};assert(not d.issue_window.open and not d.adopt_window.open)end)
+T('H7 real terminal stall permits attack without monotone G1.1 braking',function()
+ local d=C{arrival_issue_coherent=false,arrival_adopt_coherent=false,path_error=8,
+     waypoint_tolerance=3,remaining=13.4,terminal_stall_proven=true,terminal_stall_limit=17}
+ assert(d.issue_window.open and d.adopt_window.open)
+ assert(d.issue_window.reason=='ATTACK_TERMINAL_STALL_VERIFIED')
+ assert(d.current_credit=='ATTACK_TERMINAL_HANDOFF')
+end)
+T('H7 does not short circuit distant or unproved stops',function()
+ for _,f in ipairs({
+  {remaining=17.0001,terminal_stall_proven=true,terminal_stall_limit=17},
+  {remaining=13.4,terminal_stall_proven=false,terminal_stall_limit=17},
+  {remaining=13.4,terminal_stall_proven=true,terminal_stall_limit=nil}
+ })do
+  f.arrival_issue_coherent=false;f.arrival_adopt_coherent=false;f.path_error=8
+  local d=C(f);assert(not d.issue_window.open and not d.adopt_window.open)
+ end
+end)
+T('H7 preserves Exit, prior route debt, target and canonical hard guards',function()
+ for _,f in ipairs({
+  {exit_route=true},
+  {prior_route_clear=false},
+  {target_exact=false},
+  {immediate_successor=false},
+  {target_terminal_abort=true}
+ })do
+  f.terminal_stall_proven=true;f.terminal_stall_limit=17;f.remaining=13
+  f.arrival_issue_coherent=false;f.arrival_adopt_coherent=false
+  local d=C(f);assert(not d.issue_window.open and not d.adopt_window.open)
+ end
+end)
 print('TOTAL '..pass..' PASS '..fail..' FAIL');os.exit(fail==0 and 0 or 1)

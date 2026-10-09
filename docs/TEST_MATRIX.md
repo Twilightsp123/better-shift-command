@@ -106,3 +106,15 @@ Battle teardown/suspend-resume is a separate stream and must not be marked PASS 
 | Exit contact stall | **OPEN / VIDEO REQUIRED** | one Exit reassert at model 82400, 900ms no progress |
 
 H5 code changes only DEBUG/rollback diagnostic fields; Native DLL/address unchanged. Do not infer H5 WH3 gameplay PASS from CI.
+
+
+## H7 Shift Attack candidate gate — 2026-10-09
+
+| Gate | Current status | Requirement |
+| --- | --- | --- |
+| Real WH3 H6 Move→Attack symptom | **FAIL observed** | Input accepted at 41,000 model-ms, repeated G1.1 brake wait, native Attack rollback at 69,800, BSC only issues at 75,700 |
+| H7 minimal stall-envelope source candidate | **PREPARED / NOT RUN** | Lua pure policy negative/positive, static source mirror/guard, full T2-B and H6 MOVE regression |
+| WH3 RT-TP-02/03/obstacle/hairpin/Native race | **NOT RUN H7** | Smooth handoff with no route cut, bounded stall proof and no invalid immediate native adoption |
+| Release/Steam pack | **BLOCKED** | Do not promote without Windows-built byte-locked pack and real WH3 evidence |
+
+See `docs/fixes/H7_SHIFT_ATTACK_TERMINAL_STALL_REGRESSION_20261009.md`.

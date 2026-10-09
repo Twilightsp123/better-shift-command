@@ -128,3 +128,10 @@ Evidence: `script_log_091026_1144.txt` (H4S). Bridge/Observer PASS; 4 soft corne
 - [x] Add per-step forward-plane near-pass retirement after Native ACK; six positive/negative fixture gates.
 - [ ] Real WH3 replay of uid1006 12:10 9-node route and video confirmation, especially no step loss/stalls.
 - [ ] Address independent Native i+1/i+2/i+3 pre-promotion separately; H6 does not fix it.
+
+
+## P0 — H7 observed WH3 Shift Attack near-terminal regression (2026-10-09)
+
+User `script_log_091026_1253.txt` from WH3 9.0.2 / H6 controller shows Shift ATTACK input accepted but repeated `ATTACK_ARRIVAL_BRAKE_UNPROVEN` during the near-terminal MOVE, a `NATIVE_SUCCESSOR_ROLLBACK` at model_ms=69800 after native ATTACK advanced, and BSC only dispatched at 75700 after Native idle route-finish. A separate later Attack did dispatch. **Gameplay regression: CONFIRMED severe delay/rollback; not total input loss.**
+
+Isolated fix candidate on `maintenance/t2b-h7-attack-stall-recovery` based on H6 `d10d9bd55c1199e705c20fb458a7472371cd2fd1`: strict current MOVE real-progress + bounded stationary terminal envelope alternate to G1.1 monotone deceleration, with exact-target, i+1, prior-debt, EXIT and T1.6 ACK intact. **NOT WH3 VALIDATED / NOT RELEASED.** One coordinated Lua/static/full controller test and WH3 RT-TP-02/03 + H6 MOVE regression check are required. Do not patch Steam pack or release on GitHub source checks alone. Evidence and risk: `docs/fixes/H7_SHIFT_ATTACK_TERMINAL_STALL_REGRESSION_20261009.md`.
