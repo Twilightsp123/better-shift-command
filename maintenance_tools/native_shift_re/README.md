@@ -38,6 +38,16 @@ The script confirms the EXE SHA256, compares its MD5 to the Ghidra imported-prog
 
 Find an actual engine root provenance, confirm original head/count **writers**, and follow control/dataflow to MOVE completion, old order retirement and next activation. In parallel, trace original per-frame MOVE braking and motion state. Separately identify original ATTACK activation/target lifetime. Maintain exact SHA, instruction bytes, RVA, ABI, xrefs, alternatives and negative normal-RMB controls.
 
+## Exact user-provided 9.0.3-labelled EXE state-origin proof
+
+`verify_903_move_state_origin.py` is a **read-only, exact-SHA evidence verifier**, *not* an address relocator. It matches 25 selected machine-instruction guards and two original float constants and records that no patch is authorized. It rejects other EXE hashes, including other builds of WH3.
+
+    python maintenance_tools/native_shift_re/verify_903_move_state_origin.py --exe "C:\\path\\to\\Warhammer3.exe" --report "N1_outputs\\state_origin_evidence.json"
+
+Original result for SHA `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a`: **25/25 instruction guards match**, 8/8 isolated byte/metadata tests passed against original EXE; six additional synthetic CI tests were added without the EXE. No gameplay, Ghidra, or Win64 loader behavior is verified.
+
+See [native state origin report](../../docs/current/N1_903_MOVE_STATE_ORIGIN.md).
+
 ## Offline synthetic test
 
     python -m unittest discover -s tests -p "test_native_shift_re.py" -v
