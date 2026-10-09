@@ -16,10 +16,12 @@
 4. Where is target validation and queued MOVE→ATTACK handoff performed? Is stalled attack from original WH3 or was it introduced by H8's Lua second writer?
 5. What is the threading/lifetime context, and which branches are restricted to queued Shift commands vs shared with ordinary RMB?
 
-**Method:** static x64 callgraph/dataflow on target WH3 9.0.2 EXE, current candidate map and VTables; compare already-known Native Bridge hook sites. Produce annotated function signatures, RVAs/bytes/guards, proof grade, disassembly, alternate interpretations, state diagram and an explicit *cause→candidate patch site* table. No guessing that OrderHead increment alone is the solution.
+**Method:** static x64 callgraph/dataflow on target WH3 **9.0.3 user-provided EXE**; 9.0.2 candidate map and VTables are historical seeds only; compare already-known Native Bridge hook sites. Produce annotated function signatures, RVAs/bytes/guards, proof grade, disassembly, alternate interpretations, state diagram and an explicit *cause→candidate patch site* table. No guessing that OrderHead increment alone is the solution.
 **Pass:** each planned change has a specific original WH3 decision path and an independently checkable relationship to the undesirable behavior. If evidence cannot establish one, mark BLOCKED rather than fabricate an address.
 
 **N1 checkpoint (2026-10-09):** repository/map triage has started and is documented in [N1_STATIC_FINDINGS.md](N1_STATIC_FINDINGS.md). Source verifies order issuance, allocation observation and optimistic active-order reads, **not** original completion/head mutation or braking. Stage 1 is NOT complete; exact 9.0.2 EXE/disassembly/xrefs are needed before nominating or patching any site. Do not treat a metadata/byte-guard check as an N1 algorithm finding.
+
+**N1 exact binary milestone (2026-10-09):** [N1_903_ORDER_LIFECYCLE_STATIC.md](N1_903_ORDER_LIFECYCLE_STATIC.md) establishes one original 40-entry ring pop routine and five calls. MOVE completion, terminal braking and safe successor activation are not yet proven; stage 1 remains active.
 
 ## Stage 2 — Establish minimal original-code patch contract
 **Work:** for each proven site define the smallest in-place behavioral delta: e.g. avoid unnecessary terminal braking before valid queued next MOVE, alter the native completion predicate for a guide corner, or preserve correct activation of native queued ATTACK. Preserve original queue storage, order lifetime, native sequence, engine execution and user REPLACE.
@@ -42,7 +44,7 @@
 **Pass:** MSVC v142/MASM build, existing CTest 14/14 minimum, new fault injection, no dangling trampoline or partially enabled engine patch. Parallel with Stage 1, required before game-facing use.
 
 ## Stage 6 — Full regression, packaging, bounded final WH3 verification
-**Work:** run H4–H8 frozen tests for backwards reference, new native call-through/differential tests, exact 9.0.2 map/hash and packaging contracts. Produce complete source, WinX64 Native DLL, normal and DEBUG PACK, manifest and reproducible SHA256. Only after static + Windows gates, one combined real WH3 acceptance for Shift MOVE/ATTACK, EXIT, normal RMB, multiplayer/multiple units if feasible, and Quit-to-Windows.
+**Work:** run H4–H8 frozen tests for backwards reference, new native call-through/differential tests, independently proven 9.0.3 map/hash and packaging contracts. Produce complete source, WinX64 Native DLL, normal and DEBUG PACK, manifest and reproducible SHA256. Only after static + Windows gates, one combined real WH3 acceptance for Shift MOVE/ATTACK, EXIT, normal RMB, multiplayer/multiple units if feasible, and Quit-to-Windows.
 **Pass:** original Shift really behaves better on screen and native queue remains intact; no Lua dispatch or shadow-plan dependency; separate BUILD/STATIC/WINDOWS/WH3 results.
 **No automatic Steam publish.**
 
@@ -50,7 +52,7 @@
 Stage 0 → Stage 1 → Stage 2 → Stage 3 → Stage 4 → Stage 6. Stage 5 can proceed in parallel with Stage 1 but must close before Stage 6.
 
 ## Immediate next task
-**Start Stage 1:** reverse WH3 original Shift motion-braking and current-order completion/next-order activation jointly; use the 9.0.2 EXE binary or reliable prior disassembly when available. Report verified sites, unknowns and disconfirming facts. Do NOT resume H9 Lua handoff experiments or create a C++ replacement queue.
+**Start Stage 1:** reverse WH3 original Shift motion-braking and current-order completion/next-order activation jointly; use actual hash-identified user-supplied 9.0.3-labelled EXE/disassembly. Report verified sites, unknowns and disconfirming facts. Do NOT resume H9 Lua handoff experiments or create a C++ replacement queue.
 
 ## Deferred
 Visible MCT, arbitrary performance tuning, old D1/H1–H8 policy extensions and Steam publication. Historical documents are in docs/past_doc and are no longer default reading.
