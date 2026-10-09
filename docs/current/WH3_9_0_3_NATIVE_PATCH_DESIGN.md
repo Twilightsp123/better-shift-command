@@ -1,7 +1,7 @@
 # WH3 9.0.3 — Native Shift Behavior Patch design specification
 
 **Date:** 2026-10-09
-**Status:** DESIGN + READ-ONLY N1 TOOLING ONLY — unverified engine hypotheses, no 9.0.3 executable and no new native RVA, ABI or Hook authorized. [Tooling instructions](../../maintenance_tools/native_shift_re/README.md) describe PE/build SHA and Ghidra decoded-operand scouts; their outputs are *not* verified native queue writers.
+**Status:** DESIGN + PARTIAL EXACT-BINARY N1 STATIC RE — user-provided 9.0.3-labelled EXE inspected, ring-queue pop/write code recovered, MOVE braking/completion still unknown; no Hook authorized. [Tooling instructions](../../maintenance_tools/native_shift_re/README.md) describe PE/build SHA and Ghidra decoded-operand scouts; their outputs are *not* verified native queue writers.
 **Development branch:** `research/n1-native-shift-behavior-patch-20261009`.
 **Prior evidence:** `N1_STATIC_FINDINGS.md` and `N1_EXECUTABLE_RE_PLAN.md` are **9.0.2-only historical RE seeds**, not a 9.0.3 address map.
 
@@ -17,7 +17,7 @@ BSC may make **localized, version-guarded changes to proven WH3 native predicate
 A Win64 DLL may be the runtime patch carrier; this is **not** a request to modify `Warhammer3.exe` on disk.
 
 **9.0.3 version discipline:**
-- The 9.0.3 EXE SHA256 is **UNKNOWN** until a matching binary or provenance-validated disassembly is obtained.
+- User-provided 9.0.3-labelled EXE exact SHA256 is **518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a** (read-only local hash verified); 9.0.3 version resource itself has not been independently authenticated. This hash is not a released runtime build map.
 - 9.0.2 SHA256 `fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785` and every 9.0.2 RVA/VTable/guard remain historical, *never runtime-valid for 9.0.3 by assumption*.
 - 9.0.2 native map is useful as a structural **search seed** only. A 9.0.3 map must be a separate unpromoted candidate with per-site proof and independent, exact-executable bytes.
 - Runtime loading/patch installation must fail closed on hash or guard mismatch, missing ABI proof, unsupported game version, invalid state or failed partial installation.
@@ -31,7 +31,7 @@ Locate, in the actual 9.0.3 EXE:
 3. Original MOVE completion decision, store(s) to count/head, retirement/destruction and next order activation. These may be separate functions and must not be conflated.
 4. Thread and object lifetime ownership, REPLACE/HALT, cancelled command, target dead, attacked/interrupted unit paths.
 
-Legacy read-observed offsets `root+0x2F88`, `+0x2F8C`, `+0x288`, stride `0x120` must be independently re-established for 9.0.3. A double-read does not establish safe write/peeking rights.
+The exact user-supplied EXE now has instruction evidence for count/head under a `root+0x288` array subobject (alias offsets `+0x2D00` and `+0x2D04`), 0x120 stride and ring pop/wrap at RVA `0x02F4FD10`. See [N1_903_ORDER_LIFECYCLE_STATIC.md](N1_903_ORDER_LIFECYCLE_STATIC.md). This **does not** establish permission to write the head, a completed MOVE, queue lifetime safety or a patch point.
 
 ### L2 — original locomotion and waypoint arrival
 Trace from a verified original **executing** MOVE object to steering/desire speed, terminal braking, arrival flag and path state. Determine their ordering relative to MOVE-complete and successor activation:
@@ -108,7 +108,7 @@ Higher grade cannot be inferred from passing a synthetic unit test.
 
 ## 5. Stage gates and offline verification
 
-**P0 — Freeze and scope 9.0.3.** Maintain H8 and existing 9.0.2 files unchanged. New 9.0.3 candidate-map namespace with unknown hash until available. Architecture/docs are the only edits now. **PASS:** no old RVA automatically promoted.
+**P0 — Freeze and scope 9.0.3.** Maintain H8 and existing 9.0.2 files unchanged. Record observed EXE SHA only as research provenance, not a promoted 9.0.3 Hook map. Research scripts/docs and static reports only; no runtime modifications. **PASS:** no old RVA automatically promoted.
 
 **P1 — Binary producer→consumer xrefs.** Deliver graph for original creation, MOVE tick, completion, head write, retire and successor activate. Record missing links. **PASS:** each claimed edge backed by specific original instructions and exact build.
 
@@ -122,7 +122,11 @@ Higher grade cannot be inferred from passing a synthetic unit test.
 
 ### Research tooling checkpoint (2026-10-09)
 
-Committed read-only PE/9.0.2 historical guard similarity scanner and Ghidra Jython scalar-field xref exporter under maintenance_tools/native_shift_re/, plus 9 synthetic PE/offline contract tests and separate CI workflow. These are **N1 preparation**, not successful executable disassembly, not ABI evidence and not a Native Patch. Missing current 9.0.3 EXE SHA remains P1 blocker.
+Committed read-only PE/9.0.2 historical guard similarity scanner and Ghidra Jython scalar-field xref exporter under maintenance_tools/native_shift_re/, plus 9 synthetic PE/offline contract tests and separate CI workflow. These are **N1 preparation**, not successful executable disassembly, not ABI evidence and not a Native Patch. Exact EXE binary acquired and original ring pop found; **MOVE completion and terminal brake** remain P1 blockers.
+
+### N1 exact-file static RE checkpoint (2026-10-09)
+
+[N1_903_ORDER_LIFECYCLE_STATIC.md](N1_903_ORDER_LIFECYCLE_STATIC.md) records exact PE SHA, verified ring queue pop (`0x02F4FD10`) and five direct callers. These confirm original head/count mutation but **not** native MOVE completion/terminal braking, target handoff or safe detouring. 25/25 selected direct calls independently instruction-validated. All are static; no WH3 runtime or Ghidra integration.
 
 ## 6. Red lines / stopping conditions
 
@@ -134,7 +138,7 @@ Committed read-only PE/9.0.2 historical guard similarity scanner and Ghidra Jyth
 
 ## Immediate next concrete deliverable
 
-A 9.0.3 EXE SHA plus static disassembly or the user-owned EXE allows P1 xref analysis. Until then, only docs, search methodology and offline tool scaffolding are authorized. Report exactly which native functions remain unknown.
+The user-provided EXE has been analyzed with LLVM; queue pop `0x02F4FD10` and several callers have actual instruction evidence. Next: resolve state flags in `0x030433B0`/`0x03043424`, original next-order activation in `0x0304433C`, and original MOVE braking. Do not advance to a Hook based on ring pop alone.
 
 ## Links
 
