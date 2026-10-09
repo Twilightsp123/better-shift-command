@@ -124,6 +124,10 @@ Higher grade cannot be inferred from passing a synthetic unit test.
 
 Committed read-only PE/9.0.2 historical guard similarity scanner and Ghidra Jython scalar-field xref exporter under maintenance_tools/native_shift_re/, plus 9 synthetic PE/offline contract tests and separate CI workflow. These are **N1 preparation**, not successful executable disassembly, not ABI evidence and not a Native Patch. Exact EXE binary acquired and original ring pop found; **MOVE completion and terminal brake** remain P1 blockers.
 
+### N1 MOVE completion-status follow-up (2026-10-09)
+
+[N1_903_MOVE_STATUS_CHAIN.md](N1_903_MOVE_STATUS_CHAIN.md) traces actual Native MOVE issue and VTable constructor to virtual status method `0x030440F8`, which sets a Boolean based on `related_state+0x240 == 0`; the caller chain can then reach original ring pop. That related field is **not yet proven to mean arrival/stop**, and it is not safe to modify this status or the head. Original braking/steering and successor activation remain N1 blockers.
+
 ### N1 exact-file static RE checkpoint (2026-10-09)
 
 [N1_903_ORDER_LIFECYCLE_STATIC.md](N1_903_ORDER_LIFECYCLE_STATIC.md) records exact PE SHA, verified ring queue pop (`0x02F4FD10`) and five direct callers. These confirm original head/count mutation but **not** native MOVE completion/terminal braking, target handoff or safe detouring. 25/25 selected direct calls independently instruction-validated. All are static; no WH3 runtime or Ghidra integration.
