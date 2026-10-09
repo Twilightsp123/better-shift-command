@@ -3,7 +3,7 @@ Current documentation authority — 2026-10-09
 
 **Current target is WH3 9.0.3.** [WH3_9_0_3_NATIVE_PATCH_DESIGN.md](WH3_9_0_3_NATIVE_PATCH_DESIGN.md) defines version-specific research, candidate patch modules and proof gates. The 9.0.2 EXE hash, maps and N1 reports remain historical evidence only; **9.0.3-labelled user EXE SHA and several order-lifecycle RVAs are now evidenced; MOVE completion/braking remain unknown**.
 
-**N1 toolkit implemented:** [read-only 9.0.3 PE and Ghidra field-reference scouts](../../maintenance_tools/native_shift_re/README.md), with synthetic tests. They do not locate proven original queue progress or install hooks.
+**N1 toolkit implemented:** [read-only 9.0.3 PE and Ghidra field-reference scouts](../../maintenance_tools/native_shift_re/README.md), with synthetic tests. Their own candidate exports do not by themselves prove native progression or install hooks; subsequent exact-file LLVM analysis independently established a ring-pop primitive.
 
 **Read this folder first.** The decided objective is to **patch the game's existing native Shift behavior directly**, keeping its original input, order queue, locomotion and combat engine. We are NOT creating a Lua substitute, separate Native scheduler or second command queue. The NQTR label remains only as a branch/documentation identifier. This is still *research-only* (documentation plus static forensic tooling); no native patch exists or has passed WH3 validation.
 
@@ -11,15 +11,15 @@ Current documentation authority — 2026-10-09
 0. [WH3_9_0_3_NATIVE_PATCH_DESIGN.md](WH3_9_0_3_NATIVE_PATCH_DESIGN.md) — **current 9.0.3 design**; lifecycle, braking, ATTACK transition, evidence gates and no-go rules.
 1. [N1_903_ORDER_LIFECYCLE_STATIC.md](N1_903_ORDER_LIFECYCLE_STATIC.md) — actual user-supplied 9.0.3-labelled EXE: ring pop instruction evidence and unknown MOVE semantics.
 2. [PRODUCT_CONTRACT.md](PRODUCT_CONTRACT.md) — what BSC must do and must never break.
-2. [CURRENT_BASELINE.md](CURRENT_BASELINE.md) — exact source/branch and what has actually been verified.
-3. [NATIVE_RESEARCH_MAP.md](NATIVE_RESEARCH_MAP.md) — known Native entry points, missing proof, forbidden assumptions.
-4. [N1_STATIC_FINDINGS.md](N1_STATIC_FINDINGS.md) — source-verified N1 findings, negative evidence, and exact missing EXE/disassembly inputs.
-5. [N1_EXECUTABLE_RE_PLAN.md](N1_EXECUTABLE_RE_PLAN.md) — executable acquisition, xref/dataflow procedure, causal hypotheses and N1 pass/no-go gates.
-6. [TARGET_ARCHITECTURE.md](TARGET_ARCHITECTURE.md) — the original-engine patch boundary and non-goals.
-7. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — reverse the original Shift braking/handoff paths before patching native functions.
-8. [VERIFICATION.md](VERIFICATION.md) — offline/Windows/one final WH3 end-to-end verification.
-9. [RISKS_AND_DECISIONS.md](RISKS_AND_DECISIONS.md) — unresolved questions and decision register.
-10. [MAINTENANCE_RULES.md](MAINTENANCE_RULES.md) — how to update this set without reviving historical designs.
+3. [CURRENT_BASELINE.md](CURRENT_BASELINE.md) — exact source/branch and what has actually been verified.
+4. [NATIVE_RESEARCH_MAP.md](NATIVE_RESEARCH_MAP.md) — known Native entry points, missing proof, forbidden assumptions.
+5. [N1_STATIC_FINDINGS.md](N1_STATIC_FINDINGS.md) — source-verified N1 findings, negative evidence, and exact missing EXE/disassembly inputs.
+6. [N1_EXECUTABLE_RE_PLAN.md](N1_EXECUTABLE_RE_PLAN.md) — executable acquisition, xref/dataflow procedure, causal hypotheses and N1 pass/no-go gates.
+7. [TARGET_ARCHITECTURE.md](TARGET_ARCHITECTURE.md) — the original-engine patch boundary and non-goals.
+8. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — reverse the original Shift braking/handoff paths before patching native functions.
+9. [VERIFICATION.md](VERIFICATION.md) — offline/Windows/one final WH3 end-to-end verification.
+10. [RISKS_AND_DECISIONS.md](RISKS_AND_DECISIONS.md) — unresolved questions and decision register.
+11. [MAINTENANCE_RULES.md](MAINTENANCE_RULES.md) — how to update this set without reviving historical designs.
 
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
