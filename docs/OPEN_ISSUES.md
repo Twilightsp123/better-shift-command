@@ -96,3 +96,8 @@ The 2026-09-29 disassembly reports proved allocator return ABI, top-level constr
 ## H5 WH3 9.0.2 real-log audit — 2026-10-09
 
 Evidence: `script_log_091026_1144.txt` (H4S). Bridge/Observer PASS; 4 soft corners ISSUE/ACK in 300–400 model-ms; 11 predictive MOVEs; no CONTROLLER_FAIL, MOVE_AFTER_NODE_COMPLETE or NATIVE_IDLE_ROUTE_FINISH. All 80 H2 veto observations preceded the corresponding SC issue-open window (0 late-window vetoes). Three initial Native rollback races remain: one i+1 without frozen prepromotion proof, two i+2 canonical overruns. One separate 900ms-contact-stall Exit reassert. Smoothness remains UNASSESSED without same-route video. H5 isolated branch `maintenance/t2move-h5-runtime-reconcile-audit` adds logging and two negative Native Controller fixtures without loosening policies or changing 9.0.2 Native DLL. See `docs/design/T2_MOVE_H5_RUNTIME_RECONCILE_AUDIT_20261009.md`. No release promotion.
+
+## H6 candidate — WH3 2026-10-09 12:10
+- uid1006 G1 action5 guide debt best 5.112033m vs strict tolerance 3.889415m; action6 idle then block at model_ms74000, no action6->7 ACK.
+- H6 optionally retires only after real forward-plane crossing within existing SC3 1.5m soft margin and native ACK. This is not yet proven to fix WH3; the full position trace was not in the log.
+- Native i+1/i+2/i+3 premature futures remain separate unresolved issue. No Native Hook changes.

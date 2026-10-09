@@ -2811,6 +2811,39 @@ register_route_obligation=function(st,a,g,now)
     if DEBUG_TELEMETRY then dlog("ROUTE_OBLIGATION_TRANSFERRED uid="..st.uid.." gen="..st.gen.." block="..b.id.." action="..a.action_id..
         " tolerance="..num_or_nil(b.route_debts[a.action_id].tolerance).." model_ms="..now) end
 end
+-- H6: bounded guidance retirement needs an ACK-committed MOVE->MOVE
+-- and real successive position samples crossing the canonical inbound plane.
+-- This never claims physical waypoint arrival.
+local function route_guide_near_pass(st,debt)
+    local a=debt and debt.action
+    if not a or a.type~="MOVE" or a.block_kind~="MOVE_ROUTE"
+        or not st.plan or not st.pos or not st.prev_pos or not a.pos
+        or not finite(st.model_step_ms) or st.model_step_ms<=0 then return nil end
+    local aid=a.action_id
+    if not finite(aid) or st.idx<=aid then return nil end
+    local rt=action_runtime(a)
+    if rt.semantic_done or not rt.handoff_committed then return nil end
+    local nexta=st.plan[aid+1]
+    if not nexta or nexta.type~="MOVE" or nexta.block_id~=a.block_id then return nil end
+    local prior=st.plan[aid-1]
+    local anchor=prior and prior.type=="MOVE" and prior.block_id==a.block_id
+        and prior.pos or rt.entry_pos
+    if not anchor then return nil end
+    local dx,dz=a.pos.x-anchor.x,a.pos.z-anchor.z
+    local leg=math.sqrt(dx*dx+dz*dz)
+    if leg<=0.000001 then return nil end
+    local ux,uz=dx/leg,dz/leg
+    local before=(st.prev_pos.x-a.pos.x)*ux+(st.prev_pos.z-a.pos.z)*uz
+    local after=(st.pos.x-a.pos.x)*ux+(st.pos.z-a.pos.z)*uz
+    if before>=0 or after<0 then return nil end
+    local vx,vz=st.pos.x-st.prev_pos.x,st.pos.z-st.prev_pos.z
+    if vx*ux+vz*uz<=0 then return nil end
+    local tolerance=debt.tolerance or move_reach_tolerance(st)
+    local limit=tolerance+CFG.route_debt_soft_handoff_grace_m
+    local miss=point_segment_error(a.pos,st.prev_pos,st.pos)
+    if miss>limit then return nil end
+    return miss,limit,before,after
+end
 function Core.observe_route_obligations(st,now)
     if not st.pos or not st.block_state then return end
     for _,b in pairs(st.block_state) do
@@ -2839,6 +2872,18 @@ function Core.observe_route_obligations(st,now)
                         b.route_debts[aid]=nil
                         if DEBUG_TELEMETRY then dlog("ROUTE_OBLIGATION_SATISFIED uid="..st.uid.." gen="..st.gen.." block="..b.id.." action="..a.action_id..
                             " remaining="..num_or_nil(remaining).." tolerance="..num_or_nil(tolerance).." model_ms="..now) end
+                    else
+                        local miss,limit,before,after=route_guide_near_pass(st,debt)
+                        if miss then
+                            mark_action_complete(st,a,"ROUTE_GUIDE_NEAR_PASS_ACCEPTED",now,remaining)
+                            b.route_debts[aid]=nil
+                            if DEBUG_TELEMETRY then dlog("ROUTE_GUIDE_NEAR_PASS_ACCEPTED uid="..st.uid.." gen="..st.gen..
+                                " block="..b.id.." action="..a.action_id.." remaining="..num_or_nil(remaining)..
+                                " miss="..num_or_nil(miss).." strict_tolerance="..num_or_nil(tolerance)..
+                                " soft_limit="..num_or_nil(limit).." signed_before="..num_or_nil(before)..
+                                " signed_after="..num_or_nil(after)..
+                                " semantics=GUIDE_ONLY_NOT_PHYSICAL_ARRIVAL model_ms="..now) end
+                        end
                     end
                 end
             end

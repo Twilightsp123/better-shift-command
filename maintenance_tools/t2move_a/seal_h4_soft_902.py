@@ -65,6 +65,8 @@ required={"source/better_shift_command.lua","native_maps/wh3_9.0.2_fec656f4.json
  "docs/design/T2_MOVE_H4_SPEED_SOFT_20261009.md",
  ".github/workflows/t2move-h4-soft-corner.yml",
  "maintenance_tools/t2move_a/test_t2move_h4_soft_controller.lua",
+ "maintenance_tools/t2move_a/test_t2move_h6_near_pass.lua",
+ "docs/design/T2_MOVE_H6_ROUTE_NEAR_PASS_20261009.md",
  "maintenance_tools/t2move_a/test_t2move_h4_soft_native.lua",
  "maintenance_tools/t2move_a/test_t2move_h4_soft_mutations.py",
  "maintenance_tools/t2move_a/seal_h4_soft_902.py"}
@@ -90,6 +92,9 @@ manifest={
  "h4_native_parity":"4 H4 PARITY + 2 H5 NEGATIVE RACE FIXTURES; GATED BY CI",
  "h4_gameplay_change":"ALLOW_BOUNDED_STEERING_CORNER_BEFORE_ACTUAL_WAYPOINT_REACH",
  "h5_scope":"TELEMETRY_AND_NEGATIVE_NATIVE_RACE_FIXTURES_ONLY",
+ "h6_scope":"BOUNDED_POST_ACK_MOVE_GUIDE_NEAR_PASS_WITH_ACTUAL_FORWARD_PLANE_CROSSING",
+ "h6_runtime_status":"EXPERIMENTAL_PENDING_WH3_REPLAY",
+ "h6_fixture":"POSITIVE_AND_NEGATIVE_NEAR_PASS_GATED_IN_CI",
  "controller_sha256":h(controller),
  "normal_pack_sha256":h(regular),
  "debug_pack_sha256":h(debug),
@@ -106,7 +111,8 @@ manifest={
  "Test with ONE PACK ONLY. Disable Workshop/current BSC and any duplicate BSC PACK.\n"
  "First test only startup: OBSERVER_READY/START/READY, Native Move and Attack capture, observer teardown.\n"
  "Speed and continuity are priority: soft 90/180 steering is intentionally allowed before exact P reach.\n"
- "Check for any major skipped leg and Native i+2 rollback/reasserts, then straight Move, 90/180, zigzag and Attack.\n"
+ "H6: after ACK, actual motion near-pass of an old MOVE guide may retire its debt (NOT physical arrival).\n"
+ "Check for any major skipped leg, unresolved route debt and Native i+2 rollback/reasserts, then straight Move, 90/180, zigzag and Attack.\n"
  "Save script_log_*.txt and a video; report smoothness and route fidelity separately.\n"
  "Never publish to Steam until real-game smoke and acceptance pass.\n",encoding="utf-8")
 picks=[archive,regular,debug,OUT/"H4_SOFT_902_MANIFEST.json",OUT/"H4_SOFT_902_SOURCE_SHA256.txt",OUT/"READ_H4_SOFT_FIRST.txt"]
