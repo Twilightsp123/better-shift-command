@@ -1,7 +1,7 @@
 # WH3 9.0.3 — Native Shift Behavior Patch design specification
 
 **Date:** 2026-10-09
-**Status:** DESIGN + PARTIAL EXACT-BINARY N1 STATIC RE — user-provided 9.0.3-labelled EXE inspected, ring-queue pop/write code recovered, MOVE braking/completion still unknown; no Hook authorized. [Tooling instructions](../../maintenance_tools/native_shift_re/README.md) describe PE/build SHA and Ghidra decoded-operand scouts; their outputs are *not* verified native queue writers.
+**Status:** DESIGN + PARTIAL EXACT-BINARY N1 STATIC RE — user-provided 9.0.3-labelled EXE inspected, ring-queue pop/write code recovered, MOVE braking/completion still unknown; no Hook authorized. [Tooling instructions](../../maintenance_tools/native_shift_re/README.md) describe PE/build SHA and Ghidra decoded-operand scouts; these tooling outputs alone cannot confirm a writer; subsequent direct LLVM analysis established the original ring-pop writer (see N1_903_ORDER_LIFECYCLE_STATIC.md).
 **Development branch:** `research/n1-native-shift-behavior-patch-20261009`.
 **Prior evidence:** `N1_STATIC_FINDINGS.md` and `N1_EXECUTABLE_RE_PLAN.md` are **9.0.2-only historical RE seeds**, not a 9.0.3 address map.
 
