@@ -17,6 +17,8 @@
 **Method:** static x64 callgraph/dataflow on target WH3 9.0.2 EXE, current candidate map and VTables; compare already-known Native Bridge hook sites. Produce annotated function signatures, RVAs/bytes/guards, proof grade, disassembly, alternate interpretations, state diagram and an explicit *cause→candidate patch site* table. No guessing that OrderHead increment alone is the solution.
 **Pass:** each planned change has a specific original WH3 decision path and an independently checkable relationship to the undesirable behavior. If evidence cannot establish one, mark BLOCKED rather than fabricate an address.
 
+**N1 checkpoint (2026-10-09):** repository/map triage has started and is documented in [N1_STATIC_FINDINGS.md](N1_STATIC_FINDINGS.md). Source verifies order issuance, allocation observation and optimistic active-order reads, **not** original completion/head mutation or braking. Stage 1 is NOT complete; exact 9.0.2 EXE/disassembly/xrefs are needed before nominating or patching any site. Do not treat a metadata/byte-guard check as an N1 algorithm finding.
+
 ## Stage 2 — Establish minimal original-code patch contract
 **Work:** for each proven site define the smallest in-place behavioral delta: e.g. avoid unnecessary terminal braking before valid queued next MOVE, alter the native completion predicate for a guide corner, or preserve correct activation of native queued ATTACK. Preserve original queue storage, order lifetime, native sequence, engine execution and user REPLACE.
 **Pass:** old-vs-patched state transition table, preconditions and fail-closed fallback for exactly the same original engine order objects; no new BSC queue, canonical Lua state or independent command issuing API.
