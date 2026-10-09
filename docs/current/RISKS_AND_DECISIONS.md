@@ -34,6 +34,9 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 | NQ-024 | STATIC VERIFIED SPECIAL-TRANSFER BOUNDARY | Exact 9.0.3 MOVE vtable +0x38 returns true; ATTACK vtable +0x38 returns false and ATTACK +0x48 is a noop. Native queue special handoff 0x0304433C therefore admits a MOVE successor but vetoes an ATTACK successor on this specific path. No proof of default MOVE→ATTACK failure or general MOVE continuity. | Trace ordinary ATTACK activation separately; see N1_903_MOVE_VS_ATTACK_TRANSFER.md |
 | NQ-025 | STATIC VERIFIED STATE REUSE, PHYSICS UNKNOWN | MOVE +0x48 at 0x03040864 receives the existing transfer object, sets state+0x20=1, copies task payload and binds it to successor MOVE+0xA0. Current MOVE+0x40 only exposes the pointer under strict checks incl state==4. | Identify lifecycle/movement meaning of states 1/4 and terminal braking; do not bypass eligibility or refcount. |
 
+| NQ-026 | EXACT-FILE MOVE STATE ORIGIN | The native MOVE+0x08 task work path saves address of MOVE+0xA0 into init+0x50. Task constructor copies it to task+0x80; conditional initializer 0x02F41644 obtains a state object via 0x0310ED2C and writes it through task+0x80 back to MOVE+0xA0. | Verify task creation branches, full pointer/refcount ownership, and movement meaning; see N1_903_MOVE_STATE_ORIGIN.md |
+| NQ-027 | EXACT-FILE NATIVE TRANSFER REUSE LIMIT | Native state controller has a path writing state+0x20=4; successor adoption writes state+0x20=1. MOVE+0x08 may detach an existing transfer object on byte-flag, validator or scalar consistency check using engine constants 0.0 / approximately 0.01, decrementing refcount. | Classify state enumeration and actual scalar; no forced transfer or distance tuning. |
+
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
 - No guessed new Hook location, signature, VTable, native queue write offset or mutation without independent evidence.
@@ -59,5 +62,7 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 - 2026-10-09 / D-NQ-011: native task-count and conditional successor-transfer paths documented. No forced status/queue-head mutation and no new Hook authorized.
 
 - 2026-10-10 / D-NQ-012: exact-file static native MOVE/ATTACK special-handoff eligibility differs; do not force ATTACK eligibility or assume the branch is universal Shift progression. No patch authorized.
+
+- 2026-10-10 / D-NQ-013: exact-file state-object writeback and native conditional invalidation documented. No fabricated eligibility patch, counter edits or forced transfer authorized.
 
 Do not call any proposal 'implemented' until committed code and the corresponding tests exist.
