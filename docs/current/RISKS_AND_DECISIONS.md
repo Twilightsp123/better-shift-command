@@ -37,6 +37,8 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 | NQ-026 | EXACT-FILE MOVE STATE ORIGIN | The native MOVE+0x08 task work path saves address of MOVE+0xA0 into init+0x50. Task constructor copies it to task+0x80; conditional initializer 0x02F41644 obtains a state object via 0x0310ED2C and writes it through task+0x80 back to MOVE+0xA0. | Verify task creation branches, full pointer/refcount ownership, and movement meaning; see N1_903_MOVE_STATE_ORIGIN.md |
 | NQ-027 | EXACT-FILE NATIVE TRANSFER REUSE LIMIT | Native state controller has a path writing state+0x20=4; successor adoption writes state+0x20=1. MOVE+0x08 may detach an existing transfer object on byte-flag, validator or scalar consistency check using engine constants 0.0 / approximately 0.01, decrementing refcount. | Classify state enumeration and actual scalar; no forced transfer or distance tuning. |
 
+| NQ-028 | EXACT-FILE NORMAL ATTACK ROUTE | Generic original head processor 0x030433B0 dispatches active order virtual +0x08/+0x10 via 0x03043424. Issuer-derived ATTACK vtable +0x08 is 0x03025788, which submits original auxiliary attack tasks via 0x02F2FFB0. Rejection of the separate MOVE transfer gate does NOT prevent regular native ATTACK activation. | Identify MOVE predecessor's completion timing, ATTACK target validity and normal RMB contrast; see N1_903_ORDINARY_ATTACK_DISPATCH.md |
+
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
 - No guessed new Hook location, signature, VTable, native queue write offset or mutation without independent evidence.
@@ -64,5 +66,7 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 - 2026-10-10 / D-NQ-012: exact-file static native MOVE/ATTACK special-handoff eligibility differs; do not force ATTACK eligibility or assume the branch is universal Shift progression. No patch authorized.
 
 - 2026-10-10 / D-NQ-013: exact-file state-object writeback and native conditional invalidation documented. No fabricated eligibility patch, counter edits or forced transfer authorized.
+
+- 2026-10-10 / D-NQ-014: ordinary ATTACK head activation confirmed distinct from native MOVE transfer. No `ATTACK+0x38` forcing; no substitute ATTACK issue.
 
 Do not call any proposal 'implemented' until committed code and the corresponding tests exist.
