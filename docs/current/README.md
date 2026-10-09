@@ -4,14 +4,14 @@ Current documentation authority — 2026-10-09
 **Read this folder first.** This is the only normative planning/documentation entry for the proposed native queue redesign. Work is documentation-only; NQTR runtime is NOT implemented, WH3 gameplay is NOT verified.
 
 ## Minimal reading order (do not read archives routinely)
-1. PRODUCT_CONTRACT.md — what BSC must do and must never break.
-2. CURRENT_BASELINE.md — exact source/branch and what has actually been verified.
-3. NATIVE_RESEARCH_MAP.md — known Native entry points, missing proof, forbidden assumptions.
-4. TARGET_ARCHITECTURE.md — proposed single authority and failure semantics.
-5. IMPLEMENTATION_PLAN.md — build stages, ownership and acceptance gates.
-6. VERIFICATION.md — offline/Windows/one final WH3 end-to-end verification.
-7. RISKS_AND_DECISIONS.md — unresolved questions and decision register.
-8. MAINTENANCE_RULES.md — how to update this set without reviving historical designs.
+1. [PRODUCT_CONTRACT.md](PRODUCT_CONTRACT.md) — what BSC must do and must never break.
+2. [CURRENT_BASELINE.md](CURRENT_BASELINE.md) — exact source/branch and what has actually been verified.
+3. [NATIVE_RESEARCH_MAP.md](NATIVE_RESEARCH_MAP.md) — known Native entry points, missing proof, forbidden assumptions.
+4. [TARGET_ARCHITECTURE.md](TARGET_ARCHITECTURE.md) — proposed single authority and failure semantics.
+5. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — build stages, ownership and acceptance gates.
+6. [VERIFICATION.md](VERIFICATION.md) — offline/Windows/one final WH3 end-to-end verification.
+7. [RISKS_AND_DECISIONS.md](RISKS_AND_DECISIONS.md) — unresolved questions and decision register.
+8. [MAINTENANCE_RULES.md](MAINTENANCE_RULES.md) — how to update this set without reviving historical designs.
 
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
