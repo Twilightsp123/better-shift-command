@@ -132,6 +132,10 @@ Committed read-only PE/9.0.2 historical guard similarity scanner and Ghidra Jyth
 
 [N1_903_ORDER_LIFECYCLE_STATIC.md](N1_903_ORDER_LIFECYCLE_STATIC.md) records exact PE SHA, verified ring queue pop (`0x02F4FD10`) and five direct callers. These confirm original head/count mutation but **not** native MOVE completion/terminal braking, target handoff or safe detouring. 25/25 selected direct calls independently instruction-validated. All are static; no WH3 runtime or Ghidra integration.
 
+### N1 native MOVE-vs-ATTACK gate (2026-10-10)
+
+[N1_903_MOVE_VS_ATTACK_TRANSFER.md](N1_903_MOVE_VS_ATTACK_TRANSFER.md): real 9.0.3 vtables prove the special original state transfer branch approves next MOVE (+0x38 returns true) but rejects ATTACK (+0x38 returns false); MOVE +0x48 reuses and updates an existing native state pointer. This is a *specific* path, not permission to make ATTACK eligible or proof of physical smoothness. Native steering/braking, state 1/4 lifecycle and ordinary queued ATTACK activation remain unverified.
+
 ## 6. Red lines / stopping conditions
 
 - No 9.0.2 patch guard, old RVA or VTable is a valid 9.0.3 Hook without new binary verification.
