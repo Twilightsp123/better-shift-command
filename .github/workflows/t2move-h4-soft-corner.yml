@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   h4:
@@ -37,3 +38,27 @@ jobs:
           python tools/prebuild_contract_check.py
       - name: Full maintenance regressions (H4 behavior baseline)
         run: python maintenance_tools/run_checks_corepath_rc8.py
+      - name: Retrieve byte-locked v142 Windows Native 9.0.2 (CTest 14/14)
+        uses: actions/download-artifact@v4
+        with:
+          name: H2H3-WH3-902-native-v142
+          repository: Twilightsp123/better-shift-command
+          run-id: 37877413553
+          github-token: ${{ github.token }}
+          path: input_902
+      - name: Seal 9.0.2 H4 speed-first ordinary/DEBUG test PACKs and full source
+        run: python maintenance_tools/t2move_a/seal_h4_soft_902.py
+      - name: Upload H4 fully traced source and two experimental WinX64 PACKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: BSC-H4-SOFT-SPEED-WH3-902-source-testpacks
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            output/BSC_H4_soft_902_full_source.zip
+            output/zzz_better_shift_command_steam_H4_soft.pack
+            output/zzz_better_shift_command_steam_H4_soft_debug.pack
+            output/H4_SOFT_902_MANIFEST.json
+            output/H4_SOFT_902_SOURCE_SHA256.txt
+            output/H4_SOFT_902_SHA256SUMS.txt
+            output/READ_H4_SOFT_FIRST.txt
