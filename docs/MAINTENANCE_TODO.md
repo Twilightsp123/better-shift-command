@@ -123,3 +123,8 @@ Whenever an item changes from BLOCKED/PENDING to ACTIVE/PASS/FAILED:
 ## H5 WH3 9.0.2 real-log audit — 2026-10-09
 
 Evidence: `script_log_091026_1144.txt` (H4S). Bridge/Observer PASS; 4 soft corners ISSUE/ACK in 300–400 model-ms; 11 predictive MOVEs; no CONTROLLER_FAIL, MOVE_AFTER_NODE_COMPLETE or NATIVE_IDLE_ROUTE_FINISH. All 80 H2 veto observations preceded the corresponding SC issue-open window (0 late-window vetoes). Three initial Native rollback races remain: one i+1 without frozen prepromotion proof, two i+2 canonical overruns. One separate 900ms-contact-stall Exit reassert. Smoothness remains UNASSESSED without same-route video. H5 isolated branch `maintenance/t2move-h5-runtime-reconcile-audit` adds logging and two negative Native Controller fixtures without loosening policies or changing 9.0.2 Native DLL. See `docs/design/T2_MOVE_H5_RUNTIME_RECONCILE_AUDIT_20261009.md`. No release promotion.
+
+## H6 candidate — bounded route-guide near-pass
+- [x] Add per-step forward-plane near-pass retirement after Native ACK; six positive/negative fixture gates.
+- [ ] Real WH3 replay of uid1006 12:10 9-node route and video confirmation, especially no step loss/stalls.
+- [ ] Address independent Native i+1/i+2/i+3 pre-promotion separately; H6 does not fix it.
