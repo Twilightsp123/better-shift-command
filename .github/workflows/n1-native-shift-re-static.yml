@@ -1,0 +1,34 @@
+name: N1 WH3 9.0.3 Offline RE Contracts
+
+on:
+  push:
+    branches:
+      - 'research/n1-*'
+    paths:
+      - 'maintenance_tools/native_shift_re/**'
+      - 'tests/test_native_shift_re.py'
+      - '.github/workflows/n1-native-shift-re-static.yml'
+  pull_request:
+    paths:
+      - 'maintenance_tools/native_shift_re/**'
+      - 'tests/test_native_shift_re.py'
+      - '.github/workflows/n1-native-shift-re-static.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-pe-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Python syntax (PE scout and Ghidra Jython script)
+        run: |
+          python -m py_compile maintenance_tools/native_shift_re/scout_pe.py maintenance_tools/native_shift_re/ghidra_order_xrefs.py tests/test_native_shift_re.py
+      - name: Offline synthetic PE/unit tests only (NOT WH3 runtime)
+        run: |
+          python -m unittest discover -s tests -p 'test_native_shift_re.py' -v
