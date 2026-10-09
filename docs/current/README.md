@@ -3,7 +3,9 @@ Current documentation authority — 2026-10-09
 
 **Current target is WH3 9.0.3.** [WH3_9_0_3_NATIVE_PATCH_DESIGN.md](WH3_9_0_3_NATIVE_PATCH_DESIGN.md) defines version-specific research, candidate patch modules and proof gates. The 9.0.2 EXE hash, maps and N1 reports remain historical evidence only; **no 9.0.3 executable SHA or RVA is yet verified**.
 
-**Read this folder first.** The decided objective is to **patch the game's existing native Shift behavior directly**, keeping its original input, order queue, locomotion and combat engine. We are NOT creating a Lua substitute, separate Native scheduler or second command queue. The NQTR label remains only as a branch/documentation identifier. This is still documentation-only; no native patch exists or has passed WH3 validation.
+**N1 toolkit implemented:** [read-only 9.0.3 PE and Ghidra field-reference scouts](../../maintenance_tools/native_shift_re/README.md), with synthetic tests. They do not locate proven original queue progress or install hooks.
+
+**Read this folder first.** The decided objective is to **patch the game's existing native Shift behavior directly**, keeping its original input, order queue, locomotion and combat engine. We are NOT creating a Lua substitute, separate Native scheduler or second command queue. The NQTR label remains only as a branch/documentation identifier. This is still *research-only* (documentation plus static forensic tooling); no native patch exists or has passed WH3 validation.
 
 ## Minimal reading order (do not read archives routinely)
 0. [WH3_9_0_3_NATIVE_PATCH_DESIGN.md](WH3_9_0_3_NATIVE_PATCH_DESIGN.md) — **current 9.0.3 design**; lifecycle, braking, ATTACK transition, evidence gates and no-go rules.
@@ -32,5 +34,6 @@ Current documentation authority — 2026-10-09
 - Formal mod version and Steam pack identity are release policy, not a proof of installed experimental controller revision.
 - Current development starting point: H8 branch maintenance/t2move-h8-terminal-liveness-static, commit e711e716f2411599d75184618fc1ee5cb85bcd54.
 - 9.0.2 experiment uses a separately overlaid static candidate map, NOT promoted native_maps/CURRENT.
+- N1 offline tooling includes a PE SHA/section guard scout, Ghidra scalar-offset candidate exporter and synthetic regressions; Ghidra and WH3 9.0.3 executable analysis remain **unperformed**.
 - Direct Native Shift patch is NOT implemented, validated or authorized for release. The original Native Bridge may be reused only as an instrumentation/patch vehicle, not as an alternative executor.
-- This branch must contain docs/metadata only; no player-facing behavior change.
+- Research branch may contain read-only scripts/tests and docs, but no gameplay/native runtime modifications; no player-facing behavior change.
