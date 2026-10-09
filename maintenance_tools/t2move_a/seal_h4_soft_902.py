@@ -17,7 +17,7 @@ def git(*args):return subprocess.check_output(["git",*args],cwd=ROOT,text=True).
 def run(*a):subprocess.run(a,cwd=ROOT,check=True)
 if not bridge.is_file():raise SystemExit("MISSING WINDOWS v142 NEW DLL - fail closed")
 if h(bridge)==OLD_NATIVE:raise SystemExit("OLD 9.0.1 Native DLL supplied to 9.0.2 pack")
-if h(bridge)!=KNOWN_902_NATIVE:raise SystemExit("H4 MUST REUSE EXACT VERIFIED 9.0.2 DLL FROM CI 37877413553")
+if h(bridge)!=KNOWN_902_NATIVE:raise SystemExit("H8 MUST REUSE EXACT VERIFIED 9.0.2 DLL FROM CI 37877413553")
 data=bridge.read_bytes()
 for token in (VERSION,TARGET_SHA.encode()):
  if token not in data:raise SystemExit("9.0.2 VERSION/EXE HASH MISSING IN NEW DLL: "+repr(token))
@@ -36,8 +36,8 @@ sys.path.insert(0,str(ROOT/"controller_tools"))
 import pack_tools
 pack_tools.native_info(data,minhook.read_bytes())
 OUT.mkdir(exist_ok=True)
-regular=OUT/"zzz_better_shift_command_steam_H4_soft.pack"
-debug=OUT/"zzz_better_shift_command_steam_H4_soft_debug.pack"
+regular=OUT/"zzz_better_shift_command_steam_H8_terminal.pack"
+debug=OUT/"zzz_better_shift_command_steam_H8_terminal_debug.pack"
 run(sys.executable,"maintenance_tools/build_corepath_rc8.py",str(bridge),str(regular))
 run(sys.executable,"maintenance_tools/verify_corepath_rc8.py",str(regular),str(bridge))
 src=controller.read_bytes()
@@ -56,7 +56,7 @@ if dbg!=pack_tools.selfcontained(ROOT,debug_src,data,minhook.read_bytes()):raise
 changed=git("diff","--name-only",BASE_H2,"HEAD").splitlines()
 if any(x.startswith("src/native_bridge/src/platform_windows.cpp") for x in changed):
  raise SystemExit("Runtime hooking code diverged from H2 without a separate audit")
-archive=OUT/"BSC_H4_soft_902_full_source.zip"
+archive=OUT/"BSC_H8_terminal_902_full_source.zip"
 run("git","archive","--format=zip","--output="+str(archive),"HEAD")
 required={"source/better_shift_command.lua","native_maps/wh3_9.0.2_fec656f4.json",
  "native_maps/candidates/wh3_9.0.2_fec656f4.json","maintenance_tools/t2move_a/check_h2h3_902_integration.py",
@@ -67,6 +67,10 @@ required={"source/better_shift_command.lua","native_maps/wh3_9.0.2_fec656f4.json
  "maintenance_tools/t2move_a/test_t2move_h4_soft_controller.lua",
  "maintenance_tools/t2move_a/test_t2move_h6_near_pass.lua",
  "maintenance_tools/t2move_a/test_t2move_h7_native_attack.lua",
+ "maintenance_tools/t2move_a/test_t2move_h8_terminal_policy.lua",
+ "maintenance_tools/t2move_a/test_t2move_h8_terminal_controller.lua",
+ "maintenance_tools/t2move_a/test_t2move_h8_architecture_contract.py",
+ "docs/design/T2_MOVE_H8_TERMINAL_LIVENESS_AND_OWNERSHIP_20261009.md",
  "docs/design/T2_MOVE_H7_NATIVE_ATTACK_TERMINAL_20261009.md",
  "docs/design/T2_MOVE_H6_ROUTE_NEAR_PASS_20261009.md",
  "maintenance_tools/t2move_a/test_t2move_h4_soft_native.lua",
@@ -78,15 +82,15 @@ with zipfile.ZipFile(archive) as z:
  if z.read("source/better_shift_command.lua")!=src:raise SystemExit("SOURCE ARCHIVE CONTROLLER DIVERGED")
  files=[sha(z.read(p))+"  "+p for p in sorted(z.namelist()) if not p.endswith("/")]
 manifest={
- "stage":"H4-SPEED-FIRST-SOFT-WAYPOINT-WH3-9.0.2",
+ "stage":"H8-EXACT-NATIVE-MOVE-TERMINAL-LIVENESS-WH3-9.0.2",
  "source_head":git("rev-parse","HEAD"),
  "base_H2H3":BASE_H2,"target_exe_sha256":TARGET_SHA,
  "native_version":VERSION.decode("ascii"),
  "native_sha256":h(bridge),
  "map_id":candidate["map_id"],
  "required_hooks":"16/16 STATIC_MAP",
- "native_smoke_in_WH3":"PASS_BRIDGE_OBSERVER_20261009_1144",
- "runtime_motion_in_WH3":"PARTIAL_LOG_1144_VISUAL_SMOOTHNESS_UNVERIFIED",
+ "native_smoke_in_WH3":"HISTORICAL_H4_ONLY_NOT_H8",
+ "runtime_motion_in_WH3":"H8_NOT_TESTED_IN_WH3",
  "windows_v142_compile_and_ctest":"CI JOB SUCCESS PREREQUISITE",
  "native_dll_from":"REUSED_UNCHANGED_VALIDATED_WINDOWS_V142_CTEST_14_OF_14_RUN_37877413553",
  "route_policy":"SOFT_GUIDE_CONTINUITY_PRIORITY",
@@ -99,6 +103,13 @@ manifest={
  "h6_fixture":"POSITIVE_AND_NEGATIVE_NEAR_PASS_GATED_IN_CI",
  "h7_scope":"ADOPT_ONLY_EXACT_NATIVE_I_PLUS_ONE_ATTACK_IN_PHYSICAL_TERMINAL_ENVELOPE",
  "h7_runtime_status":"EXPERIMENTAL_PENDING_WH3_SHIFT_ATTACK_RETEST",
+ "h8_scope":"EXACT_CURRENT_NATIVE_MOVE_STABLE_PHYSICAL_TERMINAL_PROACTIVE_ATTACK",
+ "h8_policy_tests":"9/9 OFFLINE_GATED",
+ "h8_controller_tests":"4/4 SYNTHETIC_GATED",
+ "h8_static_contract":"ARCHITECTURE_WIRING_AND_OPEN_RISK_LABELS_GATED",
+ "h8_runtime_status":"EXPERIMENTAL_OFFLINE_ONLY_UNVERIFIED_IN_WH3",
+ "p0_hook_allocation":"OPEN_FIRST_MOVE_MH_ERROR_MEMORY_ALLOC",
+ "p2_native_queue_ownership":"OPEN_NATIVE_TAIL_NOT_PROVEN_AFTER_NONQUEUED_ROLLBACK",
  "controller_sha256":h(controller),
  "normal_pack_sha256":h(regular),
  "debug_pack_sha256":h(debug),
@@ -106,21 +117,23 @@ manifest={
  "tracked_file_count":len(files),
  "github_run_id":os.getenv("GITHUB_RUN_ID","UNKNOWN"),
  "release_promotion":False}
-(OUT/"H4_SOFT_902_MANIFEST.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-(OUT/"H4_SOFT_902_SOURCE_SHA256.txt").write_text("\n".join(files)+"\n",encoding="utf-8")
-(OUT/"READ_H4_SOFT_FIRST.txt").write_text(
- "BSC H4 speed-first SOFT WAYPOINT WH3 9.0.2 CANDIDATE. NOT RELEASED or WH3-runtime-tested.\n"
+(OUT/"H8_TERMINAL_902_MANIFEST.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+(OUT/"H8_TERMINAL_902_SOURCE_SHA256.txt").write_text("\n".join(files)+"\n",encoding="utf-8")
+(OUT/"READ_H8_TERMINAL_FIRST.txt").write_text(
+ "BSC H8 STATIC/OFFLINE terminal-liveness candidate for WH3 9.0.2; NOT RELEASED or H8 WH3-tested.\n"
  "The 9.0.2 Native DLL is byte-identical to successful v142 Windows CTest 14/14 build in CI 37877413553.\n"
  "Supported EXE SHA256: "+TARGET_SHA+"\n"
- "Test with ONE PACK ONLY. Disable Workshop/current BSC and any duplicate BSC PACK.\n"
- "First test only startup: OBSERVER_READY/START/READY, Native Move and Attack capture, observer teardown.\n"
+ "If a later WH3 validation is authorized, use ONE PACK ONLY; disable duplicate BSC PACKs.\n"
+ "No new human gameplay test is required for this static/offline architecture stage.\n"
  "Speed and continuity are priority: soft 90/180 steering is intentionally allowed before exact P reach.\n"
  "H6: after ACK, actual motion near-pass of an old MOVE guide may retire its debt (NOT physical arrival).\n"
  "H7: adopt only exact already-running Native queued Shift ATTACK near end of MOVE; no proactive ISSUE permission.\n"
+ "H8: independent proactive ATTACK after actual stable exact current Native MOVE within old terminal envelope.\n"
+ "H8 is SYNTHETIC/OFFLINE ONLY; P0 MinHook allocation and P2 dual queue ownership REMAIN OPEN.\n"
  "Verify Native attack transition on route end without forced MOVE rollback or skipped intermediate moves.\n"
  "Check for any major skipped leg, unresolved route debt and Native i+2 rollback/reasserts, then straight Move, 90/180, zigzag and Attack.\n"
- "Save script_log_*.txt and a video; report smoothness and route fidelity separately.\n"
+ "In-game smoothness and Native Hook allocation are NOT proven by this artifact.\n"
  "Never publish to Steam until real-game smoke and acceptance pass.\n",encoding="utf-8")
-picks=[archive,regular,debug,OUT/"H4_SOFT_902_MANIFEST.json",OUT/"H4_SOFT_902_SOURCE_SHA256.txt",OUT/"READ_H4_SOFT_FIRST.txt"]
-(OUT/"H4_SOFT_902_SHA256SUMS.txt").write_text("".join(h(x)+"  "+x.name+"\n" for x in picks),encoding="utf-8")
+picks=[archive,regular,debug,OUT/"H8_TERMINAL_902_MANIFEST.json",OUT/"H8_TERMINAL_902_SOURCE_SHA256.txt",OUT/"READ_H8_TERMINAL_FIRST.txt"]
+(OUT/"H8_TERMINAL_902_SHA256SUMS.txt").write_text("".join(h(x)+"  "+x.name+"\n" for x in picks),encoding="utf-8")
 print(json.dumps(manifest,ensure_ascii=False,indent=2))

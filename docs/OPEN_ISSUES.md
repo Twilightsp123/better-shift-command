@@ -101,3 +101,9 @@ Evidence: `script_log_091026_1144.txt` (H4S). Bridge/Observer PASS; 4 soft corne
 - uid1006 G1 action5 guide debt best 5.112033m vs strict tolerance 3.889415m; action6 idle then block at model_ms74000, no action6->7 ACK.
 - H6 optionally retires only after real forward-plane crossing within existing SC3 1.5m soft margin and native ACK. This is not yet proven to fix WH3; the full position trace was not in the log.
 - Native i+1/i+2/i+3 premature futures remain separate unresolved issue. No Native Hook changes.
+
+## Open P0 / P2 native architecture issues (H8 2026-10-09)
+- 13:18 Observer: MINHOOK_CREATE_FAILED hook MOVE idx0 status9 after retry; exact MinHook allocation subcause not known, no guaranteed same-process recovery. Do not modify byte-locked 9.0.2 DLL without a separate native evidence lane.
+- Native command dual-writer: BridgeHost::order executes original player queued order before Lua sees journal; Lua rollback issues nonqueued MOVE, Native queued tail cannot be asserted intact. H8 logging: lua_tail_preserved=true native_tail_proven=false; no gameplay fix yet for this ownership race.
+- H8 proactive ATTACK liveness is a bounded exact-current Native MOVE near-terminal physical standstill alternative to G11 coherent braking. Verified in synthetic controller fixture and policy tests only; WH3 gameplay NOT VERIFIED.
+- 12:10 uid1006 independent guide-debt deadlock remains a separate visual/physical risk.

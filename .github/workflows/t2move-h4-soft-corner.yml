@@ -1,4 +1,4 @@
-name: T2-MOVE H4 Soft Corner Candidate
+name: T2-MOVE H4-H8 Full Offline Candidate
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
       - maintenance/t2move-h5-runtime-reconcile-audit
       - maintenance/t2move-h6-route-guide-nearpass
       - maintenance/t2move-h7-native-shift-attack-terminal
+      - maintenance/t2move-h8-terminal-liveness-static
   workflow_dispatch:
 
 permissions:
@@ -34,6 +35,12 @@ jobs:
         run: lua5.1 maintenance_tools/t2move_a/test_t2move_h6_near_pass.lua source/better_shift_command.lua tests/fixture.lua
       - name: H7 Native exact Shift ATTACK terminal acceptance and negative fixtures
         run: lua5.1 maintenance_tools/t2move_a/test_t2move_h7_native_attack.lua source/better_shift_command.lua tests/fixture.lua
+      - name: H8 two-lane attack terminal policy adversarial suite
+        run: lua5.1 maintenance_tools/t2move_a/test_t2move_h8_terminal_policy.lua source/t2b_attack_policy_v2.lua
+      - name: H8 real-controller stationary Native MOVE liveness suite
+        run: lua5.1 maintenance_tools/t2move_a/test_t2move_h8_terminal_controller.lua source/better_shift_command.lua tests/fixture.lua
+      - name: H8 architecture source invariants and unresolved gap labels
+        run: python maintenance_tools/t2move_a/test_t2move_h8_architecture_contract.py
       - name: H4 Native V3 exact successor parity
         run: lua5.1 maintenance_tools/t2move_a/test_t2move_h4_soft_native.lua source/better_shift_command.lua tests/fixture.lua
       - name: H4 soft corner behavior mutation gates
@@ -53,19 +60,19 @@ jobs:
           run-id: 37877413553
           github-token: ${{ github.token }}
           path: input_902
-      - name: Seal 9.0.2 H4 speed-first ordinary/DEBUG test PACKs and full source
+      - name: Seal 9.0.2 H8 candidate ordinary/DEBUG test PACKs and full source
         run: python maintenance_tools/t2move_a/seal_h4_soft_902.py
-      - name: Upload H4 fully traced source and two experimental WinX64 PACKs
+      - name: Upload H8 fully traced source and two experimental WinX64 PACKs
         uses: actions/upload-artifact@v4
         with:
-          name: BSC-H4-SOFT-SPEED-WH3-902-source-testpacks
+          name: BSC-H8-TERMINAL-LIVENESS-WH3-902-source-testpacks
           if-no-files-found: error
           retention-days: 90
           path: |
-            output/BSC_H4_soft_902_full_source.zip
-            output/zzz_better_shift_command_steam_H4_soft.pack
-            output/zzz_better_shift_command_steam_H4_soft_debug.pack
-            output/H4_SOFT_902_MANIFEST.json
-            output/H4_SOFT_902_SOURCE_SHA256.txt
-            output/H4_SOFT_902_SHA256SUMS.txt
-            output/READ_H4_SOFT_FIRST.txt
+            output/BSC_H8_terminal_902_full_source.zip
+            output/zzz_better_shift_command_steam_H8_terminal.pack
+            output/zzz_better_shift_command_steam_H8_terminal_debug.pack
+            output/H8_TERMINAL_902_MANIFEST.json
+            output/H8_TERMINAL_902_SOURCE_SHA256.txt
+            output/H8_TERMINAL_902_SHA256SUMS.txt
+            output/READ_H8_TERMINAL_FIRST.txt
