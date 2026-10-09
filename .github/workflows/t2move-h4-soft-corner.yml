@@ -1,0 +1,35 @@
+name: T2-MOVE H4 Soft Corner Candidate
+
+on:
+  push:
+    branches:
+      - maintenance/t2move-h4-soft-corner-speed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  h4:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Lua 5.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+      - name: H4 soft corner active controller suite
+        run: lua5.1 maintenance_tools/t2move_a/test_t2move_h4_soft_controller.lua source/better_shift_command.lua tests/fixture.lua
+      - name: 9.0.2 source Native map and CXX MASM contracts
+        run: |
+          python maintenance_tools/t2move_a/check_h2h3_902_integration.py
+          python maintenance_tools/check_native_map_contract.py
+          python tools/prebuild_contract_check.py
+      - name: Full maintenance regressions (H4 behavior baseline)
+        run: python maintenance_tools/run_checks_corepath_rc8.py
