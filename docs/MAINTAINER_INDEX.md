@@ -93,3 +93,6 @@ When a future maintainer discovers a conflict, fix the navigation/current-state 
 
 
 **Latest isolated integration (2026-10-09):** `maintenance/t2move-h2h3-wh3-902-integration` combines the sealed H2/H3 Controller with the preexisting WH3 9.0.2 address candidate in a build-local Native map overlay. CI `37877024598` confirms Windows v142/MASM build, Native CTest 14/14, ordinary+DEBUG candidate PACKs and full-source seal. This does not promote `native_maps/CURRENT`, claim WH3 runtime success, or override T2-B/E/F/G/H1 archives. Consult `docs/design/T2MOVE_H2H3_WH3_902_INTEGRATION_20261009.md` before touching Native, release packs, or route geometry.
+
+
+**H4S current speed-first WH3 9.0.2 experimental branch:** `maintenance/t2move-h4-soft-corner-speed`. Supersedes the strict H2 exact intermediate waypoint preissue veto when existing SC1/SC2/SC4 has a legitimate steering window and there are no unpaid prior SC3 route debts. T1.6 ACK commits `H4_SOFT_WAYPOINT_ACCEPTED`, deliberately not a physical reach assertion. Native i+1 reuses frozen evidence. No new Native address/Hook bytes, no H4-A auxiliary Q. H4 fixture and whole maintenance CI passed; real WH3 H4 movement continuity not verified. See `docs/design/T2_MOVE_H4_SPEED_SOFT_20261009.md` and keep all prior G/H1/H2/H4-A branches frozen.

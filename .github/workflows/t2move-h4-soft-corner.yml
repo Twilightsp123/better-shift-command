@@ -1,0 +1,64 @@
+name: T2-MOVE H4 Soft Corner Candidate
+
+on:
+  push:
+    branches:
+      - maintenance/t2move-h4-soft-corner-speed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  h4:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Lua 5.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+      - name: H4 soft corner active controller suite
+        run: lua5.1 maintenance_tools/t2move_a/test_t2move_h4_soft_controller.lua source/better_shift_command.lua tests/fixture.lua
+      - name: H4 Native V3 exact successor parity
+        run: lua5.1 maintenance_tools/t2move_a/test_t2move_h4_soft_native.lua source/better_shift_command.lua tests/fixture.lua
+      - name: H4 soft corner behavior mutation gates
+        run: python maintenance_tools/t2move_a/test_t2move_h4_soft_mutations.py
+      - name: 9.0.2 source Native map and CXX MASM contracts
+        run: |
+          python maintenance_tools/t2move_a/check_h2h3_902_integration.py
+          python maintenance_tools/check_native_map_contract.py
+          python tools/prebuild_contract_check.py
+      - name: Full maintenance regressions (H4 behavior baseline)
+        run: python maintenance_tools/run_checks_corepath_rc8.py
+      - name: Retrieve byte-locked v142 Windows Native 9.0.2 (CTest 14/14)
+        uses: actions/download-artifact@v4
+        with:
+          name: H2H3-WH3-902-native-v142
+          repository: Twilightsp123/better-shift-command
+          run-id: 37877413553
+          github-token: ${{ github.token }}
+          path: input_902
+      - name: Seal 9.0.2 H4 speed-first ordinary/DEBUG test PACKs and full source
+        run: python maintenance_tools/t2move_a/seal_h4_soft_902.py
+      - name: Upload H4 fully traced source and two experimental WinX64 PACKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: BSC-H4-SOFT-SPEED-WH3-902-source-testpacks
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            output/BSC_H4_soft_902_full_source.zip
+            output/zzz_better_shift_command_steam_H4_soft.pack
+            output/zzz_better_shift_command_steam_H4_soft_debug.pack
+            output/H4_SOFT_902_MANIFEST.json
+            output/H4_SOFT_902_SOURCE_SHA256.txt
+            output/H4_SOFT_902_SHA256SUMS.txt
+            output/READ_H4_SOFT_FIRST.txt

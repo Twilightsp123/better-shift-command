@@ -17,7 +17,7 @@ need('adopt_window=transition_envelope(false,"TRANSITION_WAIT",false)',1)
 need('d.adopt_window=transition_envelope(false,"CANONICAL_INTERMEDIATE_ACTIONS_OWED",true)',1)
 need('local adopt_window=decision.adopt_window or {open=false,reason=decision.reason,hard_violation=decision.hard_violation}',1)
 need('decision.issue_window and decision.issue_window.open',3)
-if s.count('R1.TransitionPolicy.evaluate(st,')!=10: fail('shared evaluator call-site count includes E cached Native MOVE adoption')
+if s.count('R1.TransitionPolicy.evaluate(st,')!=11: fail('shared evaluator call sites include H4 postdrain and E cached Native MOVE adoption')
 for legacy in ('consumer="PROACTIVE"','consumer="NATIVE_RECONCILE"','consumer="SCHEDULER"','context.consumer'):
     if legacy in s: fail('consumer-specific permission remains: '+legacy)
 # T1.7 envelope structure remains mandatory after T2-B promotion. T2-B may open

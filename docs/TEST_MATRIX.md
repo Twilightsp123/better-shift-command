@@ -82,3 +82,16 @@ Battle teardown/suspend-resume is a separate stream and must not be marked PASS 
 | WH3 in-game Observer initialization and standard MOVE/ATTACK smoke | **NOT TESTED** | Await script logs on supported 9.0.2 Windows game process |
 | WH3 Move/Attack choreography, foldback/no-stutter, multi-unit, teardown | **NOT TESTED** | RT-TP-02/03/04/05 remain blocked |
 
+
+
+## H4S speed-first intermediate MOVE guidance (isolated WH3 9.0.2 candidate)
+
+| Gate | Status | Notes |
+|---|---|---|
+| 90°/180° proactive early MOVE issue + Native ACK and distinct semantic soft credit | **6/6 OFFLINE PASS** | No false physical-arrival claim; strict prior-debt, short-leg and reject/pending protection |
+| Exact Native V3 i+1 corner adoption, stale revision and collinear debt | **4/4 OFFLINE PASS** | Shared frozen evidence; real WH3 i+2 rollback unresolved |
+| Soft-steering/Native/credit mutation tests | **4/4 CAUGHT** | Failed mutants require actual Active Controller evidence |
+| Original CorePath maintenance suite, 9.0.2 Native address/identity | **PASS** | Native reused from Windows v142 CTest 14/14 archived DLL, SHA locked |
+| Genuine WH3 movement speed through 90°/180° and dense short legs | **NOT TESTED H4S** | Need actual script logs, unit video and observable stop/jitter before promotion |
+| WH3 Move→Attack, rollback/reassert flood, shutdown | **OPEN** | Must not infer from plain MOVE synthetic success |
+
