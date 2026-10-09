@@ -235,3 +235,9 @@
 **Implementation:** isolated branch `maintenance/t2move-h4-soft-corner-speed`; no new tuneable distance or angle knobs, no speculative H4-A run-through Q command, no Native source rebuild. H4 Controller 6/6, Native 4/4 and 4 mutations caught, original full maintenance PASS; existing 9.0.2 Windows v142 Native CTest 14/14 used byte-for-byte in deterministic test packs.
 
 **Unresolved:** offline proof says successor commands issue earlier, not that WH3 units preserve actual motion speed. User's real-game video/log needed before smoothness claim. Prior Native rollback and i+2 overruns must be measured separately; no merge or Steam release.
+
+## D-20261009-07 — Diagnose Native intake races before expanding adoption authority
+
+**Evidence:** WH3 H4S 11:44 log shows four early bounded soft corners committed on ACK, zero blocked issues after SC issue-open, three Native rollbacks during queued input (one `MOVE_PREPROMOTION_CACHE_MISSING` exact i+1 and two `CANONICAL_INTERMEDIATE_ACTIONS_OWED` i+2), and one independent SC5 Exit contact/stall reassert. No exact i+1 Native adoption occurred. Results do not prove visual smoothness.
+
+**Decision:** isolated H5 is a telemetry/negative-regression gate, NOT a speculative game-behavior fix. Expose frozen cache existence/age and canonical index gap at each rollback; reproduce no-cache and i+2 failures in active Controller fixture. Never accept i+2, invent prepromotion evidence or disable rollback to suppress counters. Native 9.0.2 DLL and H4 steering logic remain byte-identical. Assess Native Hook queue interception capability before any execution-ownership redesign.
