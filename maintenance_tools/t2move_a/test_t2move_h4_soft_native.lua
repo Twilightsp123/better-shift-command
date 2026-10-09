@@ -57,28 +57,36 @@ T("H4SN-04 stale Native revision remains fail closed",function()
  assert(n(f,"TRANSITION_EDGE_COMMITTED")==0)
  safe(f)
 end)
--- H5: the exact i+1 queued order can run before any pre-promotion proof.
-T("H5RN-01 immediate queued i+1 without frozen current proof fails closed",function()
+-- H5: warm Native authorization on current MOVE BEFORE future queue capture,
+-- but keep successor uncaptured until the Native promotion tick. This models
+-- the observed 17,400ms prepromotion race without faking calibration.
+local function h5_armed_single_move()
  local f=F({cold_idle=true,debug_source=true,no_calibration=true,width=20,native_order_evidence_v3=v3})
  f:start();f.unit.idle=false;f.unit.moving=true
- f:emit("MOVE",false,100,0)
+ local a=f:emit("MOVE",false,100,0)
+ f.evidence_record=a
+ f:tick(100,0,0);f:tick(200,5,0);f:tick(300,10,0)
+ return f
+end
+T("H5RN-01 queued i+1 before frozen successor proof must be rolled back",function()
+ local f=h5_armed_single_move()
  local b=f:emit("MOVE",true,100,100)
- f.evidence_record=b;f:tick(100,0,0)
+ f.evidence_record=b;f:tick(400,15,0)
  assert(n(f,"NATIVE_SUCCESSOR_ADOPTED")==0,"unproven i+1 adopted")
  assert(n(f,"TRANSITION_EDGE_COMMITTED")==0,"unproven i+1 committed")
- assert(f:has("MOVE_PREPROMOTION_CACHE_MISSING"),"missing evidence race not surfaced: "..table.concat(f.logs," | "))
+ assert(f:has("MOVE_PREPROMOTION_CACHE_MISSING"),"missing prepromotion proof not reported: "..table.concat(f.logs," | "))
+ assert(n(f,"NATIVE_SUCCESSOR_ROLLBACK")==1,"the armed Native conflict did not recover")
  safe(f)
 end)
-T("H5RN-02 single-poll Native i+2 cannot skip canonical intermediate MOVE",function()
- local f=F({cold_idle=true,debug_source=true,no_calibration=true,width=20,native_order_evidence_v3=v3})
- f:start();f.unit.idle=false;f.unit.moving=true
- f:emit("MOVE",false,100,0)
+T("H5RN-02 queued i+2 may not skip canonical intermediate MOVE",function()
+ local f=h5_armed_single_move()
  f:emit("MOVE",true,100,100)
  local c=f:emit("MOVE",true,200,100)
- f.evidence_record=c;f:tick(100,0,0)
+ f.evidence_record=c;f:tick(400,15,0)
  assert(n(f,"NATIVE_SUCCESSOR_ADOPTED")==0,"i+2 adopted")
  assert(n(f,"TRANSITION_EDGE_COMMITTED")==0,"i+2 skipped intermediate")
  assert(f:has("CANONICAL_INTERMEDIATE_ACTIONS_OWED"),"i+2 reason missing: "..table.concat(f.logs," | "))
+ assert(n(f,"NATIVE_SUCCESSOR_ROLLBACK")==1,"the armed i+2 conflict did not recover")
  safe(f)
 end)
 print("TOTAL "..pass.." PASS "..fail.." FAIL; H4/H5 Native only NOT WH3")
