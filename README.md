@@ -2,7 +2,7 @@
 
 Windows x64 mod for Total War: WARHAMMER III.
 
-**Current development direction:** research and redesign the native Shift order queue transition/completion mechanism to avoid competing Lua/Native command ownership. This is a proposed next architecture, not an existing native patch.
+**Current development direction:** reverse-engineer and directly patch WH3's **original** Shift movement, stopping, completion and attack handoff functions; keep the original input, order queue and native executor. No replacement Lua or Native command scheduler. The modification technique may use build-guarded in-memory detours, but only to change the original engine behavior, not to create another controller. This is not yet implemented.
 
 - [Read current engineering docs](docs/current/README.md)
 - [Native queue research map](docs/current/NATIVE_RESEARCH_MAP.md)

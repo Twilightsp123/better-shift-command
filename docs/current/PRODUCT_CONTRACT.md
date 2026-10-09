@@ -1,27 +1,27 @@
-# Product Contract — BSC Native Queue Redesign
+# Product Contract — Direct Native Shift Behavior Patch
 
-## Why BSC exists
-Warhammer III native Shift queue produces undesirable stops, handoff behavior and route deviations. BSC's job is to improve *real in-game movement* while retaining predictable player control; not merely make Lua telemetry report compliant route steps.
+## The user's explicit architectural requirement
+**Modify WH3's own Shift logic, not replace it.** Keep original Shift/RMB input, original queue, original order objects, original head advance/retire, original Native locomotion and combat. BSC patches the native behaviors that make the original Shift inconvenient. No Lua shadow scheduler, no BSC parallel Native queue and no periodic MOVE/ATTACK reissuance.
 
-## Required behaviors
-- Shift MOVE → MOVE → MOVE: continuous motion through **approximately guiding** intermediate points. Bounded rounded corners are allowed. Avoid stops at every marker and visibly unnatural detours; do not silently delete a major planned turn.
-- 90/135/180-degree turns, short route legs, reversals, multi-unit routes and queue revisions must have defined semantics and no double-commit or compression into mutually colliding movements.
-- MOVE → ATTACK: next attack must execute promptly when valid transition conditions are met, without the Controller cancelling the game's own correct attack or waiting forever for a particular deceleration curve.
-- MOVE → ATTACK → EXIT MOVE → ATTACK: target identity, minimum engagement hold (existing default 3 seconds) and EXIT route obligations remain intact.
-- Non-Shift RMB REPLACE/HALT and new player orders take precedence over old BSC generations. No stale Lua plan may resurrect cancelled commands.
-- Never counterfeit exact order identity using current_target, animation state, ACK alone or guessed VTables; never skip canonical i+1 merely because native execution appears to be i+2.
-- Route fidelity is a requirement on **geometry / obligation**, not absolute point-centre arrival. Guidance accepted != actual waypoint visited, and neither is established by issue/ACK alone.
-- No infinite rollback ↔ reassert loop, silent Native queued-tail deletion, process hang or partial-hook start.
+## Required gameplay
+- Shift MOVE → MOVE → MOVE should be smooth, not stop after each waypoint. Guidepoints are approximate, bounded corners acceptable, but do not erase essential route bends.
+- 90°, 135°, 180°/U-turn, short legs, dense zigzags and multiple units must maintain sane geometry and no exaggerated route compression or collisions.
+- Shift MOVE → ATTACK should hand off reliably without freeze, bogus brake predicates or BSC overwriting a legitimate Native ATTACK.
+- MOVE → ATTACK → EXIT MOVE → ATTACK must preserve chosen target identity, minimum engagement time when relevant and native exit semantics.
+- Normal RMB MOVE, normal RMB ATTACK, REPLACE and HALT must continue to work exactly as intended and cancel stale Shift tail.
+- No unbounded loop/timeout that traps a queued command indefinitely; no phantom early completion or silent skip.
 
-## Engineering requirements
-- Avoid empirical threshold tuning as a substitute for architecture. New distance/time values need a physical model or independently justified bounds.
-- Every new RE claim requires build-specific static proof and evidence grade.
-- A single component must own the *permission to advance* each active order. The engine still owns locomotion, avoidance, physics, attack execution and animation.
-- Build-specific binary compatibility is fail-closed: exact EXE SHA, byte guards, v142/MASM builds and CTest before any game-facing candidate.
-- No endless human test loop: exhaust deterministic fixtures and Windows isolated tests first. WH3 testing is a bounded final acceptance gate, not the default debugging instrument.
+## Patch requirements
+- First establish whether undesirable stopping comes from the engine's braking, original queue completion, next-command activation, or their combination. Don't assume an earlier queue-pop is sufficient.
+- Change as little original x64 code as necessary, at proven version-guarded function(s). Prefer matching Shift/queued context and leaving ordinary RMB untouched.
+- All original Native order objects and queue state stay authoritative. Do not create a second execution/controller authority in Lua or C++.
+- Preserve original order IDs, lifetimes, generation/revision/cancellation and native queued tail; no artificial 'ACK means waypoint arrived' rule.
+- No hardcoded tuning search: each geometry/time constant must come from an observed engine/physical model or an explicit acceptable design bound.
+- Fail closed if ABI/site/build is unsupported; avoid half-installed hooks and unsafe state mutation.
+- Exhaust controlled offline/Windows proof before one bounded final in-game acceptance.
 
-## Explicit non-goals
-- Do not replace CA's unit pathfinding, steering/physics, attack simulation or formation movement.
-- Do not ship a permissive 'let any queued future execute' fallback.
-- Do not enable quarantined Entity/Component/Alive/ContactPair research to gain authority.
-- Do not repurpose the public Steam pack identity to name provisional NQTR experiments.
+## Non-goals
+- Rebuild CA pathfinding, physics, formation or combat.
+- Edit the game's EXE on disk as a mod installation prerequisite.
+- Treat old H1–H8 Lua shadow-plan algorithms as the next development target.
+- Expose MCT, modify campaign AI, or publish Steam before native patch verification.

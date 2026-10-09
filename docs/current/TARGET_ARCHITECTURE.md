@@ -1,31 +1,43 @@
-# Proposed Target Architecture — single transition authority
+# Target Architecture — Patch WH3's Original Shift Behavior
 
-**Status: proposal, not an implemented or verified Native behavior.** Do not claim that current hooks can change WH3 native queue advancement.
+**Decision: modify the game's existing native Shift implementation, not replace Shift with Lua, a new Native order scheduler, or a parallel queue.** This is a reverse-engineering goal, NOT a proven working patch.
 
-## Desired execution pipeline
-Player Shift/normal command → WH3 native input capture + exact identity → WH3 native queue → **Native BSC transition decision at verified engine completion/advance boundary** → WH3 native locomotion/attack executor.
+## Exactly what stays original
+- The player's Shift / right-click command entry, controls and UI.
+- The game's own order objects, command queue, engine sequence, queue append/replace, cancellation and queue-head ownership.
+- The game's native locomotion, collision/avoidance, formation, combat, animation and target handling.
+- Normal right-click / non-Shift behavior except when an independently identified shared defect must be fixed without regression.
 
-Lua role: settings, diagnostics, user-facing state, optional high-level route policy, NOT a second writer that predicts and overwrites the game's active queue. Native transition layer role: decide whether/when a *canonical next command* becomes current, preserve atomic identity and cancellation invariants; do not implement physical steering or fake arrival.
+## Exactly what BSC changes
+Only the smallest set of **existing engine functions or decision predicates** that produce native Shift's undesirable behavior. Candidates require reverse-engineering proof:
+1. Enqueued MOVE's terminal braking / steering / movement state update, especially before a following MOVE.
+2. MOVE completion / activation of the next original order, which may be in a different function from braking.
+3. MOVE → ATTACK transition and target handoff when already queued.
+4. If needed, route geometry/waypoint guidance interpretation that influences stopping and cornering.
 
-## Ownership contract (proposed)
-- One authoritative order queue, identified by engine sequence and verified unit lifetime.
-- Player REPLACE owns the generation boundary and cancels stale planned transitions, including already-scheduled BSC callbacks.
-- BSC may only influence the exact next queue edge, not manufacture independent permanent orders without a bounded transaction.
-- A change to a queue head must have a commit/abort model with observed before/after head identity and native outcome.
-- If the hook cannot safely express a request, pass through unmodified original behavior rather than attempt Lua rollbacks of unproven Native queued tails.
-- No handler may silently consume an external attack, no double-advance and no reordering across independent units.
+Do not assume this is one hook or only the queue-head increment. If the stop happens before the order is complete, advancing the queue may not be a sufficient or correct fix.
 
-## Behavior policies
-- MOVE→MOVE: permit **bounded early steering** for approximate guidepoints; preserve a physical-route obligation or prove that a rounded segment is acceptable. U-turn, zig-zag and short-leg cases must have deterministic geometry, not fixed arbitrarily tuned timeouts.
-- MOVE→ATTACK: accept completion or native execution transition based on exact edge/target plus valid terminal evidence. G11 coherent braking remains one signal, not a globally mandatory predicate.
-- ATTACK→EXIT MOVE: require existing positive engagement / minimum engagement time and explicit exit-route semantics. Next ATTACK only after valid exit transition. No inferred attack from a near target alone.
-- Native i+2 promotion: never infer that i+1 is paid just because i+2 appears as active.
-- Long-running/missing proof: model must be explicit (wait, fall back native, cancel/recover, or diagnosed hard-fail); cannot wait forever and cannot roll back indefinitely.
+## Intended runtime path
+Player original Shift input → **WH3 original command encoding & order queue** → WH3 original movement/attack execution with **targeted native behavior patches inside that same engine path** → original native order completion / successor execution.
 
-## Architecture choices that are NOT yet resolved
-A. Engine completion/advance hook (preferred if proved): modify transition timing at source while CA still owns queue.
-B. Ingress queue policy rewriting (backup): requires proof that serialized/queued command semantics remain valid.
-C. Dual Lua/Native queues (current architecture): to be retired from command authority, NOT promoted as default.
-D. Replace engine pathfinding: excluded.
+**No second execution authority.** Lua must not own a canonical shadow queue, issue MOVE/ATTACK to replace engine orders, rollback a legitimate native ATTACK, or replay native queued tails. Optional Lua may expose settings or diagnostics only; aim for Native-only functionality where feasible. Native detours are a means to replace/adjust an original decision *within the same call path*, not a license to implement a second command dispatcher.
 
-Gate to select A vs B: actual 9.0.2 dataflow proof and deterministic 'same queue in / changed transition only' fixture; do not choose solely from attractive diagrams.
+## How to implement without modifying the on-disk EXE
+WH3's source is unavailable. A version-guarded WinX64 DLL may patch original function behavior in process memory, e.g. a narrow inline detour that invokes the original function with a modified native decision. This is **modifying the original engine's effective code path**, not editing the user's executable file. Exact hook, ABI, thread/lifetime ownership and guards must be proven first. If direct conditional patching is impossible, state that explicitly before deciding on a fallback.
+
+## Native invariants
+- The original order list remains authoritative before AND after the patch; verify actual Native head, queue count, engine seq, target identity and future tail.
+- Each native command completes once. No BSC-specific second notion of route completion that progresses a shadow queue.
+- REPLACE/HALT cancels or replaces original native commands according to WH3's own lifecycle.
+- A legitimate native ATTACK can never be overridden by an unsolicited nonqueued MOVE.
+- No artificial 'time passed, therefore waypoint visited' completion, no arbitrary bypass of i+1/i+2 order obligations.
+- If unsupported EXE, unverified bytes, missing allocation or unsafe state, fail closed / preserve original behavior wherever safe. No partial Hook startup.
+
+## Rejected architecture
+- Current H1–H8 Lua canonical plan + Native reassert feedback loop.
+- Merely porting that Lua scheduler into C++.
+- An independent Native BSC queue controlling the engine's normal queue.
+- Reimplementing WH3 pathfinding, steering, AI combat or formation simulation.
+- Direct writes to OrderHead or raw queue slots without demonstrated engine ownership/lifetime semantics.
+
+The next decision is NOT how fast a new scheduler should advance. It is **which original WH3 Shift functions cause the stop, corner and attack-handoff defects**, and whether their behavior can be patched locally.

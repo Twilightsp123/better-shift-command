@@ -1,46 +1,52 @@
-# NQTR Implementation Plan — Native Shift Queue Transition Rewrite
+# Native Shift Patch — Implementation Plan (original engine behavior, no replacement)
 
-**Plan only. Runtime construction not started.** Base H8 commit e711e716f2411599d75184618fc1ee5cb85bcd54. Keep game DLL/addresses/Steam untouched until the relevant gate is satisfied. All phases are separate commits/PRs with explicit exit evidence, not time-based tuning campaigns.
+**Scope correction 2026-10-09:** the task is to patch existing WH3 Shift behavior directly. The former "Native queue transition owner" / alternative single-writer scheduling proposal is REJECTED. Working branch retains its historical NQTR label but this document is authoritative for **direct original-engine modification**. H8 baseline: e711e716f2411599d75184618fc1ee5cb85bcd54. Documentation-only stage; no Native patch implemented.
 
-## Stage 0 — Freeze baseline / architecture contract (NOW)
-**Work:** segregate superseded documentation, publish a single current authority, preserve H4–H8 tests/manifest and exact 9.0.2 address provenance; identify 12:10/12:53/13:18 regression facts. Distinguish planned Lua tail from actual engine queue tail.
-**Exit:** current docs and docs/past_doc inventory complete, historical docs retained byte-identically, legacy contract adapted, reference-check CI green, no code or binary changed.
-**Fallback:** if moving docs breaks a historical test, update only the explicit legacy-document lookup or packaging manifest; do not restore historic advice as current architecture.
+## Stage 0 — Freeze existing work and align docs (NOW)
+**Work:** archive 59 old doc blobs without editing them; collect the actual user requirements and WH3 12:10, 12:53, 13:18 failure evidence, SHA/build/ABI, H8 test baseline and previous false assumptions. Make direct-native-patch goal explicit in all current docs; preserve all Lua/Native source unmodified.
+**Pass:** docs archive byte-identical, new docs single reading entry, checked by CI, no changed game behavior.
 
-## Stage 1 — Reverse the native queue advance decision (HIGHEST PRIORITY)
-**Work:** follow Move/Attack native order paths, existing 16 hook source, queue read-only offsets and VTables; map completion predicate, OrderHead mutation, destructor/retire, next-order activation and execution timing; separate queued ingress from execution. Produce annotated callgraph, RVA/guard candidates, ABI, lifetime/thread model and alternative interpretations.
-**Exit gate:** at least one independently checkable completion/advancement graph with exact 9.0.2 provenance; if no trustworthy single point exists, document this and compare ingress alternative B without pretending the target has been found.
-**No-go:** no address guesses, no direct changes to root+0x2F8C, no live Hook patch on unproven site.
+## Stage 1 — Reverse the original Shift execution path (critical path)
+**Questions, in this order:**
+1. Where does Shift queueing choose append vs REPLACE and which original object stores MOVE/ATTACK?
+2. What original native movement/steering function causes speed loss near a queued MOVE destination? Is the stop due to native braking, arrival mode, waypoint representation, command transition, or interaction between these?
+3. Where is MOVE judged complete, where does OrderHead actually change, and how is the next original MOVE or ATTACK activated? Are those separate call sites?
+4. Where is target validation and queued MOVE→ATTACK handoff performed? Is stalled attack from original WH3 or was it introduced by H8's Lua second writer?
+5. What is the threading/lifetime context, and which branches are restricted to queued Shift commands vs shared with ordinary RMB?
 
-## Stage 2 — Formal single-authority model (P2 root fix)
-**Work:** model an actual Native queue as the **sole** authoritative command order, with engine sequence/lifetime/revision and atomic head changes. Define source of truth when native i+1/i+2 runs before a Lua poll; define duplicate, cancellation, REPLACE, failed Native issue and what falls back to original engine behavior. Eliminate any need to restore a 'lost' native tail using nonqueued MOVE.
-**Exit gate:** deterministic C++/Lua model tests show no double-writer, no skip i+1, no resurrection of cancelled generations, and Native queued tail is validated before/after transitions. Include model checker / exhaustive short traces for all two-/three-order permutations with injected errors.
-**No-go:** never claim tail preservation based solely on the Lua array.
+**Method:** static x64 callgraph/dataflow on target WH3 9.0.2 EXE, current candidate map and VTables; compare already-known Native Bridge hook sites. Produce annotated function signatures, RVAs/bytes/guards, proof grade, disassembly, alternate interpretations, state diagram and an explicit *cause→candidate patch site* table. No guessing that OrderHead increment alone is the solution.
+**Pass:** each planned change has a specific original WH3 decision path and an independently checkable relationship to the undesirable behavior. If evidence cannot establish one, mark BLOCKED rather than fabricate an address.
 
-## Stage 3 — Design transition policies on the proven native boundary
-**Work:** MOVE→MOVE smooth early steering and route-obligation geometry (including 90/135/180, 5m, U-turn and dense zigzag); MOVE→ATTACK terminal and native handoff without exclusive dependence on G11 deceleration; ATTACK→EXIT→ATTACK, 3s hold, target loss and cancellable commands. Reuse engine movement, physics and combat.
-**Exit gate:** common native decision interface accepts exact i→i+1 identity and observable geometry, returns ALLOW / WAIT / FALLBACK / CANCEL with reason. Obligations are tracked without inventing physical waypoint arrival. Model tests prove liveness without arbitrary timeouts.
-**No-go:** not a full pathfinding reimplementation or an unchecked native deque mutation.
+## Stage 2 — Establish minimal original-code patch contract
+**Work:** for each proven site define the smallest in-place behavioral delta: e.g. avoid unnecessary terminal braking before valid queued next MOVE, alter the native completion predicate for a guide corner, or preserve correct activation of native queued ATTACK. Preserve original queue storage, order lifetime, native sequence, engine execution and user REPLACE.
+**Pass:** old-vs-patched state transition table, preconditions and fail-closed fallback for exactly the same original engine order objects; no new BSC queue, canonical Lua state or independent command issuing API.
+**No-go:** arbitrary distance/time tuning or rewriting movement/navigation algorithms.
 
-## Stage 4 — Implement Native transition owner in an isolated integration branch
-**Precondition:** Stages 1–3 passed. Hook point and ABI are proven at sufficient static level.
-**Work:** use reversible, byte-guarded, thread-safe Native interception only at validated queue boundary. Retain Lua for MCT, diagnostics and non-authoritative observations; turn off competing Lua proactive/reassert writers within NQTR mode. Native commands retain real CA journal identity; transactions commit only once on native evidence.
-**Exit gate:** synthetic Host/Native boundary tests cover target loss, queue overrun, mixed units, reorder prevention, literal head identity and pass-through under untrusted proof. Code review proves no hook/queue lifetime leaks, safe fallback and behavior unchanged when NQTR disabled.
-**No-go:** never accept arbitrary future > i+1; no 'prevent all native queueing then emulate it in Lua' shortcut without a safe atomic plan.
+## Stage 3 — Deterministic offline differential proofs
+**Work:** construct short original-native order traces and a patch-site model from Stage 1 evidence, not an invented independent scheduler. Compare unpatched vs targeted patched engine decision for MOVE→MOVE (straight, 90°, 135°, 180°, U-turn, short zigzags), MOVE→ATTACK, ATTACK→EXIT→ATTACK, REPLACE, i+1/i+2, target death and multi-unit.
+**Pass:** only the intended branch decisions differ; queue count, next-order identity and Native queued tail remain unchanged unless original logic legitimately consumes an order. Introduce counterexample fixtures for 12:53 attack rollback and 12:10 debt only for aspects actually evidenced.
+**No-go:** asserting gameplay smoothness from simulated geometry.
 
-## Stage 5 — P0 Native hook installer reliability / Windows isolation
-**Work:** separately instrument byte-locked MinHook backend in an isolated Win64 test process; distinguish status9 allocation subcauses, nearest-executable-page pressure, failed first-hook retry and teardown. Inject failures at all 16 mandatory hooks and partial apply. Decide if a safe 'rollback to fully unhooked' retry is possible.
-**Exit gate:** v142/MASM build; Native CTest baseline; proof of no partial hooks, no freed trampolines in flight, deterministic fail-closed errors. New Hook addresses not promoted until executable hash/bytes match.
-**No-go:** never treat a 50ms Sleep or infinite retry as correctness.
+## Stage 4 — Implement a *Native direct patch*, not a new Controller
+**Preconditions:** Stage 1 site/ABI verified; Stages 2–3 negative proof gates passed.
+**Work:** guarded WinX64 inline detour/branch patch at the proven original function(s); prefer calling original functions, altering only localized predicates/inputs/outputs. Native engine remains owner of input, queue, movement and attack. Retire/disable the old Lua active scheduler/reassert in this mode. If Lua is retained, settings/diagnostics only and no MOVE/ATTACK issuing.
+**Pass:** Windows isolated fixtures demonstrate exact call-through, no double execute, unchanged original queue/targets and rollback to original behavior on unsupported build or disabled mod.
+**No-go:** moving the Lua algorithm to C++ and claiming the engine has been modified.
 
-## Stage 6 — Integrated offline acceptance & final WH3 gate
-**Work:** CI runs existing regression and mutation suite plus NQTR queue/geometry and Native fault injection. Build reproducible normal and DEBUG PACK with full source archive, candidate EXE map, manifest hashes and known open limitations. Then perform ONE bounded final WH3 acceptance round covering startup, Shift MOVE/ATTACK/EXIT, normal RMB, multi-unit, Quit-to-Windows.
-**Exit gate:** STATIC/MODEL/WINDOWS complete and WH3 outcomes separately verified; only then consider an explicit merge/release recommendation. If WH3 fails, reproduce the specific evidence as a *new deterministic fixture*, not a series of unguided user trials.
-**No-go:** green CI by itself cannot authorize Steam publication.
+## Stage 5 — Robust Hook installation / P0
+**Work:** instrument MinHook allocator behavior for 13:18 status9 first MOVE hook failure in isolated Win64 process. Prove cleanup for 0..16 hook partial-creation failures, near-page allocation limits, process-wide pinning and Stop/Quit behavior; do not add unbounded retries or skip guards.
+**Pass:** MSVC v142/MASM build, existing CTest 14/14 minimum, new fault injection, no dangling trampoline or partially enabled engine patch. Parallel with Stage 1, required before game-facing use.
 
-## Critical path / dependencies
-Stage 0 → Stage 1 → Stage 2 → Stage 3 → Stage 4 → Stage 6.
-Stage 5 can begin in parallel with Stage 1 but **must close before any in-process WH3 validation**. If no safe Native advancement interception can be proven, stop and document a decision between alternative ingress-level rewrite and abandoning direct engine queue changes rather than shipping a speculative Hook.
+## Stage 6 — Full regression, packaging, bounded final WH3 verification
+**Work:** run H4–H8 frozen tests for backwards reference, new native call-through/differential tests, exact 9.0.2 map/hash and packaging contracts. Produce complete source, WinX64 Native DLL, normal and DEBUG PACK, manifest and reproducible SHA256. Only after static + Windows gates, one combined real WH3 acceptance for Shift MOVE/ATTACK, EXIT, normal RMB, multiplayer/multiple units if feasible, and Quit-to-Windows.
+**Pass:** original Shift really behaves better on screen and native queue remains intact; no Lua dispatch or shadow-plan dependency; separate BUILD/STATIC/WINDOWS/WH3 results.
+**No automatic Steam publish.**
 
-## Explicitly postponed work
-User-visible MCT UI, historical D1 profile tuning, generic CA pathfinding rewrite, quarantined physical Entity research, arbitrary gameplay parameter search and Steam marketing are outside the NQTR core.
+## Dependency diagram
+Stage 0 → Stage 1 → Stage 2 → Stage 3 → Stage 4 → Stage 6. Stage 5 can proceed in parallel with Stage 1 but must close before Stage 6.
+
+## Immediate next task
+**Start Stage 1:** reverse WH3 original Shift motion-braking and current-order completion/next-order activation jointly; use the 9.0.2 EXE binary or reliable prior disassembly when available. Report verified sites, unknowns and disconfirming facts. Do NOT resume H9 Lua handoff experiments or create a C++ replacement queue.
+
+## Deferred
+Visible MCT, arbitrary performance tuning, old D1/H1–H8 policy extensions and Steam publication. Historical documents are in docs/past_doc and are no longer default reading.

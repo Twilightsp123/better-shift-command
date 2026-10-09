@@ -1,11 +1,11 @@
-# Native RE Map — known locations vs unknown semantics
+# Native Reverse-Engineering Map — WH3's Original Shift Code Paths
 
 ## Grounded 9.0.2 known sites (candidate, not runtime-promoted)
 See native_maps/candidates/wh3_9.0.2_fec656f4.json and generated_native_map.hpp. Keep exact EXE SHA and byte guards.
 
 | Site / layout | Grounded meaning | NOT proved |
 |---|---|---|
-| Move 0x030351AC, Attack 0x03033544 | Native order entry / capture detours | final 'order finished' or queue-head advance |
+| Move 0x030351AC, Attack 0x03033544 | Native order entry / capture detours | Shift braking, current order completion, successor activation or original execution state |
 | Lua MOVE 0x02ED6404, Lua ATTACK 0x02ED5C9C | Lua API ingress | player Shift click originates here |
 | publish_move 0x01CAFDDC, publish_attack 0x02DF3410 | command publication hooks | a safe, lossless 'replace progression policy' lever |
 | writer_begin, writer_finalize, copy, stage, handlers, selection, free | packet pipeline / lifetime observation | authority to suppress arbitrary game commands |
@@ -15,13 +15,20 @@ See native_maps/candidates/wh3_9.0.2_fec656f4.json and generated_native_map.hpp.
 | Attack VTable RVA 0x03912988 | ATTACK outcome identity | permission to skip target/lifetime verification |
 | Simple Intercept Move VTable RVA 0x03910438 | internal sibling constructor | valid top-level MOVE identity |
 
-## Investigation priority
-1. Static call/dataflow from top-level Order entry and command publication to queue write and original execution.
-2. Trace both MOVE and ATTACK native complete predicates, event/flag writes, consumer(s) of OrderHead, head increment/erase/destructor and next-order activation. Record *exact function, caller and context* for each.
-3. Prove a **common transition decision point** (if one exists). Distinguish input append, native issue, scheduling, completion event, queue pop and movement control updates. Do not assume one function covers all.
-4. Verify native queue mutations preserve engine sequence, target identity, order lifetime, revision and interaction with external orders.
-5. Re-derive guards and VTables for current WH3 build, cross-check the candidate map, and grade every new site as STATIC, WINDOWS_FIXTURE or WH3_RUNTIME.
-6. Assess if read-only queue inspection can be combined with a safely reversible detour. Never write root+offset directly based on the read-only probe alone.
+## Investigation priority — original engine, not a second executor
+1. Trace **original Shift append/replace** input to queue write and command object identity; determine when/where the queued flag affects native behavior.
+2. Trace **original MOVE terminal deceleration and steering state**: desired speed, arrival radius, braking switch, queued successor lookahead and any forced halt. Determine whether the visible stop occurs *before* native queue-head advancement.
+3. Trace **native MOVE completion and successor activation** separately: completion state/predicate, event/flag writes, OrderHead changes, object retirement and next MOVE/ATTACK activation. Record exact function, caller and context for each.
+4. Trace **native MOVE→ATTACK handoff** and target validation. Distinguish vanilla failure from the H8 Lua rollback symptom; no off-target intervention.
+5. Connect each observed undesirable behavior to a particular original native decision branch, including whether only queued Shift commands pass it. Do not assume one universal queue-advance Hook exists.
+6. Re-derive guards and VTables for 9.0.2, grade evidence STATIC/WINDOWS/WH3, and assess reversible narrow patch feasibility. Do not directly write OrderHead/slots based on read-only probes.
+7. Verify every localized modification leaves WH3's original queue identity, future tail, lifetime, attack target, REPLACE and ordinary RMB behavior intact. **No Lua or C++ replacement order queue.**
+
+## Missing high-priority evidence
+- No verified location yet for the original engine's MOVE terminal braking/desired-speed calculation.
+- No verified location yet for the original engine's MOVE completion predicate or next native order activation.
+- No proof that queue-head advance is the cause, rather than an effect, of the stop-and-go behavior.
+- No verified native original Shift ATTACK handoff function or shared RMB divergence point.
 
 ## Required RE deliverable per site
 - target EXE SHA/build, RVA, original bytes/mask, function signature/ABI and calling convention, predecessor/successor graph, dataflow evidence;

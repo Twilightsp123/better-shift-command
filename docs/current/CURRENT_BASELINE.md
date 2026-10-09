@@ -1,6 +1,6 @@
-# Baseline and Evidence — what is proven
+# Baseline and Evidence — Direct Native Shift Patch Starting Point
 
-Date: 2026-10-09. Baseline: maintenance/t2move-h8-terminal-liveness-static @ e711e716f2411599d75184618fc1ee5cb85bcd54. New NQTR docs branch is not a gameplay branch.
+Date: 2026-10-09. Baseline: maintenance/t2move-h8-terminal-liveness-static @ e711e716f2411599d75184618fc1ee5cb85bcd54. The NQTR-labelled documentation branch now targets **direct changes to WH3 original Shift native function behavior**, not a second scheduler. No such patch has yet been built.
 
 ## Program sources
 - source/better_shift_command.lua and src/better_shift_command.lua: mirrored Lua Controller; src/better_shift_command_selfcontained.template.lua must agree for constrained functions.
@@ -24,6 +24,6 @@ Date: 2026-10-09. Baseline: maintenance/t2move-h8-terminal-liveness-static @ e71
 
 ## Fixed compatibility and safety
 - 16 mandatory core hooks; physical evidence remains QUARANTINED and optional hook pathways disabled.
-- C++ host and Lua currently share authority to issue commands; correct long-term responsibility split is NOT established.
+- Current H8 C++ host and Lua share command authority; they are frozen **historical baseline**, not the target implementation. New plan retains WH3's own input, original queue and original executor; BSC will patch the defective native Shift branches directly, with no active Lua MOVE/ATTACK dispatcher.
 - Actual 9.0.2 Native dll/build map has been used in earlier WH3 runs, but status9 shows bootstrap is not 100% reliable across sessions.
 - Old development journal, SC/T1/H* policy tuning tables and D1 MCT design were frozen in docs/past_doc; inspect them only for a cited failed assumption or fixture origin.
