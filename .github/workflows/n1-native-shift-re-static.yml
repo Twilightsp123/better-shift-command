@@ -11,7 +11,7 @@ on:
   pull_request:
     paths:
       - 'maintenance_tools/native_shift_re/**'
-      - 'tests/test_native_shift_re.py'
+      - 'tests/test_native_shift_re*.py'
       - '.github/workflows/n1-native-shift-re-static.yml'
   workflow_dispatch:
 
