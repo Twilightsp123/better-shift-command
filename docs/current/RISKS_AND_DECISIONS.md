@@ -21,8 +21,10 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 | NQ-015 | OPEN / N1 BLOCKER | No matching WH3 9.0.2 EXE/disassembly in accessed materials; current repository identifies issuer and optimistic order-reader but not native MOVE update/head writer/next activation. | hash-verified EXE/Ghidra xrefs and read/write dataflow; see N1_STATIC_FINDINGS.md |
 | NQ-016 | SOURCE-VERIFIED NEGATIVE | Optional Smart Guard `state_transition_hook` is a filtered Pursue/TakeUpPositions path, NOT established Shift queue progression despite its name. | separately reverse native per-frame queue consumer; do not reuse Hook17 blindly |
 | NQ-017 | SOURCE-VERIFIED LIMITATION | EvidenceProbe::active_order double-reads count/head/slot; it is not synchronized and does not grant queue mutation/lifetime authority. | investigate original thread ownership, atomics/locks and retirement |
-| NQ-018 | 9.0.3 BLOCKER | WH3 9.0.3 is the current target; EXE SHA, all applicable RVAs/VTables/guards and actual completion/steering/activation graph are unverified. | obtain exact 9.0.3 binary/disassembly, rebuild source/map evidence; see WH3_9_0_3_NATIVE_PATCH_DESIGN.md |
-| NQ-019 | OFFLINE TOOLING ONLY | Added read-only PE SHA/legacy guard scout and Ghidra scalar-operand candidate exporter, with 9 synthetic tests. Offset matches are NOT field-root evidence; no Ghidra runtime integration or WH3 EXE has been tested. | run tools against SHA-verified 9.0.3 EXE and prove true writer/function xrefs |
+| NQ-018 | PARTIALLY CLOSED / 9.0.3 EXE | User-provided 9.0.3-labelled EXE SHA `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a` and one original 40-slot head/count pop primitive now have real instruction evidence. Game-version resource, other Hook addresses/ABI and braking/completion/activation remain unverified. | pursue state/steering dataflow in N1_903_ORDER_LIFECYCLE_STATIC.md |
+| NQ-019 | OFFLINE TOOLING + EXECUTABLE RE | Existing PE/Ghidra scouts have synthetic tests; **separate direct LLVM/PE analysis of real user-provided EXE** established ring pop. Ghidra runtime has not been tested; no playable WH3 behavior proof. | inspect virtual completion predicate, movement state and target handoff |
+
+| NQ-020 | EXACT FILE STATIC EVIDENCE | Original ring pop at 0x02F4FD10 increments aliased head (+0x2D04 from UnitRoot+0x288), decrements count (+0x2D00), and wraps at 40; five verified direct calls. This is a risky *mutating lifecycle primitive*, NOT a patch recommendation. | identify caller-specific MOVE completion and native braking independently |
 
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
@@ -40,6 +42,8 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 
 - 2026-10-09 / D-NQ-006: N1 first static source/map triage recorded; no new RVA/ABI promoted, no original shift patch authorized.
 - 2026-10-09 / D-NQ-007: switch current executable target to WH3 9.0.3; preserve all 9.0.2 source/maps as historical evidence, do not treat previous RVAs as runtime-compatible with 9.0.3.
-- 2026-10-09 / D-NQ-008: N1 tooling is read-only, must never auto-promote bytes/offsets to confirmed Hook or patch. Offline test successes are tooling contracts only. Require actual 9.0.2 EXE-level consumer dataflow before N2.
+- 2026-10-09 / D-NQ-008: N1 tooling is read-only, must never auto-promote bytes/offsets to confirmed Hook or patch. Offline test successes are tooling contracts only. Require actual exact-build MOVE completion/braking dataflow before N2.
+
+- 2026-10-09 / D-NQ-009: user-provided 9.0.3-labelled EXE statically analyzed; native ring pop and callers identified. No runtime Hook, ABI or gameplay claim promoted; see N1_903_ORDER_LIFECYCLE_STATIC.md.
 
 Do not call any proposal 'implemented' until committed code and the corresponding tests exist.
