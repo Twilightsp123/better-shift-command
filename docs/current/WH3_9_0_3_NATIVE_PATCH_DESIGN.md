@@ -136,6 +136,10 @@ Committed read-only PE/9.0.2 historical guard similarity scanner and Ghidra Jyth
 
 [N1_903_MOVE_VS_ATTACK_TRANSFER.md](N1_903_MOVE_VS_ATTACK_TRANSFER.md): real 9.0.3 vtables prove the special original state transfer branch approves next MOVE (+0x38 returns true) but rejects ATTACK (+0x38 returns false); MOVE +0x48 reuses and updates an existing native state pointer. This is a *specific* path, not permission to make ATTACK eligible or proof of physical smoothness. Native steering/braking, state 1/4 lifecycle and ordinary queued ATTACK activation remain unverified.
 
+### N1 native state producer and rejection gate (2026-10-10)
+
+[N1_903_MOVE_STATE_ORIGIN.md](N1_903_MOVE_STATE_ORIGIN.md) follows original task construction and writeback to `MOVE+0xA0`. The engine sets state `0` on native construction, a path sets `4`, and successor MOVE adoption writes `1`. The current MOVE work submission may release/clear an old pointer on native flag/validator/scalar mismatch, using existing binary float constants 0.0 and approximately 0.01; these are **not BSC tuning parameters**. No evidence yet relates those scalar checks directly to braking. 25 exact byte guards / 8 local tests pass; no runtime Hook. Remaining task: identify state/desired-speed/path-reset semantics, and ordinary ATTACK activation.
+
 ## 6. Red lines / stopping conditions
 
 - No 9.0.2 patch guard, old RVA or VTable is a valid 9.0.3 Hook without new binary verification.
