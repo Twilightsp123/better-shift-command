@@ -948,6 +948,19 @@ function P.evaluate(f)
  if f.semantic_done==true then d.reason="ATTACK_AFTER_ROUTE_COMPLETE";d.issue_route_mode="COMPLETE";d.adopt_route_mode="COMPLETE";d.issue_window=env(true,d.reason,false);d.adopt_window=env(true,d.reason,false);return d end
  if f.exit_route==true then d.reason="ATTACK_REQUIRES_ROUTE_COMPLETE";d.issue_window=env(false,d.reason,false);d.adopt_window=env(false,d.reason,false);return d end
  if not finite(f.path_error) or not finite(f.waypoint_tolerance) or f.waypoint_tolerance<0 or not finite(f.remaining) or f.remaining<0 then d.reason="ATTACK_ROUTE_GEOMETRY_UNAVAILABLE";d.issue_window=env(false,d.reason,false);d.adopt_window=env(false,d.reason,false);return d end
+ -- H8: two distinct proofs are accepted: G11 predictive braking below, or
+ -- current Native MOVE physically stable near its canonical terminal.  The
+ -- latter is computed from fresh observed positions, not elapsed time alone.
+ if f.terminal_stall_ready==true and f.native_current_exact==true
+   and finite(f.terminal_stall_limit) and f.terminal_stall_limit>0
+   and finite(f.route_min_progress) and finite(f.route_progress)
+   and f.route_progress>=f.route_min_progress
+   and f.remaining<=f.terminal_stall_limit then
+   d.reason="ATTACK_NATIVE_MOVE_STALL_TERMINAL"
+   d.issue_route_mode=d.reason;d.adopt_route_mode=d.reason
+   d.issue_window=env(true,d.reason,false);d.adopt_window=env(true,d.reason,false)
+   d.current_credit="ATTACK_TERMINAL_HANDOFF";return d
+ end
  local sync=finite(f.sync_margin) and math.max(0,f.sync_margin) or 0;local safe=f.path_error<=f.waypoint_tolerance
  local io,ao=false,false;local ir,ar="ATTACK_ARRIVAL_BRAKE_UNPROVEN","ATTACK_ARRIVAL_BRAKE_UNPROVEN";local im,am="BLOCKED","BLOCKED"
  if safe then
@@ -3433,7 +3446,7 @@ local function t2b_attack_decision(st,current,successor,g,context)
  local stable,terminal_limit,stall_reason=attack_terminal_stall_evidence(st,current,g,clock())
  g.attack_terminal_stall_observed=stable;g.attack_terminal_stall_limit=terminal_limit;g.attack_terminal_stall_reason=stall_reason
  local p=R1.T2BAttackPolicy.evaluate({terminal_stall_ready=stable,native_current_exact=st.native_current_move_witness_ms==clock(),
-  terminal_stall_limit=terminal_limit,route_progress=g.progress,immediate_successor=context.immediate_successor~=false,target_exact=context.target_exact~=false,target_terminal_abort=context.target_terminal_abort==true,prior_route_clear=clear==true,semantic_done=action_runtime(current).semantic_done==true,exit_route=current.block_kind=="EXIT_ROUTE",arrival_issue_coherent=b.issue_coherent==true,arrival_adopt_coherent=b.adopt_coherent==true,path_error=err,waypoint_tolerance=tol,remaining=g.remaining,sync_margin=b.sync_margin})
+  terminal_stall_limit=terminal_limit,route_progress=g.progress,route_min_progress=CFG.route_attack_min_progress,immediate_successor=context.immediate_successor~=false,target_exact=context.target_exact~=false,target_terminal_abort=context.target_terminal_abort==true,prior_route_clear=clear==true,semantic_done=action_runtime(current).semantic_done==true,exit_route=current.block_kind=="EXIT_ROUTE",arrival_issue_coherent=b.issue_coherent==true,arrival_adopt_coherent=b.adopt_coherent==true,path_error=err,waypoint_tolerance=tol,remaining=g.remaining,sync_margin=b.sync_margin})
  g.arrival_g11_ready=b.ready;g.arrival_g11_deceleration=b.deceleration_observed;g.arrival_g11_issue_coherent=b.issue_coherent;g.arrival_g11_adopt_coherent=b.adopt_coherent;g.arrival_g11_reason=b.reason;g.arrival_g11_stop_distance=b.stopping_distance;g.arrival_g11_stop_error=b.stopping_point_error;g.arrival_g11_issue_limit=b.issue_coherence_limit;g.arrival_g11_adopt_limit=b.adopt_coherence_limit;g.arrival_sync_margin=b.sync_margin;g.attack_path_error=err;g.attack_waypoint_tolerance=tol;g.t2b_issue_route_mode=p.issue_route_mode;g.t2b_adopt_route_mode=p.adopt_route_mode;g.current_credit=p.current_credit;g.route_safe=(p.issue_window and p.issue_window.open==true) or (p.adopt_window and p.adopt_window.open==true);g.route_mode=(p.issue_window and p.issue_window.open and p.issue_route_mode) or (p.adopt_window and p.adopt_window.open and p.adopt_route_mode) or "BLOCKED";g.route_reason=p.reason;return p
 end
 

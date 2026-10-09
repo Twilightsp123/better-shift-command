@@ -7,6 +7,7 @@ on:
       - maintenance/t2move-h5-runtime-reconcile-audit
       - maintenance/t2move-h6-route-guide-nearpass
       - maintenance/t2move-h7-native-shift-attack-terminal
+      - maintenance/t2move-h8-terminal-liveness-static
   workflow_dispatch:
 
 permissions:
@@ -34,6 +35,12 @@ jobs:
         run: lua5.1 maintenance_tools/t2move_a/test_t2move_h6_near_pass.lua source/better_shift_command.lua tests/fixture.lua
       - name: H7 Native exact Shift ATTACK terminal acceptance and negative fixtures
         run: lua5.1 maintenance_tools/t2move_a/test_t2move_h7_native_attack.lua source/better_shift_command.lua tests/fixture.lua
+      - name: H8 two-lane attack terminal policy adversarial suite
+        run: lua5.1 maintenance_tools/t2move_a/test_t2move_h8_terminal_policy.lua source/t2b_attack_policy_v2.lua
+      - name: H8 real-controller stationary Native MOVE liveness suite
+        run: lua5.1 maintenance_tools/t2move_a/test_t2move_h8_terminal_controller.lua source/better_shift_command.lua tests/fixture.lua
+      - name: H8 architecture source invariants and unresolved gap labels
+        run: python maintenance_tools/t2move_a/test_t2move_h8_architecture_contract.py
       - name: H4 Native V3 exact successor parity
         run: lua5.1 maintenance_tools/t2move_a/test_t2move_h4_soft_native.lua source/better_shift_command.lua tests/fixture.lua
       - name: H4 soft corner behavior mutation gates

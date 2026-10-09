@@ -67,6 +67,10 @@ required={"source/better_shift_command.lua","native_maps/wh3_9.0.2_fec656f4.json
  "maintenance_tools/t2move_a/test_t2move_h4_soft_controller.lua",
  "maintenance_tools/t2move_a/test_t2move_h6_near_pass.lua",
  "maintenance_tools/t2move_a/test_t2move_h7_native_attack.lua",
+ "maintenance_tools/t2move_a/test_t2move_h8_terminal_policy.lua",
+ "maintenance_tools/t2move_a/test_t2move_h8_terminal_controller.lua",
+ "maintenance_tools/t2move_a/test_t2move_h8_architecture_contract.py",
+ "docs/design/T2_MOVE_H8_TERMINAL_LIVENESS_AND_OWNERSHIP_20261009.md",
  "docs/design/T2_MOVE_H7_NATIVE_ATTACK_TERMINAL_20261009.md",
  "docs/design/T2_MOVE_H6_ROUTE_NEAR_PASS_20261009.md",
  "maintenance_tools/t2move_a/test_t2move_h4_soft_native.lua",
@@ -99,6 +103,10 @@ manifest={
  "h6_fixture":"POSITIVE_AND_NEGATIVE_NEAR_PASS_GATED_IN_CI",
  "h7_scope":"ADOPT_ONLY_EXACT_NATIVE_I_PLUS_ONE_ATTACK_IN_PHYSICAL_TERMINAL_ENVELOPE",
  "h7_runtime_status":"EXPERIMENTAL_PENDING_WH3_SHIFT_ATTACK_RETEST",
+ "h8_scope":"EXACT_CURRENT_NATIVE_MOVE_STABLE_PHYSICAL_TERMINAL_PROACTIVE_ATTACK",
+ "h8_runtime_status":"EXPERIMENTAL_OFFLINE_ONLY_UNVERIFIED_IN_WH3",
+ "p0_hook_allocation":"OPEN_FIRST_MOVE_MH_ERROR_MEMORY_ALLOC",
+ "p2_native_queue_ownership":"OPEN_NATIVE_TAIL_NOT_PROVEN_AFTER_NONQUEUED_ROLLBACK",
  "controller_sha256":h(controller),
  "normal_pack_sha256":h(regular),
  "debug_pack_sha256":h(debug),
@@ -117,6 +125,8 @@ manifest={
  "Speed and continuity are priority: soft 90/180 steering is intentionally allowed before exact P reach.\n"
  "H6: after ACK, actual motion near-pass of an old MOVE guide may retire its debt (NOT physical arrival).\n"
  "H7: adopt only exact already-running Native queued Shift ATTACK near end of MOVE; no proactive ISSUE permission.\n"
+ "H8: independent proactive ATTACK after actual stable exact current Native MOVE within old terminal envelope.\n"
+ "H8 is SYNTHETIC/OFFLINE ONLY; P0 MinHook allocation and P2 dual queue ownership REMAIN OPEN.\n"
  "Verify Native attack transition on route end without forced MOVE rollback or skipped intermediate moves.\n"
  "Check for any major skipped leg, unresolved route debt and Native i+2 rollback/reasserts, then straight Move, 90/180, zigzag and Attack.\n"
  "Save script_log_*.txt and a video; report smoothness and route fidelity separately.\n"
