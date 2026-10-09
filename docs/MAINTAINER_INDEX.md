@@ -87,3 +87,7 @@ When a future maintainer discovers a conflict, fix the navigation/current-state 
 ## 7. D1 promotion rule
 
 `BSC-TPOL-D1` remains the design stream. `BSC-TPOL-T1H` is the first implemented substage: hidden PolicyProfile/MCT scaffolding only. T2 movement behavior and T3 visible MCT are still future work. Source behavior wins any disagreement with a design-only section.
+
+## H4 soft waypoint — frozen architecture reference (2026-10-09)
+
+**FROZEN DESIGN / SOURCE REFERENCE, NOT RELEASE:** User accepted the speed-first soft waypoint model with observed WH3 9.0.2 H4 early steering. Complete reference Controller, fixture and Native verification cases are pinned in `archive/h4_soft_speed_20261009/` with SHA1 Git blob contract, and architecture decisions/remaining risk in `docs/design/T2_MOVE_H4_FROZEN_ARCHITECTURE_20261009.md`. Do not treat this as a replacement for the active main v1.3.0 source, 9.0.1 Native lock or Steam package. Full H4 candidate remains in `maintenance/t2move-h4-soft-corner-speed`. Native i+2 rollback and more extensive movement scenarios remain open.

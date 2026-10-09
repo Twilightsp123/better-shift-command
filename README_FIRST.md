@@ -63,3 +63,7 @@ The next gameplay work is therefore still:
 - later visible MCT wiring.
 
 Battle teardown/hang remains a separate lifecycle stream and must not be mixed into transition-policy changes.
+
+## H4 experimental architecture frozen separately
+
+H4's **speed-first approximate intermediate MOVE waypoint** design and its exact source/tests are preserved under `archive/h4_soft_speed_20261009/` and `docs/design/T2_MOVE_H4_FROZEN_ARCHITECTURE_20261009.md`. This freezes the future architecture contract; it does **not** replace the current v1.3.0 runtime, 9.0.1 Native lock, release PACK, or authorize a Steam update. The source was originally validated offline in H4 CI and partially in the user's WH3 9.0.2 battle; remaining Native rollback and broad gameplay tests are open.

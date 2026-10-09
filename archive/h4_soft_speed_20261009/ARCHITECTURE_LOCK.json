@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "stage": "H4_SPEED_FIRST_SOFT_WAYPOINT_ARCHITECTURE_FROZEN",
+  "frozen_at": "2026-10-09",
+  "architecture_source_commit": "6027a28fcf9eb6766aec60b7c74ee16af01e2acf",
+  "architecture_source_branch": "maintenance/t2move-h4-soft-corner-speed",
+  "github_actions_approval_run": 37880088909,
+  "github_release_candidate_artifact": 11594255419,
+  "main_pre_freeze_runtime_sha": "0bbdd8cef552d9f4e977352a1b38db94a4eefba2",
+  "main_release_code_change": false,
+  "main_release_native_build": "1.0.17 WH3 9.0.1 unchanged",
+  "reference_candidate_native": "1.0.18-corepath-wh3-fec656f4-map902",
+  "runtime_evidence_summary": "H4 11:44 WH3 observed: BRIDGE_OK / OBSERVER_READY / START / READY; 0 CONTROLLER_FAIL; 4 soft corner ISSUE / 4 ACK credits; 13 transition commits; 3 native future rollbacks and one EXIT reassert; QUIT safe-stop. Visual user assessment acceptable; unresolved rollbacks.",
+  "policy": {
+    "first": "maintain motion speed and continuous Move→Move steering",
+    "second": "intermediate waypoints are approximate route guidance",
+    "safety": "ACK-only edge commit, independent physical reach, prior-debt/short-leg/Attack/Exit/provenance constraints"
+  },
+  "status": "ARCHITECTURE_FROZEN_REFERENCE_NOT_PRODUCTION_RELEASE",
+  "archived_files": {
+    "archive/h4_soft_speed_20261009/source/better_shift_command.lua": {
+      "source": "source/better_shift_command.lua",
+      "git_blob_sha1": "a152f0fcbdc4f247f6760670ff14483f0982a3c1"
+    },
+    "archive/h4_soft_speed_20261009/src/better_shift_command.lua": {
+      "source": "src/better_shift_command.lua",
+      "git_blob_sha1": "a152f0fcbdc4f247f6760670ff14483f0982a3c1"
+    },
+    "archive/h4_soft_speed_20261009/tests/fixture.lua": {
+      "source": "tests/fixture.lua",
+      "git_blob_sha1": "4b80de642a7055c1da5cb104bdb4c7b4c116be30"
+    },
+    "archive/h4_soft_speed_20261009/tests/test_t2move_h4_soft_controller.lua": {
+      "source": "maintenance_tools/t2move_a/test_t2move_h4_soft_controller.lua",
+      "git_blob_sha1": "3910e8be5a98b1951b5a565a99d50fba3f5d42d5"
+    },
+    "archive/h4_soft_speed_20261009/tests/test_t2move_h4_soft_native.lua": {
+      "source": "maintenance_tools/t2move_a/test_t2move_h4_soft_native.lua",
+      "git_blob_sha1": "2dd9901ea09a04177b281ec2a40ed3b5654fc0df"
+    },
+    "archive/h4_soft_speed_20261009/source/t2move_h1_route_obligation.lua": {
+      "source": "source/t2move_h1_route_obligation.lua",
+      "git_blob_sha1": "dcb9d2ffa097b4bd5c026c887058ad94aa5c9a47"
+    },
+    "archive/h4_soft_speed_20261009/docs/T2_MOVE_H4_SPEED_SOFT_20261009.md": {
+      "source": "docs/design/T2_MOVE_H4_SPEED_SOFT_20261009.md",
+      "git_blob_sha1": "02b4177a999a86cd11ba3d83d4c2089adfdf7399"
+    }
+  }
+}

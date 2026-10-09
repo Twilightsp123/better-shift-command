@@ -1,0 +1,37 @@
+name: H4 frozen architecture baseline (main archive only)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'archive/h4_soft_speed_20261009/**'
+      - 'tests/test_h4_architecture_baseline.py'
+      - 'docs/design/T2_MOVE_H4_FROZEN_ARCHITECTURE_20261009.md'
+      - '.github/workflows/h4-architecture-baseline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  h4_frozen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Source hash and production-isolation contract
+        run: python tests/test_h4_architecture_baseline.py
+      - name: Install Lua 5.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+      - name: Test archived H4 proactive soft corners with archived real-controller fixture
+        run: |
+          lua5.1 archive/h4_soft_speed_20261009/tests/test_t2move_h4_soft_controller.lua archive/h4_soft_speed_20261009/source/better_shift_command.lua archive/h4_soft_speed_20261009/tests/fixture.lua
+      - name: Test archived H4 Native i+1 acceptance/rejection
+        run: |
+          lua5.1 archive/h4_soft_speed_20261009/tests/test_t2move_h4_soft_native.lua archive/h4_soft_speed_20261009/source/better_shift_command.lua archive/h4_soft_speed_20261009/tests/fixture.lua
