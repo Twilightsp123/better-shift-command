@@ -2966,6 +2966,25 @@ function R1.H1ShadowObserve(st,current,successor,context,now,legacy)
     return result
 end
 
+-- H4-S: intermediate MOVE waypoints are soft steering guides, not hard
+-- arrival checkpoints. H1 remains independent physical-arrival evidence.
+-- Only SC1/SC2/SC4's already-bounded corner window can approve a rounded
+-- corner without observed arrival. This is semantic route acceptance, not
+-- an assertion that the unit occupied the waypoint coordinates.
+function R1.H4SoftCornerCredit(st,current,successor,g,proof,decision)
+    if not proof or proof.state~="BLOCKED" or proof.reason~="H1_SUCCESSOR_CHORD_MISSES_WAYPOINT"
+        or not current or current.type~="MOVE" or not successor or successor.type~="MOVE"
+        or not g or g.route_mode~="STEERING_CORNER" then return nil end
+    if g.route_reason~="TURN_CORRIDOR_ENTERED" and g.route_reason~="TURN_CORRIDOR_STALL_ESCAPE" then return nil end
+    if not finite(g.remaining) or not finite(g.corner_window) or g.remaining>g.corner_window
+        or not finite(g.progress) or g.progress<CFG.route_move_min_progress then return nil end
+    if not decision or not decision.issue_window or decision.issue_window.open~=true
+        or decision.hard_violation then return nil end
+    local clear=block_route_clear(st,current)
+    if not clear then return nil end
+    return "CORNER_SOFT_ACCEPTED"
+end
+
 local function route_handoff_ready(st,g,nexta)
     local cur=st.plan[st.idx]
     local rt=action_runtime(cur)
@@ -3155,6 +3174,12 @@ function Core.commit_transition_edge(st,tx,now,opts)
                     mark_action_complete(st,current,"H2_ROUTE_SATISFIED_OBSERVED",now,g.remaining)
                     if DEBUG_TELEMETRY then dlog("H2_WAYPOINT_CREDIT uid="..st.uid..
                         " action="..current.action_id.." reason="..clean(g.h2_route_reason).." model_ms="..now) end
+                elseif g.h2_route_credit=="CORNER_SOFT_ACCEPTED" then
+                    mark_action_complete(st,current,"H4_SOFT_WAYPOINT_ACCEPTED",now,g.remaining)
+                    if DEBUG_TELEMETRY then dlog("H4_SOFT_CORNER_COMMITTED uid="..st.uid..
+                        " gen="..st.gen.." action="..current.action_id..
+                        " successor="..successor.action_id.." remaining="..num_or_nil(g.remaining)..
+                        " semantics=ROUNDED_GUIDE_NOT_PHYSICAL_ARRIVAL model_ms="..now) end
                 else
                     register_route_obligation(st,current,g,now)
                     if DEBUG_TELEMETRY then dlog("H2_EXECUTION_COMMITTED_ROUTE_OWED uid="..st.uid..
@@ -3430,7 +3455,8 @@ function R1.T2MoveEPreview(st,current,successor,ctx)
     -- G turnback is a stricter legacy subset, not a second independent permission.
     local obligation=cached.h1_shadow
     if type(obligation)~="table" or
-       (obligation.state~="SATISFIED" and obligation.state~="DEBT_PRESERVED") then
+       (obligation.state~="SATISFIED" and obligation.state~="DEBT_PRESERVED"
+        and cached.h4_soft_credit~="CORNER_SOFT_ACCEPTED") then
         return nil,"H2_NATIVE_ROUTE_OBLIGATION_UNPROVEN"
     end
     -- G: legacy SC1 may proactively start a U-turn early, but its steering
@@ -3443,7 +3469,8 @@ function R1.T2MoveEPreview(st,current,successor,ctx)
         if not finite(backtrack) or not finite(reach) or reach<0 then
             return nil,"MOVE_TURNBACK_FROZEN_PROOF_MISSING"
         end
-        if backtrack>reach and cached.geometry.remaining>reach then
+        if backtrack>reach and cached.geometry.remaining>reach
+            and cached.h4_soft_credit~="CORNER_SOFT_ACCEPTED" then
             return nil,"MOVE_TURNBACK_WAYPOINT_UNPAID"
         end
     end
@@ -3574,13 +3601,20 @@ local function dispatch(st,index,reason,g,now,opts)
         if cur and cur.type=="MOVE" then
             -- Re-evaluate proof AFTER journal drain and immediately before Native ISSUE.
             -- A newly completed prior debt or changed canonical edge revokes stale proof.
-            local h2=R1.H1ShadowObserve(st,cur,a,"H2_PREISSUE",now,nil)
-            if not h2 or h2.state=="BLOCKED" then
+            local fresh=geometry(st,a)
+            local decision=fresh and R1.TransitionPolicy.evaluate(st,cur,a,fresh,
+                {current_index=st.idx,successor_index=index}) or nil
+            local h2=R1.H1ShadowObserve(st,cur,a,"H2_PREISSUE",now,decision)
+            local soft=R1.H4SoftCornerCredit(st,cur,a,fresh,h2,decision)
+            if not h2 or (h2.state=="BLOCKED" and not soft)
+                or not decision or decision.hard_violation or not decision.issue_window
+                or decision.issue_window.open~=true then
                 if DEBUG_TELEMETRY then dlog("H2_PREISSUE_DENIED uid="..st.uid..
                     " reason="..clean(h2 and h2.reason or "UNAVAILABLE").." model_ms="..now) end
                 return
             end
-            g.h2_route_credit=h2.state;g.h2_route_reason=h2.reason
+            g=fresh;g.h2_route_credit=soft or h2.state
+            g.h2_route_reason=soft and "H4_ROUNDED_CORNER" or h2.reason
         end
     end
     if a.type=="ATTACK" then
@@ -4114,7 +4148,8 @@ function R1.observe_t2move_d(st,cur,now)
         cert.current_ref=cur;cert.successor_ref=nexta
         cert.current_semantic_done=action_runtime(cur).semantic_done==true
         cert.route_reason=decision.route_reason
-        cert.h1_shadow=h1 -- diagnostic only; E/F/G proof and commit never read it.
+        cert.h1_shadow=h1 -- H1 independent geometric observation.
+        cert.h4_soft_credit=R1.H4SoftCornerCredit(st,cur,nexta,g,h1,decision)
     end
     st.t2move_d_evidence=cert
     if DEBUG_TELEMETRY and cert then
@@ -4190,8 +4225,10 @@ function Core.reconcile_native_successor(st,now)
         local proof=st.t2move_d_evidence
         g=proof and transition_geometry_snapshot(proof.geometry) or nil
         if g then
-            g.h2_route_credit=proof and proof.h1_shadow and proof.h1_shadow.state
-            g.h2_route_reason=proof and proof.h1_shadow and proof.h1_shadow.reason
+            g.h2_route_credit=proof and (proof.h4_soft_credit or
+                (proof.h1_shadow and proof.h1_shadow.state))
+            g.h2_route_reason=proof and proof.h4_soft_credit and "H4_NATIVE_ROUNDED_CORNER"
+                or (proof and proof.h1_shadow and proof.h1_shadow.reason)
         end
         decision=R1.TransitionPolicy.evaluate(st,cur,future,g,{current_index=st.idx,
             successor_index=future_index,execution_lineage=future_lineage,execution_provider=e.provider,
@@ -4328,15 +4365,22 @@ local function advance(st,now)
     else
         local decision=R1.TransitionPolicy.evaluate(st,cur,nexta,g,{current_index=st.idx,successor_index=st.idx+1})
         local h2=R1.H1ShadowObserve(st,cur,nexta,"ISSUE",now,decision)
-        -- H2-C: never issue a successor that cannot repay the old waypoint.
+        local soft=R1.H4SoftCornerCredit(st,cur,nexta,g,h2,decision)
+        -- Hard proof still protects old SC3 debts. A bounded SC1/SC2 corner
+        -- may be accepted as a SOFT waypoint to preserve moving speed.
         -- Preserve the original T1.7 timing/window; no new meter/angle gates.
-        if not h2 or h2.state=="BLOCKED" then
+        if not h2 or (h2.state=="BLOCKED" and not soft) then
             if DEBUG_TELEMETRY then dlog("H2_ROUTE_ISSUE_BLOCKED uid="..st.uid..
                 " gen="..st.gen.." action="..cur.action_id.." successor="..nexta.action_id..
                 " reason="..clean(h2 and h2.reason or "ROUTE_PROOF_UNAVAILABLE").." model_ms="..now) end
             return
         end
-        g.h2_route_credit=h2.state;g.h2_route_reason=h2.reason
+        g.h2_route_credit=soft or h2.state
+        g.h2_route_reason=soft and "H4_ROUNDED_CORNER" or h2.reason
+        if soft and DEBUG_TELEMETRY then dlog("H4_SOFT_CORNER_ISSUE uid="..st.uid..
+            " gen="..st.gen.." current="..cur.action_id.." successor="..nexta.action_id..
+            " remaining="..num_or_nil(g.remaining).." window="..num_or_nil(g.corner_window)..
+            " chord_error="..num_or_nil(h2.chord_error).." model_ms="..now) end
         local route_ok,route_reason=decision.route_ok,decision.route_reason or decision.reason
         if not route_ok then
             if DEBUG_TELEMETRY and now-st.last_wait>=1000 then
