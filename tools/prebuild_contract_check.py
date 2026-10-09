@@ -52,7 +52,7 @@ if 'bool BridgeHost::issue_ready()const noexcept{return v3_issue_calibration_rea
     fail('core issue readiness depends on non-command gate')
 if 'DIAGNOSTIC_RUNTIME_GATES_NOT_READY' in HOST:
     fail('diagnostic gates still veto issue')
-if '1.0.17-corepath-wh3-6c104-movevtfix' not in HDR:
+if '1.0.18-corepath-wh3-fec656f4-map902' not in HDR:
     fail('missing bridge version')
 for t in ('COREPATH_EXECUTION_IDENTITY_ONLY','PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8'):
     if t not in LUA: fail('missing '+t)
