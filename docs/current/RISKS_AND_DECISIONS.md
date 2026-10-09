@@ -28,6 +28,9 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 
 | NQ-021 | EXACT FILE MOVE STATUS DATAFLOW | Native MOVE constructor 0x030090BC writes VTable 0x0390B4F0. Virtual +0x10 resolves to 0x030440F8, setting object+0x20 from (related_state+0x240 == 0). In state path 0x030433B0 this flag gates ring pop. Original meaning of related-state+0x240, MOVE terminal brake, and next activation remain OPEN. | trace related-state writer, MOVE virtual +0x08, and native successor activation; see N1_903_MOVE_STATUS_CHAIN.md |
 
+| NQ-022 | EXACT FILE TASK COUNT | `related_state+0x240` is an auxiliary native task/suborder-like collection count: append `0x02F2FFB0`, cleanup `0x02F4FD5C`, per-unit update `0x03043520`. This count feeds the MOVE completion-status byte but is NOT a geometric arrival predicate. | classify task objects and track correct lifetime; see N1_903_SUBTASK_AND_HANDOFF.md |
+| NQ-023 | EXACT FILE CONDITIONAL HANDOFF | `0x0304433C` can call current order vfunc +0x40, next order +0x38 and +0x48, followed by original pop/collection cleanup. For MOVE vtable +0x40 the special state object is returned only under narrow native conditions; this is NOT universal queued MOVE lookahead. | understand MOVE+0xA0 object and native braking/activation before local patch decision |
+
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
 - No guessed new Hook location, signature, VTable, native queue write offset or mutation without independent evidence.
@@ -49,5 +52,7 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 - 2026-10-09 / D-NQ-009: user-provided 9.0.3-labelled EXE statically analyzed; native ring pop and callers identified. No runtime Hook, ABI or gameplay claim promoted; see N1_903_ORDER_LIFECYCLE_STATIC.md.
 
 - 2026-10-09 / D-NQ-010: exact-file MOVE constructor/virtual status dataflow identified; cannot equate status zero-check with physical arrival or authorize head manipulation.
+
+- 2026-10-09 / D-NQ-011: native task-count and conditional successor-transfer paths documented. No forced status/queue-head mutation and no new Hook authorized.
 
 Do not call any proposal 'implemented' until committed code and the corresponding tests exist.
