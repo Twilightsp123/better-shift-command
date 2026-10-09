@@ -61,7 +61,7 @@ end)
 -- but keep successor uncaptured until the Native promotion tick. This models
 -- the observed 17,400ms prepromotion race without faking calibration.
 local function h5_armed_single_move()
- local f=F({cold_idle=true,debug_source=true,no_calibration=true,width=20,native_order_evidence_v3=v3})
+ local f=F({cold_idle=true,debug_source=true,no_calibration=false,width=20,native_order_evidence_v3=v3})
  f:start();f.unit.idle=false;f.unit.moving=true
  local a=f:emit("MOVE",false,100,0)
  f.evidence_record=a
