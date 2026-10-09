@@ -140,6 +140,10 @@ Committed read-only PE/9.0.2 historical guard similarity scanner and Ghidra Jyth
 
 [N1_903_MOVE_STATE_ORIGIN.md](N1_903_MOVE_STATE_ORIGIN.md) follows original task construction and writeback to `MOVE+0xA0`. The engine sets state `0` on native construction, a path sets `4`, and successor MOVE adoption writes `1`. The current MOVE work submission may release/clear an old pointer on native flag/validator/scalar mismatch, using existing binary float constants 0.0 and approximately 0.01; these are **not BSC tuning parameters**. No evidence yet relates those scalar checks directly to braking. 25 exact byte guards / 8 local tests pass; no runtime Hook. Remaining task: identify state/desired-speed/path-reset semantics, and ordinary ATTACK activation.
 
+### N1 ordinary ATTACK head activation (2026-10-10)
+
+[N1_903_ORDINARY_ATTACK_DISPATCH.md](N1_903_ORDINARY_ATTACK_DISPATCH.md) establishes generic head processor `0x030433B0` and slot virtual dispatcher `0x03043424` can call native ATTACK `+0x08 -> 0x03025788`, which issues original ATTACK auxiliary tasks. This is a distinct path from special MOVE state inheritance, so it is invalid to force ATTACK successor +0x38 eligibility. Exact time, target validation and visual handoff remain OPEN.
+
 ## 6. Red lines / stopping conditions
 
 - No 9.0.2 patch guard, old RVA or VTable is a valid 9.0.3 Hook without new binary verification.
