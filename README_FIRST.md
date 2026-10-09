@@ -72,3 +72,6 @@ The next transition work is therefore:
 - lifecycle/teardown remains a separate stream.
 
 Battle teardown/hang remains a separate lifecycle stream and must not be mixed into transition-policy changes.
+
+
+**9.0.2 H2/H3 experimental runtime handoff (2026-10-09):** The Windows Native 1.0.18 build now targets EXE SHA256 `fec656f433dd7eb2bf47c889d91dd36b8242b0e631b3608a0453838e373f3785` with the preexisting 16-hook/VTable 9.0.2 address candidate. The original H2/H3 test pack was incorrectly built against the 9.0.1 DLL and failed at `OBSERVER_HOST_EXE_SHA256_MISMATCH`. The isolated `maintenance/t2move-h2h3-wh3-902-integration` branch builds a fresh WinX64 v142 DLL and seals plain/DEBUG candidate PACKs only after Windows Native CTest; it is **NOT WH3 runtime validated, NOT merged, NOT released**. See `docs/design/T2MOVE_H2H3_WH3_902_INTEGRATION_20261009.md`.
