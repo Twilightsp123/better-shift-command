@@ -131,7 +131,7 @@ local function F(options)
  function bm:get_player_army() return player_army end
  function bm:get_scriptunit_for_unit(bu) return find_su(bu) end
  local B={}
- function B.version()return f.cfg.wrong_version and "0.1.1" or "1.0.17-corepath-wh3-6c104-movevtfix" end
+ function B.version()return f.cfg.wrong_version and "0.1.1" or "1.0.18-corepath-wh3-fec656f4-map902" end
 
  local function mirror_v2_order_to_v3(e)
   if type(e)~="table" then return e end
