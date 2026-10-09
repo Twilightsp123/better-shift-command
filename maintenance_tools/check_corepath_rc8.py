@@ -35,7 +35,7 @@ for token in ('bind_evidence_unit_v3','read_entity_snapshot_v3','read_combat_gro
     if token in required: fail('physical API leaked into boot hard requirements: '+token)
 for token in ('r1_evidence_capabilities_v3','read_active_order_identity_v3','stop_observer'):
     if token not in required: fail('core evidence API missing from boot requirements: '+token)
-need(boot,'bridge.version()~="1.0.17-corepath-wh3-6c104-movevtfix"')
+need(boot,'bridge.version()~="1.0.18-corepath-wh3-fec656f4-map902"')
 need(controller,'BSC_COREPATH_SAFE_STOP_QUIT_WINDOWS')
 need(controller,'OBSERVER_SAFE_STOP reason=QUIT_WINDOWS_CLICK')
 # Quarantined binder must short-circuit before touching userdata/native physical API.
@@ -77,7 +77,7 @@ if native_map['derived']['simple_intercept_move_vtable'].get('release_use') is n
 need(host,'bool BridgeHost::issue_ready()const noexcept{return v3_issue_calibration_ready();}')
 if 'DIAGNOSTIC_RUNTIME_GATES_NOT_READY' in host: fail('physical diagnostic gate still vetoes core issue path')
 hdr=(ROOT/'src/native_bridge/include/wh3/bridge_host.hpp').read_text(encoding='utf-8')
-need(hdr,'1.0.17-corepath-wh3-6c104-movevtfix')
+need(hdr,'1.0.18-corepath-wh3-fec656f4-map902')
 for token in ('PHYSICAL_EVIDENCE_QUARANTINED_COREPATH_RC8','physical_evidence_quarantined','COREPATH_EXECUTION_IDENTITY_ONLY'):
     need(lua,token)
 # Production physical capability bits must be false while execution identity follows the build lock.
