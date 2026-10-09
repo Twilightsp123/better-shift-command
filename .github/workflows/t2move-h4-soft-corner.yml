@@ -6,6 +6,7 @@ on:
       - maintenance/t2move-h4-soft-corner-speed
       - maintenance/t2move-h5-runtime-reconcile-audit
       - maintenance/t2move-h6-route-guide-nearpass
+      - maintenance/t2move-h7-native-shift-attack-terminal
   workflow_dispatch:
 
 permissions:
@@ -31,6 +32,8 @@ jobs:
         run: lua5.1 maintenance_tools/t2move_a/test_t2move_h4_soft_controller.lua source/better_shift_command.lua tests/fixture.lua
       - name: H6 near-pass route debt real controller synthetic CA
         run: lua5.1 maintenance_tools/t2move_a/test_t2move_h6_near_pass.lua source/better_shift_command.lua tests/fixture.lua
+      - name: H7 Native exact Shift ATTACK terminal acceptance and negative fixtures
+        run: lua5.1 maintenance_tools/t2move_a/test_t2move_h7_native_attack.lua source/better_shift_command.lua tests/fixture.lua
       - name: H4 Native V3 exact successor parity
         run: lua5.1 maintenance_tools/t2move_a/test_t2move_h4_soft_native.lua source/better_shift_command.lua tests/fixture.lua
       - name: H4 soft corner behavior mutation gates

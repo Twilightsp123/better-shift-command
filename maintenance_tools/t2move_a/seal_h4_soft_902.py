@@ -66,6 +66,8 @@ required={"source/better_shift_command.lua","native_maps/wh3_9.0.2_fec656f4.json
  ".github/workflows/t2move-h4-soft-corner.yml",
  "maintenance_tools/t2move_a/test_t2move_h4_soft_controller.lua",
  "maintenance_tools/t2move_a/test_t2move_h6_near_pass.lua",
+ "maintenance_tools/t2move_a/test_t2move_h7_native_attack.lua",
+ "docs/design/T2_MOVE_H7_NATIVE_ATTACK_TERMINAL_20261009.md",
  "docs/design/T2_MOVE_H6_ROUTE_NEAR_PASS_20261009.md",
  "maintenance_tools/t2move_a/test_t2move_h4_soft_native.lua",
  "maintenance_tools/t2move_a/test_t2move_h4_soft_mutations.py",
@@ -95,6 +97,8 @@ manifest={
  "h6_scope":"BOUNDED_POST_ACK_MOVE_GUIDE_NEAR_PASS_WITH_ACTUAL_FORWARD_PLANE_CROSSING",
  "h6_runtime_status":"EXPERIMENTAL_PENDING_WH3_REPLAY",
  "h6_fixture":"POSITIVE_AND_NEGATIVE_NEAR_PASS_GATED_IN_CI",
+ "h7_scope":"ADOPT_ONLY_EXACT_NATIVE_I_PLUS_ONE_ATTACK_IN_PHYSICAL_TERMINAL_ENVELOPE",
+ "h7_runtime_status":"EXPERIMENTAL_PENDING_WH3_SHIFT_ATTACK_RETEST",
  "controller_sha256":h(controller),
  "normal_pack_sha256":h(regular),
  "debug_pack_sha256":h(debug),
@@ -112,6 +116,8 @@ manifest={
  "First test only startup: OBSERVER_READY/START/READY, Native Move and Attack capture, observer teardown.\n"
  "Speed and continuity are priority: soft 90/180 steering is intentionally allowed before exact P reach.\n"
  "H6: after ACK, actual motion near-pass of an old MOVE guide may retire its debt (NOT physical arrival).\n"
+ "H7: adopt only exact already-running Native queued Shift ATTACK near end of MOVE; no proactive ISSUE permission.\n"
+ "Verify Native attack transition on route end without forced MOVE rollback or skipped intermediate moves.\n"
  "Check for any major skipped leg, unresolved route debt and Native i+2 rollback/reasserts, then straight Move, 90/180, zigzag and Attack.\n"
  "Save script_log_*.txt and a video; report smoothness and route fidelity separately.\n"
  "Never publish to Steam until real-game smoke and acceptance pass.\n",encoding="utf-8")
