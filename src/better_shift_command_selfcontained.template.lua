@@ -2980,8 +2980,8 @@ function R1.H4SoftCornerCredit(st,current,successor,g,proof,decision)
         or not finite(g.progress) or g.progress<CFG.route_move_min_progress then return nil end
     if not decision or not decision.issue_window or decision.issue_window.open~=true
         or decision.hard_violation then return nil end
-    local clear=block_route_clear(st,current)
-    if not clear then return nil end
+    local prior_unpaid_clear=block_route_clear(st,current)
+    if not prior_unpaid_clear then return nil end
     return "CORNER_SOFT_ACCEPTED"
 end
 
