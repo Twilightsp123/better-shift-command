@@ -1,7 +1,7 @@
 # BSC — Direct WH3 Native Shift Patch (NQTR documentation branch)
 Current documentation authority — 2026-10-09
 
-**Current target is WH3 9.0.3.** [WH3_9_0_3_NATIVE_PATCH_DESIGN.md](WH3_9_0_3_NATIVE_PATCH_DESIGN.md) defines version-specific research, candidate patch modules and proof gates. The 9.0.2 EXE hash, maps and N1 reports remain historical evidence only; **9.0.3-labelled user EXE SHA and several order-lifecycle RVAs are now evidenced; MOVE completion/braking remain unknown**.
+**Current target is WH3 9.0.3.** [WH3_9_0_3_NATIVE_PATCH_DESIGN.md](WH3_9_0_3_NATIVE_PATCH_DESIGN.md) defines version-specific research, candidate patch modules and proof gates. The 9.0.2 EXE hash, maps and N1 reports remain historical evidence only; **9.0.3-labelled EXE queue pop, MOVE task-status propagation and conditional native successor-transfer paths are now partially evidenced; braking and general Shift behavior remain unknown**.
 
 **N1 toolkit implemented:** [read-only 9.0.3 PE and Ghidra field-reference scouts](../../maintenance_tools/native_shift_re/README.md), with synthetic tests. Their own candidate exports do not by themselves prove native progression or install hooks; subsequent exact-file LLVM analysis independently established a ring-pop primitive.
 
@@ -10,17 +10,18 @@ Current documentation authority — 2026-10-09
 ## Minimal reading order (do not read archives routinely)
 0. [WH3_9_0_3_NATIVE_PATCH_DESIGN.md](WH3_9_0_3_NATIVE_PATCH_DESIGN.md) — **current 9.0.3 design**; lifecycle, braking, ATTACK transition, evidence gates and no-go rules.
 1. [N1_903_ORDER_LIFECYCLE_STATIC.md](N1_903_ORDER_LIFECYCLE_STATIC.md) — actual user-supplied 9.0.3-labelled EXE: ring pop and callers.
-2. [N1_903_MOVE_STATUS_CHAIN.md](N1_903_MOVE_STATUS_CHAIN.md) — MOVE constructor/VTable and a state-to-original-pop chain; meaning of underlying movement count still OPEN.
-3. [PRODUCT_CONTRACT.md](PRODUCT_CONTRACT.md) — what BSC must do and must never break.
-4. [CURRENT_BASELINE.md](CURRENT_BASELINE.md) — exact source/branch and what has actually been verified.
-5. [NATIVE_RESEARCH_MAP.md](NATIVE_RESEARCH_MAP.md) — known Native entry points, missing proof, forbidden assumptions.
-6. [N1_STATIC_FINDINGS.md](N1_STATIC_FINDINGS.md) — source-verified N1 findings, negative evidence, and exact missing EXE/disassembly inputs.
-7. [N1_EXECUTABLE_RE_PLAN.md](N1_EXECUTABLE_RE_PLAN.md) — executable acquisition, xref/dataflow procedure, causal hypotheses and N1 pass/no-go gates.
-8. [TARGET_ARCHITECTURE.md](TARGET_ARCHITECTURE.md) — the original-engine patch boundary and non-goals.
-9. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — reverse the original Shift braking/handoff paths before patching native functions.
-10. [VERIFICATION.md](VERIFICATION.md) — offline/Windows/one final WH3 end-to-end verification.
-11. [RISKS_AND_DECISIONS.md](RISKS_AND_DECISIONS.md) — unresolved questions and decision register.
-12. [MAINTENANCE_RULES.md](MAINTENANCE_RULES.md) — how to update this set without reviving historical designs.
+2. [N1_903_MOVE_STATUS_CHAIN.md](N1_903_MOVE_STATUS_CHAIN.md) — MOVE constructor/VTable and status-to-pop path.
+3. [N1_903_SUBTASK_AND_HANDOFF.md](N1_903_SUBTASK_AND_HANDOFF.md) — exact-file proof that +0x240 counts auxiliary tasks and that conditional successor transfer exists; NOT general Shift lookahead.
+4. [PRODUCT_CONTRACT.md](PRODUCT_CONTRACT.md) — what BSC must do and must never break.
+5. [CURRENT_BASELINE.md](CURRENT_BASELINE.md) — exact source/branch and what has actually been verified.
+6. [NATIVE_RESEARCH_MAP.md](NATIVE_RESEARCH_MAP.md) — known Native entry points, missing proof, forbidden assumptions.
+7. [N1_STATIC_FINDINGS.md](N1_STATIC_FINDINGS.md) — source-verified N1 findings, negative evidence, and exact missing EXE/disassembly inputs.
+8. [N1_EXECUTABLE_RE_PLAN.md](N1_EXECUTABLE_RE_PLAN.md) — executable acquisition, xref/dataflow procedure, causal hypotheses and N1 pass/no-go gates.
+9. [TARGET_ARCHITECTURE.md](TARGET_ARCHITECTURE.md) — the original-engine patch boundary and non-goals.
+10. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — reverse the original Shift braking/handoff paths before patching native functions.
+11. [VERIFICATION.md](VERIFICATION.md) — offline/Windows/one final WH3 end-to-end verification.
+12. [RISKS_AND_DECISIONS.md](RISKS_AND_DECISIONS.md) — unresolved questions and decision register.
+13. [MAINTENANCE_RULES.md](MAINTENANCE_RULES.md) — how to update this set without reviving historical designs.
 
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
