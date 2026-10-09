@@ -3164,7 +3164,7 @@ local function transition_geometry_snapshot(g)
         arrival_sync_margin=g.arrival_sync_margin,attack_path_error=g.attack_path_error,
         h2_route_credit=g.h2_route_credit,h2_route_reason=g.h2_route_reason,
         attack_waypoint_tolerance=g.attack_waypoint_tolerance,attack_terminal_limit=g.attack_terminal_limit,
-        arrival_g11_deceleration=g.arrival_g11_deceleration,arrival_g11_issue_coherent=g.arrival_g11_issue_coherent,
+        arrival_g11_ready=g.arrival_g11_ready,arrival_g11_deceleration=g.arrival_g11_deceleration,arrival_g11_issue_coherent=g.arrival_g11_issue_coherent,
         arrival_g11_adopt_coherent=g.arrival_g11_adopt_coherent,arrival_g11_reason=g.arrival_g11_reason,
         arrival_g11_stop_distance=g.arrival_g11_stop_distance,arrival_g11_stop_error=g.arrival_g11_stop_error,
         arrival_g11_issue_limit=g.arrival_g11_issue_limit,arrival_g11_adopt_limit=g.arrival_g11_adopt_limit,
@@ -3436,7 +3436,7 @@ local function t2b_attack_decision(st,current,successor,g,context)
  local b=R1.ArrivalBrakeG11.observe(st.motion_samples,current.pos,action_runtime(current).entered_ms,tol)
  local target=g.target_pos;local err=(target and st.pos and current.pos) and point_segment_error(current.pos,st.pos,target) or nil
  local p=R1.T2BAttackPolicy.evaluate({immediate_successor=context.immediate_successor~=false,target_exact=context.target_exact~=false,target_terminal_abort=context.target_terminal_abort==true,prior_route_clear=clear==true,semantic_done=action_runtime(current).semantic_done==true,exit_route=current.block_kind=="EXIT_ROUTE",arrival_issue_coherent=b.issue_coherent==true,arrival_adopt_coherent=b.adopt_coherent==true,path_error=err,waypoint_tolerance=tol,remaining=g.remaining,sync_margin=b.sync_margin})
- g.arrival_g11_deceleration=b.deceleration_observed;g.arrival_g11_issue_coherent=b.issue_coherent;g.arrival_g11_adopt_coherent=b.adopt_coherent;g.arrival_g11_reason=b.reason;g.arrival_g11_stop_distance=b.stopping_distance;g.arrival_g11_stop_error=b.stopping_point_error;g.arrival_g11_issue_limit=b.issue_coherence_limit;g.arrival_g11_adopt_limit=b.adopt_coherence_limit;g.arrival_sync_margin=b.sync_margin;g.attack_path_error=err;g.attack_waypoint_tolerance=tol;g.t2b_issue_route_mode=p.issue_route_mode;g.t2b_adopt_route_mode=p.adopt_route_mode;g.current_credit=p.current_credit;g.route_safe=(p.issue_window and p.issue_window.open==true) or (p.adopt_window and p.adopt_window.open==true);g.route_mode=(p.issue_window and p.issue_window.open and p.issue_route_mode) or (p.adopt_window and p.adopt_window.open and p.adopt_route_mode) or "BLOCKED";g.route_reason=p.reason;return p
+ g.arrival_g11_ready=b.ready;g.arrival_g11_deceleration=b.deceleration_observed;g.arrival_g11_issue_coherent=b.issue_coherent;g.arrival_g11_adopt_coherent=b.adopt_coherent;g.arrival_g11_reason=b.reason;g.arrival_g11_stop_distance=b.stopping_distance;g.arrival_g11_stop_error=b.stopping_point_error;g.arrival_g11_issue_limit=b.issue_coherence_limit;g.arrival_g11_adopt_limit=b.adopt_coherence_limit;g.arrival_sync_margin=b.sync_margin;g.attack_path_error=err;g.attack_waypoint_tolerance=tol;g.t2b_issue_route_mode=p.issue_route_mode;g.t2b_adopt_route_mode=p.adopt_route_mode;g.current_credit=p.current_credit;g.route_safe=(p.issue_window and p.issue_window.open==true) or (p.adopt_window and p.adopt_window.open==true);g.route_mode=(p.issue_window and p.issue_window.open and p.issue_route_mode) or (p.adopt_window and p.adopt_window.open and p.adopt_route_mode) or "BLOCKED";g.route_reason=p.reason;return p
 end
 
 -- BSC-TPOL-T1 shared TransitionPolicy evaluator.
@@ -4287,6 +4287,7 @@ function Core.reconcile_native_successor(st,now)
             rt.movement_seen==true and route_clear==true and
             st.pos and st.prev_pos and finite(st.model_step_ms) and st.model_step_ms>0 and
             g and finite(g.remaining) and finite(g.progress) and
+            g.arrival_g11_ready==true and
             g.progress>=CFG.route_attack_min_progress and
             finite(terminal_limit) and terminal_limit>0 and
             g.remaining<=terminal_limit and dist(st.pos,cur.pos)<=terminal_limit then
