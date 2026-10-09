@@ -1,7 +1,7 @@
 # WH3 9.0.3 — Native Shift Behavior Patch design specification
 
 **Date:** 2026-10-09
-**Status:** DESIGN ONLY — unverified engine hypotheses, no 9.0.3 executable and no new native RVA, ABI or Hook authorized.
+**Status:** DESIGN + READ-ONLY N1 TOOLING ONLY — unverified engine hypotheses, no 9.0.3 executable and no new native RVA, ABI or Hook authorized. [Tooling instructions](../../maintenance_tools/native_shift_re/README.md) describe PE/build SHA and Ghidra decoded-operand scouts; their outputs are *not* verified native queue writers.
 **Development branch:** `research/n1-native-shift-behavior-patch-20261009`.
 **Prior evidence:** `N1_STATIC_FINDINGS.md` and `N1_EXECUTABLE_RE_PLAN.md` are **9.0.2-only historical RE seeds**, not a 9.0.3 address map.
 
@@ -119,6 +119,10 @@ Higher grade cannot be inferred from passing a synthetic unit test.
 **P4 — Isolated Windows proof.** Only after P1–P3: small x64 patch carrier, secure hash/guard check and reversible/disable-safe hook; verify exact ABI, trampoline, unwind, cancellation and fault-injected partial installation. Independently isolate legacy `MH_ERROR_MEMORY_ALLOC` / `OBSERVER_MINHOOK_CREATE_FAILED` via allocation/proximity instrumentation. Avoid 16-hook legacy bootstrap by default; hook count is proof-derived, not precommitted. **PASS:** no partially enabled patch, stale trampolines or uncontrolled retry.
 
 **P5 — Integration and one bounded WH3 acceptance.** Build proper WinX64 DLL, normal and DEBUG PACK plus source/evidence/SHA256 manifests. After all static + offline + Windows checks, execute one consolidated WH3 test matrix: MOVE→MOVE, corners, short zigzag, MOVE→ATTACK, ATTACK→EXIT MOVE→ATTACK (only if implemented), right-click REPLACE, cancel, target death, multi-unit, game exit. Mark each `STATIC`, `OFFLINE`, `WINDOWS`, `WH3` separately. No Steam publication without actual WH3 success.
+
+### Research tooling checkpoint (2026-10-09)
+
+Committed read-only PE/9.0.2 historical guard similarity scanner and Ghidra Jython scalar-field xref exporter under maintenance_tools/native_shift_re/, plus 9 synthetic PE/offline contract tests and separate CI workflow. These are **N1 preparation**, not successful executable disassembly, not ABI evidence and not a Native Patch. Missing current 9.0.3 EXE SHA remains P1 blocker.
 
 ## 6. Red lines / stopping conditions
 
