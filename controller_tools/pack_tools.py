@@ -7,7 +7,7 @@ CONTROLLER_PATH = r'script\battle\mod\better_shift_command.lua'
 BRIDGE_PATH = r'script\better_shift_command\bin\bridge_Windows_NT-x64.lua'
 MINHOOK_PATH = r'script\better_shift_command\bin\minhook_Windows_NT-x64.lua'
 MINHOOK_SHA256 = 'df452eacdb076c35a80c795df920fd3c6f128faa3e0bccb0b7490e95f8659d54'
-BRIDGE_VERSION = b'1.0.17-corepath-wh3-6c104-movevtfix'
+BRIDGE_VERSION = b'1.0.18-corepath-wh3-fec656f4-map902'
 
 def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -85,4 +85,4 @@ def selfcontained(root: Path,controller: bytes,bridge: bytes,minhook: bytes) -> 
         (MINHOOK_PATH,encode_payload('minhook.x64.dll',minhook)),
         (r'script\better_shift_command\licenses\MINHOOK_LICENSE.txt',(root/'baseline/MINHOOK_LICENSE.txt').read_bytes()),
         (r'script\better_shift_command\licenses\THIRD_PARTY_NOTICES.txt',
-         b'Better Shift Command v1.2.2 CorePath RC8 PREBUILD candidate. Native Bridge 1.0.17-corepath-wh3-6c104-movevtfix; physical Entity evidence quarantined; frozen MinHook runtime. See MINHOOK_LICENSE.txt.\n')])
+         b'Better Shift Command v1.2.2 CorePath RC8 PREBUILD candidate. Native Bridge 1.0.18-corepath-wh3-fec656f4-map902; physical Entity evidence quarantined; frozen MinHook runtime. See MINHOOK_LICENSE.txt.\n')])
