@@ -36,3 +36,11 @@ jobs:
           name: bsc-rmb-fresh-continuation-disabled-experiment-win64
           path: build/fc/Release/bsc_fresh_continuation_EXPERIMENT_OFF_BY_DEFAULT.dll
           if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bsc-n1-rmb-experiment-win64-full-source
+          path: |
+            src/native_bridge/experiments/fresh_continuation/**
+            build/fc/Release/bsc_fresh_continuation_EXPERIMENT_OFF_BY_DEFAULT.dll
+          if-no-files-found: error
