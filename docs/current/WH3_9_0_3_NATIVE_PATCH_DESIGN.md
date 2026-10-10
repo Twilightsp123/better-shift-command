@@ -152,6 +152,10 @@ Committed read-only PE/9.0.2 historical guard similarity scanner and Ghidra Jyth
 
 [N1_903_ROUTE_GATE_ANALYSIS.md](N1_903_ROUTE_GATE_ANALYSIS.md) demonstrates 0x0310F560 is a stateful path processing function: original coordinate working stores, helper invocations and cleanup; deeper helper 0x030E88C8 calculates 2D spatial distance and writes route results. The callback's state+0x24 flag is set to 1 in the examined path only when AL from route-processing is nonzero and controller field +0x4E4 >= 2. This is **not** proven to be a terminal speed/braking predicate; no local Hook authorized. 46 exact guards, 6 direct call edges, 8 local tests pass (one using pinned user EXE, synthetic CI may skip it).
 
+### N1 state4 branch correction and geometry early exit (2026-10-10)
+
+[N1_903_STATE4_GEOMETRY_BRANCH.md](N1_903_STATE4_GEOMETRY_BRANCH.md) distinguishes a state4 transition that clears the transfer flag from another state4 writer that doesn't directly clear it. It also locates a guarded geometry comparison and early return in `0x0311F534` on state4's execution path. These are **new investigation seeds**, not proof of terminal braking or a safe Hook. 25 machine instruction guards, four control-flow edges, six offline tests (one exact EXE) verified.
+
 ## 6. Red lines / stopping conditions
 
 - No 9.0.2 patch guard, old RVA or VTable is a valid 9.0.3 Hook without new binary verification.
