@@ -64,6 +64,8 @@ Current documentation authority — updated 2026-10-10
 
 **Native model displacement-rate evidence (2026-10-10):** [N1_903_MEMBER_POSE_DISPLACEMENT_DERIVATIVE.md](N1_903_MEMBER_POSE_DISPLACEMENT_DERIVATIVE.md) — exact original member pose updater `0x0315C1E4` computes XYZ displacement rates at `member+0xE0/+0xE4/+0xE8` and angular rate `+0xEC`; member tick `0x03060700` supplies target from its own controller `+0x2E0`, then advances local controller after updating member pose. Native mode3 record helper `0x030BE544` only appends 48-byte records, not avoidance. **52 exact opcode guards, 5 E8 calls, 18 offline tests** verified; actual WH3 collision/patch still unknown.
 
+**N1 native slot binding evidence (2026-10-10):** [N1_903_GROUP_INDEX_TO_SLOT_COLLISION_CAUSAL.md](N1_903_GROUP_INDEX_TO_SLOT_COLLISION_CAUSAL.md) — original group members appended in source order, mode3 target records appended in 48-byte order, grid indices mapped back to records without vector permutation, then native fanout pairs `member[i]` with `record[i]`. Conditional 3×3/180° straight-travel counterexample converges all members at midpoint; offline bijective slot-matching candidate preserves target set but is **not** proven safe in WH3. 44 machine guards, 8 calls, 22 tests. No DLL.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
