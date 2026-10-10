@@ -148,7 +148,7 @@ Committed read-only PE/9.0.2 historical guard similarity scanner and Ghidra Jyth
 
 [N1_903_STATE_MACHINE_REBASE.md](N1_903_STATE_MACHINE_REBASE.md) establishes 0–4 native state switch and staged successor MOVE rebase (state=1, pending +0x120..0x140 -> active +0x60..0xA8). One state=4 branch clears the separate handoff flag state+0x24, though transfer provider requires it nonzero: forcing state 4 is unsafe. Outgoing/current and incoming MOVE share a mode-selected scalar getter; its physical units and original braking remain unknown. 44 selected exact code guards, 5 native branch targets and 7 isolated synthetic tests checked; no patch.
 
-## 6. Red lines / stopping conditions
+### N1 transfer flag writer (2026-10-10)\n\n[N1_903_TRANSFER_FLAG_WRITER.md](N1_903_TRANSFER_FLAG_WRITER.md) identifies original writer `0x0311EB10` in callback `0x0311E80C`, controlled by `0x0310F560` return and additional gate. Accepted branch can set state=2, other exits state=4. This reduces the unknown to precise **flag/state lifecycle and motor/path coupling**, but no braking predicate or safe Hook identified. Full local verifier: 68 machine guards, 9 branch destinations, 7 isolated tooling tests PASS.\n\n## 6. Red lines / stopping conditions
 
 - No 9.0.2 patch guard, old RVA or VTable is a valid 9.0.3 Hook without new binary verification.
 - No direct writes to head/slots, no H8 Native/Lua replacement scheduler, no forced command replay or attack overwrite.
