@@ -15,16 +15,17 @@ Current documentation authority — 2026-10-09
 4. [N1_903_MOVE_VS_ATTACK_TRANSFER.md](N1_903_MOVE_VS_ATTACK_TRANSFER.md) — original state transfer: MOVE successor eligible, ATTACK successor excluded on this path.
 5. [N1_903_MOVE_STATE_ORIGIN.md](N1_903_MOVE_STATE_ORIGIN.md) — original MOVE+0xA0 state producer/writeback, native state 4 source and reuse invalidation gate.
 6. [N1_903_ORDINARY_ATTACK_DISPATCH.md](N1_903_ORDINARY_ATTACK_DISPATCH.md) — generic native ATTACK head activation is distinct from MOVE's special state inheritance.
-7. [PRODUCT_CONTRACT.md](PRODUCT_CONTRACT.md) — what BSC must do and must never break.
-8. [CURRENT_BASELINE.md](CURRENT_BASELINE.md) — exact source/branch and what has actually been verified.
-9. [NATIVE_RESEARCH_MAP.md](NATIVE_RESEARCH_MAP.md) — known Native entry points, missing proof, forbidden assumptions.
-10. [N1_STATIC_FINDINGS.md](N1_STATIC_FINDINGS.md) — source-verified N1 findings, negative evidence, and exact missing EXE/disassembly inputs.
-11. [N1_EXECUTABLE_RE_PLAN.md](N1_EXECUTABLE_RE_PLAN.md) — executable acquisition, xref/dataflow procedure, causal hypotheses and N1 pass/no-go gates.
-12. [TARGET_ARCHITECTURE.md](TARGET_ARCHITECTURE.md) — the original-engine patch boundary and non-goals.
-13. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — reverse the original Shift braking/handoff paths before patching native functions.
-14. [VERIFICATION.md](VERIFICATION.md) — offline/Windows/one final WH3 end-to-end verification.
-15. [RISKS_AND_DECISIONS.md](RISKS_AND_DECISIONS.md) — unresolved questions and decision register.
-16. [MAINTENANCE_RULES.md](MAINTENANCE_RULES.md) — how to update this set without reviving historical designs.
+7. [N1_903_STATE_MACHINE_REBASE.md](N1_903_STATE_MACHINE_REBASE.md) — explicit 0–4 native state dispatcher, staged MOVE payload rebasing, transfer flag conflict; motor/brake meaning OPEN.
+8. [PRODUCT_CONTRACT.md](PRODUCT_CONTRACT.md) — what BSC must do and must never break.
+9. [CURRENT_BASELINE.md](CURRENT_BASELINE.md) — exact source/branch and what has actually been verified.
+10. [NATIVE_RESEARCH_MAP.md](NATIVE_RESEARCH_MAP.md) — known Native entry points, missing proof, forbidden assumptions.
+11. [N1_STATIC_FINDINGS.md](N1_STATIC_FINDINGS.md) — source-verified N1 findings, negative evidence, and exact missing EXE/disassembly inputs.
+12. [N1_EXECUTABLE_RE_PLAN.md](N1_EXECUTABLE_RE_PLAN.md) — executable acquisition, xref/dataflow procedure, causal hypotheses and N1 pass/no-go gates.
+13. [TARGET_ARCHITECTURE.md](TARGET_ARCHITECTURE.md) — the original-engine patch boundary and non-goals.
+14. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — reverse the original Shift braking/handoff paths before patching native functions.
+15. [VERIFICATION.md](VERIFICATION.md) — offline/Windows/one final WH3 end-to-end verification.
+16. [RISKS_AND_DECISIONS.md](RISKS_AND_DECISIONS.md) — unresolved questions and decision register.
+17. [MAINTENANCE_RULES.md](MAINTENANCE_RULES.md) — how to update this set without reviving historical designs.
 
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
