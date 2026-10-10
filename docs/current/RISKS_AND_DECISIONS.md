@@ -59,6 +59,8 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 
 | NQ-041 | EXACT BINARY FORMATION-LEVEL ENTRY LEAD | Original unit update `0x03043648` calls `0x030421A4` (loops root+0x184/+0x188 position-bearing members, reads member+0x88/+0x90) and `0x0302AE0C` (uses root+0x32F8 and root+0x3C38) before queue stage `0x0304433C` on observed path. These objects are not yet proven individual soldiers nor per-model waypoint targets. | Trace array producers, member object types, group target writers and individual steer/turn consumers; see N1_903_FORMATION_ENTRY_CALLGRAPH.md. |
 
+| NQ-042 | DISTINCT MEMBER LAYERS VERIFIED | On same UnitRoot, native function around `0x0303D6AD` reads separate container A `+0x184/+0x188` and B `+0x114/+0x118`; B has separate element virtual calls. A member vfunc `+0x58` can expose further child array `+0xBE4/+0xBE8`. Cannot label A positional aggregation as actual per-soldier waypoint logic or classify B with abandoned assumptions. | resolve actual member VTable/RTTI/constructor, nested child type and native target/facing writer; see N1_903_MEMBER_LAYER_TYPE_GAP.md |
+
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
 - No guessed new Hook location, signature, VTable, native queue write offset or mutation without independent evidence.
