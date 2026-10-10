@@ -73,3 +73,11 @@ The read-only `audit_903_formation_entry.py` accepts `--exe` and `--report` and 
     python maintenance_tools/native_shift_re/audit_903_formation_entry.py --exe "C:\\path\\to\\Warhammer3.exe" --report "N1_outputs\\formation_entry.json"
 
 See [N1 formation entry report](../../docs/current/N1_903_FORMATION_ENTRY_CALLGRAPH.md). The user-visible issue is within-unit soldier model desynchronization and crowding, **not a proven vanilla Move stop**.
+
+## Distinct member layers (2026-10-10)
+
+`audit_903_member_layers.py` verifies 23 exact user-EXE instruction byte guards and four E8 call targets. It preserves an important **negative inference**: two independent UnitRoot count/pointer vectors and one deeper child collection do **not** automatically identify individual soldier movement objects. It neither writes the EXE nor authorizes runtime changes.
+
+    python maintenance_tools/native_shift_re/audit_903_member_layers.py --exe "C:\\path\\Warhammer3.exe" --report "N1_outputs\\member_layers.json"
+
+See [N1 member layer report](../../docs/current/N1_903_MEMBER_LAYER_TYPE_GAP.md). Synthetic checks: tests/test_native_shift_re_member_layers.py. A separately provided full offline package also contains bounded LLVM instructions, 8 independent local tests and SHA manifest; no executable copy.
