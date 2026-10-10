@@ -56,6 +56,8 @@ Current documentation authority — updated 2026-10-10
 
 **N1 resolved original member receiver (2026-10-10):** [N1_903_MEMBER_VIRTUAL_RECEIVER_RESOLVED.md](N1_903_MEMBER_VIRTUAL_RECEIVER_RESOLVED.md) traces +0x368 into shared native handler `0x0306B9F0`, then +0xE8/+0x100 member methods and actual per-member coordinate/orientation writes. **38 real VTables identified with constructor references, 16 original byte guards, 7 local exact-EXE/offline tests.** [Pinned proof script](../../maintenance_tools/native_shift_re/audit_903_member_virtual_receivers.py). Arrival phase still unknown; no Hook.
 
+**N1 causal audit correction — stronger negative evidence:** [N1_903_LAYOUT_COUNT_NOT_ARRIVAL_DISCONFIRMATION.md](N1_903_LAYOUT_COUNT_NOT_ARRIVAL_DISCONFIRMATION.md) identifies group strategy `+0x20` as formation-size/layout-number computation (sqrt(n), min(13,n), table) cached at task+0xB8, **NOT waypoint-completion status**. Separate group object `+0x20` is a different function. One group target generation precedes batch dispatch; per-member receiver branches by `member+0x104`. Exact-SHA proof [script](../../maintenance_tools/native_shift_re/audit_903_layout_vs_arrival.py). No safe repair site established.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
