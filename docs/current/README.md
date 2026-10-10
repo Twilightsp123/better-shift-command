@@ -46,6 +46,8 @@ Current documentation authority — updated 2026-10-10
 
 **N1 object-type correction:** [N1_903_MEMBER_LAYER_TYPE_GAP.md](N1_903_MEMBER_LAYER_TYPE_GAP.md) verifies two distinct UnitRoot pointer/count vectors and a further nested child-object array; do **not** equate position aggregation with per-soldier route progress. [SHA-gated verifier](../../maintenance_tools/native_shift_re/audit_903_member_layers.py), 23 exact bytes / 4 calls / 8 independent local tests.
 
+**Direct MOVE→unit route evidence (2026-10-10):** [N1_903_MOVE_TO_UNIT_ROUTE_DIRECT.md](N1_903_MOVE_TO_UNIT_ROUTE_DIRECT.md) proves two MOVE original callsites reach route configurator 0x0301287C and write root+0x270 through original branches. [Read-only verifier](../../maintenance_tools/native_shift_re/audit_903_move_unit_route.py) (23 machine guards + 7 calls). A separate member-related virtual +0xC8 dispatch is documented, but its type/callchain is not yet proven. No Hook.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
