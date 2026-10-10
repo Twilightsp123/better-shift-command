@@ -34,6 +34,10 @@ The group function `0x030D5490` calls VTable+0x48 ONCE with group count, produci
 
 Function `0x03022A4C` contains a read of native queue count `root+0x2F88`, **but this read is inside the DL=0 branch**. Its sole direct-E8 caller currently located, `0x03043289`, sets DL=1 at `0x03043284`. Thus the visible queued-count check is **bypassed on that observed call path** and must not be treated as a proven group-arrival condition.
 
+## 2026-10-10 successor finding: actual virtual receiver functions identified
+
+[N1_903_MEMBER_VIRTUAL_RECEIVER_RESOLVED.md](N1_903_MEMBER_VIRTUAL_RECEIVER_RESOLVED.md) resolves the formerly unknown member VTable `+0x368`: 38 original constructor-backed native vtables share group getter `+0x3F8 -> 0x008F37B0` (`member+0x300`). Of them 36 dispatch `+0x368` to common `0x0306B9F0`, one to forwarding wrapper `0x0306B9CC` and one to specialized `0x03117CE0`. The common handler chooses member action `+0x100` or `+0xE8`; the former reaches `0x0315F4E0`, an instruction-verified member coordinate/angle writer (`+0x88/+0x90/+0xB0`), while another downstream method updates member-local route cache (`+0x910/+0x930`). Still no proven independent per-model waypoint-arrival decision or patch safety.
+
 ## What is still open / exact next proof
 
 1. Identify concrete implementations and original completion logic behind member VTable `+0x368`; establish whether this submits an independent motor task, an individual route phase or another animation/action.
