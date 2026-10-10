@@ -33,6 +33,12 @@ Separately, native **0x03012A6C** accesses the same root route pointer at **0x03
 
 Another original routine **0x0304725C** reads `root+0x270` and loops through the `root+0x188` member list; for each selected element it constructs coordinates involving a pseudo-random scalar and calls **0x0307AA30** at **0x03047473**, which invokes multiple *member* virtual methods, including `+0xE8` and `+0x608`. But no direct E8 caller into **0x0304725C** was found and its dynamic task type/Shift relation remains unknown. **It may be a separate scattering/AI task, NOT normal queued Shift model target assignment.** Do not infer soldier-specific queued commands from it or patch the randomization.
 
+## Additional direct native member-related virtual call (exact-site follow-up)
+
+Verified `0x03012A2C` calls `0x03012A6C` at site `0x03012A4E`. This separate member/context path reads root member vector `+0x188` (`0x03012AD1`), then a further pointer at `+0x20` (`0x03012AE8`), loads that pointer's position-like floats `+0x88/+0x90` (`0x03012AF5`, `0x03012B02`), and retrieves the same root-route pointer `+0x270` (`0x03012BED`). Crucially it calls **the selected member-related object's virtual +0xC8** at **`0x03012C1E`**, and later calls original unit route configuration **`0x0301287C`** at **`0x03012C42`**.
+
+The 9 exact instruction guards and 2 direct call targets were rechecked against the user's EXE; 4 additional synthetic tests passed. **This is an original route/member interface candidate, not yet a demonstrated soldier waypoint writer:** neither the concrete vtable method nor a complete original MOVE worker → `0x03012A6C` call path has been established. It also may target one representative member rather than every render soldier.
+
 ## What has been verified offline, and what has not
 
 - `audit_move_group_route.py`: **23/23 exact original opcode guards and 7/7 E8 call targets** on SHA-pinned user EXE.
