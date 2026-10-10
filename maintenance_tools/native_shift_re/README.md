@@ -81,3 +81,9 @@ See [N1 formation entry report](../../docs/current/N1_903_FORMATION_ENTRY_CALLGR
     python maintenance_tools/native_shift_re/audit_903_member_layers.py --exe "C:\\path\\Warhammer3.exe" --report "N1_outputs\\member_layers.json"
 
 See [N1 member layer report](../../docs/current/N1_903_MEMBER_LAYER_TYPE_GAP.md). Synthetic checks: tests/test_native_shift_re_member_layers.py. A separately provided full offline package also contains bounded LLVM instructions, 8 independent local tests and SHA manifest; no executable copy.
+
+## Native MOVE → unit route proof (exact 9.0.3 user binary)
+
+Run `audit_903_move_unit_route.py --exe PATH --report OUTPUT` to check the 23 exact byte guards and seven original E8 target calls linking both MOVE worker branches to `0x0301287C` and native route descriptor storage at root `+0x270`. Research only, not a Hook map. See [N1 report](../../docs/current/N1_903_MOVE_TO_UNIT_ROUTE_DIRECT.md).
+
+Run `audit_903_member_route_virtual.py --exe PATH --report OUTPUT` to verify nine original bytes and two E8 targets near native unit-route/member virtual `+0xC8` dispatch. The vtable implementation and soldier identity are **not** proven. Old unrelated nearest-member selector `0x031E11AC` has no direct E8 caller identified; no patch proposed.
