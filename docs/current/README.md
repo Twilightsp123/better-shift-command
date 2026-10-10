@@ -44,6 +44,8 @@ Current documentation authority — updated 2026-10-10
 
 **N1 formation entry update (2026-10-10):** [N1_903_FORMATION_ENTRY_CALLGRAPH.md](N1_903_FORMATION_ENTRY_CALLGRAPH.md) — exact-file same-unit update sequence: position-bearing member aggregation, group coordinate update, native queued-order processing. Member object type and model turn/arrival are still unverified. [Read-only audit](../../maintenance_tools/native_shift_re/audit_903_formation_entry.py), 23 opcode guards/6 calls, 8 synthetic tests. No patch.
 
+**N1 object-type correction:** [N1_903_MEMBER_LAYER_TYPE_GAP.md](N1_903_MEMBER_LAYER_TYPE_GAP.md) verifies two distinct UnitRoot pointer/count vectors and a further nested child-object array; do **not** equate position aggregation with per-soldier route progress. [SHA-gated verifier](../../maintenance_tools/native_shift_re/audit_903_member_layers.py), 23 exact bytes / 4 calls / 8 independent local tests.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
