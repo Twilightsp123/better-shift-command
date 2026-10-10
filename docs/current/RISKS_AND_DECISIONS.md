@@ -43,7 +43,7 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 | NQ-030 | HANDOFF FLAG SAFETY CONTRADICTION | One native branch writing state+0x20=4 at 0x0311E4B5 simultaneously clears byte state+0x24 at 0x0311E4B9. Current MOVE transfer provider 0x03039FB0 requires state=4 and state+0x24!=0. Thus state4 alone cannot justify forced handoff. | find proven writer of state+0x24=1 with valid state4 and lifetime; no flag patch. |
 | NQ-031 | SHARED SCALAR REFERENCE FRAME, UNPROVEN PHYSICS | Both outgoing current MOVE 0x03025DD2 and successor MOVE 0x030408AF call scalar getter 0x0301C1B4, selected by MOVE+0x9A bit4. Receiver builds state+0x140 values, stage1 copies them to state+0xA0 before outgoing reuse validates consistency. Scalar units unknown. | correlate actual original motor/path consumer, not thresholds. |
 
-## Safety constraints
+| NQ-032 | EXACT-EXE FLAG WRITER FOUND | Original state callback `0x0311E80C` writes state+0x24 at `0x0311EB10`, determined by result of complex native `0x0310F560` and another gate on `[rbx+0x4E4]`. Accepted route sets state 2; other exits set state 4. Thus state4+flag1 reachability still needs proof; see N1_903_TRANSFER_FLAG_WRITER.md. | trace validator/predicate and later state4+flag1 lifecycle; do not force flag. |\n\n## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
 - No guessed new Hook location, signature, VTable, native queue write offset or mutation without independent evidence.
 - No unbounded retry of MinHook after uncertain partial apply; process-restart-required remains a legitimate fail-closed state.
@@ -73,4 +73,4 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 
 - 2026-10-10 / D-NQ-014: ordinary ATTACK head activation confirmed distinct from native MOVE transfer. No `ATTACK+0x38` forcing; no substitute ATTACK issue.
 
-Do not call any proposal 'implemented' until committed code and the corresponding tests exist.
+- 2026-10-10 / D-NQ-015: original `state+0x24` writer and validator call now located. Native flag cannot be treated as fixed boolean permission or tuning constant; no Hook approved.\n\nDo not call any proposal 'implemented' until committed code and the corresponding tests exist.
