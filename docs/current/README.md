@@ -68,6 +68,8 @@ Current documentation authority — updated 2026-10-10
 
 **2026-10-10 direct positive AND negative slot-index evidence:** [N1_903_SLOT_IDENTITY_POSITIVE_AND_NEGATIVE.md](N1_903_SLOT_IDENTITY_POSITIVE_AND_NEGATIVE.md) confirms original group fanout pairs member[i] with generated target[i], while native old-group removal *can* reindex a member through swap-last (mode3) or strategy-specific replacement (+0x60/+0x70); source-root stable ordering could still make new groups stable. After fanout there is native group geometry/status processing, so actual collision is unproven. Exact-SHA 45 machine guards + 9 calls + 8 vtables + 15 offline tests in chat evidence archive; no Hook.
 
+**Slot identity / CA avoidance cross-check (2026-10-10):** [N1_903_MODE_AND_DIRECTIONAL_AVOIDANCE_CROSSCHECK.md](N1_903_MODE_AND_DIRECTIONAL_AVOIDANCE_CROSSCHECK.md) — old-group swap-last is removal maintenance, not normal corner-turn slot optimization; MOVE gets *dynamic* unit formation mode; mode3/mode5 target generator paths do not show a global minimum-travel matcher, mode0 delegates to further strategy virtuals; separate native actor-interaction code computes relative-position·displacement-rate sign, but normal Shift reachability is NOT proven. Full offline SHA-gated audit: 45 opcode guards, nine E8 edges, three strategy VTables, 12 local tests. **No gameplay fix**.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
