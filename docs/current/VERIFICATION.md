@@ -1,31 +1,29 @@
-# Verification — Direct Patch of WH3's Original Shift Functions
+# BSC — corrected verification and evidence gates
 
-This program must prefer **deterministic offline and isolated Windows evidence**. No 'try ten games and tune until it seems okay' methodology.
+**First read [PRODUCT_CAUSE_CORRECTION_20261010.md](PRODUCT_CAUSE_CORRECTION_20261010.md).** The vanilla Shift MOVE issue is **asynchronous individual soldiers within a unit arriving/turning into one another**; native full-stop at intermediate waypoints is **not** an established defect. MOVE→ATTACK pausing was a legacy **Lua Controller** regression.
 
 ## Evidence tiers
-- STATIC: source / EXE disassembly + guard/callgraph / semantic claims; may show a candidate, cannot prove runtime.
-- MODEL: differential fixture built from *proven original WH3* movement/completion/attack decision paths; cannot substitute an invented new BSC order scheduler.
-- WINDOWS: controlled Win64 fixture using actual v142/MASM Native Bridge/hook backend; proves ABI, atomic lifecycle, rollback/teardown under injected faults.
-- WH3: one bounded smoke and acceptance matrix once architecture is coherent and Windows gates all pass. Required for real geometry, speed and compatibility claims.
 
-## Deterministic queue fixtures (minimum)
-1. Original Shift queue append/REPLACE unchanged; no alternate queue in Lua/C++. Validate that only original engine decisions are patched.
-2. First/last MOVE, exact i+1 and i+2 promotions; duplicate callbacks; ACK reject/timeout; engine seq wrap; missing/mismatched unit lifetime/revision.
-3. Original native MOVE desired speed/brake decision, arrival state and next-order activation vs patched branch: straight, 90, 135, 180, U-turn, zig-zag, 5m legs. Native queued tail and engine order identities unchanged.
-4. Original native MOVE→ATTACK handoff when target lives, dies or changes; patch cannot rely on Lua G11, ACK/reassert or independent MOVE/ATTACK issuing. Test non-Shift RMB unchanged.
-5. ATTACK→EXIT MOVE→ATTACK: 3s minimum engagement, exit proof, cancellation, target no longer viable, no phantom re-engagement.
-6. Concurrent units and mixed native/controller origin; queue append while transaction pending; interrupted battle; restart.
-7. Memory allocation failure before any hook, partial create fail at each of 16 sites, partial apply fail, stop/resume and process-restart-required policy; 9.0.2 guards still intact.
-8. Native queue contents **before and after** a transition, not only canonical Lua-plan array; no silent tail destruction.
-9. Replay actual observed 12:53 Attack rollback and 12:10 debt deadlock as minimized modeled counterexamples; annotate missing coordinates rather than invent them.
-10. Native original-code pass-through oracle: when patch disabled, unsupported or unsafe, engine original behavior and order objects must match baseline. No Lua reissue/rollback, no second Native dispatcher.
+- **STATIC:** exact-file disassembly, original function/dataflow, group/formation slot and per-soldier pointer provenance, ownership/ABI. Native ring pop or route-processing instructions alone do not establish model-level behavior.
+- **OFFLINE:** only evidence-derived differential tests of a localized original engine predicate; synthetic model tests cannot prove actual soldier formation quality.
+- **WINDOWS:** exact-hash guarded runtime patch installation, ABI, call-through, fault cleanup and disable/quit safety; never silently retry forever.
+- **WH3:** one consolidated final in-game test. Required to assert that *soldier models* turn together better, avoid intra-unit crowding, or that Lua regression is absent.
 
-## Promotion sequencing
-1. No changed source/Native until a tested model names the exact queue authority.
-2. All new unit tests and frozen H4–H8/old CorePath contract tests PASS; archived D1 tests are historical compatibility, not current design acceptance.
-3. Windows v142 + MASM binary, guarded Hook install with 14/14 existing CTest minimum and new fault-injection suite, deterministic pack manifest/hash, no changes to 9.0.2 map without proof.
-4. WH3 once at final integration: Observer READY; repeat core route, Shift ATTACK and EXIT with known units; check Native queue/visual result; Quit-to-Windows teardown.
-5. Release only on explicit approval; CI does not equal gameplay acceptance.
+## Static and offline regression matrix
 
-## Failure reporting
-Use PASS / FAIL / INCONCLUSIVE / BLOCKED separately for (1) program correctness, (2) Native hook initialization, (3) actual in-game physical motion, (4) queue preservation. Never report 'preserved_tail' without specifying Lua or Native.
+1. **Formation allocation:** trace one unit MOVE command through original formation target/pivot/slot assignment to individual soldier destination and turn/arrival logic. Ensure same-card soldier identity and model lifetime.
+2. **Model phase coherence:** same unit's leading vs trailing soldiers on straight, 90°,135°,180° turns, dense short zigzags; verify native branch invariants for early turn/target promotion vs mixed model phases.
+3. **Blocked/late model cases:** path obstruction, variable model speed, collision/avoidance, incomplete formation, terrain and casualties; localized patch must not deadlock whole unit waiting for an absent model or ignore route bends.
+4. **Formation semantics:** maintain unit facing, relative slot assignment, steering/turn ability, collision behavior and recovery, without implementing our own physics solver.
+5. **Queue invariants:** original head/count, sequence/identity, i+1/i+2, future tail, CANCEL/REPLACE/HALT and non-queued RMB remain engine owned; do not inject extra MOVE/ATTACK.
+6. **Lua attack regression isolation:** with old BSC control reissue/rollback disabled in new mode, original MOVE→ATTACK activation/target identity cannot be overwritten by BSC. Separate original-engine ATTACK Hook needs independently evidenced native defect.
+7. **Optional ATTACK→EXIT→ATTACK:** if implemented by proven native semantics, check engagement minimum, exit route, target viability and cancellation; otherwise mark DEFERRED rather than spoofing commands.
+8. **Lifecycle/Win64:** thread ownership, reference counting, entity lifetime, model/formation restructuring, MinHook allocator failures, partial installation and quit; do not automatically require legacy 16-hook host.
+9. **Fail closed:** unsupported EXE, missing ABI, invalid formation state or disabled patch preserves original WH3 behavior; no half-patched engine.
+10. **Historical counterexamples:** H8 12:53 rollback and prior Lua route debt remain regressions to prevent in *new BSC*, not evidence of native model-level crowding mechanics.
+
+## Final WH3 physical acceptance (only once after prior gates)
+
+Observe and record soldier-level relative position, headings, assigned slot deviation and crowding in one card before/at/after queued guidepoint turns. Distinguish mixed soldier headings from legitimate temporary differential turning caused by obstacle avoidance. Aggregate unit velocity alone is insufficient. Test no extra pause/reissued commands in MOVE→ATTACK with legacy Lua Controller absent, then REPLACE and unit combat/cancel. Report STATIC/OFFLINE/WINDOWS/WH3 status separately, plus source, DLL/PACK and SHA manifest only after they actually exist.
+
+**Current status:** N1 model/formation execution path unknown; no patch-ready exact RVA/ABI, no Windows or WH3 behavior pass. No repeated user gameplay testing during research, no premature Steam publication.
