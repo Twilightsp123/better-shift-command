@@ -1,43 +1,48 @@
-# Native Reverse-Engineering Map — WH3's Original Shift Code Paths
+# WH3 9.0.3 Native Research Map — formation-model Shift MOVE
 
-## Grounded 9.0.2 known sites (candidate, not runtime-promoted)
-See native_maps/candidates/wh3_9.0.2_fec656f4.json and generated_native_map.hpp. Keep exact EXE SHA and byte guards.
+**Correct defect and priority:** [PRODUCT_CAUSE_CORRECTION_20261010.md](PRODUCT_CAUSE_CORRECTION_20261010.md). Original Shift MOVE's user-observed defect is **asynchronous arrivals and turning of soldier models under one unit card**, causing orientation mismatch and crowding; not a proven vanilla unit stopping at every waypoint. MOVE→ATTACK stopping in past BSC was a Lua Controller regression.
 
-| Site / layout | Grounded meaning | NOT proved |
+## Existing 9.0.3 exact-file anchors — NOT patch permission
+
+User-provided EXE SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a`. Game 9.0.3 label from user, version resource unverified; `0x140000000` image base.
+
+| Unit/order-level feature | Research-only RVA | What has actually been shown | Not established |
+|---|---|---|---|
+| Native MOVE issuer | `0x030323C8` | slot allocation/MOVE construction | per-soldier steering/arrival |
+| Ring pop | `0x02F4FD10` | head/count writes and cleanup | root cause of crowding |
+| MOVE constructor/vtable | `0x030090BC` / `0x0390B4F0` | native MOVE object type | all soldier-model movement types |
+| MOVE work and task lifecycle | `0x03025D70`, `0x030440F8`, `0x03043520` | auxiliary task count/state | soldiers independently owning Shift queues |
+| Special native MOVE handoff | `0x0304433C` | conditional original state transfer | universal succession, formation turn coherence |
+| Native state driver | `0x0311DE74` | state 0–4 paths and payload rebase | movement speed or model heading semantics |
+| Route validator | `0x0310F560` | geometry/route updates and conditional flag | desired speed/arrival distance |
+| Geometry early exit | `0x0311F8CB` | guarded route-setup skip | physical braking or intra-unit crowding |
+| Normal ATTACK work | `0x03025788` | original attack activation path | any *vanilla* MOVE→ATTACK stop |
+
+All above are exact-file static-machine-code research recorded in the N1_903 reports. No hook ABI, thread/lifetime safety, group coherency or physical outcome is proven. Old 9.0.2 hook map is historical and must not be treated as 9.0.3.
+
+## HIGH PRIORITY — missing model-level map
+
+| Required native object/path | Verified 9.0.3 RVA? | Required dataflow/evidence |
 |---|---|---|
-| Move 0x030351AC, Attack 0x03033544 | Native order entry / capture detours | Shift braking, current order completion, successor activation or original execution state |
-| Lua MOVE 0x02ED6404, Lua ATTACK 0x02ED5C9C | Lua API ingress | player Shift click originates here |
-| publish_move 0x01CAFDDC, publish_attack 0x02DF3410 | command publication hooks | a safe, lossless 'replace progression policy' lever |
-| writer_begin, writer_finalize, copy, stage, handlers, selection, free | packet pipeline / lifetime observation | authority to suppress arbitrary game commands |
-| active order: count root+0x2F88, head root+0x2F8C | optimistic read-only double-read of active-order head (NOT an atomic/locked queue snapshot) | queue-head writer lock/lifetime protection |
-| slots root+0x288, stride 0x120, VTable +0x18, seq +0x20 | read-only type/sequence identity | direct safe mutation of slot/queue index |
-| Full Move VTable RVA 0x03913618 | top-level MOVE outcome identity | all MOVE subclasses are equivalent |
-| Attack VTable RVA 0x03912988 | ATTACK outcome identity | permission to skip target/lifetime verification |
-| Simple Intercept Move VTable RVA 0x03910438 | internal sibling constructor | valid top-level MOVE identity |
+| Unit/group formation-origin/heading and slot target producer | **NO** | original UnitRoot MOVE task to formation target/slot updates |
+| Soldier entity list, slot membership and per-model destination | **NO** | safe pointer, owner, object lifetime, producer/writer xrefs; old Entity+0x18 assumption rejected |
+| Individual soldier arrival and leg/turn transition | **NO** | compare before/after native target, orientation and path-advance instructions |
+| Unit-wide formation phase synchronization, if any | **NO** | native coordination rules, group transformation timing |
+| Collision avoidance and model-space crowding response | **NO** | exact consumer of near-neighbor spacing and path state; distinguish effect from cause |
+| Difference between queued intermediate MOVE and normal RMB MOVE | **NO** | native queued flag propagation and per-model negative control |
 
-## Investigation priority — original engine, not a second executor
-1. Trace **original Shift append/replace** input to queue write and command object identity; determine when/where the queued flag affects native behavior.
-2. Trace **original MOVE terminal deceleration and steering state**: desired speed, arrival radius, braking switch, queued successor lookahead and any forced halt. Determine whether the visible stop occurs *before* native queue-head advancement.
-3. Trace **native MOVE completion and successor activation** separately: completion state/predicate, event/flag writes, OrderHead changes, object retirement and next MOVE/ATTACK activation. Record exact function, caller and context for each.
-4. Trace **native MOVE→ATTACK handoff** and target validation. Distinguish vanilla failure from the H8 Lua rollback symptom; no off-target intervention.
-5. Connect each observed undesirable behavior to a particular original native decision branch, including whether only queued Shift commands pass it. Do not assume one universal queue-advance Hook exists.
-6. Re-derive guards and VTables for 9.0.2, grade evidence STATIC/WINDOWS/WH3, and assess reversible narrow patch feasibility. Do not directly write OrderHead/slots based on read-only probes.
-7. Verify every localized modification leaves WH3's original queue identity, future tail, lifetime, attack target, REPLACE and ordinary RMB behavior intact. **No Lua or C++ replacement order queue.**
+## N1 method
 
-## N1 repository audit checkpoint
-See [N1_STATIC_FINDINGS.md](N1_STATIC_FINDINGS.md): the current source observes **order construction and active order reads**, but contains no verified original per-frame MOVE completion, braking, OrderHead writer, or successor activation function. The optional Smart Guard `state_transition` handler is **not** a demonstrated Shift advance hook. Target 9.0.2 EXE/disassembly required for the next reverse-engineering step. No queue writes permitted.
+1. Trace current native queued unit MOVE into **formation origin/pivot and slot assignment**; identify original produced model-level targets, not merely queue-head count.
+2. From each slot/target, follow exact soldier movement consumer, per-model arrival/turn criterion, heading state writes and collision response. Identify shared-vs-individual timing.
+3. Compare actual decision when soldier A of a unit can turn while B is behind. Validate whether original unit/group synchronization exists and can be narrowly adjusted.
+4. Distinguish model-level variance caused by formation target geometry, independent model phase, or avoidance/pathfinding. Record alternate explanations and falsifiers.
+5. Review old Lua ATTACK rollback separately, not as native Shift MOVE defect. No original ATTACK patch unless new evidence demands it.
 
-## Missing high-priority evidence
-- No verified location yet for the original engine's MOVE terminal braking/desired-speed calculation.
-- No verified location yet for the original engine's MOVE completion predicate or next native order activation.
-- No proof that queue-head advance is the cause, rather than an effect, of the stop-and-go behavior.
-- No verified native original Shift ATTACK handoff function or shared RMB divergence point.
+## Evidence and safety
 
-## Required RE deliverable per site
-- target EXE SHA/build, RVA, original bytes/mask, function signature/ABI and calling convention, predecessor/successor graph, dataflow evidence;
-- alternative interpretations, thread/context ownership, exact exception/suspend handling, rollover behavior, negative false-match fixtures;
-- initial proof grade and promotion gates, stored in RISKS_AND_DECISIONS.md.
-- no new 'release-authorized' address from a mere callgraph guess.
+Per new native candidate: exact EXE digest, RVA/instruction bytes, real x64 ABI, pointer provenance/aliases, call graph, read/write sets, ownership/lifetime, unit-versus-soldier scope, negative RMB/blocked-model cases and uncertainty grade. No mutation of raw OrderHead, task counters, VTables, entity component offsets or transfer flags.
 
-## Hook installation P0 is a separate prerequisite
-At 13:18, MH_CreateHook for first MOVE failed with MH_ERROR_MEMORY_ALLOC. The current platform_start_observer sets attempted=true before creating hooks, retries once after 50ms, then locks the process if that fails. Do not add unbounded retry or partially enable a guessed hook. First isolate MinHook allocator/nearby executable page behavior in a mock Windows process with byte-identical runtime assumptions.
+Old 16-Hook map, N1 ring-pop and route geometry studies remain relevant **as navigation into native code**, but do not demonstrate which soldier-specific condition creates mixed headings and crowding.
+
+Runtime patch implementation remains blocked until model-level cause, safe local delta and offline/Win64 proofs exist. Do not request repeated user WH3 tests during N1.
