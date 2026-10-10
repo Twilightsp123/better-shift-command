@@ -30,6 +30,8 @@ All above are exact-file static-machine-code research recorded in the N1_903 rep
 
 **Corrected P0 research decision:** [Shared order vs independent model arrival](N1_903_SHARED_ORDER_GROUP_ARRIVAL_HYPOTHESIS.md). Common native MOVE order plus per-model arrival/leg promotion can explain mixed headings without differing high-level commands. First identify whether individual model leg indices actually advance independently; alternatively a single group target update plus physical slot steering may explain it. The original approach must not wait for exact arrival of all soldiers. Current code analysis **does not establish either mechanism**.
 
+**N1 breakthrough: original native MOVE issues per-member payloads** ([proof](N1_903_NATIVE_MOVE_MEMBER_FANOUT.md)). Real original MOVE issuer at `0x030323C8`, branch callsite `0x03032965`, reaches route update `0x0302DB44`, which builds group from `root+0x184/+0x188` via `0x0301B8E4`, invokes route config `0x0301287C`, then calls `0x030D5490`. The latter creates group-indexed `0x30`-stride target/parameter records and invokes native member VTable `+0x368` once per group entry. The member object class and per-model NEXT-leg completion remain OPEN. This shows how one high-level MOVE can fan out, **not proof of different high-level Shift orders**. Next identify concrete `+0x368` receiver implementations and whether each model independently decides route-phase promotion; preserve native group synchronization.
+
 ## HIGH PRIORITY — missing model-level map
 
 | Required native object/path | Verified 9.0.3 RVA? | Required dataflow/evidence |
