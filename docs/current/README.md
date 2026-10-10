@@ -27,7 +27,9 @@ Current documentation authority — 2026-10-09
 16. [RISKS_AND_DECISIONS.md](RISKS_AND_DECISIONS.md) — unresolved questions and decision register.
 17. [MAINTENANCE_RULES.md](MAINTENANCE_RULES.md) — how to update this set without reviving historical designs.
 
-**Latest N1 finding:** [N1_903_TRANSFER_FLAG_WRITER.md](N1_903_TRANSFER_FLAG_WRITER.md) identifies original `state+0x24` writer and branches into state 2/4; no verified braking patch point.\n\n## Source-of-truth order
+**Latest N1 finding:** [N1_903_TRANSFER_FLAG_WRITER.md](N1_903_TRANSFER_FLAG_WRITER.md) identifies original `state+0x24` writer and branches into state 2/4; no verified braking patch point.\n\n**N1 route-gate update (2026-10-10):** [N1_903_ROUTE_GATE_ANALYSIS.md](N1_903_ROUTE_GATE_ANALYSIS.md) — original 0x0310F560 performs stateful route processing, and 0x0311EB10 flag is jointly gated by AL and native mode. Braking/physical timing remains unknown; patch not approved.
+
+## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
 3. Explicit test results with reproducible executable fixtures.
