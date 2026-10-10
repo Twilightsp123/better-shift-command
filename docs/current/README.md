@@ -29,6 +29,8 @@ Current documentation authority — 2026-10-09
 
 **Latest N1 finding:** [N1_903_TRANSFER_FLAG_WRITER.md](N1_903_TRANSFER_FLAG_WRITER.md) identifies original `state+0x24` writer and branches into state 2/4; no verified braking patch point.\n\n**N1 route-gate update (2026-10-10):** [N1_903_ROUTE_GATE_ANALYSIS.md](N1_903_ROUTE_GATE_ANALYSIS.md) — original 0x0310F560 performs stateful route processing, and 0x0311EB10 flag is jointly gated by AL and native mode. Braking/physical timing remains unknown; patch not approved.
 
+**New state-4 / geometry finding:** [N1_903_STATE4_GEOMETRY_BRANCH.md](N1_903_STATE4_GEOMETRY_BRANCH.md) — distinguishes two genuine native state-4 paths and identifies a gated geometry early exit; no braking function proven.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
