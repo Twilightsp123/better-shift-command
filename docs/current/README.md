@@ -70,6 +70,8 @@ Current documentation authority — updated 2026-10-10
 
 **Slot identity / CA avoidance cross-check (2026-10-10):** [N1_903_MODE_AND_DIRECTIONAL_AVOIDANCE_CROSSCHECK.md](N1_903_MODE_AND_DIRECTIONAL_AVOIDANCE_CROSSCHECK.md) — old-group swap-last is removal maintenance, not normal corner-turn slot optimization; MOVE gets *dynamic* unit formation mode; mode3/mode5 target generator paths do not show a global minimum-travel matcher, mode0 delegates to further strategy virtuals; separate native actor-interaction code computes relative-position·displacement-rate sign, but normal Shift reachability is NOT proven. Full offline SHA-gated audit: 45 opcode guards, nine E8 edges, three strategy VTables, 12 local tests. **No gameplay fix**.
 
+**Binding proof standard (real WH3, 2026-10-10):** [N1_903_PROGRESSIVE_SHIFT_TURN_REAL_BASELINE.md](N1_903_PROGRESSIVE_SHIFT_TURN_REAL_BASELINE.md) accepts within-card crowding under CA's *progressive* Shift turn as a CONFIRMED user-observed defect. V3 real unit route sweeps ~179° from 35–43s while 29/40 member-sample frames show spacing<1.0. NO requirement to make normal RMB follow the same geometric path or to prove the defect's existence again; focus on actual executed MOVE→member target/steering causal site and later SAME-Shift before/after efficacy. No current gameplay fix.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
