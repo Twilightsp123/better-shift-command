@@ -103,3 +103,11 @@ This tool does not write to the executable, install hooks, or prove actual game 
     python maintenance_tools/native_shift_re/audit_903_member_virtual_receivers.py --exe "C:\\path\\Warhammer3.exe" --out "N1_outputs\\member_vtables.json"
 
 See [research report](../../docs/current/N1_903_MEMBER_VIRTUAL_RECEIVER_RESOLVED.md).
+
+## Exact 9.0.3 layout-count vs waypoint-arrival negative proof
+
+`audit_903_layout_vs_arrival.py` statically verifies 26 code guards, eight constructor-backed strategy vtables (+0x20/+0x48), and distinct original group object virtual +0x20 (native RVA 0x030E0AA8). The strategy+0x20 values are formation layout cardinalities (sqrt(n), min(13,n), member-count lookup, etc.), not a demonstrated Shift waypoint arrival flag. Task+0xB8 caches these computed integers. The member receiver chooses +0x100/+0xE8 actions by member+0x104; no proven original leg-phase controller or Hook site. Offline tests `tests/test_native_shift_re_layout_vs_arrival.py` (8 cases).
+
+    python maintenance_tools/native_shift_re/audit_903_layout_vs_arrival.py --exe "C:\\path\\Warhammer3.exe" --out "N1_outputs\\layout_vs_arrival.json"
+
+See [finding](../../docs/current/N1_903_LAYOUT_COUNT_NOT_ARRIVAL_DISCONFIRMATION.md). No EXE writes.
