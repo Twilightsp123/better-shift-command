@@ -128,3 +128,10 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 - 2026-10-10 / D-NQ-015: original `state+0x24` writer and validator call now located. Native flag cannot be treated as fixed boolean permission or tuning constant; no Hook approved.\n\n- 2026-10-10 / D-NQ-016: reject patching the stateful route processor to always accept or bypassing mode/flag checks; exact-file evidence documents side effects and per-path mode requirement.
 
 Do not call any proposal 'implemented' until committed code and the corresponding tests exist.
+
+
+## 2026-10-10 — N1 code experiment: queued continuation without native state inheritance
+
+**Experimental source:** `src/native_bridge/experiments/fresh_continuation/`. Original exact EXE `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a`. At `0x0304459D`, original byte span `ff4618498d4e18498b4618488bd6ff5048` increments shared-state reference and calls successor MOVE+0x48 transfer; `0x030445AE` continues with original pop. The opt-in 5-byte patch `e90c000000` skips **both** reference increment and transfer, preserving original queue processing. RMB MOVE constructor starts with `MOVE+0xA0=null` (`0x030090E7`), so next queued MOVE begins via fresh original path. This is a proof of a **native behavior change**, not of decreased member compression.
+
+**Risk/decision:** Do NOT automatically enable or ship this as the BSC fix. Native inheritance may be essential to CA's gradual bends, and skipping it could recreate stop-and-start movement. Exact SHA guard, reversible bytes and private-process DLL build cannot establish WH3 game behavior. OFFLINE exact EXE, real x64 synthetic byte execution and Windows private-process refusal tests are different grades. Pending firm geometry/route continuity acceptance; the user requests **zero additional game tests** until a causally grounded fix plan exists. If offline/engine evidence disconfirms preserving gradual turns, reject this prototype and continue Mode0 original segment-target continuity instead of retuning or reopening Lua controller.
