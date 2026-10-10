@@ -57,3 +57,11 @@ Initial isolated Python result: **9/9 PASS** on synthetic PE files. This is NOT 
 No DLL, PACK, native injection, executable modification, shadow queue, Lua controller or Steam release results from these tools.
 
 See docs/current/WH3_9_0_3_NATIVE_PATCH_DESIGN.md for the current N1–N6 plan.
+
+## N1 route-gate evidence (9.0.3-labelled exact SHA)
+
+`verify_903_route_gate.py` checks 46 frozen machine-instruction byte guards and 6 verified E8 call edges on the exact user-supplied EXE SHA only; always emits `runtime_patch_authorized: false`. The derived `state+0x24` truth table is **specific to the traced callback**, not a general WH3 mode or movement-speed rule. Run with:
+
+    python maintenance_tools/native_shift_re/verify_903_route_gate.py --exe "C:\\path\\Warhammer3.exe" --out "N1_outputs\\route_gate.json"
+
+Six synthetic CI cases reside in `tests/test_native_shift_re_route_gate.py`. The complete separately supplied local proof archive additionally contains bounded LLVM disassembly, byte evidence, tests and SHA manifest without the EXE. Actual WH3 physics/braking and Windows Hook compatibility have not been tested.
