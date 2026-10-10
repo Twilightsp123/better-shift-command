@@ -22,7 +22,7 @@ jobs:
         run: |
           python -m unittest discover -s src/native_bridge/experiments/fresh_continuation/tests -p test_exact_binary.py -v
   windows-msvc-x64:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - name: Configure x64 Windows private build
