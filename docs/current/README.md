@@ -66,6 +66,8 @@ Current documentation authority — updated 2026-10-10
 
 **N1 native slot binding evidence (2026-10-10):** [N1_903_GROUP_INDEX_TO_SLOT_COLLISION_CAUSAL.md](N1_903_GROUP_INDEX_TO_SLOT_COLLISION_CAUSAL.md) — original group members appended in source order, mode3 target records appended in 48-byte order, grid indices mapped back to records without vector permutation, then native fanout pairs `member[i]` with `record[i]`. Conditional 3×3/180° straight-travel counterexample converges all members at midpoint; offline bijective slot-matching candidate preserves target set but is **not** proven safe in WH3. 44 machine guards, 8 calls, 22 tests. No DLL.
 
+**2026-10-10 direct positive AND negative slot-index evidence:** [N1_903_SLOT_IDENTITY_POSITIVE_AND_NEGATIVE.md](N1_903_SLOT_IDENTITY_POSITIVE_AND_NEGATIVE.md) confirms original group fanout pairs member[i] with generated target[i], while native old-group removal *can* reindex a member through swap-last (mode3) or strategy-specific replacement (+0x60/+0x70); source-root stable ordering could still make new groups stable. After fanout there is native group geometry/status processing, so actual collision is unproven. Exact-SHA 45 machine guards + 9 calls + 8 vtables + 15 offline tests in chat evidence archive; no Hook.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
