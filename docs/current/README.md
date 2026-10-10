@@ -1,13 +1,22 @@
-# BSC — Direct WH3 Native Shift Patch (NQTR documentation branch)
-Current documentation authority — 2026-10-09
+# BSC — Original WH3 Shift formation-coherence research (9.0.3)
+Current documentation authority — updated 2026-10-10
 
-**Current target is WH3 9.0.3.** [WH3_9_0_3_NATIVE_PATCH_DESIGN.md](WH3_9_0_3_NATIVE_PATCH_DESIGN.md) defines version-specific research, candidate patch modules and proof gates. The 9.0.2 EXE hash, maps and N1 reports remain historical evidence only; **9.0.3-labelled EXE queue pop, MOVE task-status, state-object writeback and conditional successor transfer are instruction-backed; braking and general Shift behavior remain unknown**.
+> **PRODUCT CAUSE CORRECTION:** [PRODUCT_CAUSE_CORRECTION_20261010.md](PRODUCT_CAUSE_CORRECTION_20261010.md) is mandatory first reading. **Native Shift MOVE does not have a proven full-stop defect.** The user-observed issue is that **soldier models in one unit card turn/arrive asynchronously**, leading to mixed facing and internal crowding. The conspicuous MOVE→ATTACK pause was **our legacy Lua Controller regression**, not an established vanilla bug. Previous "braking-first" assumptions in older N1 reports are superseded as design priorities; their disassembly remains research evidence.
+
+**Current target is WH3 9.0.3.** [WH3_9_0_3_NATIVE_PATCH_DESIGN.md](WH3_9_0_3_NATIVE_PATCH_DESIGN.md) defines version-specific research, candidate patch modules and proof gates. The 9.0.2 EXE hash, maps and N1 reports remain historical evidence only; **9.0.3 labelled EXE queue, task and transfer mechanisms are instruction-backed, but their role in per-model formation crowding is unverified**.
 
 **N1 toolkit implemented:** [read-only 9.0.3 PE and Ghidra field-reference scouts](../../maintenance_tools/native_shift_re/README.md), with synthetic tests. Their own candidate exports do not by themselves prove native progression or install hooks; subsequent exact-file LLVM analysis independently established a ring-pop primitive.
 
-**Read this folder first.** The decided objective is to **patch the game's existing native Shift behavior directly**, keeping its original input, order queue, locomotion and combat engine. We are NOT creating a Lua substitute, separate Native scheduler or second command queue. The NQTR label remains only as a branch/documentation identifier. This is still *research-only* (documentation plus static forensic tooling); no native patch exists or has passed WH3 validation.
+**Read the corrected diagnosis and plan first.** The decided objective is to **patch the game's existing native Shift behavior directly**, keeping its original input, order queue, locomotion and combat engine. We are NOT creating a Lua substitute, separate Native scheduler or second command queue. The NQTR label remains only as a branch/documentation identifier. This is still *research-only* (documentation plus static forensic tooling); no native patch exists or has passed WH3 validation.
 
 ## Minimal reading order (do not read archives routinely)
+- [PRODUCT_CAUSE_CORRECTION_20261010.md](PRODUCT_CAUSE_CORRECTION_20261010.md) — primary problem diagnosis, Lua regression separation, evidence boundaries.
+- [PRODUCT_CONTRACT.md](PRODUCT_CONTRACT.md) — corrected product requirements and formation-level acceptance.
+- [WH3_9_0_3_NATIVE_PATCH_DESIGN.md](WH3_9_0_3_NATIVE_PATCH_DESIGN.md) — updated model/formation RE architecture.
+- [NATIVE_RESEARCH_MAP.md](NATIVE_RESEARCH_MAP.md) — prioritized missing formation/model-level functions.
+- [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — corrected N1–N6 stages.
+
+### Prior exact-binary research (mechanism evidence; not demonstrated bug cause)
 0. [WH3_9_0_3_NATIVE_PATCH_DESIGN.md](WH3_9_0_3_NATIVE_PATCH_DESIGN.md) — **current 9.0.3 design**; lifecycle, braking, ATTACK transition, evidence gates and no-go rules.
 1. [N1_903_ORDER_LIFECYCLE_STATIC.md](N1_903_ORDER_LIFECYCLE_STATIC.md) — actual user-supplied 9.0.3-labelled EXE: ring pop and callers.
 2. [N1_903_MOVE_STATUS_CHAIN.md](N1_903_MOVE_STATUS_CHAIN.md) — MOVE constructor/VTable and status-to-pop path.
@@ -43,7 +52,7 @@ Current documentation authority — 2026-10-09
 **Do not use** the former README_FIRST/2026-09 maintainer reading list, D1/T1H design, 9.0.1 CURRENT_BUILD_MAP, or H1–H8 experiment writeups as a current implementation plan. They are retained in docs/past_doc, or pre-existing archive, for targeted forensic lookup only.
 
 ## Important status
-- N1 source/map triage is recorded in N1_STATIC_FINDINGS.md for **historical 9.0.2** evidence. The user-supplied 9.0.3-labelled binary SHA and **original head/count pop writer** have now been statically identified in [N1_903_ORDER_LIFECYCLE_STATIC.md](N1_903_ORDER_LIFECYCLE_STATIC.md); original MOVE-completion/braking/next-activation semantics remain unverified. No patch authorized.
+- N1 source/map triage is recorded in N1_STATIC_FINDINGS.md for historical 9.0.2 evidence. The user-supplied 9.0.3-labelled binary's queue pop and some state handoff mechanisms have instruction evidence. **The soldier-level formation divergence responsible for crowding remains unidentified; earlier braking pursuit is de-prioritized.** No patch authorized.
 - Formal mod version and Steam pack identity are release policy, not a proof of installed experimental controller revision.
 - Current development starting point: H8 branch maintenance/t2move-h8-terminal-liveness-static, commit e711e716f2411599d75184618fc1ee5cb85bcd54.
 - 9.0.2 experiment uses a separately overlaid static candidate map, NOT promoted native_maps/CURRENT.
