@@ -2,6 +2,12 @@
 
 **First read [PRODUCT_CAUSE_CORRECTION_20261010.md](PRODUCT_CAUSE_CORRECTION_20261010.md).** The vanilla Shift MOVE issue is **asynchronous individual soldiers within a unit arriving/turning into one another**; native full-stop at intermediate waypoints is **not** an established defect. MOVE→ATTACK pausing was a legacy **Lua Controller** regression.
 
+## Binding proof standards after real V3 capture (2026-10-10)
+
+[N1_903_PROGRESSIVE_SHIFT_TURN_REAL_BASELINE.md](N1_903_PROGRESSIVE_SHIFT_TURN_REAL_BASELINE.md): **DEFECT EXISTS = PASS**. At 35–43 s of actual original queued MOVE on one unit, centroid motion direction progressively swept ~179°, while member spacing stayed <1.0 in 29 of 40 frames; ordinary MOVE had 0/139 such frames in this recording and Shift 85/194. This is *observed within-unit crowding during gradual CA turns*, not a demand that CA move through 180° in one step. Do not require identical normal RMB path geometry to accept the reported defect. Do not make the user re-prove it.
+
+**PATCH SITE = OPEN:** Need x64 instruction/dataflow showing candidate original target/phase/steering policy affects actual execution. V3 active MOVE was `0x03025D70`; the independent `0x0302DB44→0x030D5490` fanout was not hit, so it is not safe to patch mode3 grid logic based on this capture. **PATCH EFFECT = OPEN:** only a later before/after test of the SAME original queued Shift bend will establish improvement; preserve the CA progressive turn path and all normal order semantics. An exact normal-right-click geometric match is NOT a prerequisite.
+
 ## Evidence tiers
 
 - **STATIC:** exact-file disassembly, original function/dataflow, group/formation slot and per-soldier pointer provenance, ownership/ABI. Native ring pop or route-processing instructions alone do not establish model-level behavior.
