@@ -58,6 +58,8 @@ Current documentation authority — updated 2026-10-10
 
 **N1 causal audit correction — stronger negative evidence:** [N1_903_LAYOUT_COUNT_NOT_ARRIVAL_DISCONFIRMATION.md](N1_903_LAYOUT_COUNT_NOT_ARRIVAL_DISCONFIRMATION.md) identifies group strategy `+0x20` as formation-size/layout-number computation (sqrt(n), min(13,n), table) cached at task+0xB8, **NOT waypoint-completion status**. Separate group object `+0x20` is a different function. One group target generation precedes batch dispatch; per-member receiver branches by `member+0x104`. Exact-SHA proof [script](../../maintenance_tools/native_shift_re/audit_903_layout_vs_arrival.py). No safe repair site established.
 
+**Positive member-direction result (2026-10-10):** [N1_903_PER_MEMBER_DIFFERENT_HEADING_PROOF.md](N1_903_PER_MEMBER_DIFFERENT_HEADING_PROOF.md) traces ONE original MOVE through a selectable grid formation strategy to **different per-member 16-bit facing codes**, each carried into original native member +0xB0. Real 3×3 corner slots can differ by 0x8000 cyclic code. The result proves assigned orientations can differ, not actual velocity/crowding or a safe patch. Downloadable exact-SHA forensic bundle: 42 machine guards / 6 calls / 8 tests.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
