@@ -144,6 +144,10 @@ Committed read-only PE/9.0.2 historical guard similarity scanner and Ghidra Jyth
 
 [N1_903_ORDINARY_ATTACK_DISPATCH.md](N1_903_ORDINARY_ATTACK_DISPATCH.md) establishes generic head processor `0x030433B0` and slot virtual dispatcher `0x03043424` can call native ATTACK `+0x08 -> 0x03025788`, which issues original ATTACK auxiliary tasks. This is a distinct path from special MOVE state inheritance, so it is invalid to force ATTACK successor +0x38 eligibility. Exact time, target validation and visual handoff remain OPEN.
 
+### N1 state-machine / native payload-rebase checkpoint (2026-10-10)
+
+[N1_903_STATE_MACHINE_REBASE.md](N1_903_STATE_MACHINE_REBASE.md) establishes 0–4 native state switch and staged successor MOVE rebase (state=1, pending +0x120..0x140 -> active +0x60..0xA8). One state=4 branch clears the separate handoff flag state+0x24, though transfer provider requires it nonzero: forcing state 4 is unsafe. Outgoing/current and incoming MOVE share a mode-selected scalar getter; its physical units and original braking remain unknown. 44 selected exact code guards, 5 native branch targets and 7 isolated synthetic tests checked; no patch.
+
 ## 6. Red lines / stopping conditions
 
 - No 9.0.2 patch guard, old RVA or VTable is a valid 9.0.3 Hook without new binary verification.
