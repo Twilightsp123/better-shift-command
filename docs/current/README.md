@@ -62,6 +62,8 @@ Current documentation authority — updated 2026-10-10
 
 **New causally relevant strategy source:** [N1_903_FORMATION_MODE_AND_MODEL_MOTION_RULES.md](N1_903_FORMATION_MODE_AND_MODEL_MOTION_RULES.md) traces exact original MOVE's **`[[UnitRoot+0x3D48]+0x248]`** formation selector into `0x030C7D18` mode 0..12 strategy dispatch, then actual per-member target/facing generation. Mode 3's divergent heading result is conditional on a unit *using that strategy*; next distinguish pose from velocity and group phase from local trajectory. Read-only 22 exact opcode guards, 5 direct calls, 8 local tests. No Native patch.
 
+**Native model displacement-rate evidence (2026-10-10):** [N1_903_MEMBER_POSE_DISPLACEMENT_DERIVATIVE.md](N1_903_MEMBER_POSE_DISPLACEMENT_DERIVATIVE.md) — exact original member pose updater `0x0315C1E4` computes XYZ displacement rates at `member+0xE0/+0xE4/+0xE8` and angular rate `+0xEC`; member tick `0x03060700` supplies target from its own controller `+0x2E0`, then advances local controller after updating member pose. Native mode3 record helper `0x030BE544` only appends 48-byte records, not avoidance. **52 exact opcode guards, 5 E8 calls, 18 offline tests** verified; actual WH3 collision/patch still unknown.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
