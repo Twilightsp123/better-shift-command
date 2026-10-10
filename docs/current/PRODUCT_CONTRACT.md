@@ -22,6 +22,10 @@ The conspicuous MOVE→ATTACK stop/delay reported during BSC testing was introdu
 
 Preserve desired target/minimum engagement time/exit guidance requirements if a safe native representation can be proven. Defer unsupported functionality instead of using the old shadow scheduler.
 
+## Proven real WH3 baseline (no longer an open symptom)
+
+The user confirms CA may decompose an about-180° queued Shift turn into a gradual sequence of bends. That is permitted original navigation. The undesired behavior is *members crowding and moving in discordant directions even while that gradual bend executes*. Actual captured native V3 sample for UnitRoot `0x2128a6f80` demonstrates a ~179° progressive centroid travel-direction sweep at 35–43 s, with 29/40 frames of sampled members closer than 1.0 units (observational distance threshold). **We accept the defect as demonstrated.** We still must identify the original code defect and prove any patched behavior, but no longer demand matching regular RMB and queued routes. See [real baseline](N1_903_PROGRESSIVE_SHIFT_TURN_REAL_BASELINE.md).
+
 ## Behavior and regression contract
 
 - Same card, multiple soldier models: consistent route-leg progression, bounded relative heading divergence, reasonable model spacing and formation recovery, no crowding/wedging from premature individual turns.
