@@ -57,6 +57,8 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 | NQ-039 | PRODUCT REGRESSION / OLD LUA | The noticeable MOVE→ATTACK stop was caused by BSC Lua active arbitration/reissue/rollback, not proven native vanilla behavior. H8 logs support overwrite of accepted native ATTACK. | disable old Lua active issuer in future Native mode; test original ATTACK without BSC competition before considering native attack patch |
 | NQ-040 | ACTIVE N1 ROOT-CAUSE GAP | Existing ring pop, transfer states and route geometry evidence does not identify the source of model-level crowded turns. Blind geometry/desired-speed patch would optimize the wrong symptom. | locate formation-to-model target producer, individual soldier steering/arrival and collision consumers; prove first divergence and feasibility |
 
+| NQ-041 | EXACT BINARY FORMATION-LEVEL ENTRY LEAD | Original unit update `0x03043648` calls `0x030421A4` (loops root+0x184/+0x188 position-bearing members, reads member+0x88/+0x90) and `0x0302AE0C` (uses root+0x32F8 and root+0x3C38) before queue stage `0x0304433C` on observed path. These objects are not yet proven individual soldiers nor per-model waypoint targets. | Trace array producers, member object types, group target writers and individual steer/turn consumers; see N1_903_FORMATION_ENTRY_CALLGRAPH.md. |
+
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
 - No guessed new Hook location, signature, VTable, native queue write offset or mutation without independent evidence.
