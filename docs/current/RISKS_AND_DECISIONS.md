@@ -64,6 +64,8 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 | NQ-043 | POSITIVE ORIGINAL MOVE→UNIT ROUTE DATAFLOW | On exact WH3 user EXE, native MOVE worker `0x03025D70` calls route configurator `0x0301287C` at both `0x03025E91` and `0x03026022`; the latter writes original route pointer to `root+0x270` on heap/inline branches. Native adjacent member route function `0x03012A6C` invokes selected member-related vfunc `+0xC8` at `0x03012C1E`, but per-soldier identity and causality not proven. | Identify real slot/model target/facing writer and trace queued Shift to member consumer; see N1_903_MOVE_TO_UNIT_ROUTE_DIRECT.md |
 | NQ-044 | UNLINKED MEMBER TASK CANNOT JUSTIFY PATCH | `0x0304725C` reads native `root+0x270` and loops root member array with pseudo-random coordinates and virtual calls; no direct E8 caller found, task may be unrelated AI/scatter. Do not claim this is chained Shift fan-out. | recover task object identity and caller or rule out as non-Shift branch. |
 
+| NQ-045 | USER-CLARIFIED P0 ARRIVAL/PROMOTION HYPOTHESIS | Soldier crowding does not require different Shift commands: one shared unit MOVE can have independent per-model arrival tests, causing early models to turn toward leg k+1 while lagging models continue leg k. Alternative: common group leg, unequal slot/steering timing. Both remain OPEN; see N1_903_SHARED_ORDER_GROUP_ARRIVAL_HYPOTHESIS.md. | Find exact individual arrival/phase field and native group-level transition writer; discriminate hypotheses, no 'all models exactly arrived' barrier and no premature first-outlier triggering. |
+
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
 - No guessed new Hook location, signature, VTable, native queue write offset or mutation without independent evidence.
@@ -72,6 +74,8 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 - Questions that require WH3 runtime remain marked OPEN and are not hidden inside synthetic test success.
 
 ## Decision record
+- 2026-10-10 / D-NQ-018 (user technical clarification): independent *arrival decisions* within one unit may explain divergent headings under one common queued Shift command. Prioritize proof of model-level leg promotion versus group target update; reject unsupported premise of different high-level commands and naïve wait-for-all synchronization.
+
 - 2026-10-10 / D-NQ-017 (user correction, highest precedence): explicitly separate **vanilla intra-unit soldier crowding on chained Shift MOVE** from **BSC Lua Controller MOVE→ATTACK stopping regression**. Stop prioritizing terminal braking, early queue-head advancement or geometry threshold tuning until connected to actual model-level divergence. Preserve earlier exact-file N1 research as engine mechanism evidence only. No runtime patch authorized.
 
 - 2026-10-09 / D-NQ-001: freeze H8 as a reference candidate only; start documentation-only NQTR on independent branch.
