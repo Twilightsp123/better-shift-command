@@ -14,7 +14,22 @@ At `0x030D54CA` original group VTable+0x48 is invoked **once before the per-memb
 
 **New complete static crossreference sweep** of both executable PE sections found the group dispatch also directly reached from original task callback sites `0x0301C05F`, `0x0301C0DD` and `0x0301C185`, in addition to initial MOVE `0x0302DBDB`. Specifically task callback `0x0301C0B0` re-invokes group fanout then calls `0x0302BC30` at `0x0301C0EE`. The latter compares a group virtual+0x20 result to cached task+0xB8 under native conditions, can refresh the original route, and **bulk-clears bit0** in each root-A member's+0x6C/+0x70. The group virtual result and bits **cannot be labeled waypoint arrival or next-leg index** without their writers/consumers. The vtable task callback's identity as normal Shift progression is also unproven.
 
-Read-only local one-pass audit checked **14/14 direct E8 targets**, **18/18 opcode guards**, assembled full raw-E8 xrefs of 11 critical functions and eight bounded native disassemblies. Tool tests **5/5 PASS**. The full tool, generated JSON, bounded disassembly, detailed Chinese report and SHA manifest were supplied as conversation archive **BSC_903_ONE_PASS_CAUSAL_AUDIT_20261010.zip** (not the game executable). This is STATIC/OFFLINE integrity, not a WH3 motion test.
+**New concrete strategy resolution:** original group constructor `0x030C2C3C` calls strategy selector `0x030C7D18`, which constructs `group+0xB30` strategy objects. Eight distinct constructor-anchored virtual tables are confirmed on the pinned EXE. For each original table, the `+0x20` group-state method and **`+0x48` member-target generator** are decoded and reside in executable sections:
+
+| Strategy VTable | Original vfunc +0x20 | Original vfunc +0x48 |
+|---|---|---|
+| `0x0390F4B8` | `0x030D19A4` | **`0x030C9B3C`** |
+| `0x0390F0C8` | `0x030D1A18` | **`0x030CAD9C`** |
+| `0x0390F180` | `0x008F7750` | **`0x030CA218`** |
+| `0x0390F388` | `0x008F7700` | **`0x030C9C44`** |
+| `0x0390F558` | `0x0305FFDC` | **`0x030C9A64`** |
+| `0x0390F030` | `0x008F7780` | **`0x030CAFCC`** |
+| `0x0390F218` | `0x030D1A08` | **`0x030CA140`** |
+| `0x0390EF98` | `0x008F7770` | **`0x030CAF04`** |
+
+At least some actual `+0x48` implementations process original coordinate/heading/group-mode inputs and invoke route/target-generation helpers (e.g. `0x030DBFD4`), **not one universal per-soldier arrival function**. Mode-specific selection means patching only a convenient virtual receiver could silently miss other unit types. Exact link from individual model's later arrival to a next waypoint phase still unproven.
+
+Read-only local one-pass audit checked **14/14 direct E8 targets**, **18/18 opcode guards**, **8/8 constructor-referenced group-strategy VTables** with **16 verified method pointers**, and assembled raw-E8 crossreference candidates of 11 functions plus **nine** bounded native disassembly excerpts. Tool tests **6/6 PASS**. Full pipeline and JSON evidence delivered as `BSC_903_ONE_PASS_CAUSAL_AUDIT_20261010.zip` in the conversation. The full tool, generated JSON, bounded disassembly, detailed Chinese report and SHA manifest were supplied as conversation archive **BSC_903_ONE_PASS_CAUSAL_AUDIT_20261010.zip** (not the game executable). This is STATIC/OFFLINE integrity, not a WH3 motion test.
 
 ## Single closed causal decision, not endless small reports
 
