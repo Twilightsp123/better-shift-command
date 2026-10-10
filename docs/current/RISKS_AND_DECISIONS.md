@@ -39,6 +39,10 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 
 | NQ-028 | EXACT-FILE NORMAL ATTACK ROUTE | Generic original head processor 0x030433B0 dispatches active order virtual +0x08/+0x10 via 0x03043424. Issuer-derived ATTACK vtable +0x08 is 0x03025788, which submits original auxiliary attack tasks via 0x02F2FFB0. Rejection of the separate MOVE transfer gate does NOT prevent regular native ATTACK activation. | Identify MOVE predecessor's completion timing, ATTACK target validity and normal RMB contrast; see N1_903_ORDINARY_ATTACK_DISPATCH.md |
 
+| NQ-029 | EXACT 9.0.3 STATE-MACHINE REBASE | Driver 0x0311DE74 switches over state+0x20 values 0–4. MOVE receiver 0x03040864 sets state=1 and pending payload+0x120..0x140; state-1 driver later copies to+0x60..0xA8. No physical motor semantics proven. | trace state-1 post-rebase speed/path calls; see N1_903_STATE_MACHINE_REBASE.md |
+| NQ-030 | HANDOFF FLAG SAFETY CONTRADICTION | One native branch writing state+0x20=4 at 0x0311E4B5 simultaneously clears byte state+0x24 at 0x0311E4B9. Current MOVE transfer provider 0x03039FB0 requires state=4 and state+0x24!=0. Thus state4 alone cannot justify forced handoff. | find proven writer of state+0x24=1 with valid state4 and lifetime; no flag patch. |
+| NQ-031 | SHARED SCALAR REFERENCE FRAME, UNPROVEN PHYSICS | Both outgoing current MOVE 0x03025DD2 and successor MOVE 0x030408AF call scalar getter 0x0301C1B4, selected by MOVE+0x9A bit4. Receiver builds state+0x140 values, stage1 copies them to state+0xA0 before outgoing reuse validates consistency. Scalar units unknown. | correlate actual original motor/path consumer, not thresholds. |
+
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
 - No guessed new Hook location, signature, VTable, native queue write offset or mutation without independent evidence.
