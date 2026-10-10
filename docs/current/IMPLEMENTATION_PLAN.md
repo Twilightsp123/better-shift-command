@@ -18,6 +18,12 @@ Trace original **queued UnitRoot MOVE route leg** into (1) unit formation target
 
 Use the actual 9.0.3 EXE; reconstruct x64 object pointer provenance, aliasing, per-entity membership, writers, readers and virtual consumers. Do not resurrect retracted Entity+0x18 MovementComponent layout. The unit-level order ring is already partly mapped but may be several layers above the actual bug.
 
+### Workstream N1-B — distinguish common order versus independent model arrival
+
+**P0 causal question (user clarified):** Can WH3 apply *one common Shift MOVE command* but let individual models independently mark the current waypoint reached / switch to the next leg? If so the first native change target is a **unit/formation-level leg promotion decision**, not a new command-issuance mechanism. Check this before searching for soldiers receiving different Shift commands. An alternative is a globally updated leg with asynchronous slot target/steering effects: explicitly falsify the independent-arrival hypothesis when evidence contradicts it. See [N1_903_SHARED_ORDER_GROUP_ARRIVAL_HYPOTHESIS.md](N1_903_SHARED_ORDER_GROUP_ARRIVAL_HYPOTHESIS.md).
+
+**Do not assume the group should wait for all soldiers.** A bounded group passage criterion can trigger coherent phase change once; a single distant outlier must not trigger wholesale early turning. No guessed arrival radius, threshold tuning or new controller until real original producer/writer xrefs are verified.
+
 ### Workstream N1-B — divergence and coordination
 
 Find which *original instruction condition* lets model A turn/change target while model B of the same unit is still executing the prior segment, OR find native group-wide route target changes that are spatially asymmetric. Distinguish per-soldier waypoint arrival from formation-slot target updates and collision/avoidance responses. The model-level root cause is OPEN and may be multiple interacting mechanisms.
