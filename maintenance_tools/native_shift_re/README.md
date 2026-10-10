@@ -65,3 +65,11 @@ See docs/current/WH3_9_0_3_NATIVE_PATCH_DESIGN.md for the current N1–N6 plan.
     python maintenance_tools/native_shift_re/verify_903_route_gate.py --exe "C:\\path\\Warhammer3.exe" --out "N1_outputs\\route_gate.json"
 
 Six synthetic CI cases reside in `tests/test_native_shift_re_route_gate.py`. The complete separately supplied local proof archive additionally contains bounded LLVM disassembly, byte evidence, tests and SHA manifest without the EXE. Actual WH3 physics/braking and Windows Hook compatibility have not been tested.
+
+## N1 formation member/group coordinate entry (user-reported real defect)
+
+The read-only `audit_903_formation_entry.py` accepts `--exe` and `--report` and refuses all EXE SHA mismatch. It compares **23 pinned exact instruction guards** and **6 decoded direct-call targets** for UnitRoot member-position aggregation and group coordinate updating before native order processing. This is NOT a proven soldier-array mapping, arrival condition or Hook location. Synthetic regression tests: `tests/test_native_shift_re_formation.py` (8 cases).
+
+    python maintenance_tools/native_shift_re/audit_903_formation_entry.py --exe "C:\\path\\to\\Warhammer3.exe" --report "N1_outputs\\formation_entry.json"
+
+See [N1 formation entry report](../../docs/current/N1_903_FORMATION_ENTRY_CALLGRAPH.md). The user-visible issue is within-unit soldier model desynchronization and crowding, **not a proven vanilla Move stop**.
