@@ -28,7 +28,7 @@ bool game_sha256(std::string& out) {
  do{
   if(BCryptOpenAlgorithmProvider(&alg,BCRYPT_SHA256_ALGORITHM,nullptr,0)!=0)break;
   if(BCryptCreateHash(alg,&h,nullptr,0,nullptr,0,0)!=0)break;
-  std::array<UCHAR,1<<20> buffer{};
+  std::array<UCHAR,65536> buffer{};
   bool io=true;
   for(;;){
    DWORD n=0;
