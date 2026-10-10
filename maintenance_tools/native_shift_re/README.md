@@ -111,3 +111,7 @@ See [research report](../../docs/current/N1_903_MEMBER_VIRTUAL_RECEIVER_RESOLVED
     python maintenance_tools/native_shift_re/audit_903_layout_vs_arrival.py --exe "C:\\path\\Warhammer3.exe" --out "N1_outputs\\layout_vs_arrival.json"
 
 See [finding](../../docs/current/N1_903_LAYOUT_COUNT_NOT_ARRIVAL_DISCONFIRMATION.md). No EXE writes.
+
+## V3 active MOVE / mode0 / local pose / group-cohesion bounded call audit (2026-10-10)
+
+`audit_903_active_cohesion_links.py` verifies the 9 documented E8 anchors and enumerates decoded direct and indirect callsites in 16 bounded windows on the pinned target EXE. It requires GNU `objdump` and the original 9.0.3-labelled SHA. It never alters game memory or asserts virtual/dataflow links from missing direct calls. Run `python maintenance_tools/native_shift_re/audit_903_active_cohesion_links.py --exe /path/to/Warhammer3.exe --report active_cohesion_links.json --objdump objdump`; offline tests: `python -m unittest discover -s tests -p test_native_shift_re_active_cohesion.py -v`. See `docs/current/N1_903_ACTIVE_COHESION_LINK_AUDIT.md`. This is not a Native Patch.
