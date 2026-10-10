@@ -54,6 +54,8 @@ Current documentation authority — updated 2026-10-10
 
 **New original MOVE→member fanout (2026-10-10):** [N1_903_NATIVE_MOVE_MEMBER_FANOUT.md](N1_903_NATIVE_MOVE_MEMBER_FANOUT.md) — direct original MOVE issuer → route update → UnitRoot A-member group → group-generated 0x30-stride records → per-member virtual +0x368. Original instruction guards 38/38 and 9 E8 calls matched, 10 local offline tests. **Member virtual completion/turn code still unknown; NO patch.**
 
+**N1 resolved original member receiver (2026-10-10):** [N1_903_MEMBER_VIRTUAL_RECEIVER_RESOLVED.md](N1_903_MEMBER_VIRTUAL_RECEIVER_RESOLVED.md) traces +0x368 into shared native handler `0x0306B9F0`, then +0xE8/+0x100 member methods and actual per-member coordinate/orientation writes. **38 real VTables identified with constructor references, 16 original byte guards, 7 local exact-EXE/offline tests.** [Pinned proof script](../../maintenance_tools/native_shift_re/audit_903_member_virtual_receivers.py). Arrival phase still unknown; no Hook.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
