@@ -1,27 +1,47 @@
-# Product Contract — Direct Native Shift Behavior Patch
+# BSC Product Contract — Native Shift behavior patch
 
-## The user's explicit architectural requirement
-**Modify WH3's own Shift logic, not replace it.** Keep original Shift/RMB input, original queue, original order objects, original head advance/retire, original Native locomotion and combat. BSC patches the native behaviors that make the original Shift inconvenient. No Lua shadow scheduler, no BSC parallel Native queue and no periodic MOVE/ATTACK reissuance.
+**Authoritative correction (2026-10-10):** [PRODUCT_CAUSE_CORRECTION_20261010.md](PRODUCT_CAUSE_CORRECTION_20261010.md). Do not revive prior assertions that unmodified WH3 Shift MOVE necessarily stops at each waypoint. Historical experiments are evidence, not a substitute for this product observation.
 
-## Required gameplay
-- Shift MOVE → MOVE → MOVE should be smooth, not stop after each waypoint. Guidepoints are approximate, bounded corners acceptable, but do not erase essential route bends.
-- 90°, 135°, 180°/U-turn, short legs, dense zigzags and multiple units must maintain sane geometry and no exaggerated route compression or collisions.
-- Shift MOVE → ATTACK should hand off reliably without freeze, bogus brake predicates or BSC overwriting a legitimate Native ATTACK.
-- MOVE → ATTACK → EXIT MOVE → ATTACK must preserve chosen target identity, minimum engagement time when relevant and native exit semantics.
-- Normal RMB MOVE, normal RMB ATTACK, REPLACE and HALT must continue to work exactly as intended and cancel stale Shift tail.
-- No unbounded loop/timeout that traps a queued command indefinitely; no phantom early completion or silent skip.
+## Distinct product problems
 
-## Patch requirements
-- First establish whether undesirable stopping comes from the engine's braking, original queue completion, next-command activation, or their combination. Don't assume an earlier queue-pop is sufficient.
-- Change as little original x64 code as necessary, at proven version-guarded function(s). Prefer matching Shift/queued context and leaving ordinary RMB untouched.
-- All original Native order objects and queue state stay authoritative. Do not create a second execution/controller authority in Lua or C++.
-- Preserve original order IDs, lifetimes, generation/revision/cancellation and native queued tail; no artificial 'ACK means waypoint arrived' rule.
-- No hardcoded tuning search: each geometry/time constant must come from an observed engine/physical model or an explicit acceptable design bound.
-- Fail closed if ABI/site/build is unsupported; avoid half-installed hooks and unsafe state mutation.
-- Exhaust controlled offline/Windows proof before one bounded final in-game acceptance.
+### P0 — Vanilla chained Shift MOVE causes intra-unit formation desynchronization
 
-## Non-goals
-- Rebuild CA pathfinding, physics, formation or combat.
-- Edit the game's EXE on disk as a mod installation prerequisite.
-- Treat old H1–H8 Lua shadow-plan algorithms as the next development target.
-- Expose MCT, modify campaign AI, or publish Steam before native patch verification.
+The player observes **different soldier models within the same unit card** reaching, turning at, and progressing beyond queued route points at different moments. Early models change heading while trailing models are still completing the leg; orientation mismatches and intra-unit crowding/jostling result. This is **NOT** a confirmed stop-and-restart of the whole unit after every native waypoint.
+
+Acceptance target: improve *coherence of model-level path progression and formation travel* through guide points without distorting the player's intended route. Small physiological slowdowns when turning are normal, especially at 180 degrees; a constant-speed requirement is expressly rejected.
+
+Exact cause is **open**: individual soldier arrival timing, formation-slot target assignment, unit/group promotion, steering, obstacles/collision, or combinations. Do not equate a read-only unit-level ring queue with each soldier having its own queued command list; prove any such mechanism before using it.
+
+### P1 — Legacy BSC Lua MOVE→ATTACK pause/rollback regression
+
+The conspicuous MOVE→ATTACK stop/delay reported during BSC testing was introduced by the earlier Lua Controller's arbitration/reissuing/rollback, **not shown to be a native vanilla stop bug**. Existing logs show BSC could overwrite an already accepted native ATTACK with MOVE. In the new architecture the old Lua active issuer must be retired/disabled; vanilla ATTACK is not to be patched unless *separate* evidence proves a native bug.
+
+### P2 — ATTACK→EXIT MOVE→ATTACK product extension
+
+Preserve desired target/minimum engagement time/exit guidance requirements if a safe native representation can be proven. Defer unsupported functionality instead of using the old shadow scheduler.
+
+## Behavior and regression contract
+
+- Same card, multiple soldier models: consistent route-leg progression, bounded relative heading divergence, reasonable model spacing and formation recovery, no crowding/wedging from premature individual turns.
+- Route turns: straight, 90°, 135°, 180°/U-turn; short dense legs and zigzags; multiple units, different unit geometries and collision/terrain constraints.
+- No mandatory exact waypoint-center intersection for guidepoints, but do not silently skip critical turns or cut across the planned route.
+- Native right-click MOVE/ATTACK, REPLACE, HALT, queued future-tail identity, target death and combat state retain their original semantics. Avoid additional native/pathfinding/animation regressions.
+- The successful implementation must actually improve the **models' observed formation motion**, not merely produce smoother unit-centroid coordinates or a synthetic path-pass assertion.
+- Native MOVE→ATTACK must not be overwritten by old BSC; success cannot be claimed from removing Lua alone without a bounded final in-game acceptance.
+
+## Implementation boundary and N1 proof requirement
+
+WH3 retains original Shift input, queued order objects, queue advance/retire, original formation-slot assignment, per-soldier locomotion, collision and combat. BSC is allowed only *proven localized native decisions* in that original path, perhaps using exact-build guarded runtime DLL detours. **No new BSC executor, order queue, replay/reassert or direct OrderHead writes.**
+
+First reverse **unit-level queued MOVE → formation target assignment → individual model movement / arrival / orientation → native synchronization or collision response**. Evidence must show which original decision causes premature/asymmetric progression and a minimal change that does not corrupt object lifetime. Old +0x18 Entity/MovementComponent assumptions are quarantined. An isolated queue pop, state-4 check or geometry early exit is not causal proof of intra-unit collision.
+
+Version: user-provided 9.0.3-labelled EXE SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a`; version resource label unverified, existing addresses are exact-binary research, not patch-authorized.
+
+## Verification gates
+
+1. **STATIC:** object lifetime, exact x64 ABI, unit-vs-model semantics, formation target/promotion path, read/write effects, competing causes and precise native candidate.
+2. **OFFLINE:** evidence-derived differential tests, no skipped route legs, no model-order desynchronization in the modeled proven branch, no second BSC commander. Synthetic tests are not WH3 physics evidence.
+3. **WINDOWS:** stable exact-hash-guarded Hook, call-through, install/disable/cleanup failure handling including MinHook allocation; no partial patch.
+4. **WH3:** one consolidated in-game acceptance focused on intra-unit model cohesion; MOVE→ATTACK separately confirms no legacy Lua regression. No Steam release before game proof.
+
+**No-go:** if reliable change requires a new formation/pathfinding/collision engine rather than local native conditions, report the scope as infeasible instead of returning to a growing Lua Controller.
