@@ -1,19 +1,28 @@
 # Better Shift Command (BSC)
 
-Windows x64 mod for Total War: WARHAMMER III.
+A Windows x64 Total War: WARHAMMER III mod project.
 
-**Current target: WH3 9.0.3.** No 9.0.3 EXE SHA/RVA/ABI has been verified; previous 9.0.2 maps are historical search seeds only.
+**Current research target:** user-supplied WH3 9.0.3-labelled EXE, SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a` (game version label not independently verified from VERSIONINFO). **No authorized new Native gameplay patch yet.**
 
-**Current development direction:** reverse-engineer and directly patch WH3's **original** Shift movement, stopping, completion and attack handoff functions; keep the original input, order queue and native executor. No replacement Lua or Native command scheduler. The modification technique may use build-guarded in-memory detours, but only to change the original engine behavior, not to create another controller. This is not yet implemented.
+## What BSC actually fixes
 
-- [Read current engineering docs](docs/current/README.md)
-- [9.0.3 direct-patch design](docs/current/WH3_9_0_3_NATIVE_PATCH_DESIGN.md)
-- [N1 offline forensic scripts and instructions](maintenance_tools/native_shift_re/README.md)
-- [Native queue research map](docs/current/NATIVE_RESEARCH_MAP.md)
-- [Phased implementation plan](docs/current/IMPLEMENTATION_PLAN.md)
-- [Active risks and decisions](docs/current/RISKS_AND_DECISIONS.md)
-- [Historical archive — not default reading](docs/past_doc/README.md)
+**Vanilla Shift MOVE → MOVE:** soldier models **within the same unit card** reach and turn at queued route points asynchronously, so their headings diverge and they crowd/jostle against one another. The defect is **formation and per-model movement coherence**, NOT a proven native full-stop at each intermediate MOVE waypoint.
 
-Experimental source starting point: H8 commit e711e716f2411599d75184618fc1ee5cb85bcd54. Formal public Mod version v1.3.0 / Steam pack name zzz_better_shift_command_steam.pack have not been changed by this documentation work.
+**MOVE → ATTACK pause in old BSC:** the conspicuous stop/rollback came from the past Lua Controller conflicting with native ATTACK. That is a **BSC regression**, not evidence that unmodified WH3's attack transition needs patching.
 
-Source lives in source/, src/native_bridge/, tests/, maintenance_tools/ and native_maps/. Existing archive/ and runtime_evidence/ remain preserved. **This research branch contains only documentation, read-only forensic tools and synthetic tests — no approved WH3 9.0.3 patch, DLL or release.**
+**Architecture:** reverse-engineer and minimally patch the original WH3 native formation/waypoint behavior. WH3 still owns the original queue, per-soldier movement/steering/collision, and ATTACK. No replacement Lua/Native command scheduler, no repeated reissue or OrderHead modification. A DLL may implement verified narrow in-process patches in future.
+
+## Current documents
+
+- [Product diagnosis correction — read first](docs/current/PRODUCT_CAUSE_CORRECTION_20261010.md)
+- [Product contract and acceptance](docs/current/PRODUCT_CONTRACT.md)
+- [WH3 9.0.3 formation-native architecture](docs/current/WH3_9_0_3_NATIVE_PATCH_DESIGN.md)
+- [N1 reverse-engineering research map](docs/current/NATIVE_RESEARCH_MAP.md)
+- [Corrected stage plan](docs/current/IMPLEMENTATION_PLAN.md)
+- [All current docs](docs/current/README.md)
+- [Read-only N1 PE/disassembly proof tools](maintenance_tools/native_shift_re/README.md)
+- [Historical documents (not current design authority)](docs/past_doc/README.md)
+
+The old H8 code baseline is `e711e716f2411599d75184618fc1ee5cb85bcd54`; formal public version v1.3.0 and Steam pack name `zzz_better_shift_command_steam.pack` are unchanged by this research branch.
+
+Previous exact-file N1 findings concerning native queue pop, MOVE task/state transfer, route validation and geometry remain static engine evidence, **not proof that the unit-card's soldier crowding comes from stopping or braking**. No new DLL, PACK, Windows runtime validation or WH3 gameplay success is claimed.
