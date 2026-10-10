@@ -52,6 +52,8 @@ Current documentation authority — updated 2026-10-10
 
 **New exact-file N1 result (2026-10-10):** [N1_903_MEMBER_STATUS_AND_SPATIAL_CONSUMER.md](N1_903_MEMBER_STATUS_AND_SPATIAL_CONSUMER.md) — one native original unit-route callback bulk-resets **all** A-member state bits; another native subsystem measures spatial envelopes and compares member pairs. [SHA-pinned verifier](../../maintenance_tools/native_shift_re/audit_903_member_status_spatial.py): 38 original instruction guards, 13 actual E8 calls; 9 local synthetic tests. These two native subsystems have NOT been causally connected to ordinary Shift turn desynchronization; no Hook.
 
+**New original MOVE→member fanout (2026-10-10):** [N1_903_NATIVE_MOVE_MEMBER_FANOUT.md](N1_903_NATIVE_MOVE_MEMBER_FANOUT.md) — direct original MOVE issuer → route update → UnitRoot A-member group → group-generated 0x30-stride records → per-member virtual +0x368. Original instruction guards 38/38 and 9 E8 calls matched, 10 local offline tests. **Member virtual completion/turn code still unknown; NO patch.**
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
