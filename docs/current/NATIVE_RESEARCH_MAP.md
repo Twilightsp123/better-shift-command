@@ -24,6 +24,8 @@ All above are exact-file static-machine-code research recorded in the N1_903 rep
 
 [N1_903_FORMATION_ENTRY_CALLGRAPH.md](N1_903_FORMATION_ENTRY_CALLGRAPH.md) proves that unit update `0x03043648` calls position-bearing member-list aggregator `0x030421A4` (root count `+0x184`, pointer array `+0x188`, member coordinates `+0x88/+0x90`) and group coordinate function `0x0302AE0C` (group pointer root `+0x32F8`, coordinate subobject root `+0x3C38`), **before** this path invokes original order stage `0x0304433C`. This is source/consumer lead only, **not** proof that member objects are soldier models or that group coordinates are each model destination. See read-only audit tool `maintenance_tools/native_shift_re/audit_903_formation_entry.py`.
 
+**New type/collection distinction:** [N1_903_MEMBER_LAYER_TYPE_GAP.md](N1_903_MEMBER_LAYER_TYPE_GAP.md) proves two different native UnitRoot collections A `+0x184/+0x188` and B `+0x114/+0x118`, both accessed in the SAME root routine. A-member virtual `+0x58` can return another nested pointer array at `+0xBE4/+0xBE8`. Neither type is formally identified as every soldier model. The actual model destination and heading writer remains unknown. Do not revive retired `Entity+0x18` physical assumptions.
+
 ## HIGH PRIORITY — missing model-level map
 
 | Required native object/path | Verified 9.0.3 RVA? | Required dataflow/evidence |
