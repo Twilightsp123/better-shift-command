@@ -28,6 +28,8 @@ All above are exact-file static-machine-code research recorded in the N1_903 rep
 
 **Direct original MOVE→unit route link (new):** [N1_903_MOVE_TO_UNIT_ROUTE_DIRECT.md](N1_903_MOVE_TO_UNIT_ROUTE_DIRECT.md): original MOVE worker `0x03025D70` calls `0x0301287C` at `0x03025E91` and `0x03026022`; route configurator stores a native route descriptor at `root+0x270` (heap or inline branch). Adjacent native function `0x03012A6C` also loads `root+0x270`, reads member-like coordinates and dispatches virtual `+0xC8` before calling `0x0301287C`—**not proven reached from normal queued MOVE or a soldier model**. Distinct unlinked native task `0x0304725C` reads same route then iterates members with pseudo-random coordinate operations; it may be an unrelated AI/scatter task. Avoid false causal attribution.
 
+**Corrected P0 research decision:** [Shared order vs independent model arrival](N1_903_SHARED_ORDER_GROUP_ARRIVAL_HYPOTHESIS.md). Common native MOVE order plus per-model arrival/leg promotion can explain mixed headings without differing high-level commands. First identify whether individual model leg indices actually advance independently; alternatively a single group target update plus physical slot steering may explain it. The original approach must not wait for exact arrival of all soldiers. Current code analysis **does not establish either mechanism**.
+
 ## HIGH PRIORITY — missing model-level map
 
 | Required native object/path | Verified 9.0.3 RVA? | Required dataflow/evidence |
