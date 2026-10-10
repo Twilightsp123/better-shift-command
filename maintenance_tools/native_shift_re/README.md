@@ -87,3 +87,11 @@ See [N1 member layer report](../../docs/current/N1_903_MEMBER_LAYER_TYPE_GAP.md)
 Run `audit_903_move_unit_route.py --exe PATH --report OUTPUT` to check the 23 exact byte guards and seven original E8 target calls linking both MOVE worker branches to `0x0301287C` and native route descriptor storage at root `+0x270`. Research only, not a Hook map. See [N1 report](../../docs/current/N1_903_MOVE_TO_UNIT_ROUTE_DIRECT.md).
 
 Run `audit_903_member_route_virtual.py --exe PATH --report OUTPUT` to verify nine original bytes and two E8 targets near native unit-route/member virtual `+0xC8` dispatch. The vtable implementation and soldier identity are **not** proven. Old unrelated nearest-member selector `0x031E11AC` has no direct E8 caller identified; no patch proposed.
+
+## N1 proven original MOVE fanout to group members
+
+Read [N1_903_NATIVE_MOVE_MEMBER_FANOUT.md](../../docs/current/N1_903_NATIVE_MOVE_MEMBER_FANOUT.md). SHA-gated `audit_903_move_member_fanout.py` verifies **38 exact original machine instruction guards and nine E8 call destinations**: original MOVE issuer calls route update, constructs a unit-root-derived native group, creates group-specific 0x30-stride target records, and calls each member object's virtual +0x368 with a separately constructed native payload. The concrete VTable receiver/motor-completion logic is not yet identified. Synthetic CI gates: `tests/test_native_shift_re_move_member_fanout.py`.
+
+    python maintenance_tools/native_shift_re/audit_903_move_member_fanout.py --exe "C:\\path\\Warhammer3.exe" --report "N1_outputs\\move_member_fanout.json"
+
+This tool does not write to the executable, install hooks, or prove actual game animation/arrival behavior.
