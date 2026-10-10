@@ -12,6 +12,9 @@
 
 ## Stage 1 — N1: reverse formation/model-level native behavior — ACTIVE
 
+**2026-10-10 V3 evidence gate correction:** The existence of within-unit crowding during a *progressive* original Shift turn is now proven by real game member trajectories. The confirmed user behavior is not a bad instantaneous 180° command: CA already steers through gradual bends. Do not waste more work requiring geometrically matched ordinary RMB/Shift paths for defect recognition. The remaining N1 obligation is narrower: trace the actual V3 hit MOVE worker `0x03025D70` -> route config `0x0301287C` / task `0x02F2C734` to the true group/member steering consumers; the independently audited `0x0302DB44→0x030D5490` route had 0 hits in that real capture. Then select a reversible original group target/phase/avoidance predicate, preserve CA's bend sequence, and judge efficacy only by same-Shift pre/post measurements. See [N1_903_PROGRESSIVE_SHIFT_TURN_REAL_BASELINE.md](N1_903_PROGRESSIVE_SHIFT_TURN_REAL_BASELINE.md).
+
+
 ### Workstream N1-A — unit-to-model command/dataflow
 
 Trace original **queued UnitRoot MOVE route leg** into (1) unit formation target/origin/heading, (2) model/slot target distribution and per-soldier movement state, (3) model-specific arrival/turn/next-leg updates, (4) group synchronization and collision response.
