@@ -48,6 +48,8 @@ Current documentation authority — updated 2026-10-10
 
 **Direct MOVE→unit route evidence (2026-10-10):** [N1_903_MOVE_TO_UNIT_ROUTE_DIRECT.md](N1_903_MOVE_TO_UNIT_ROUTE_DIRECT.md) proves two MOVE original callsites reach route configurator 0x0301287C and write root+0x270 through original branches. [Read-only verifier](../../maintenance_tools/native_shift_re/audit_903_move_unit_route.py) (23 machine guards + 7 calls). A separate member-related virtual +0xC8 dispatch is documented, but its type/callchain is not yet proven. No Hook.
 
+**Priority root-cause distinction:** [N1_903_SHARED_ORDER_GROUP_ARRIVAL_HYPOTHESIS.md](N1_903_SHARED_ORDER_GROUP_ARRIVAL_HYPOTHESIS.md) — same unit-level Shift order may be promoted at different per-model *arrival decisions*. Test whether models have independent leg-phase state versus sharing group phase but having different physical steering. **Do not presume different Shift commands or wait-for-all.**
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
