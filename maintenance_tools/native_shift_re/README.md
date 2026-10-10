@@ -95,3 +95,11 @@ Read [N1_903_NATIVE_MOVE_MEMBER_FANOUT.md](../../docs/current/N1_903_NATIVE_MOVE
     python maintenance_tools/native_shift_re/audit_903_move_member_fanout.py --exe "C:\\path\\Warhammer3.exe" --report "N1_outputs\\move_member_fanout.json"
 
 This tool does not write to the executable, install hooks, or prove actual game animation/arrival behavior.
+
+## N1 original member virtual receivers solved (9.0.3 labelled EXE)
+
+`audit_903_member_virtual_receivers.py` verifies original SHA and **16 machine instruction byte guards**, scans native VTable slots +0x3F8 and +0x368, then independently confirms constructor RIP-relative LEA references. Exact-binary result: **38 VTables, 36 common member handler `0x0306B9F0`, 1 delegator `0x0306B9CC`, 1 special `0x03117CE0`**; group getter `0x008F37B0` reads `member+0x300`. Downstream member methods `+0xE8/+0x100` connect to native coordinate/heading writes and local route cache. No proven waypoint completion or runtime Hook. Synthetic CI tests: `tests/test_native_shift_re_member_virtual_receivers.py`. Full EXE-backed 7-case test bundle delivered separately.
+
+    python maintenance_tools/native_shift_re/audit_903_member_virtual_receivers.py --exe "C:\\path\\Warhammer3.exe" --out "N1_outputs\\member_vtables.json"
+
+See [research report](../../docs/current/N1_903_MEMBER_VIRTUAL_RECEIVER_RESOLVED.md).
