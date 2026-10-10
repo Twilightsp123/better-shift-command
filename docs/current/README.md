@@ -60,6 +60,8 @@ Current documentation authority — updated 2026-10-10
 
 **Positive member-direction result (2026-10-10):** [N1_903_PER_MEMBER_DIFFERENT_HEADING_PROOF.md](N1_903_PER_MEMBER_DIFFERENT_HEADING_PROOF.md) traces ONE original MOVE through a selectable grid formation strategy to **different per-member 16-bit facing codes**, each carried into original native member +0xB0. Real 3×3 corner slots can differ by 0x8000 cyclic code. The result proves assigned orientations can differ, not actual velocity/crowding or a safe patch. Downloadable exact-SHA forensic bundle: 42 machine guards / 6 calls / 8 tests.
 
+**New causally relevant strategy source:** [N1_903_FORMATION_MODE_AND_MODEL_MOTION_RULES.md](N1_903_FORMATION_MODE_AND_MODEL_MOTION_RULES.md) traces exact original MOVE's **`[[UnitRoot+0x3D48]+0x248]`** formation selector into `0x030C7D18` mode 0..12 strategy dispatch, then actual per-member target/facing generation. Mode 3's divergent heading result is conditional on a unit *using that strategy*; next distinguish pose from velocity and group phase from local trajectory. Read-only 22 exact opcode guards, 5 direct calls, 8 local tests. No Native patch.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
