@@ -61,6 +61,9 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 
 | NQ-042 | DISTINCT MEMBER LAYERS VERIFIED | On same UnitRoot, native function around `0x0303D6AD` reads separate container A `+0x184/+0x188` and B `+0x114/+0x118`; B has separate element virtual calls. A member vfunc `+0x58` can expose further child array `+0xBE4/+0xBE8`. Cannot label A positional aggregation as actual per-soldier waypoint logic or classify B with abandoned assumptions. | resolve actual member VTable/RTTI/constructor, nested child type and native target/facing writer; see N1_903_MEMBER_LAYER_TYPE_GAP.md |
 
+| NQ-043 | POSITIVE ORIGINAL MOVE→UNIT ROUTE DATAFLOW | On exact WH3 user EXE, native MOVE worker `0x03025D70` calls route configurator `0x0301287C` at both `0x03025E91` and `0x03026022`; the latter writes original route pointer to `root+0x270` on heap/inline branches. Native adjacent member route function `0x03012A6C` invokes selected member-related vfunc `+0xC8` at `0x03012C1E`, but per-soldier identity and causality not proven. | Identify real slot/model target/facing writer and trace queued Shift to member consumer; see N1_903_MOVE_TO_UNIT_ROUTE_DIRECT.md |
+| NQ-044 | UNLINKED MEMBER TASK CANNOT JUSTIFY PATCH | `0x0304725C` reads native `root+0x270` and loops root member array with pseudo-random coordinates and virtual calls; no direct E8 caller found, task may be unrelated AI/scatter. Do not claim this is chained Shift fan-out. | recover task object identity and caller or rule out as non-Shift branch. |
+
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
 - No guessed new Hook location, signature, VTable, native queue write offset or mutation without independent evidence.
