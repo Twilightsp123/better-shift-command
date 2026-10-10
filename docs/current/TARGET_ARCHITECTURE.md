@@ -1,43 +1,41 @@
-# Target Architecture — Patch WH3's Original Shift Behavior
+# BSC Target Architecture — original formation-aware Shift MOVE patch
 
-**Decision: modify the game's existing native Shift implementation, not replace Shift with Lua, a new Native order scheduler, or a parallel queue.** This is a reverse-engineering goal, NOT a proven working patch.
+**Product truth:** [PRODUCT_CAUSE_CORRECTION_20261010.md](PRODUCT_CAUSE_CORRECTION_20261010.md). A native Shift MOVE issue is *individual models in one unit becoming out of sync through queued waypoint turns and crowding*, **not** a proven native full-stop between MOVE orders. The MOVE→ATTACK stop belongs to the old Lua Controller regression unless independently reproduced in unmodified WH3.
 
-## Exactly what stays original
-- The player's Shift / right-click command entry, controls and UI.
-- The game's own order objects, command queue, engine sequence, queue append/replace, cancellation and queue-head ownership.
-- The game's native locomotion, collision/avoidance, formation, combat, animation and target handling.
-- Normal right-click / non-Shift behavior except when an independently identified shared defect must be fixed without regression.
+## Original engine remains authoritative
 
-## Exactly what BSC changes
-Only the smallest set of **existing engine functions or decision predicates** that produce native Shift's undesirable behavior. Candidates require reverse-engineering proof:
-1. Enqueued MOVE's terminal braking / steering / movement state update, especially before a following MOVE.
-2. MOVE completion / activation of the next original order, which may be in a different function from braking.
-3. MOVE → ATTACK transition and target handoff when already queued.
-4. If needed, route geometry/waypoint guidance interpretation that influences stopping and cornering.
+WH3 retains the original Shift/RMB input, unit-level queued order objects, command identity, append/REPLACE and HALT, group/formation slot assignments, per-model locomotion and arrival, collision/avoidance, combat and animations. Native detours are only a means of changing a *verified narrow native decision within WH3's original execution path*.
 
-Do not assume this is one hook or only the queue-head increment. If the stop happens before the order is complete, advancing the queue may not be a sufficient or correct fix.
+BSC must not own a Lua shadow route, C++ order executor, ACK/reissue loop, early queue-head mutation, separate formation simulator, or repeated replacement MOVE/ATTACK calls. Optional Lua can expose settings/diagnostics only.
 
-## Intended runtime path
-Player original Shift input → **WH3 original command encoding & order queue** → WH3 original movement/attack execution with **targeted native behavior patches inside that same engine path** → original native order completion / successor execution.
+## Actual N1 layers to correlate
 
-**No second execution authority.** Lua must not own a canonical shadow queue, issue MOVE/ATTACK to replace engine orders, rollback a legitimate native ATTACK, or replay native queued tails. Optional Lua may expose settings or diagnostics only; aim for Native-only functionality where feasible. Native detours are a means to replace/adjust an original decision *within the same call path*, not a license to implement a second command dispatcher.
+**L0 — unit command context:** Where a unit-level original queued MOVE destination/next route leg is represented. Relevant known 9.0.3 issuer/queue evidence exists, but this is *context*, not a fix for soldiers crowding.
 
-## How to implement without modifying the on-disk EXE
-WH3's source is unavailable. A version-guarded WinX64 DLL may patch original function behavior in process memory, e.g. a narrow inline detour that invokes the original function with a modified native decision. This is **modifying the original engine's effective code path**, not editing the user's executable file. Exact hook, ABI, thread/lifetime ownership and guards must be proven first. If direct conditional patching is impossible, state that explicitly before deciding on a fallback.
+**L1 — formation route mapping:** How the unit's current/next order becomes a formation origin, heading, slots and per-soldier movement target. Find actual producer and consumer fields in exact EXE, not stale offsets.
 
-## Native invariants
-- The original order list remains authoritative before AND after the patch; verify actual Native head, queue count, engine seq, target identity and future tail.
-- Each native command completes once. No BSC-specific second notion of route completion that progresses a shadow queue.
-- REPLACE/HALT cancels or replaces original native commands according to WH3's own lifecycle.
-- A legitimate native ATTACK can never be overridden by an unsolicited nonqueued MOVE.
-- No artificial 'time passed, therefore waypoint visited' completion, no arbitrary bypass of i+1/i+2 order obligations.
-- If unsupported EXE, unverified bytes, missing allocation or unsafe state, fail closed / preserve original behavior wherever safe. No partial Hook startup.
+**L2 — individual soldier movement:** How each soldier decides it has approached/reached its assigned point, turns, starts following the next leg, and responds to blocked or slower neighbors. Compare identity and timestamps at *soldier* level rather than only UnitRoot/order head.
 
-## Rejected architecture
-- Current H1–H8 Lua canonical plan + Native reassert feedback loop.
-- Merely porting that Lua scheduler into C++.
-- An independent Native BSC queue controlling the engine's normal queue.
-- Reimplementing WH3 pathfinding, steering, AI combat or formation simulation.
-- Direct writes to OrderHead or raw queue slots without demonstrated engine ownership/lifetime semantics.
+**L3 — synchronization policy:** Find existing native formation coherence/coordination, if any, and verify whether early individual arrival/promotion can be altered with minimal local conditions. Avoid all-or-none group fences that stall behind a permanently blocked soldier. Preserve valid path navigation, collision and realistic U-turn slowing.
 
-The next decision is NOT how fast a new scheduler should advance. It is **which original WH3 Shift functions cause the stop, corner and attack-handoff defects**, and whether their behavior can be patched locally.
+**L4 — combat regression isolation:** Old BSC Lua caused MOVE→ATTACK pause/rollback. Retiring that competing authority is the direct architectural fix; do not patch original ATTACK unless another native defect is established. Existing original generic ATTACK activation path remains authoritative.
+
+## Candidate design possibilities (hypotheses, not approved Hooks)
+
+A. Existing formation waypoint phase/slot target handoff already has a group-level policy, but an original predicate permits early soldier turn/divergence. A scoped change to *that* decision is preferred.
+
+B. Native unit/group promotes the route and updates slot targets at unsuitable times, creating model heading spread; a scoped formation destination/transition fix may work without rewriting solver or individual movement.
+
+C. Crowding originates in native soldier avoidance/pathfinding that cannot be improved without a major rewrite. If no safe small change, **NO-GO** for simple Native Shift Patch; do not paper over it with Lua resends.
+
+The prior investigation into original MOVE state0–4, task counts, special MOVE state transfer, and the geometry early exit is **still valid partial machine-code research** for the exact binary. It is not a demonstrated link to intra-unit soldier misalignment, cannot be called the root cause, and must not be used to justify a braking-distance fix.
+
+## Safety gates and acceptance
+
+- Version-guard and byte-guard actual 9.0.3 binary; register ABI, threading and object life proven independently for each targeted site.
+- Model-level relative headings, spacing, slot alignment, route-bend fidelity and formation recovery are primary outcomes. Unit centroid speed alone is not acceptance.
+- Preserve ordinary RMB commands, CANCEL/REPLACE, native order sequence, i+1/i+2, target and animation lifetimes, multiple unit selection.
+- One bundled final WH3 check only after static+offline+Windows gates; no false PASS from synthetic geometry.
+- If original engine lacks a safe formation-level transition lever, report limitation and stop before constructing an alternative command executor.
+
+**Development status:** research only. No verified per-model cause or safe behavior patch; no DLL/PACK or Steam release from this branch.
