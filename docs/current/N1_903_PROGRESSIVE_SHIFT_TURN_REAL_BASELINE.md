@@ -13,6 +13,10 @@ Real WH3 V3 logs from the same UnitRoot `0x2128a6f80` captured 36 stable member 
 
 **GRADE: WH3 OBSERVED DEFECT = PASS.** Do not ask the user to further prove that original Shift has crowding, and do not treat exact regular RMB-vs-Shift route matching as a gate.
 
+## Actual original MOVE-work timing during the progressive turn
+
+For this **same UnitRoot**, the V3 raw trace has original MOVE-work entrance records for three different order object pointers at **t=34.154, 34.194, 34.239 s**. The next observed original MOVE-work entrance for that UnitRoot is **t=47.460 s**. The compressed 35–43 s turn happens while **no new original MOVE-work entrance is recorded**. This weighs against treating every instant of opposite soldier motion as a *new top-level MOVE command having just been issued*. Previously constructed per-model targets and locally progressing trajectories can operate between those entrances. It is **not proof** that the engine does not internally advance route phases; the probe's `execution_start` label corresponds to MOVE work entry, not an independently proven completion/physical activation event.
+
 ## Three distinct standards, no moving goalposts
 
 **1. Defect exists: PASS (now).** User-visible crowding + time-aligned native member coordinates, spacing compression and direction spread during real *progressive* Shift turns is enough to accept this symptom.
