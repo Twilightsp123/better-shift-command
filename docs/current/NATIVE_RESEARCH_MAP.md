@@ -26,6 +26,8 @@ All above are exact-file static-machine-code research recorded in the N1_903 rep
 
 **New type/collection distinction:** [N1_903_MEMBER_LAYER_TYPE_GAP.md](N1_903_MEMBER_LAYER_TYPE_GAP.md) proves two different native UnitRoot collections A `+0x184/+0x188` and B `+0x114/+0x118`, both accessed in the SAME root routine. A-member virtual `+0x58` can return another nested pointer array at `+0xBE4/+0xBE8`. Neither type is formally identified as every soldier model. The actual model destination and heading writer remains unknown. Do not revive retired `Entity+0x18` physical assumptions.
 
+**Direct original MOVE→unit route link (new):** [N1_903_MOVE_TO_UNIT_ROUTE_DIRECT.md](N1_903_MOVE_TO_UNIT_ROUTE_DIRECT.md): original MOVE worker `0x03025D70` calls `0x0301287C` at `0x03025E91` and `0x03026022`; route configurator stores a native route descriptor at `root+0x270` (heap or inline branch). Adjacent native function `0x03012A6C` also loads `root+0x270`, reads member-like coordinates and dispatches virtual `+0xC8` before calling `0x0301287C`—**not proven reached from normal queued MOVE or a soldier model**. Distinct unlinked native task `0x0304725C` reads same route then iterates members with pseudo-random coordinate operations; it may be an unrelated AI/scatter task. Avoid false causal attribution.
+
 ## HIGH PRIORITY — missing model-level map
 
 | Required native object/path | Verified 9.0.3 RVA? | Required dataflow/evidence |
