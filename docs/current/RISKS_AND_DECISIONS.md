@@ -49,6 +49,8 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 | NQ-035 | ORIGINAL STATE4 TRANSITIONS DIFFER | Separate state2->helper path at 0x0311E56E calls 0x0311EC28, which sets state4 at 0x0311ED63 without adjacent flag clear; a different state4 writer 0x0311E4B5 does clear +0x24. Native helper side effects/true Shift reachability not yet proven. | compare state4+flag1 lifecycle to motor updates; see N1_903_STATE4_GEOMETRY_BRANCH.md |
 | NQ-036 | GEOMETRY EARLY RETURN, NOT YET BRAKING | State4 processor 0x0311F534 uses geometric sqrt at 0x0311F7D1 and threshold comparator 0x0311F8BB–C5, clears inner+0x6C and jumps to epilogue when gated. No verified desired-speed/velocity write here. | follow early-exit vs continued motor dataflow before any Hook. |
 
+| NQ-037 | BRANCH DIFFERENTIAL VERIFIED, BRAKING STILL OPEN | 9.0.3 state-4 geometric early exit at `0x0311F8CB` jumps straight to cleanup, skipping guarded route helpers, nested `+0x40` pointer assignment and nested `+0x6C=1`. No downstream motor-speed writer or physical stop causality established. | Trace `0x0312D088` route object to native locomotion consumer, compare queued MOVE and ordinary RMB; see N1_903_STATE4_ROUTE_SETUP_DIFF.md. |
+
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
 - No guessed new Hook location, signature, VTable, native queue write offset or mutation without independent evidence.
