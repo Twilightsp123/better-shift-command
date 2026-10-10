@@ -32,6 +32,8 @@ All above are exact-file static-machine-code research recorded in the N1_903 rep
 
 **N1 breakthrough: original native MOVE issues per-member payloads** ([proof](N1_903_NATIVE_MOVE_MEMBER_FANOUT.md)). Real original MOVE issuer at `0x030323C8`, branch callsite `0x03032965`, reaches route update `0x0302DB44`, which builds group from `root+0x184/+0x188` via `0x0301B8E4`, invokes route config `0x0301287C`, then calls `0x030D5490`. The latter creates group-indexed `0x30`-stride target/parameter records and invokes native member VTable `+0x368` once per group entry. The member object class and per-model NEXT-leg completion remain OPEN. This shows how one high-level MOVE can fan out, **not proof of different high-level Shift orders**. Next identify concrete `+0x368` receiver implementations and whether each model independently decides route-phase promotion; preserve native group synchronization.
 
+**Negative closure:** [N1_903_LAYOUT_COUNT_NOT_ARRIVAL_DISCONFIRMATION.md](N1_903_LAYOUT_COUNT_NOT_ARRIVAL_DISCONFIRMATION.md). Strategy+0x20 calculates layout cardinality, not group waypoint arrival: 8 proven vtables, sqrt(n)/min(13,n)/table strategies. Task+0xB8 caches that number. Group object+0x20 is a distinct type/function. Current MOVE fanout computes group targets once then dispatches per member; receiver branch `member+0x104` chooses two native action paths and may update local cache. No verified member leg-index advance. Do NOT patch strategy+0x20, cached+0xB8 or force common phase yet.
+
 ## HIGH PRIORITY — missing model-level map
 
 | Required native object/path | Verified 9.0.3 RVA? | Required dataflow/evidence |
