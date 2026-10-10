@@ -1,0 +1,38 @@
+name: BSC N1 RMB-style native handoff EXPERIMENT
+on:
+  push:
+    branches: ['research/n1-*']
+    paths:
+      - 'src/native_bridge/experiments/fresh_continuation/**'
+      - '.github/workflows/n1-rmb-fresh-continuation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile C++ and actual x64 instruction fixture
+        run: |
+          cmake -S src/native_bridge/experiments/fresh_continuation -B /tmp/bsc_fc_build -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/bsc_fc_build --parallel
+          ctest --test-dir /tmp/bsc_fc_build --output-on-failure
+      - name: Source exact-build guard (no game executable in CI)
+        run: |
+          python -m unittest discover -s src/native_bridge/experiments/fresh_continuation/tests -p test_exact_binary.py -v
+  windows-msvc-x64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure x64 Windows private build
+        run: cmake -S src/native_bridge/experiments/fresh_continuation -B build/fc -G "Visual Studio 17 2022" -A x64
+      - name: Build experimental DLL and private-process tests
+        run: cmake --build build/fc --config Release --parallel
+      - name: Strict fail-closed Windows private tests
+        run: ctest --test-dir build/fc -C Release --output-on-failure
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bsc-rmb-fresh-continuation-disabled-experiment-win64
+          path: build/fc/Release/bsc_fresh_continuation_EXPERIMENT_OFF_BY_DEFAULT.dll
+          if-no-files-found: error
