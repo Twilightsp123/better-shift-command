@@ -10,6 +10,8 @@ The player observes **different soldier models within the same unit card** reach
 
 Acceptance target: improve *coherence of model-level path progression and formation travel* through guide points without distorting the player's intended route. Small physiological slowdowns when turning are normal, especially at 180 degrees; a constant-speed requirement is expressly rejected.
 
+**New leading hypothesis (NOT yet verified):** all models can share one unit-level Shift order, but each model might separately decide `arrived/current-leg-complete` and therefore start pursuing the next leg at a different time. A candidate solution would promote the **shared formation route phase once** on a bounded group-level passage condition, not demand every model reach the exact waypoint or reissue separate commands. This is one possibility, not a proven model-level condition. See [group arrival hypothesis](N1_903_SHARED_ORDER_GROUP_ARRIVAL_HYPOTHESIS.md).
+
 Exact cause is **open**: individual soldier arrival timing, formation-slot target assignment, unit/group promotion, steering, obstacles/collision, or combinations. Do not equate a read-only unit-level ring queue with each soldier having its own queued command list; prove any such mechanism before using it.
 
 ### P1 — Legacy BSC Lua MOVE→ATTACK pause/rollback regression
