@@ -38,6 +38,6 @@ In `0x0315F4E0`, original instructions **write member-specific coordinate/angle 
 
 The original virtual dispatch and its concrete member coordinate writers are now identified. Still **not** verified: which original state tells each model it has reached the active waypoint, whether member A and B can progress to different *leg indices* on one shared order, whether group route phase is already atomic, and the safety of altering the engine's formation policy. This must be proved before Native Patch or unit-wide arrival tuning.
 
-**Repro:** exact-SHA, read-only `n1_903_member_dispatch_vtables_verify.py` in [downloadable local bundle](sandbox:/mnt/data/BSC_N1_903_MEMBER_RECEIVER_RESOLVED_20261010.zip) checks **16 exact opcode sites**, locates all 38 VTables and constructor-like xrefs, and exports method mappings as JSON. Local tests **7/7 PASS** including real SHA-matched EXE. Bundled LLVM disassembly and SHA manifest; EXE excluded. No gameplay DLL or PACK, no in-game verification.
+**Repro:** exact-SHA, read-only `n1_903_member_dispatch_vtables_verify.py` in the downloadable offline research bundle supplied with the analysis checks **16 exact opcode sites**, locates all 38 VTables and constructor-like xrefs, and exports method mappings as JSON. Local tests **7/7 PASS** including real SHA-matched EXE. Bundled LLVM disassembly and SHA manifest; EXE excluded. No gameplay DLL or PACK, no in-game verification.
 
 Full local report in bundle: `N1_903_MEMBER_VTABLE_RECEIVER_RESOLVED.md`.
