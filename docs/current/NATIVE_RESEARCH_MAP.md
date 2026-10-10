@@ -20,6 +20,10 @@ User-provided EXE SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850
 
 All above are exact-file static-machine-code research recorded in the N1_903 reports. No hook ABI, thread/lifetime safety, group coherency or physical outcome is proven. Old 9.0.2 hook map is historical and must not be treated as 9.0.3.
 
+## New N1 exact-file unit/member/formation entry points (2026-10-10)
+
+[N1_903_FORMATION_ENTRY_CALLGRAPH.md](N1_903_FORMATION_ENTRY_CALLGRAPH.md) proves that unit update `0x03043648` calls position-bearing member-list aggregator `0x030421A4` (root count `+0x184`, pointer array `+0x188`, member coordinates `+0x88/+0x90`) and group coordinate function `0x0302AE0C` (group pointer root `+0x32F8`, coordinate subobject root `+0x3C38`), **before** this path invokes original order stage `0x0304433C`. This is source/consumer lead only, **not** proof that member objects are soldier models or that group coordinates are each model destination. See read-only audit tool `maintenance_tools/native_shift_re/audit_903_formation_entry.py`.
+
 ## HIGH PRIORITY — missing model-level map
 
 | Required native object/path | Verified 9.0.3 RVA? | Required dataflow/evidence |
