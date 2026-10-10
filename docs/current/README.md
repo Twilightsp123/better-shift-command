@@ -42,6 +42,8 @@ Current documentation authority — updated 2026-10-10
 
 **N1 further bounded proof (2026-10-10):** [N1_903_STATE4_ROUTE_SETUP_DIFF.md](N1_903_STATE4_ROUTE_SETUP_DIFF.md) shows the state-4 geometric early-exit bypasses guarded route-pointer setup; no proven velocity/desired-speed writer, no Hook.
 
+**N1 formation entry update (2026-10-10):** [N1_903_FORMATION_ENTRY_CALLGRAPH.md](N1_903_FORMATION_ENTRY_CALLGRAPH.md) — exact-file same-unit update sequence: position-bearing member aggregation, group coordinate update, native queued-order processing. Member object type and model turn/arrival are still unverified. [Read-only audit](../../maintenance_tools/native_shift_re/audit_903_formation_entry.py), 23 opcode guards/6 calls, 8 synthetic tests. No patch.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
