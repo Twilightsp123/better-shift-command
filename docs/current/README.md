@@ -31,6 +31,8 @@ Current documentation authority — 2026-10-09
 
 **New state-4 / geometry finding:** [N1_903_STATE4_GEOMETRY_BRANCH.md](N1_903_STATE4_GEOMETRY_BRANCH.md) — distinguishes two genuine native state-4 paths and identifies a gated geometry early exit; no braking function proven.
 
+**N1 further bounded proof (2026-10-10):** [N1_903_STATE4_ROUTE_SETUP_DIFF.md](N1_903_STATE4_ROUTE_SETUP_DIFF.md) shows the state-4 geometric early-exit bypasses guarded route-pointer setup; no proven velocity/desired-speed writer, no Hook.
+
 ## Source-of-truth order
 1. Frozen working code and exact build artifacts, with their hashes.
 2. Current NQTR documents in this directory; label speculation as proposal.
