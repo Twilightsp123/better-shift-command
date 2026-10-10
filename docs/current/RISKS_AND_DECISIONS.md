@@ -1,5 +1,7 @@
 # Open Issues, Evidence Grades and Decision Log
 
+**2026-10-10 binding product correction:** [PRODUCT_CAUSE_CORRECTION_20261010.md](PRODUCT_CAUSE_CORRECTION_20261010.md). The native Shift MOVE problem is **intra-unit soldier model asynchronous arrival/turning and crowding**, not a proven unit-wide stop. MOVE→ATTACK pause belongs to the earlier Lua Controller regression. Older findings about native braking, queue progress or state transfer are **mechanism evidence, not causal proof** of model crowding.
+
 This file is normative for proposed NQTR. Labels: FACT = verified in cited source/log; INFERENCE = plausible mechanism; OPEN = unproved; PROPOSED = choice not yet approved.
 
 | ID | Status | Issue / decision | Next proof |
@@ -8,7 +10,7 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 | NQ-002 | FACT | Lua rollback issues nonqueued MOVE, not proof that original Native queued tail survived. | actual native order snapshot after rollback |
 | NQ-003 | FACT | 12:53 Shift ATTACK blocked by G11 policy and exact Native ATTACK later rolled back. | immutable log + deterministic reproduction |
 | NQ-004 | FACT | 13:18 MinHook first MOVE creation fails with status9, after retry. | isolated Windows backend instrumentation |
-| NQ-005 | OPEN | The true native completion / queue-head advancement function and safe detour do not yet have verified RVA or ABI. | RE callgraph + dataflow; dual independent signatures |
+| NQ-005 | UPDATED / HISTORICAL GAP | Exact-file 9.0.3 queue pop/head writer is now identified (see NQ-020), but no safe detour ABI or proof that queue advancement explains per-model formation crowding. | trace formation-model target and turn consumers, not raw head mutation |
 | NQ-006 | OPEN | Would early Native queue advance alone retain all engine route-guidance semantics? | geometry + queue state oracle, no assumed physics |
 | NQ-007 | DECIDED GOAL | Modify WH3's **original native Shift behavior in its own call path**; do not replace it with a BSC Native scheduler, Lua shadow queue or replay system. | original-code braking/completion/attack dataflow + narrow patch proof |
 | NQ-008 | OPEN | Which lock/thread handles order lifetime, queue write and cancellation? | Windows thread/exception instrumentation |
@@ -16,7 +18,7 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 | NQ-010 | OPEN | MH_ERROR_MEMORY_ALLOC is not necessarily exhausted RAM; MinHook executable-near allocation may fail. | allocator reason trace, Windows fault injections |
 | NQ-011 | PROPOSED | All old D1/T1/H1–H8 architecture papers are archived, not current implementation authority. | docs/current + reference gate |
 | NQ-012 | FACT | Native 9.0.2 mapping is static candidate; native_maps/CURRENT stays 9.0.1. | map and build provenance |
-| NQ-013 | OPEN | Does the original Shift stop arise in terminal braking, arrival state, queue pop or successor activation? A new queue owner would not establish this. | comparative original native instruction dataflow and Windows fixture |
+| NQ-013 | SUPERSEDED INCORRECT PREMISE | Earlier N1 assumed a vanilla Shift MOVE stop. User corrected this: native defect is models arriving/turning out of sync within one unit, with mutual crowding; prior braking-centered hypothesis is not product evidence. | follow new NQ-038/039 and formation-to-model dataflow |
 | NQ-014 | DECIDED GOAL | Lua may provide optional settings/diagnostics but cannot issue replacement MOVE/ATTACK, rollback or advance original native orders in the redesigned mode. | source contract + negative instrumentation test |
 | NQ-015 | OPEN / N1 BLOCKER | No matching WH3 9.0.2 EXE/disassembly in accessed materials; current repository identifies issuer and optimistic order-reader but not native MOVE update/head writer/next activation. | hash-verified EXE/Ghidra xrefs and read/write dataflow; see N1_STATIC_FINDINGS.md |
 | NQ-016 | SOURCE-VERIFIED NEGATIVE | Optional Smart Guard `state_transition_hook` is a filtered Pursue/TakeUpPositions path, NOT established Shift queue progression despite its name. | separately reverse native per-frame queue consumer; do not reuse Hook17 blindly |
@@ -51,6 +53,10 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 
 | NQ-037 | BRANCH DIFFERENTIAL VERIFIED, BRAKING STILL OPEN | 9.0.3 state-4 geometric early exit at `0x0311F8CB` jumps straight to cleanup, skipping guarded route helpers, nested `+0x40` pointer assignment and nested `+0x6C=1`. No downstream motor-speed writer or physical stop causality established. | Trace `0x0312D088` route object to native locomotion consumer, compare queued MOVE and ordinary RMB; see N1_903_STATE4_ROUTE_SETUP_DIFF.md. |
 
+| NQ-038 | USER-CONFIRMED PRODUCT DEFECT | Original queued Shift MOVE makes soldier models inside one unit card turn/reach route points asynchronously; their orientations diverge and they squeeze/crowd each other. Actual native responsible function remains UNKNOWN. | rederive 9.0.3 formation slot assignment, per-soldier arrival/turning, and group coordination from UnitRoot; see PRODUCT_CAUSE_CORRECTION_20261010.md |
+| NQ-039 | PRODUCT REGRESSION / OLD LUA | The noticeable MOVE→ATTACK stop was caused by BSC Lua active arbitration/reissue/rollback, not proven native vanilla behavior. H8 logs support overwrite of accepted native ATTACK. | disable old Lua active issuer in future Native mode; test original ATTACK without BSC competition before considering native attack patch |
+| NQ-040 | ACTIVE N1 ROOT-CAUSE GAP | Existing ring pop, transfer states and route geometry evidence does not identify the source of model-level crowded turns. Blind geometry/desired-speed patch would optimize the wrong symptom. | locate formation-to-model target producer, individual soldier steering/arrival and collision consumers; prove first divergence and feasibility |
+
 ## Safety constraints
 - Never revive retracted Entity+0x18 MovementComponent claim. Do not bind quarantined physical APIs into command completion.
 - No guessed new Hook location, signature, VTable, native queue write offset or mutation without independent evidence.
@@ -59,11 +65,13 @@ This file is normative for proposed NQTR. Labels: FACT = verified in cited sourc
 - Questions that require WH3 runtime remain marked OPEN and are not hidden inside synthetic test success.
 
 ## Decision record
+- 2026-10-10 / D-NQ-017 (user correction, highest precedence): explicitly separate **vanilla intra-unit soldier crowding on chained Shift MOVE** from **BSC Lua Controller MOVE→ATTACK stopping regression**. Stop prioritizing terminal braking, early queue-head advancement or geometry threshold tuning until connected to actual model-level divergence. Preserve earlier exact-file N1 research as engine mechanism evidence only. No runtime patch authorized.
+
 - 2026-10-09 / D-NQ-001: freeze H8 as a reference candidate only; start documentation-only NQTR on independent branch.
 - 2026-10-09 / D-NQ-002: prioritize finding real Native queue completion/advance authority over more Lua threshold patches.
 - 2026-10-09 / D-NQ-003: preserve old design/experiments byte-identically in docs/past_doc, make current directory only active documentation.
 - 2026-10-09 / D-NQ-004: Retain native mapping as evidence only; never write the game queue based on guessed fields.
-- 2026-10-09 / D-NQ-005 (user correction): **Directly patch original WH3 Shift behavior.** Reject the proposal for a BSC-specific Native transition decision owner or an alternative order scheduler. Research original queued MOVE terminal braking, completion and native ATTACK handoff before choosing any hook.
+- 2026-10-09 / D-NQ-005 (user correction): **Directly patch original WH3 Shift behavior.** Reject the proposal for a BSC-specific Native transition decision owner or an alternative order scheduler. Research original model-level formation target, waypoint progression and coordination; old Lua ATTACK regression is a separate track.
 
 - 2026-10-09 / D-NQ-006: N1 first static source/map triage recorded; no new RVA/ABI promoted, no original shift patch authorized.
 - 2026-10-09 / D-NQ-007: switch current executable target to WH3 9.0.3; preserve all 9.0.2 source/maps as historical evidence, do not treat previous RVAs as runtime-compatible with 9.0.3.
