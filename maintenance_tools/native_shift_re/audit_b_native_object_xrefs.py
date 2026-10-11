@@ -125,6 +125,57 @@ def verified_cross_references(pe: StrictPE) -> dict:
     }
 
 
+# B subcontroller and motor probes have DIFFERENT objects. This deliberately
+# collects the full instruction+operand before any alleged dataflow join.
+FOCUSED_FUNCTIONS = {
+    0x03281444: "B_task_node_reference_check",
+    0x03121ABC: "B_route_node_lookup",
+    0x030ECB10: "B_node_construct_and_cache",
+    0x03128E80: "group_route_context_tick",
+    0x03109D78: "route_node_recycle",
+    0x030F65AC: "route_node_geometry_release",
+    0x030FDA9C: "shared_geometry_generator",
+    0x030D5490: "A_group_to_member_fanout",
+    0x03071E04: "member_goal_replace",
+    0x0311954C: "member_motor_writer",
+}
+
+
+def displacement_candidates(pe: StrictPE) -> list[dict]:
+    """List bounded native operands, without falsely merging object owners.
+
+    Full disassembly of these ten original unwind functions is independently
+    obtained at runtime. A memory operand ending +0x70 is NOT necessarily a
+    B node. Provenance still requires walking the base register's origin.
+    """
+    import re
+    relevant = re.compile(r"\[[^\]]*\+0x(?:70|58|2d0|2d8|b10)\]")
+    results = []
+    for target, label in FOCUSED_FUNCTIONS.items():
+        owner = pe.function(target)
+        if owner is None:
+            raise ValueError("FOCUS_FUNCTION_NOT_UNWIND_OWNED:" + hex(target))
+        instructions = pe.disasm(owner[0], owner[1]-owner[0]).splitlines()
+        for i, line in enumerate(instructions):
+            if not relevant.search(line.lower()):
+                continue
+            match = re.match(r"^\s*([0-9a-f]+):", line)
+            if not match:
+                continue
+            results.append({
+                "site": "0x" + match.group(1),
+                "function": hex(owner[0]),
+                "focus": label,
+                "disassembly": line.strip(),
+                "previous_line": instructions[i-1].strip() if i else "",
+                "next_line": instructions[i+1].strip()
+                             if i+1 < len(instructions) else "",
+                "base_pointer_owner_proven": False,
+                "grade": "EXACT_DISASSEMBLY_OPERAND_NOT_OBJECT_ALIAS",
+            })
+    return results
+
+
 def run(exe: Path, manifest: Path) -> dict:
     m = read_manifest(manifest)
     pe = StrictPE(exe)  # SHA256 and PE ImageBase checked before any scan
@@ -146,6 +197,7 @@ def run(exe: Path, manifest: Path) -> dict:
             if observed != pe.base + implementation:
                 raise ValueError("TASK_VTABLE_IDENTITY_CHANGED:" + hex(slot))
         xrefs = verified_cross_references(pe)
+        memory_operands = displacement_candidates(pe)
         return {
             "schema": "bsc.n1.native_object_xref.v1",
             "exe_sha256": pe.sha,
@@ -154,6 +206,7 @@ def run(exe: Path, manifest: Path) -> dict:
             "typed_anchor_sites": {name: hex(site)
                                    for name, site in TYPED_ANCHORS.items()},
             "xrefs": xrefs,
+            "focused_route_to_motor_operand_candidates": memory_operands,
             "specific_unproven_edges": [
                 "B node+0x70 -> per-member goal +0x7F8/+0x818 or +0x1E0: no type-verified edge yet",
                 "0x03905D98 task constructor -> concrete live per-member task in V3: not recorded",
