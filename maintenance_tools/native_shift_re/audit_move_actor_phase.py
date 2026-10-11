@@ -134,6 +134,15 @@ PIN = {
     'route_reference_eval_all_match_false': (0x030DEA79, '32c0'),
     'route_reference_eval_any_mismatch_true': (0x030DEA86, 'b001'),
     'route_reference_store_from_first_node': (0x030C78D0, '48894378'),
+    'route_segment_type0_alloc_0xd8': (0x030D0A9C, 'b9d8000000'),
+    'route_segment_type1_alloc_0xe8': (0x030D0ACE, 'b9e8000000'),
+    'route_segment_type0_vtable_materialization': (0x030D0AAE, '488d05fbe78300'),
+    'route_segment_type1_vtable_materialization': (0x030C2083, '488d05a6d28400'),
+    'route_segment_type0_ctor': (0x030D0ABF, 'e8a016ffff'),
+    'route_segment_type1_ctor': (0x030D0AE3, 'e88c15ffff'),
+    'route_segment_vfn10_get_position_input': (0x030CF3F0, '4c8d4110'),
+    'route_segment_vfn10_ref_lookup': (0x030CF419, 'e8cad20200'),
+    'route_segment_node_factory': (0x030C78D7, 'e8a8910000'),
 }
 # Direct CALL edges verified against original 5-byte E8 instructions.
 CALLS = {
@@ -178,6 +187,11 @@ CALLS = {
     'submotor_existing_context_resync': (0x03121A99,0x030FDA9C),
     'fallback_motor_alloc':(0x03121B40,0x030ECB10),
     'fallback_existing_route_relation_gate':(0x0328146D,0x030DEA20),
+    'native_route_segment_node_factory':(0x030C78D7,0x030D0A84),
+    'route_segment_type0_init':(0x030D0ABF,0x030C2164),
+    'route_segment_type1_init':(0x030D0AE3,0x030C2074),
+    'route_segment_vfn10_geometry':(0x030CF409,0x0311C408),
+    'route_segment_vfn10_reference':(0x030CF419,0x030FC6E8),
 }
 JUMPS={
     'actor_receipt_tail_cache_refresh':(0x030732C0,0x03056ED4)
@@ -187,6 +201,8 @@ VTABLES={
     'fallback_move_task_update':(0x03AE0128+0x08,0x03271A48),
     'actor_normal_action_tick':(0x03914618+0x10,0x0325C818),
     'actor_normal_action_setup':(0x03914618+0x08,0x03258B8C),
+    'native_route_segment_type0_v10':(0x0390F2B0+0x10,0x030CF3E0),
+    'native_route_segment_type1_v10':(0x0390F330+0x10,0x030CF3E0),
 }
 
 class OriginalPE:
@@ -255,7 +271,7 @@ def verify(pe):
         'group_branch_B':'0x03279E40 else creates 0x03AE0128 group task and sets per actor +0xB10 bit7 from spatial predicate',
         'fallback_submotor_geometry':'0x03281444 may call 0x03121ABC, which calls 0x030ECB10; the latter copies a route descriptor via 0x030EC9EC, builds route segments via 0x030FE1E4->0x030C1FDC/0x030C7858, stores the resulting route pointer at submotor+0x70, calls 0x030DB824 to read orientation and 0x0310E770 to connect doubly-linked-list neighbors; this is NOT proof the actor motor has consumed the route; alternative 0x031219B0 has separate inherited-context path',
         'fallback_progress':'0x03281408 advances / installs sub-controller through 0x03281444 and task +0x20 depends on embedded-list predicate',
-        'fallback_prior_route_relation_gate':'0x03281444 invokes 0x030DEA20 on existing subcontroller+0x70, which holds the route descriptor. 0x030DEA20 iterates route+0x10 / route+0x0C entries and calls per-entry vtable+0x10 against route+0x78 saved relation. It returns TRUE on FIRST mismatch and FALSE if empty/all match. In 0x03281444 TRUE disposes existing subcontroller and allows reconstruction; FALSE sets task+0x60. This is a relation consistency test, not proof of per-soldier waypoint completion. 0x030C7858 can populate route+0x78 from a selected candidate +0x40.',
+        'fallback_prior_route_relation_gate':'0x03281444 invokes 0x030DEA20 on existing subcontroller+0x70, which holds the route descriptor. 0x030DEA20 iterates route+0x10 / route+0x0C entries and calls per-entry vtable+0x10 against route+0x78 saved relation. It returns TRUE on FIRST mismatch and FALSE if empty/all match. In 0x03281444 TRUE disposes existing subcontroller and allows reconstruction; FALSE sets task+0x60. This is a ROUTE-SEGMENT relation consistency test, not per-soldier waypoint completion: 0x030C7858 appends node objects from 0x030D0A84, which constructs the two segment-class vtables 0x0390F2B0/0x0390F330; BOTH virtual +0x10 point to 0x030CF3E0 and resolve a spatial reference via 0x0311C408->0x030FC6E8. 0x030C7858 can populate route+0x78 from a selected candidate +0x40.',
         'group_branch_A_packet':'0x030D5490 builds transformed 0x26 target packets and invokes each actor vfunc+0x368 within one loop',
         'actor_receipt':'0x03073224 invokes 0x0315EC98 pose then 0x03078B1C mode then 0x03056ED4 spatial cache',
         'actor_subaction':'0x0306B9F0 conditionally replaces actor+0x328 action with vtable 0x03914618 (packet+0x34=0)',
@@ -268,7 +284,7 @@ def verify(pe):
         'No instruction-only proof that actor+0x318 is a Shift user-waypoint index',
         'No verified direct chain from this packet to persistent primary actor+0x7F8/+0x818 locomotion targets',
         '0x0310E770 is only previous/next pointer relinking; no proven producer-to-consumer edge from fallback submotor+0x70 to main soldier velocity',
-        '0x030DEA20 checks route-linked object reference consistency, not verified member completion; its first-mismatch return cannot alone prove 60 actors changed frames',
+        '0x030DEA20 checks ROUTE SEGMENT spatial-reference consistency, not actor-soldier completion; its first-mismatch return cannot alone prove 60 actors changed frames',
         'Per-actor conditional update DOES NOT prove different rendered frames absent tick trace',
         'Original B-group member+0xB10 bit7 is not proven to control Shift waypoint progression',
         'No evidence for safely replacing group branch condition, the actor mode or the queue with a global hook',
