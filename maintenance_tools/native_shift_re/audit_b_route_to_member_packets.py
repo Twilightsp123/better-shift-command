@@ -36,6 +36,19 @@ PINS={
  'associated_member_bit7_read':(0x2f879d7,'410fb687100b0000'),
  'active_task_bit7_clear':(0x2f879f3,'8897100b0000'),
  'separate_motor_goal_commit':(0x311963a,'0f1187e0010000'),
+ 'B_packet_code_4c_zero':(0x2f5f91a,'41894a4c'),
+ 'B_packet_code50_bits':(0x2f5f940,'80c906'),
+ 'B_packet_code50_store':(0x2f5f95e,'41884a50'),
+ 'B_packet_creator_call_1':(0x326a423,'e8b454cfff'),
+ 'B_packet_creator_call_2':(0x326a466,'e87154cfff'),
+ 'member_mode_classifier':(0x306ba23,'e8dc73d5ff'),
+ 'member_deferred_guard':(0x306ba2f,'f6425020'),
+ 'member_deferred_builder_call':(0x306ba5b,'e8683defff'),
+ 'deferred_task_vtable_install':(0x2f5f7dd,'488d0534669a00'),
+ 'deferred_task_payload_offset':(0x2f5f843,'034b4c'),
+ 'deferred_task_deadline_store':(0x2f5f84a,'898fa0000000'),
+ 'deferred_task_deadline_read':(0x2f6b184,'8b81a0000000'),
+ 'deferred_task_deadline_compare':(0x2f6b18a,'398298000000'),
 }
 VTABLES={
  'cached_subtype_v8':(0x3ae00e8+0x08,0x3271b0c),
@@ -46,6 +59,7 @@ VTABLES={
  'bit7_active_v28':(0x3905d98+0x28,0x2f85960),
  'bit7_active_v78':(0x3905d98+0x78,0x2f87684),
  'bit7_negative_v78':(0x3905d18+0x78,0x11287fc),
+ 'member_deferred_task_tick':(0x3905e18+0x10,0x2f83b24),
 }
 CALLS={
  'cached_subtype_constructor':(0x3279f71,0x3263ec4),
@@ -55,6 +69,9 @@ CALLS={
  'per_member_packet_builder':(0x3265c69,0x326a3a0),
  'per_member_adjustment':(0x3265ca9,0x2f72520),
  'B_member_preclassification':(0x3263bfb,0x3068c38),
+ 'B_packet_ctor_call_a':(0x326a423,0x2f5f8dc),
+ 'B_packet_ctor_call_b':(0x326a466,0x2f5f8dc),
+ 'B_receiver_deferred_ctor':(0x306ba5b,0x2f5f7c8),
 }
 class StrictPE:
  def __init__(self,path):
@@ -102,6 +119,8 @@ def audit(path):
           'route_bridge':'0x3AE00E8+0x10 -> 0x03281520: task+0x78 -> node+0x70 geometry -> 0x03265B24 -> member virtual+0x368',
           'bit7_bridge':'0x3AC6F78+0x90 -> 0x02F6EF4C -> task vtable 0x03905D98 +0x78 -> 0x02F87684',
           'different_B_main_vtable':'0x3AE0128+0x10 -> 0x03281408',
+          'conditional_deferred_member_path':'0x02F5F8DC produces packet+0x50 with no bit 0x20; if native mode check 0x02DC2E04 is false, receiver 0x0306B9F0 builds 0x03905E18 deferred task at 0x02F5F7C8',
+          'deferred_task_deadline':'task+0xA0 = native group tick+packet+0x4C; branch checks it in 0x02F6B170; no guarantee motor changes during same tick',
           'unproven':['whether either path executed in historic V3',
                        'packet+0x368 to normal soldier motor+0x1E0 and its activation timing',
                        'whether bit7 task belongs to B movement in V3',
