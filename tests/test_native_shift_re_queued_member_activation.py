@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 
-SRC=Path(__file__).resolve().parents[1]/'src'/'audit_member_handoff.py'
+SRC=Path(__file__).resolve().parents[1]/'maintenance_tools'/'native_shift_re'/'audit_903_queued_member_activation.py'
 spec=importlib.util.spec_from_file_location('audit_member_handoff', SRC)
 mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
 EXE=Path(os.environ.get('WH3_903_EXE','')) if os.environ.get('WH3_903_EXE') else None
