@@ -220,7 +220,7 @@ python -m unittest discover -s tests -p 'test_native_shift_re_b_native_object_xr
 
 **此节覆盖上节的“延迟包到 `member+0x1E0` 尚未连通”这一旧断点，但不覆盖 V3 实际分支未知的限制。**
 
-**实际在用户同日上传且 SHA256 精确匹配的原始 EXE 上执行：46 个原始指令字节守卫、8 条 E8 调用、3 张完整动作虚表槽和 38 张原生士兵虚表 census 均通过；本地 10/10 离线测试通过。** GitHub 工具源为
+**实际在用户同日上传且 SHA256 精确匹配的原始 EXE 上执行：52 个原始指令字节守卫、9 条 E8 调用、3 张完整动作虚表槽和 38 张原生士兵虚表 census 均通过；本地 10/10 离线测试通过。** GitHub 工具源为
 `maintenance_tools/native_shift_re/audit_b_deferred_motor.py`；
 单元测试为 `tests/test_native_shift_re_b_deferred_motor.py`。
 它们在公开 CI 不携带 EXE 时仅可做结构／合成验证；不得升级为 V3 证明。
@@ -305,3 +305,6 @@ B route node+0x70
 必须和普通 RMB 相同目标及成员位置条件比较，辨别有效的原生
 “旧目标不再可保留”谓词，才允许制作可逆、默认关闭的最小 Patch。
 此处无 DLL / Win64 构建 / WH3 修复验证；`patch_authorized=false` 不变。
+
+
+**新增子任务发包时序负对照（原始 EXE 守卫已纳入上述计数）：** `0x03281520` 在 `0x0328152A` 读取本 B 子任务 `+0x80` 已发包标志；满足缓存就绪后 `0x032815C5→0x03265B24` 执行成员目标包 fanout；`0x032815D7` 设置子任务 `+0x80=1`，然后 `0x032815E2` 仍要检查 `group+0x898` 的另一完成条件。这里的“已发包”**不是**每名成员 `member+0x1E0` 已更新，也**不能**推出该群组不再有其他同步条件。不要把 `group+0x898` 未识别的含义猜成全兵牌到达确认。
