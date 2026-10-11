@@ -547,3 +547,25 @@ GitHub 的结构／合成 CI 不含原始 EXE，不能称为游戏修复。
 Shift 路段接收前后的旧/新版本、所用动作实例和路径兼容关系；
 若没有实例证据则只能使用一次性最小只读采集器。旧
 `0x0304459D` 实验 Patch 保持关闭；不可修改 5 单位分流阈值。
+
+
+## 2026-10-12 增量 VI：找到 member+0x1E0 的真实成员动作读取者，未混淆 V3 运行证据
+
+本轮用用户上传的原始 Warhammer3.exe（SHA256 518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a）实际通过 **28 处指令原字节 + 11 条机器码 E8 调用**及本地 **9/9 单元测试**。新增 maintenance_tools/native_shift_re/audit_original_motor_goal_reader.py 和 tests/test_native_shift_re_old_motor_goal_reader.py。
+
+**目标写入：** 0x0311954C 存在 member+0x228==1 早退；通过后在 0x0311963A 把 16 字节原生目标写入 member+0x1E0。进入此函数不等于已提交。
+
+**同一成员的原生读者（新增有类型链）：**
+- 成员动作 0x0325E294 在 0x0325FD87 CALL 0x03256180。
+- 0x032561E4 从 [action+0x08] 取得 member*；0x032561E8 读取这个成员的 +0x710 状态；0x03256204 CALL 0x03115C94。
+- 0x03115C94 的 0x03115C98 / 0x03115CAB 检查 member+0x188/+0x18F，0x03115CBC 得到**同一成员** &member+0x1E0，0x03115CB4 / 0x03115CC3 读取成员 X/Z（+0x88/+0x90）。
+- 0x03115CD3→0x0311CED4 解码目标几何；0x03115CE3→0x030FD4D0 查询方向；随后位移和朝向点积判定，返回结果在 0x0325620B 改变动作分支。
+- 独立的群组成员枚举 0x02F85880 在 0x02F858FD 也调用 0x03115C94。
+
+因此成员旧 +0x1E0 目标有真实原生**动作决策读取者**。但此读者本身不是物理位移积分器，也不能把静态可达冒充 V3 实际命中。仅可称为：如果 B 收到后继目标但主目标尚未提交，并且该动作的内部条件成立，那么旧目标值可能影响后续成员动作决策。
+
+**纠正旧错误：** 0x03119687→0x03102CA4 **并不能证明物理 motor 被通知/积分**。实际 0x03102CAB 检查参数 flag 0x04，0x03102CB0 读取 member+0x200 链表拥有者，0x03102CBF→0x0312169C 清理 member+0x200/+0x208/+0x210 链表引用并写 +0x218=2。另一个 0x0311EC28 读取 +0x1E0 的对象是 **UnitRoot**，不是 member；同偏移负对照保持。
+
+**可运行的一次性动态取证工具：** 已交付 BSC_N1_903_OLD_MOTOR_GOAL_CONSUMER_AND_ONESHOT_TRACE_20261012.zip，包含独立静态审计、Windows Frida 接入脚本、严格 SHA/PID/内存原字节守卫、成员级 B_DEFERRED_RECEIVE → GOAL_READ → GOAL_WRITE_PRE 事件采集、RMB 直接清理对照和保守结果分析器。Frida 为布设探针会临时重定向/恢复代码指令，但不会修改游戏业务状态。**本会话不能启动 WH3，所以未执行 Win64 动态采集。** 工具不直接证明玩家 Shift 命令与 B 实例身份，更不直接证明实际物理碰撞；历史 V3 动态分支尚未记录。
+
+**验证等级：** 精确 EXE STATIC PASS，离线 Python PASS；Windows attach NOT RUN，V3 中旧目标确实被读 UNKNOWN，新 CA 路线几何冲突 UNKNOWN，Native Patch 未授权且未制作。禁止根据同一内存偏移拼接无关对象，禁止激活旧 0x0304459D 跳过继承补丁。
