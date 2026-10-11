@@ -44,6 +44,26 @@ GUARDS={
  'far_action_skip_if_state_active':(0x325601a,'0f854d010000'),
  'far_action_main_goal_commit':(0x3256161,'e89ebce1ff'),
  'far_action_marks_issued':(0x3256166,'c6839000000001'),
+ 'RMB_packet_26_immediate':(0x2f5f8bd,'c6435026'),
+ 'B_packet_generated_flags':(0x2f5f940,'80c906'),
+ 'B_packet_bit20_stays_clear':(0x2f5f95e,'41884a50'),
+ 'receiver_mode_return':(0x306ba2b,'84c0'),
+ 'receiver_mode_immediate_jump':(0x306ba2d,'7536'),
+ 'receiver_packet_bit20_check':(0x306ba2f,'f6425020'),
+ 'receiver_bit20_immediate_jump':(0x306ba33,'7530'),
+ 'deferred_holder_cleanup_address':(0x306ba35,'488d8f90040000'),
+ 'deferred_holder_cleanup_call':(0x306ba3c,'e87350d4ff'),
+ 'deferred_new_task_address':(0x306ba41,'488d8fa8040000'),
+ 'deferred_task_install':(0x306ba5b,'e8683defff'),
+ 'deferred_returns_before_action_reset':(0x306ba60,'e975010000'),
+ 'direct_action_reset_address':(0x306bba7,'488d8f28030000'),
+ 'direct_action_reset_call':(0x306bbae,'e85d4ed4ff'),
+ 'direct_status_action_install':(0x306bbd5,'e832cf1d00'),
+ 'v580_resets_old_subaction_on_activation':(0x306a9a7,'e86460d4ff'),
+ 'v568_resets_old_subaction_on_activation':(0x306a913,'e8f860d4ff'),
+ 'deferred_tick_deadline_branch':(0x2f6b190,'724e'),
+ 'deferred_task_dispatch_mark':(0x2f7a183,'c6839c00000001'),
+ 'RMB_member_packet_construct':(0x30d54fc,'e867a3e8ff'),
 }
 EDGES={
  0x32815c5:0x3265b24,0x3265c69:0x326a3a0,
@@ -53,6 +73,9 @@ EDGES={
  0x3032965:0x302db44,0x302dbdb:0x30d5490,
  0x325ea85:0x3071e04,0x3119687:0x3102ca4,
  0x306a927:0x32490d0,0x325da69:0x3255ff0,0x3256161:0x3071e04,
+ 0x30d54fc:0x2f5f868,0x306ba3c:0x2db0ab4,0x306ba5b:0x2f5f7c8,
+ 0x306bbae:0x2db0a10,0x306bbd5:0x3248b0c,
+  0x306a9a7:0x2db0a10,0x306a913:0x2db0a10,
 }
 THRESHOLD_RVA=0x3942d74
 
@@ -91,6 +114,13 @@ def verify_original(exe:Path):
           'counterexample':{'near4_flag1':select_actor_action(0x68,1,4,0),
                             'far6_flag1':select_actor_action(0x68,1,6,0)},
           'important_negative_control':'Both v580 and v568 action families have static paths to the native main motor writer; do not force v580 globally.',
+          'new_exact_receiver_difference':[
+            'RMB direct packet constructor makes packet+0x50=0x26 including bit 0x20; receiver 0x0306BA2F branches to immediate processing',
+            'B native packet constructor only builds low bit0/bit1/bit2/bit4 flags, no 0x20; group mode false chooses deferred packet',
+            'deferred branch 0x0306BA35 cleans member+0x490 holder, constructs new task at member+0x4A8, then E9 0x0306BA60 skips member+0x328 reset',
+            'immediate receiver 0x0306BBA7 resets old member+0x328 subaction and installs 0x81 type at 0x0306BBD5',
+            'deferred member task later selects member +0x568/+0x580; both reset member+0x328 only when new member action is installed'
+          ],
           'v3_branch_observed':False,'safe_patch_authorized':False,
           'gameplay_causality_proven':False}
     finally:p.close()
