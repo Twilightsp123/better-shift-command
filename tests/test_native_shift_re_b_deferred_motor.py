@@ -27,9 +27,9 @@ def member_task_dispatch(code,flag_0x10=False,local_gate=0):
 
 class DeferredMotorContracts(unittest.TestCase):
     def test_native_guarded_sites_count(self):
-        self.assertEqual(len(b.PINS),40)
+        self.assertEqual(len(b.PINS),46)
         self.assertEqual(len(b.VTABLES),3)
-        self.assertEqual(len(b.DIRECT),7)
+        self.assertEqual(len(b.DIRECT),8)
     def test_per_member_action_codes_67_69(self):
         self.assertEqual(member_code(True,0,5),0x67)
         self.assertEqual(member_code(True,0,6),0x68)
@@ -53,6 +53,11 @@ class DeferredMotorContracts(unittest.TestCase):
     def test_member_subaction_uses_distinct_vtables(self):
         self.assertEqual(b.VTABLES[0x03913808+0x10],0x0325e294)
         self.assertEqual(b.VTABLES[0x03add278+0x10],0x0325d9e0)
+    def test_common_tick_calls_embedded_action_without_forcing_both_modes(self):
+        self.assertEqual(b.PINS["member_tick_subaction_owner"][1],"488d8f28030000")
+        self.assertEqual(b.DIRECT[0x30822d2],0x3080f4c)
+        self.assertEqual(b.PINS["subaction_owner_flag_gate"][1],"80b95401000001")
+        self.assertEqual(b.PINS["subaction_v10_update"][1],"ff5010")
     def test_native_goal_writer_is_conditional_not_immediate(self):
         self.assertEqual(b.DIRECT[0x0325ea85],0x03071e04)
         self.assertEqual(b.DIRECT[0x03071e86],0x03071f20)
@@ -73,7 +78,7 @@ class DeferredMotorContracts(unittest.TestCase):
     def test_exact_original_exe(self):
         r=b.verify(Path(os.environ["WH3_903_EXE"]))
         self.assertEqual(r["member_class_census"],38)
-        self.assertEqual(r["pinned_opcode_instructions"],40)
+        self.assertEqual(r["pinned_opcode_instructions"],46)
         self.assertFalse(r["patch_authorized"])
 
 if __name__=="__main__":unittest.main()
