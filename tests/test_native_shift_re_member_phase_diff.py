@@ -18,8 +18,8 @@ class PinnedNativeMemberPhaseTests(unittest.TestCase):
         self.assertTrue(m.SHA256.startswith('518c4f'))
 
     def test_guarded_anchors(self):
-        self.assertEqual(len(m.GUARDS),33)
-        self.assertEqual(len(m.DIRECT_EDGES),14)
+        self.assertEqual(len(m.GUARDS),40)
+        self.assertEqual(len(m.DIRECT_EDGES),16)
         self.assertEqual(len(m.BRANCHES),3)
 
     def test_rmb_versus_queued_order_state_not_actor_state(self):
@@ -96,13 +96,21 @@ class PinnedNativeMemberPhaseTests(unittest.TestCase):
         for forbidden in ['WriteProcessMemory(', 'VirtualProtect(', 'OrderHead=', 'runtime_patch_authorized\':True']:
             self.assertNotIn(forbidden,src)
 
+    def test_member_contact_path_not_automatically_move_activation(self):
+        self.assertEqual(m.GUARDS['contact_pair_same_owner_skip'][0],0x030849A4)
+        self.assertEqual(m.GUARDS['contact_dispatch_member_virtual_4b0_a'][0],0x03084AED)
+        self.assertEqual(m.DIRECT_EDGES['common_member_update_to_contact_filter'][1],0x0308489C)
+        self.assertEqual(m.DIRECT_EDGES['special_member_virtual_4b0_uses_3069844'][1],0x03069844)
+
     def test_full_binary_when_present(self):
         exe=os.environ.get('WH3_903_EXE')
         if not exe:self.skipTest('Original WH3 EXE not distributed to CI')
         report=m.inspect(Path(exe))
-        self.assertEqual(len(report['guards']),33)
-        self.assertEqual(len(report['direct_edges']),14)
+        self.assertEqual(len(report['guards']),40)
+        self.assertEqual(len(report['direct_edges']),16)
         self.assertEqual(len(report['checked_branches']),3)
         self.assertFalse(report['runtime_patch_authorized'])
+        self.assertEqual(report['member_interaction_vtables']['virtual_4b0'],{'0x8d3280':4,'0x3069844':32})
+        self.assertEqual(report['member_interaction_vtables']['virtual_4d0'],{'0x3069b10':36})
 
 if __name__=='__main__':unittest.main()
