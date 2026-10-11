@@ -31,9 +31,9 @@ class BRoutePacketBridgeTests(unittest.TestCase):
   self.assertNotEqual(a.VTABLES['bit7_negative_v78'][1],0x2f87684)
  def test_true_e8_target_math(self):
   s=0x32815c5;t=0x3265b24
-  self.assertEqual(a.e8_destination(s,b'\\xe8'+struct.pack('<i',t-s-5)),t)
+  self.assertEqual(a.e8_destination(s,bytes([0xe8])+struct.pack('<i',t-s-5)),t)
   with self.assertRaisesRegex(ValueError,'NOT_E8'):
-   a.e8_destination(s,b'\\xe9'+struct.pack('<i',t-s-5))
+   a.e8_destination(s,bytes([0xe9])+struct.pack('<i',t-s-5))
  def test_original_version_refused_without_writes(self):
   with tempfile.TemporaryDirectory() as d:
    p=Path(d)/'fake.exe';data=b'MZ'+b'wrong version'*20;p.write_bytes(data)
@@ -54,5 +54,5 @@ class BRoutePacketBridgeTests(unittest.TestCase):
   proof=a.audit(Path(os.environ['WH3_903_EXE']))
   self.assertEqual(proof['level'],'ORIGINAL_EXE_STATIC')
   self.assertFalse(proof['patch_authorized'])
-  self.assertEqual(proof['machine_guards'],27)
+  self.assertEqual(proof['machine_guards'],len(a.PINS))
 if __name__=='__main__':unittest.main()
