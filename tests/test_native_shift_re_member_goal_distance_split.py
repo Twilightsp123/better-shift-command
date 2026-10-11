@@ -21,8 +21,8 @@ class NativeDeferredDistanceGate(unittest.TestCase):
   self.assertNotEqual(a.select_actor_action(0x68,1,4,0),
                       a.select_actor_action(0x68,1,6,0))
  def test_original_opcode_inventory(self):
-  self.assertEqual(len(a.GUARDS),36)
-  self.assertEqual(len(a.EDGES),15)
+  self.assertEqual(len(a.GUARDS),56)
+  self.assertEqual(len(a.EDGES),22)
   self.assertEqual(a.THRESHOLD_RVA,0x3942d74)
   self.assertEqual(a.GUARDS['near_flag_clear'],(0x2f7a08e,'44894378'))
  def test_both_actor_action_classes_can_reach_original_goal_writer(self):
@@ -34,6 +34,17 @@ class NativeDeferredDistanceGate(unittest.TestCase):
   self.assertEqual(a.GUARDS['far_action_checks_motor_state'][1],'39b810070000')
   self.assertEqual(a.GUARDS['far_action_constructor_clears_issued'][1],'664183a29000000000')
   self.assertEqual(a.GUARDS['far_action_marks_issued'][1],'c6839000000001')
+ def test_native_receiver_defers_without_old_action_disposal(self):
+  self.assertEqual(a.GUARDS['RMB_packet_26_immediate'][1],'c6435026')
+  self.assertEqual(a.GUARDS['receiver_packet_bit20_check'][1],'f6425020')
+  self.assertEqual(a.GUARDS['deferred_returns_before_action_reset'][1],'e975010000')
+  self.assertEqual(a.EDGES[0x306ba5b],0x2f5f7c8)
+  self.assertEqual(a.EDGES[0x306bbae],0x2db0a10)
+ def test_deferred_activation_later_resets_action(self):
+  self.assertEqual(a.EDGES[0x306a9a7],0x2db0a10)
+  self.assertEqual(a.EDGES[0x306a913],0x2db0a10)
+  self.assertNotEqual(a.GUARDS['deferred_new_task_address'][0],
+                      a.GUARDS['direct_action_reset_address'][0])
  def test_refuse_wrong_exe(self):
   with tempfile.TemporaryDirectory() as tmp:
    p=Path(tmp)/'wrong.exe'
@@ -46,6 +57,6 @@ class NativeDeferredDistanceGate(unittest.TestCase):
  def test_original_9_0_3(self):
   r=a.verify_original(Path(os.environ['WH3_903_EXE']))
   self.assertEqual(r['horizontal_squared_distance_gate'],25.)
-  self.assertEqual(r['verified_call_edges'],15)
+  self.assertEqual(r['verified_call_edges'],22)
   self.assertFalse(r['safe_patch_authorized'])
 if __name__=='__main__':unittest.main()
