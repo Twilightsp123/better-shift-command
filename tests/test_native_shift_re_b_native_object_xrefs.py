@@ -57,6 +57,28 @@ class NativeBObjectXrefsTests(unittest.TestCase):
         self.assertNotEqual(xrefs.TYPED_ANCHORS["node_geometry_write"],
                             xrefs.TYPED_ANCHORS["member_goal_writer_commit"])
 
+    def test_focused_route_and_motor_probes_are_separate(self):
+        self.assertIn(0x030ECB10, xrefs.FOCUSED_FUNCTIONS)
+        self.assertIn(0x03128E80, xrefs.FOCUSED_FUNCTIONS)
+        self.assertIn(0x03071E04, xrefs.FOCUSED_FUNCTIONS)
+        self.assertIn(0x0311954C, xrefs.FOCUSED_FUNCTIONS)
+
+    def test_unproven_displacement_owner_stays_unproven(self):
+        class FakePE:
+            def function(self, target):
+                return (target, target + 0x20)
+
+            def disasm(self, start, size):
+                return (
+                    "  " + format(start, "x") + ": 48 8b 41 70  mov rax,QWORD PTR [rcx+0x70]\\n"
+                    "  " + format(start+4, "x") + ": 48 89 c1  mov rcx,rax\\n"
+                )
+
+        hits = xrefs.displacement_candidates(FakePE())
+        self.assertEqual(len(hits), len(xrefs.FOCUSED_FUNCTIONS))
+        self.assertTrue(all(not h["base_pointer_owner_proven"] for h in hits))
+        self.assertTrue(all("NOT_OBJECT_ALIAS" in h["grade"] for h in hits))
+
     def test_wrong_exe_sha_rejected_before_scan(self):
         from audit_wh3_full_native_chain import StrictPE
         with tempfile.TemporaryDirectory() as tmp:
