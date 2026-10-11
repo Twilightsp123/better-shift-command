@@ -117,6 +117,23 @@ PIN = {
     'submotor_existing_optional_route': (0x03121A99, 'e8febffdff'),
     'fallback_context_submotor_initialization': (0x03121A37, '8903c743040100'),
     'fallback_context_other_submotor': (0x03121B40, 'e8cbaffcff'),
+    # In B, an existing route subcontroller may be invalidated as soon as any
+    # route-linked object's current resolved reference differs from the
+    # single stored route reference. This is NOT a per-soldier finish barrier.
+    'fallback_existing_route_read': (0x03281469, '488b4970'),
+    'fallback_existing_route_first_gate': (0x03281474, '741d'),
+    'fallback_existing_route_discard': (0x03281480, '4883635800'),
+    'fallback_existing_route_same': (0x03281493, 'c6436001'),
+    'route_reference_eval_non_null': (0x030DEA2A, '4883797800'),
+    'route_reference_eval_nodes': (0x030DEA34, '488b7910'),
+    'route_reference_eval_node_count': (0x030DEA38, '8b410c'),
+    'route_reference_eval_vtbl_slot10': (0x030DEA4E, '4c8b4810'),
+    'route_reference_eval_indirect_call': (0x030DEA5C, '41ffd1'),
+    'route_reference_eval_against_saved': (0x030DEA5F, '483b4378'),
+    'route_reference_eval_first_difference': (0x030DEA63, '7521'),
+    'route_reference_eval_all_match_false': (0x030DEA79, '32c0'),
+    'route_reference_eval_any_mismatch_true': (0x030DEA86, 'b001'),
+    'route_reference_store_from_first_node': (0x030C78D0, '48894378'),
 }
 # Direct CALL edges verified against original 5-byte E8 instructions.
 CALLS = {
@@ -160,6 +177,7 @@ CALLS = {
     'submotor_merge_route_segments': (0x030FE287,0x030C7858),
     'submotor_existing_context_resync': (0x03121A99,0x030FDA9C),
     'fallback_motor_alloc':(0x03121B40,0x030ECB10),
+    'fallback_existing_route_relation_gate':(0x0328146D,0x030DEA20),
 }
 JUMPS={
     'actor_receipt_tail_cache_refresh':(0x030732C0,0x03056ED4)
@@ -237,6 +255,7 @@ def verify(pe):
         'group_branch_B':'0x03279E40 else creates 0x03AE0128 group task and sets per actor +0xB10 bit7 from spatial predicate',
         'fallback_submotor_geometry':'0x03281444 may call 0x03121ABC, which calls 0x030ECB10; the latter copies a route descriptor via 0x030EC9EC, builds route segments via 0x030FE1E4->0x030C1FDC/0x030C7858, stores the resulting route pointer at submotor+0x70, calls 0x030DB824 to read orientation and 0x0310E770 to connect doubly-linked-list neighbors; this is NOT proof the actor motor has consumed the route; alternative 0x031219B0 has separate inherited-context path',
         'fallback_progress':'0x03281408 advances / installs sub-controller through 0x03281444 and task +0x20 depends on embedded-list predicate',
+        'fallback_prior_route_relation_gate':'0x03281444 invokes 0x030DEA20 on existing subcontroller+0x70, which holds the route descriptor. 0x030DEA20 iterates route+0x10 / route+0x0C entries and calls per-entry vtable+0x10 against route+0x78 saved relation. It returns TRUE on FIRST mismatch and FALSE if empty/all match. In 0x03281444 TRUE disposes existing subcontroller and allows reconstruction; FALSE sets task+0x60. This is a relation consistency test, not proof of per-soldier waypoint completion. 0x030C7858 can populate route+0x78 from a selected candidate +0x40.',
         'group_branch_A_packet':'0x030D5490 builds transformed 0x26 target packets and invokes each actor vfunc+0x368 within one loop',
         'actor_receipt':'0x03073224 invokes 0x0315EC98 pose then 0x03078B1C mode then 0x03056ED4 spatial cache',
         'actor_subaction':'0x0306B9F0 conditionally replaces actor+0x328 action with vtable 0x03914618 (packet+0x34=0)',
@@ -249,6 +268,7 @@ def verify(pe):
         'No instruction-only proof that actor+0x318 is a Shift user-waypoint index',
         'No verified direct chain from this packet to persistent primary actor+0x7F8/+0x818 locomotion targets',
         '0x0310E770 is only previous/next pointer relinking; no proven producer-to-consumer edge from fallback submotor+0x70 to main soldier velocity',
+        '0x030DEA20 checks route-linked object reference consistency, not verified member completion; its first-mismatch return cannot alone prove 60 actors changed frames',
         'Per-actor conditional update DOES NOT prove different rendered frames absent tick trace',
         'Original B-group member+0xB10 bit7 is not proven to control Shift waypoint progression',
         'No evidence for safely replacing group branch condition, the actor mode or the queue with a global hook',
