@@ -37,6 +37,13 @@ GUARDS={
  'native_member_receiver_v368':(0x30d550f,'ff9068030000'),
  'deferred_580_action_calls_goal_writer':(0x325ea85,'e87a33e1ff'),
  'member_motor_goal_field':(0x311963a,'0f1187e0010000'),
+ 'far_action_constructor_clears_issued':(0x32490f9,'664183a29000000000'),
+ 'far_action_tick_calls_local_goal':(0x325da69,'e88285ffff'),
+ 'far_action_one_shot_guard':(0x3256007,'80b99000000001'),
+ 'far_action_checks_motor_state':(0x3256014,'39b810070000'),
+ 'far_action_skip_if_state_active':(0x325601a,'0f854d010000'),
+ 'far_action_main_goal_commit':(0x3256161,'e89ebce1ff'),
+ 'far_action_marks_issued':(0x3256166,'c6839000000001'),
 }
 EDGES={
  0x32815c5:0x3265b24,0x3265c69:0x326a3a0,
@@ -45,6 +52,7 @@ EDGES={
  0x2f4f62c:0x3279ee8,0x3279f71:0x3263ec4,
  0x3032965:0x302db44,0x302dbdb:0x30d5490,
  0x325ea85:0x3071e04,0x3119687:0x3102ca4,
+ 0x306a927:0x32490d0,0x325da69:0x3255ff0,0x3256161:0x3071e04,
 }
 THRESHOLD_RVA=0x3942d74
 
@@ -76,10 +84,13 @@ def verify_original(exe:Path):
             'per-member horizontal XZ distance <5 clears task+0x78 only if ==1',
             'branch v580 vs v568 depends on special action code, flag and distance',
             '0x02F561E8 MOVE callback has conditional E8 to 0x02F4F514 -> 0x03279EE8 -> B cached subtype',
+            'far-action v568 -> 0x0306A8FC -> 0x032490D0 creates a fresh action with +0x90=0',
+            'far-action 0x0325D9E0 -> 0x03255FF0 conditionally also commits 0x03071E04, with one-shot +0x90/+0x710 gate',
             'fresh RMB conditional issuer 0x030323C8->0x0302DB44->0x030D5490'
           ],
           'counterexample':{'near4_flag1':select_actor_action(0x68,1,4,0),
                             'far6_flag1':select_actor_action(0x68,1,6,0)},
+          'important_negative_control':'Both v580 and v568 action families have static paths to the native main motor writer; do not force v580 globally.',
           'v3_branch_observed':False,'safe_patch_authorized':False,
           'gameplay_causality_proven':False}
     finally:p.close()
