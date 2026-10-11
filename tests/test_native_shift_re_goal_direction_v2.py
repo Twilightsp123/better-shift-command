@@ -30,7 +30,10 @@ class GoalDirectionAndTraceTests(unittest.TestCase):
         b={'type':'event','ev':'OLD_GOAL_DIRECTION_DECISION','member':'0xaa',
            'traceId':3,'predicateReturn':1,'lastGoalReadSameThread':True,
            'lastGoalReadWithin100ms':True,'writeSeenSinceReceive':False,
-           'goalUnchangedSinceReceive':True}
+           'goalUnchangedSinceReceive':True,
+           'pairToExactNativeGoalRead':True,
+           'decodedGoalMatchesNativeAL':True,
+           'decodedOldGoal':{'nearZero':False,'dot':-3.0}}
         summary=a.analyze([r,q,b])
         self.assertEqual(summary['old_direction_with_B_fanout_count'],0)
         self.assertFalse(summary['physical_crowding_proven'])
@@ -38,6 +41,22 @@ class GoalDirectionAndTraceTests(unittest.TestCase):
         summary=a.analyze([r,q,b])
         self.assertEqual(summary['grade'],'B_FANOUT_LINKED_OLD_GOAL_DIRECTION_DECISION')
         self.assertFalse(summary['geometric_route_conflict_proven'])
+    def test_unpaired_old_read_never_counts_as_branch_proof(self):
+        recv={'type':'event','ev':'B_DEFERRED_RECEIVE','member':'0x99','traceId':6,
+              'atMs':20,'source':{'memberFanoutMatched':True}}
+        old={'type':'event','ev':'GOAL_READ','member':'0x99','traceId':6,
+             'writeSeenSinceReceive':False,'goalUnchangedSinceReceive':True}
+        legacy={'type':'event','ev':'OLD_GOAL_DIRECTION_DECISION',
+                'member':'0x99','traceId':6,'predicateReturn':1,
+                'goalUnchangedSinceReceive':True,'writeSeenSinceReceive':False,
+                'lastGoalReadSameThread':True,'lastGoalReadWithin100ms':True}
+        proof=a.analyze([recv,old,legacy])
+        self.assertEqual(proof['old_direction_with_B_fanout_count'],0)
+        self.assertEqual(proof['grade'],'B_FANOUT_LINKED_OLD_GOAL_READ')
+        legacy.update(pairToExactNativeGoalRead=True,decodedGoalMatchesNativeAL=False,
+                      decodedOldGoal={'nearZero':False,'dot':-3})
+        self.assertEqual(a.analyze([recv,old,legacy])['old_direction_with_B_fanout_count'],0)
+
     def test_queue_identity_strict_fallback(self):
         r={'type':'event','ev':'B_DEFERRED_RECEIVE','member':'0xa','traceId':2,
            'atMs':100,'source':{'memberFanoutMatched':True,
@@ -47,7 +66,10 @@ class GoalDirectionAndTraceTests(unittest.TestCase):
         b={'type':'event','ev':'OLD_GOAL_DIRECTION_DECISION','member':'0xa',
            'traceId':2,'predicateReturn':0,'lastGoalReadSameThread':True,
            'lastGoalReadWithin100ms':True,'writeSeenSinceReceive':False,
-           'goalUnchangedSinceReceive':True}
+           'goalUnchangedSinceReceive':True,
+           'pairToExactNativeGoalRead':True,
+           'decodedGoalMatchesNativeAL':True,
+           'decodedOldGoal':{'nearZero':False,'dot':-3.0}}
         result=a.analyze([{'type':'event','ev':'QUEUED_CONTINUATION'},r,q,b])
         self.assertEqual(result['grade'],'QUEUE_LINKED_B_OLD_GOAL_DIRECTION_DECISION')
         self.assertFalse(result['native_fix_proven'])
