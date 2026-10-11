@@ -11,7 +11,7 @@ import shutil
 from pathlib import Path
 from audit_wh3_full_native_chain import StrictPE, EXPECTED_SHA
 
-PIN=re.compile(r'\\[0x([0-9a-fA-F]+),\\s*[\\x27\\x22]([0-9a-fA-F]+)[\\x27\\x22]\\]')
+PIN=re.compile(r'\[0x([0-9a-fA-F]+),\s*[\x27\x22]([0-9a-fA-F]+)[\x27\x22]\]')
 
 def parse_probe(path):
     text=Path(path).read_text(encoding='utf-8')
@@ -27,11 +27,11 @@ def parse_probe(path):
 def starts_from_asm(asm):
     starts=set()
     for line in asm.splitlines():
-        m=re.match(r'^\\s*([0-9a-f]+):\\s+(.+)$',line)
+        m=re.match(r'^\s*([0-9a-f]+):\s+(.+)$',line)
         if not m:continue
-        fields=m.group(2).split('\\t')
+        fields=m.group(2).split('\t')
         # Wrapped disassembly byte continuations are NOT instruction starts.
-        if len(fields)>=2 and re.match(r'^\\s*[a-z][a-z0-9_.]*\\b',fields[-1]):
+        if len(fields)>=2 and re.match(r'^\s*[a-z][a-z0-9_.]*\b',fields[-1]):
             starts.add(int(m.group(1),16))
     return starts
 
