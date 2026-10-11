@@ -21,10 +21,19 @@ class NativeDeferredDistanceGate(unittest.TestCase):
   self.assertNotEqual(a.select_actor_action(0x68,1,4,0),
                       a.select_actor_action(0x68,1,6,0))
  def test_original_opcode_inventory(self):
-  self.assertEqual(len(a.GUARDS),29)
-  self.assertEqual(len(a.EDGES),12)
+  self.assertEqual(len(a.GUARDS),36)
+  self.assertEqual(len(a.EDGES),15)
   self.assertEqual(a.THRESHOLD_RVA,0x3942d74)
   self.assertEqual(a.GUARDS['near_flag_clear'],(0x2f7a08e,'44894378'))
+ def test_both_actor_action_classes_can_reach_original_goal_writer(self):
+  self.assertEqual(a.EDGES[0x325ea85],0x3071e04)
+  self.assertEqual(a.EDGES[0x325da69],0x3255ff0)
+  self.assertEqual(a.EDGES[0x3256161],0x3071e04)
+ def test_far_action_has_one_shot_goal_guard_not_permanent_stale_goal(self):
+  self.assertEqual(a.GUARDS['far_action_one_shot_guard'][1],'80b99000000001')
+  self.assertEqual(a.GUARDS['far_action_checks_motor_state'][1],'39b810070000')
+  self.assertEqual(a.GUARDS['far_action_constructor_clears_issued'][1],'664183a29000000000')
+  self.assertEqual(a.GUARDS['far_action_marks_issued'][1],'c6839000000001')
  def test_refuse_wrong_exe(self):
   with tempfile.TemporaryDirectory() as tmp:
    p=Path(tmp)/'wrong.exe'
@@ -37,6 +46,6 @@ class NativeDeferredDistanceGate(unittest.TestCase):
  def test_original_9_0_3(self):
   r=a.verify_original(Path(os.environ['WH3_903_EXE']))
   self.assertEqual(r['horizontal_squared_distance_gate'],25.)
-  self.assertEqual(r['verified_call_edges'],12)
+  self.assertEqual(r['verified_call_edges'],15)
   self.assertFalse(r['safe_patch_authorized'])
 if __name__=='__main__':unittest.main()
