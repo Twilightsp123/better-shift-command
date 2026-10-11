@@ -214,3 +214,94 @@ python -m unittest discover -s tests -p 'test_native_shift_re_b_native_object_xr
 5. `patch_authorized=false` 不变；需要安全根因与 ABI 才可做最小 Patch，不修改公共成员 Tick 或 CA 队列弯道。
 
 本地原始 EXE 额外审计已跑 **41 处指令守卫、9 个虚表槽、10 条调用边**并通过；合成／EXE 混合测试 **9/9 PASS**。GitHub 提交的轻量验证脚本覆盖其中大部分相同边；CI 不持有 EXE，不能将 CI 结果升级为真实 EXE 或游戏行为测试。
+
+
+## 2026-10-11 原始 EXE 增量 II：B 延迟成员任务已接通一条条件主 motor 更新链
+
+**此节覆盖上节的“延迟包到 `member+0x1E0` 尚未连通”这一旧断点，但不覆盖 V3 实际分支未知的限制。**
+
+**实际在用户同日上传且 SHA256 精确匹配的原始 EXE 上执行：46 个原始指令字节守卫、8 条 E8 调用、3 张完整动作虚表槽和 38 张原生士兵虚表 census 均通过；本地 10/10 离线测试通过。** GitHub 工具源为
+`maintenance_tools/native_shift_re/audit_b_deferred_motor.py`；
+单元测试为 `tests/test_native_shift_re_b_deferred_motor.py`。
+它们在公开 CI 不携带 EXE 时仅可做结构／合成验证；不得升级为 V3 证明。
+
+### 1. 完整的、仍有条件门控的原生成员数据流
+
+```text
+B route node+0x70
+   → B cached subtype 0x03AE00E8 +0x10→0x03281520
+   → 0x03265B24 formation geometry/records
+   → 0x0326A3A0 → packet+0x34 (member-specific action code)
+   → member virtual+0x368, common receiver 0x0306B9F0
+     → (group mode gate FALSE & packet+0x50 bit0x20 FALSE)
+       0x02F5F7C8, task vtable 0x03905E18
+       packet+0x34 → task+0x74 (0x02D99F74 copies payload into task+0x40)
+       → task+0x10→0x02F83B24, deadline/prerequisite state
+       → 0x02F6B170 → 0x02F79FF0 [task+0x74 / per-member state gates]
+       → [conditional virtual+0x580] 0x0306A990
+       → 0x03249350 installs member+0x330 action 0x03913808
+       → common member Tick 0x03081EB4 → 0x03080F4C
+         [member+0x328 ownership and action state gates]
+       → virtual+0x10→0x0325E294 [additional native conditions]
+       → CALL at 0x0325EA85 → 0x03071E04
+       → 0x03071F20 → 0x0311954C
+       → member+0x1E0 original motor goal + 0x03102CA4 notification
+```
+
+**关键对象身份：** `0x0306A990` 在 `0x0306A99A` 定位本士兵
+`member+0x328`，通过 `0x0306A9BB→0x03249350` 安装动作虚表
+`0x03913808`；其 `+0x10` 是 `0x0325E294`。
+公共 Tick 的 `0x030822CB` 传入同一 `&member+0x328`，
+`0x030822D2→0x03080F4C` 在持有标志成立时调用嵌入动作
+`+0x08/+0x10`。`0x0325EA85` 的原始 `E8 7A 33 E1 FF`
+精确指向 `0x03071E04`，后者触发先前已机器码确认的
+`+0x7F8→+0x1E0` motor 链。
+
+### 2. 真正的两类原生目标交接存在分叉
+
+- `0x03265B24` 在 `0x03265BEB` 读生成记录 `+0x2C`，
+  在 `0x03265BF5` 读**当前成员** `member+0x318`；按记录代码
+  5/6/7 等有条件生成动作 `0x67/0x68/0x69`，也可能因包标志
+  令代码清零；`0x03265C3F` 将最终 `EBX` 放入 `R9D`。
+- `0x0326A3A0` 把成员动作参数传给 `0x02F5F8DC`，后者在
+  `0x02F5F945` 写 `packet+0x34`。目标包经成员接收器
+  `0x02F5F7C8→0x02D99F74` 从 packet 复制到 `task+0x40`，
+  因而 `task+0x74` 精确对应 packet+0x34。
+- `0x02F79FF0` 在 `0x02F7A002/0x02F7A00B` 筛选
+  `task+0x74` 是否属于 `0x67..0x69`；还看
+  `task+0x90 bit0x10`、成员距离和 `task+0x78`，
+  满足特定条件才在 `0x02F7A116` 调用成员 `virtual+0x580`。
+  其余可在 `0x02F7A17D` 使用 **`virtual+0x568`**。
+- 精确原始 EXE 所有已识别 **38 张成员虚表**：
+  **38/38** 的 `+0x580→0x0306A990`；
+  `+0x568` 为 **37 张 `0x0306A8FC`、1 张 `0x0311737C`**。
+  `0x0306A8FC` 经 `0x032490D0` 创建**另一张**
+  `0x03ADD278` 动作，`+0x10→0x0325D9E0`，与第一类
+  `0x03913808+0x10→0x0325E294` 不等价。
+- `0x0325E294` 到 `0x03071E04` 还需要
+  `0x0325EA21` 的 `action+0x6E==1`、
+  `0x0325EA27` 的局部状态及一系列成员原生状态门槛；
+  不能仅看到动作安装就当作主 motor 在同一帧更新了目标。
+
+**离线原生分支模型**能生成同一群组中一个成员走 `+0x580`、
+另一个走 `+0x568` 的可执行反例。然而这只是机器码许可的
+状态组合，不是历史 V3 士兵的实际目标更新帧、速度或挤压因果证明。
+
+### 3. bit7 任务必须继续保持独立
+
+`0x03AC6F78+0x90→0x02F6EF4C` 的
+`0x03905D98+0x78→0x02F87684` **bit7 消费任务**与
+`0x03905E18` 延迟目标任务不同。
+不能把 bit7 当作已经证实的 Shift 队列交接阶段位，
+也不能在未见 B group 实际安装该消费者时修改 `member+0xB10`。
+
+### 4. 修复判据仍须明确
+
+新增证据把阻断位置从“谁读取 B 缓存”收缩为：
+**在真实 Shift MOVE 续接时，各成员何时从
+`0x03905E18` 延迟状态进入
+`0x03913808 / 0x03ADD278` 动作，以及实际是否经过
+`0x0325EA85` 到 `member+0x1E0`。**
+必须和普通 RMB 相同目标及成员位置条件比较，辨别有效的原生
+“旧目标不再可保留”谓词，才允许制作可逆、默认关闭的最小 Patch。
+此处无 DLL / Win64 构建 / WH3 修复验证；`patch_authorized=false` 不变。
