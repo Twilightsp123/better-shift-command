@@ -1,0 +1,72 @@
+digraph WH3_MOVE {
+  graph [fontname="DejaVu Sans", fontsize=18, rankdir=LR, splines=polyline, nodesep=0.32, ranksep=0.70,
+         labelloc=t, label="WH3 Original MOVE — RMB / Shift object-aware chain (static; V3 branch unknown)",
+         bgcolor="white", pad="0.2"];
+  node [fontname="DejaVu Sans", fontsize=10, shape=box, style="rounded,filled", fillcolor="#F5F7FA", color="#6A7C8F", margin="0.10,0.08"];
+  edge [fontname="DejaVu Sans", fontsize=9, color="#65788B", arrowsize=0.62];
+
+  subgraph cluster_cmd {label="Command and task state"; color="#DAE0E7";
+    RMB [label="Normal RMB\nnew MOVE: +0xA0 = null"];
+    SHIFT [label="Shift successor\nconditional shared state inherit"];
+    MOVE [label="0x03025D70\nMOVE work (V3 hit)"];
+    TCB [label="0x02F561E8\nnative MOVE task callback"];
+    SEL [label="0x03279E40\nmode classifier (0/3/5)", shape=diamond, margin="0.06"];
+    RMB -> MOVE; SHIFT -> MOVE; MOVE -> TCB; TCB -> SEL;
+  }
+
+  subgraph cluster_group {label="Group task branches"; color="#D5DEE8";
+    A [label="A mode 0/3/5\n0x030D554C\n0x030D5490 per-actor packets"];
+    B [label="B other modes\n0x03263AB0\nactor classifier and B task"];
+    Geom [label="common geometry\n0x030FDA9C"];
+    Bbuild [label="0x03281444\n0x03121ABC\n0x030ECB10"];
+    Bnode [label="B route node +0x70\nroute_context +0x2D0"];
+    SEL -> A [label="true"]; SEL -> B [label="false"];
+    Geom -> A [label="ready packet targets"];
+    B -> Bbuild [label="conditional task tick"];
+    Bbuild -> Bnode [label="create/retain geometry"];
+    Geom -> Bnode [label="deferred cache fill"];
+  }
+
+  subgraph cluster_group_tick {label="Separate group tick owners"; color="#D5DEE8";
+    GT [label="0x02DD579C\nunit group tick"];
+    UnitTasks [label="unit+0x1F0\n0x02F853A0 generic tasks"];
+    GroupFSM [label="unit+0x150\n0x02DD81B0\ngroup phase FSM"];
+    RouteCtx [label="unit+0x160\n0x03128E80 route context"];
+    RouteTasks [label="route_context+0x1F0\n0x0311DE74 route computation"];
+    RouteNodes [label="route_context+0x2D0\nB nodes cache / refcount"];
+    GT -> UnitTasks [label="1"];
+    GT -> GroupFSM [label="2+"];
+    GT -> RouteCtx [label="later"];
+    RouteCtx -> RouteTasks;
+    RouteCtx -> RouteNodes;
+    Bnode -> RouteNodes [label="owned by"];
+    GroupFSM -> A [label="other conditional path", style=dashed, color="#967A5C"];
+  }
+
+  subgraph cluster_actor {label="Actor target and later update"; color="#D5DEE8";
+    Packet [label="0x26 packet\n0x0306B9F0 receiver"];
+    Pose [label="0x03073224\npose + mode handling"];
+    Action [label="member +0x328\n0x03914618 subaction"];
+    Mode [label="member+0x318\n0x03078B1C mode setter"];
+    AT [label="0x03081EB4 common actor tick\n10-cohort mode recheck only"];
+    Mot [label="primary actor motor inputs\n0x03071E04/0x03071F20\nor subtype route 0x02F83F44"];
+    A -> Packet;
+    Packet -> Pose [label="conditional virtual+0xE8"];
+    Pose -> Mode [label="immediate"];
+    Packet -> Action [label="conditional replacement"];
+    Action -> AT [label="later individual update", style=dashed];
+    AT -> Mode [label="periodic/gated"];
+    Pose -> Mot [label="same goal? UNPROVEN",style=dashed, color="#B4534E"];
+    Bnode -> Mot [label="route-to-motor dataflow UNPROVEN",style=dashed, color="#B4534E"];
+  }
+
+  subgraph cluster_member_bridge {label="Conditional B member-state bridge (new evidence)"; color="#D5DEE8";
+    Bit [label="member+0xB10 bit7\nwritten per actor in B"];
+    VTask [label="task vtable 0x03905D98\n+0x28 update -> +0x78"];
+    BReader [label="0x02F87684\nreads two actor flags\nselects heading branch"];
+    B -> Bit [label="per-member write"];
+    Bit -> BReader [label="proven field READ",color="#396F5D"];
+    VTask -> BReader [label="conditional v+0x78",color="#396F5D"];
+    BReader -> Mot [label="V3 motor consequence UNPROVEN",style=dashed,color="#B4534E"];
+  }
+}
