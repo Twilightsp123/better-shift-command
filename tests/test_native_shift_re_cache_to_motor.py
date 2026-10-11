@@ -24,6 +24,7 @@ class NativeCacheMotorTests(unittest.TestCase):
   self.assertEqual(len(a.VFUNC),3)
   self.assertEqual(a.VFUNC['action_type_a_neighbour_update'],(0x03ACD218,0x0308279C))
   self.assertEqual(a.VFUNC['action_type_b_spatial_target_update'],(0x03ACD598,0x0308393C))
+  self.assertEqual(a.VFUNC['action_type_b_update'],(0x03ACD478,0x03083120))
  def test_original_e8_forward(self):
   self.assertEqual(a.e8_destination(0x1000,b'\xe8\x05\x00\x00\x00'),0x100a)
  def test_original_e8_back(self):
