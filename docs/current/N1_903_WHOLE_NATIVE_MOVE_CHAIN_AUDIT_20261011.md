@@ -107,3 +107,51 @@ python -m unittest discover -v -s tests -p 'test_native_shift_re_full_chain.py'
 若要让第二个命令也检查真实 EXE，设置环境变量 `WH3_903_EXE=/absolute/path/to/Warhammer3.exe`。Linux 使用 `objdump` 时，程序还会逐函数核对调用点是否真是指令边界；没有该工具时会省略这项额外独立检查并标明覆盖范围。GitHub CI 不含游戏 EXE，只能运行结构性测试（会跳过真实 EXE 项）；不得把 CI 通过说成游戏行为测试通过。
 
 **工程结论：**我们已经把整条相关代码网络批量审计到**对象所有权、状态位写读、路线建毁和成员更新**层面；剩下的不再是无目的“多找几个函数”，而是一个清楚标记、尚无静态对象身份连接的 `B node+0x70 → 实际主兵模运动输入` 关系，以及历史 V3 A/B 运行分支。不能因找到 175 个函数就虚称已经完全恢复游戏控制逻辑。
+
+## B 任务对象与路线缓存的全代码段 xref 补充（同日增量）
+
+本研究分支新增了 `maintenance_tools/native_shift_re/audit_b_native_object_xrefs.py` 及
+`tests/test_native_shift_re_b_native_object_xrefs.py`。目的不是再扩大 175 个精选节点的总数，
+而是针对**精选集合遗漏的上游对象构造者**和**不同对象碰巧具有同一字段偏移**这两类失真。
+
+### 已有机器码级起点（继承自冻结的 full_chain_manifest.json）
+
+- `0x03263C0A` 原始守卫 `0883100b0000`：B 群组构造者逐成员设置 `member+0xB10` bit7。
+- `0x02F6EFDE` 原始守卫 `488d05b36d9900`：另一类成员任务在
+  `0x02F6EF4C` 内装入 vtable `0x03905D98`；相应 +0x78
+  指向 `0x02F87684`。`0x03905D18+0x78→0x011287FC` 为负对照。
+  **未验证** B 群组构造路径确实创建/运行该成员任务实例。
+- `0x030ECBA2` 和 `0x03129097` 分别在 B 节点创建与缓存填充处写
+  `node+0x70`；`0x030F65D2` 在销毁时读同一节点几何；
+  `0x0311963A` 写 `member+0x1E0` 的最终运动目标。
+  **这些操作之间还没有以对象指针类型证明的传值边。**
+
+### 新代码采取的验证顺序
+
+1. 对 EXE 执行**完整 SHA256/PE ImageBase 校验**；复核上述 7 个原始机器码守卫与
+   3 项任务虚表（含负对照）。
+2. 扫描所有原始可执行节的常规 x64 RIP 相对 `LEA/MOV` 引用，以及针对性
+   `E8` 直接调用。覆盖 `0x03905D98` / `0x03905D18` /
+   `0x03905E18` / `0x03AE0128` / `0x03914618` 五张虚表，
+   与 `0x02F6EF4C` / `0x03263AB0` 等关键调用目标。
+3. 每个字节模式候选必须由**PE unwind 所属函数的真实 objdump 指令边界**确认。
+   非指令边界、无已知拥有函数者拒绝记为已证 xref；扫描仍非全类型指针别名求解。
+4. 独立反汇编 B 任务、路线节点分配/释放、群组 Tick、A 成员下发、目标写入和主
+   motor writer 共 10 个函数；只输出 `+0x58/+0x70/+0x2D0/+0x2D8/+0xB10`
+   内存操作数及前后指令。**操作数相同不证明拥有者相同**。
+5. 报告输出保留 `patch_authorized=false`、历史 V3 未观测和仍缺的准确边。
+   禁止据交叉引用结果推断群组路线直接进入主运动控制器，或发布补丁。
+
+在**持有精确原始 EXE**的 Windows/Linux 离线主机上运行：
+
+```bash
+python maintenance_tools/native_shift_re/audit_b_native_object_xrefs.py \
+  --exe /absolute/path/to/Warhammer3.exe \
+  --out /safe/output/b_native_object_xrefs.json
+python -m unittest discover -s tests -p 'test_native_shift_re_b_native_object_xrefs.py' -v
+```
+
+验证等级：新 Python 程序及离线合成断言由研究分支 CI 执行；**本会话没有原始 EXE 文件**
+，因此未运行真实 EXE 的全节 xref 枚举，没有 Win64 Native DLL 或实机验证，
+不声称已经定位安全修复点。必须取得构造者实例到成员实际活动任务的对象身份，
+并证明 B 几何读者确实将数据写入主运动目标，再设计细粒度、默认关闭、可逆补丁。
