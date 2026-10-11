@@ -38,12 +38,12 @@ def deferred_actor_tick_permitted(tick_mask, actor_action_type, action_active,
 
 class NativeOriginalMoveActorPhase(unittest.TestCase):
     def test_machine_guard_coverage(self):
-        self.assertEqual(len(a.PIN),92)
+        self.assertEqual(len(a.PIN),97)
         self.assertIn('fallback_member_set_bit7',a.PIN)
         self.assertIn('mode_new_written',a.PIN)
         self.assertIn('move_callback_subtask_state58',a.PIN)
     def test_original_direct_edges(self):
-        self.assertEqual(len(a.CALLS),39)
+        self.assertEqual(len(a.CALLS),40)
         self.assertEqual(len(a.JUMPS),1)
         self.assertEqual(a.CALLS['task_to_group_branch'],(0x02F56404,0x03279E40))
         self.assertEqual(a.CALLS['branch_to_fallback'],(0x03279ED8,0x03263AB0))
@@ -83,6 +83,11 @@ class NativeOriginalMoveActorPhase(unittest.TestCase):
         self.assertEqual(a.CALLS['submotor_emit_route_segments'][1],0x030C1FDC)
         self.assertEqual(a.CALLS['submotor_merge_route_segments'][1],0x030C7858)
         self.assertEqual(a.PIN['submotor_route_result_store'][1],'48894370')
+    def test_group_submotor_is_linked_list_not_a_direct_motor_tick(self):
+        self.assertEqual(a.PIN['submotor_link_write_previous'][1],'48894818')
+        self.assertEqual(a.PIN['submotor_link_write_next'][1],'48894810')
+        self.assertEqual(a.CALLS['submotor_link_neighbor_nodes'][1],0x0310E770)
+        self.assertEqual(a.CALLS['submotor_insert_segment_node'][1],0x01325434)
     def test_fallback_existing_submotor_route_still_conditional(self):
         self.assertEqual(a.CALLS['submotor_existing_context_resync'][1],0x030FDA9C)
         self.assertEqual(a.CALLS['fallback_submotor_fresh'][1],0x031219B0)
@@ -135,8 +140,8 @@ class NativeOriginalMoveActorPhase(unittest.TestCase):
         pe=a.OriginalPE(exe)
         try:
             proof=a.verify(pe)
-            self.assertEqual(proof['exact_opcode_guards'],92)
-            self.assertEqual(proof['verified_calls'],39)
+            self.assertEqual(proof['exact_opcode_guards'],97)
+            self.assertEqual(proof['verified_calls'],40)
             self.assertEqual(proof['verified_tail_jumps'],1)
             self.assertFalse(proof['patch_authorized'])
             self.assertEqual(proof['v3_real_runtime_branch'],'unknown')
