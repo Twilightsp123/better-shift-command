@@ -38,12 +38,12 @@ def deferred_actor_tick_permitted(tick_mask, actor_action_type, action_active,
 
 class NativeOriginalMoveActorPhase(unittest.TestCase):
     def test_machine_guard_coverage(self):
-        self.assertEqual(len(a.PIN),97)
+        self.assertEqual(len(a.PIN),111)
         self.assertIn('fallback_member_set_bit7',a.PIN)
         self.assertIn('mode_new_written',a.PIN)
         self.assertIn('move_callback_subtask_state58',a.PIN)
     def test_original_direct_edges(self):
-        self.assertEqual(len(a.CALLS),40)
+        self.assertEqual(len(a.CALLS),41)
         self.assertEqual(len(a.JUMPS),1)
         self.assertEqual(a.CALLS['task_to_group_branch'],(0x02F56404,0x03279E40))
         self.assertEqual(a.CALLS['branch_to_fallback'],(0x03279ED8,0x03263AB0))
@@ -88,6 +88,28 @@ class NativeOriginalMoveActorPhase(unittest.TestCase):
         self.assertEqual(a.PIN['submotor_link_write_next'][1],'48894810')
         self.assertEqual(a.CALLS['submotor_link_neighbor_nodes'][1],0x0310E770)
         self.assertEqual(a.CALLS['submotor_insert_segment_node'][1],0x01325434)
+    def test_fallback_route_relation_first_mismatch_resets_subcontroller(self):
+        # Real native original: 0x03281444 invokes 0x030DEA20 on existing
+        # subcontroller+0x70; 0x030DEA20 returns TRUE on FIRST route-linked
+        # reference unequal to route+0x78, not after a 60-soldier barrier.
+        self.assertEqual(a.CALLS['fallback_existing_route_relation_gate'],
+                         (0x0328146D,0x030DEA20))
+        self.assertEqual(a.PIN['route_reference_eval_first_difference'],
+                         (0x030DEA63,'7521'))
+        self.assertEqual(a.PIN['route_reference_eval_all_match_false'][1],'32c0')
+        self.assertEqual(a.PIN['route_reference_eval_any_mismatch_true'][1],'b001')
+        self.assertEqual(a.PIN['route_reference_store_from_first_node'][0],0x030C78D0)
+        def relation_mismatch(saved, resolved):
+            # Synthetic structural model; NO actual V3 unit data.
+            return saved is not None and any(ref is not saved for ref in resolved)
+        shared=object();different=object()
+        self.assertFalse(relation_mismatch(shared,[shared]*36))
+        self.assertTrue(relation_mismatch(shared,[shared]*35+[different]))
+        self.assertFalse(relation_mismatch(None,[different]))
+        self.assertFalse(relation_mismatch(shared,[]))
+        self.assertEqual(a.PIN['fallback_existing_route_discard'][1],'4883635800')
+        self.assertEqual(a.PIN['fallback_existing_route_same'][1],'c6436001')
+
     def test_fallback_existing_submotor_route_still_conditional(self):
         self.assertEqual(a.CALLS['submotor_existing_context_resync'][1],0x030FDA9C)
         self.assertEqual(a.CALLS['fallback_submotor_fresh'][1],0x031219B0)
@@ -140,8 +162,8 @@ class NativeOriginalMoveActorPhase(unittest.TestCase):
         pe=a.OriginalPE(exe)
         try:
             proof=a.verify(pe)
-            self.assertEqual(proof['exact_opcode_guards'],97)
-            self.assertEqual(proof['verified_calls'],40)
+            self.assertEqual(proof['exact_opcode_guards'],111)
+            self.assertEqual(proof['verified_calls'],41)
             self.assertEqual(proof['verified_tail_jumps'],1)
             self.assertFalse(proof['patch_authorized'])
             self.assertEqual(proof['v3_real_runtime_branch'],'unknown')
