@@ -59,6 +59,12 @@ PINS = {
  "member_goal_progress_call":(0x3071e86,"e895000000"),
  "member_motor_goal_write":(0x311963a,"0f1187e0010000"),
  "member_motor_notify":(0x3119687,"e81896feff"),
+ "B_subtype_once_flag":(0x328152a,"80b98000000000"),
+ "B_subtype_once_skip":(0x3281537,"0f85a1000000"),
+ "B_subtype_ready_gate":(0x328154a,"80780800"),
+ "B_subtype_group_fanout":(0x32815c5,"e85a45feff"),
+ "B_subtype_dispatch_mark":(0x32815d7,"4088bb80000000"),
+ "B_subtype_group_completion_gate":(0x32815e2,"83b89808000000"),
  "member_tick_subaction_owner":(0x30822cb,"488d8f28030000"),
  "member_tick_subaction_call":(0x30822d2,"e875ecffff"),
  "subaction_owner_flag_gate":(0x3080f52,"80b95401000001"),
@@ -72,6 +78,7 @@ VTABLES = {
  0x03add278+0x10:0x0325d9e0,
 }
 DIRECT = {
+ 0x32815c5:0x3265b24,
  0x30822d2:0x3080f4c,
  0x3265c69:0x326a3a0,
  0x306ba5b:0x2f5f7c8,
@@ -136,6 +143,7 @@ def verify(exe):
           "member_v568_targets":dict(other),
           "typed_conditional_route":[
             "B node+0x70 via 0x03281520 / 0x03265B24 -> per-member packet+0x34",
+            "after packet fanout 0x032815D7 marks B subtype dispatch, distinct from member motor goal commit; 0x032815E2 additionally tests group+0x898",
             "packet+0x34 through 0x02D99F74 to deferred task+0x74",
             "task+0x74 / mode / distance gates in 0x02F79FF0 select member virtual +0x580 versus +0x568",
             "virtual +0x580 -> 0x0306A990 -> 0x03249350 installs 0x03913808 member+0x330 action",
