@@ -48,6 +48,13 @@ GUARDS = {
     'common_writer_commits_xyz_goal':(0x0311963A,'0f1187e0010000'),
     'common_writer_notifies_native':(0x03119687,'e81896feff'),
     'native_update_uses_own_mode_flags':(0x03102CAB,'f6c204'),
+    'contact_pair_same_owner_first':(0x03084996,'488b8780000000'),
+    'contact_pair_same_owner_cmp':(0x0308499D,'48398380000000'),
+    'contact_pair_same_owner_skip':(0x030849A4,'0f84b3010000'),
+    'contact_dispatch_member_virtual_4b0_a':(0x03084AED,'ff90b0040000'),
+    'contact_dispatch_member_virtual_4b0_b':(0x03084D3E,'ff90b0040000'),
+    'member_packet_direct_branch':(0x0306BA2F,'f6425020'),
+    'member_packet_direct_e8_method':(0x0306BB44,'41ff93e8000000'),
 }
 DIRECT_EDGES = {
     'candidate_lookup_for_old_comparison':(0x03052350,0x0312D088),
@@ -64,6 +71,8 @@ DIRECT_EDGES = {
     'progression_to_common_writer_a':(0x030720E3,0x0311954C),
     'progression_to_common_writer_b':(0x030723D9,0x0311954C),
     'common_writer_native_notify':(0x03119687,0x03102CA4),
+    'common_member_update_to_contact_filter':(0x030824A6,0x0308489C),
+    'special_member_virtual_4b0_uses_3069844':(0x03116D70,0x03069844),
 }
 # Verify machine-code true-branch destination, independent of expected bytes.
 BRANCHES = {
@@ -103,7 +112,7 @@ def model_individual_action(*,action_active:bool,found_candidate:bool,
 def inspect(exe: Path) -> dict:
     digest=sha(exe)
     if digest!=SHA256:raise ValueError('WRONG_EXE_SHA256:'+digest)
-    guards=[]; calls=[]; branches=[]
+    guards=[]; calls=[]; branches=[]; interaction_vtables={}
     with exe.open('rb') as f,mmap.mmap(f.fileno(),0,access=mmap.ACCESS_READ) as mm:
         pe=PinnedPE(mm)
         for name,(site,bytes_hex) in GUARDS.items():
@@ -125,22 +134,42 @@ def inspect(exe: Path) -> dict:
             got=branch_dest(site,pe.read(site,n,True))
             if got!=dest:raise ValueError('CONDITIONAL_BRANCH_MISMATCH:'+name)
             branches.append({'name':name,'from':hex(site),'to':hex(got)})
+        # Member+0x4B0 is also reached from contact/interaction callsites,
+        # including one that skips actors sharing the same +0x80 owner pointer.
+        # This is NOT evidence that action 0x03088618 runs under normal MOVE.
+        for vt,(receiver,_ve8) in pe.member_vtable_census().items():
+            if receiver!=0x0306B9F0:continue
+            fn=pe.pointer_rva(vt+0x4B0)
+            fn2=pe.pointer_rva(vt+0x4D0)
+            interaction_vtables[vt]=(fn,fn2)
+        from collections import Counter
+        count_4b0=Counter(t[0] for t in interaction_vtables.values())
+        count_4d0=Counter(t[1] for t in interaction_vtables.values())
+        if len(interaction_vtables)!=36 or count_4b0!={0x03069844:32,0x008D3280:4} or count_4d0!={0x03069B10:36}:
+            raise ValueError('INTERACTION_ACTOR_VTABLE_CENSUS_CHANGED')
     return {
       'schema':'bsc.903.rmb_shift_member_phase_decision.v1',
       'grade':'PINNED_EXE_STATIC_ONLY',
       'sha256':digest,
       'guards':guards,'direct_edges':calls,'checked_branches':branches,
+      'member_interaction_vtables':{
+          'common_member_classes':len(interaction_vtables),
+          'virtual_4b0':{hex(k):v for k,v in sorted(count_4b0.items())},
+          'virtual_4d0':{hex(k):v for k,v in sorted(count_4d0.items())},
+      },
       'interpretation':[
         'Fresh RMB and eligible queued continuation carry different higher-level route-state lifetimes.',
         'Same spatial association identity short-circuits the original compatibility helper to TRUE.',
         'One actor action can retain existing motor goal on group-compatibility TRUE, while another action on TRUE calls an incremental path that still reaches the goal writer.',
         'Incompatibility can issue a full per-member target reset and progress through the original motor writer.',
         'Native goal writer can return early for original actor flags, so call-to-writer is not proof every invocation writes a goal.',
+        'A group-action creation route is reachable via virtual+0x4B0 in a member-interaction screen; the screen skips same-owner (+0x80) candidate pairs in the examined branch. This does NOT prove the group action occurs in native RMB/Shift move handling.',
       ],
       'not_proven':[
         'Which actor action types were active in real V3 35-43s compressed turn.',
         'How often identity-equal cache and divergent action outcomes happened in the real battle.',
         'One specific branch as a proven cause of the observed model crowding.',
+        'A native MOVE task calling group-action A 0x03088618 rather than a contact/event path.',
       ],
       'runtime_patch_authorized':False,
       'windows_build_tested':False,
