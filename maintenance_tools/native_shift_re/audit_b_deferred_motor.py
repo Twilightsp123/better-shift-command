@@ -59,6 +59,12 @@ PINS = {
  "member_goal_progress_call":(0x3071e86,"e895000000"),
  "member_motor_goal_write":(0x311963a,"0f1187e0010000"),
  "member_motor_notify":(0x3119687,"e81896feff"),
+ "member_tick_subaction_owner":(0x30822cb,"488d8f28030000"),
+ "member_tick_subaction_call":(0x30822d2,"e875ecffff"),
+ "subaction_owner_flag_gate":(0x3080f52,"80b95401000001"),
+ "subaction_embedded_pointer":(0x3080f5b,"488d5908"),
+ "subaction_v8_initialize":(0x3080f71,"ff5008"),
+ "subaction_v10_update":(0x3080f84,"ff5010"),
 }
 VTABLES = {
  0x03905e18+0x10:0x02f83b24,
@@ -66,6 +72,7 @@ VTABLES = {
  0x03add278+0x10:0x0325d9e0,
 }
 DIRECT = {
+ 0x30822d2:0x3080f4c,
  0x3265c69:0x326a3a0,
  0x306ba5b:0x2f5f7c8,
  0x2f5f7ee:0x2d99f74,
@@ -132,6 +139,7 @@ def verify(exe):
             "packet+0x34 through 0x02D99F74 to deferred task+0x74",
             "task+0x74 / mode / distance gates in 0x02F79FF0 select member virtual +0x580 versus +0x568",
             "virtual +0x580 -> 0x0306A990 -> 0x03249350 installs 0x03913808 member+0x330 action",
+            "common actor tick 0x03081EB4 at 0x030822CB passes &member+0x328 to 0x03080F4C; owner-flag-gated virtual +0x10 selects 0x0325E294",
             "member action +0x10 -> 0x0325E294 conditionally calls 0x03071E04",
             "0x03071E04 -> 0x03071F20 -> 0x0311954C can commit member+0x1E0 motor target"],
           "unproven":[
