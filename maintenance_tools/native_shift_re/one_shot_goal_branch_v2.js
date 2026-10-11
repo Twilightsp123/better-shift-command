@@ -7,7 +7,8 @@ const PINS=[
  [0x0304459d,'ff4618'],[0x03265d3f,'ff9068030000'],
  [0x0306ba5b,'e8683defff'],[0x0306bbae,'e85d4ed4ff'],
  [0x03115cbc,'4c8d89e0010000'],[0x03256209,'84c0'],
- [0x0311963a,'0f1187e0010000'],[0x0311965f,'c787d80100000000803f'],
+ [0x0311963a,'0f1187e0010000'],[0x03119660,'c787d80100000000803f'],
+ [0x03115cf4,'f3410f104a08'],
  [0x03281554,'488b4070']
 ];
 function hx(p,n){try{return Array.from(new Uint8Array(p.readByteArray(n)))
@@ -22,6 +23,7 @@ for(const [rva,expected] of PINS){
 }
 const t0=Date.now();let total=0,discarded=0,nextId=0;
 const queue=[],packets=new Map(),actors=new Map(),postWrites=new Map();
+const goalReadsByThread=new Map();
 let readCount=0;
 function now(){return Date.now()-t0;}
 function emit(ev,v){if(total>=CAP.events){discarded++;return;}
@@ -82,10 +84,10 @@ try {
        (last.packet===show(p)||last.bytes===hx(p,0x58));
    const owner=readPtr(m,0x58);
    const q=queue.filter(z=>now()-z.at<10000&&
-      (z.root===show(owner)||z.group===show(owner)||(last&&z.group===last.group)));
+      (z.root===show(owner)||z.group===show(owner)||(match&&last&&z.group===last.group)));
    init(m,'B_DEFERRED_RECEIVE',p,{
      memberFanoutMatched:!!match,memberFanoutGroup:last?last.group:null,
-     memberFanoutGeo:last?last.geom:null,queuedUnitIdentityMatches:q.length>0,
+     memberFanoutGeo:last?last.geom:null,queuedUnitIdentityMatches:!!match&&q.length>0,
      queuedIdentityMethod:q.length?'EXACT_POINTER_EQUALITY':'UNKNOWN',
      note:'Temporal proximity is NOT proof of same Shift order.'});
  });
@@ -99,9 +101,27 @@ try {
    s.lastGoalSample=now();s.lastReadThread=this.threadId;
    s.readSeen=true;readCount++;
    const v=memberState(m);
+   goalReadsByThread.set(this.threadId,{at:now(),member:show(m),
+      traceId:s.id,x:v.x,z:v.z,oldGoal:v.goal24,decoded:null});
    emit('GOAL_READ',{traceId:s.id,
      goalUnchangedSinceReceive:v.goal24===s.prior,
      writeSeenSinceReceive:s.wrote,...v});
+ });
+ // Exact native 0x03115CF4 instruction boundary:
+ // R10 contains decoded goal XYZ, RCX the ushort heading LUT index,
+ // RAX the runtime-populated GOAL heading LUT (not soldier facing).
+ attach(0x03115cf4,function(){
+   const d=goalReadsByThread.get(this.threadId);if(!d)return;
+   if(now()-d.at>100){goalReadsByThread.delete(this.threadId);return;}
+   const idx=this.context.rcx.toUInt32();if(idx>65535)return;
+   const tx=readF32(this.context.r10,0),tz=readF32(this.context.r10,8);
+   const gx=readF32(this.context.rax,idx*8);
+   const gz=readF32(this.context.rax,idx*8+4);
+   const dot=(tx===null||tz===null||gx===null||gz===null||
+     d.x===null||d.z===null)?null:(tx-d.x)*gx+(tz-d.z)*gz;
+   d.decoded={targetX:tx,targetZ:tz,goalHeadingX:gx,goalHeadingZ:gz,
+     headingIndex:idx,dot,nearZero:dot===null||Math.abs(dot)<0.0001,
+     nativeExpectedReturn:dot===null||Math.abs(dot)<0.0001?null:(dot<0?1:0)};
  });
  attach(0x03256209,function(){
    // 0x032561E4 loads member from [action+0x8]; AL was just returned by
@@ -109,13 +129,21 @@ try {
    const action=this.context.rbx,m=readPtr(action,8);if(!m)return;
    const s=active(m);if(!s)return;
    const v=memberState(m),al=this.context.rax.toUInt32()&0xff;
+   const paired=goalReadsByThread.get(this.threadId);
+   const validPair=!!paired&&paired.member===show(m)&&paired.traceId===s.id&&
+     now()-paired.at<100&&paired.decoded!==null;
    emit('OLD_GOAL_DIRECTION_DECISION',{
      traceId:s.id,action:show(action),predicateReturn:al,branchIfFalse:al===0,
+     pairToExactNativeGoalRead:validPair,
+     decodedOldGoal:validPair?paired.decoded:null,
+     decodedGoalMatchesNativeAL:validPair&&paired.decoded.nativeExpectedReturn!==null?
+       paired.decoded.nativeExpectedReturn===al:null,
      readSeenSinceReceive:s.readSeen,
      lastGoalReadSameThread:s.lastReadThread===this.threadId,
      lastGoalReadWithin100ms:now()-s.lastGoalSample<100,
      goalUnchangedSinceReceive:v.goal24===s.prior,
      writeSeenSinceReceive:s.wrote,...v});
+   if(validPair)goalReadsByThread.delete(this.threadId);
  });
  attach(0x0311963a,function(){
    const m=this.context.rdi,s=active(m);if(!s)return;
@@ -124,8 +152,9 @@ try {
    emit('GOAL_COMMIT_PRE',{traceId:s.id,proposed24:hx(this.context.rdx,24),
     before24:hx(m.add(0x1e0),24),...memberState(m)});
  });
- attach(0x0311965f,function(){
-   // First 16-byte MOVUPS and following 8-byte MOVSD have both executed.
+ attach(0x03119660,function(){
+   // 0x0311965F is inside a MOVSD, never hook mid-instruction.
+   // At 0x03119660 the 24-byte goal stores have completed.
    const m=this.context.rdi,s=active(m);if(!s)return;
    const pre=postWrites.get(show(m));if(!pre||pre.traceId!==s.id)return;
    const actual=hx(m.add(0x1e0),24);
