@@ -49,6 +49,16 @@ class BRoutePacketBridgeTests(unittest.TestCase):
   self.assertIn('bit7_active_v78',a.VTABLES)
   self.assertEqual(a.PINS['active_task_bit7_read'][1],'8a97100b0000')
   self.assertEqual(a.PINS['B_member_bit7_write'][1],'0883100b0000')
+ def test_B_packet_conditional_deferred_member_creation(self):
+  self.assertEqual(a.PINS['B_packet_code50_bits'][1],'80c906')
+  self.assertEqual(a.PINS['member_deferred_guard'][1],'f6425020')
+  self.assertEqual(a.CALLS['B_receiver_deferred_ctor'],(0x306ba5b,0x2f5f7c8))
+  self.assertEqual(a.VTABLES['member_deferred_task_tick'],(0x3905e28,0x2f83b24))
+ def test_deferred_activation_has_an_explicit_tick_guard(self):
+  self.assertEqual(a.PINS['deferred_task_payload_offset'][1],'034b4c')
+  self.assertEqual(a.PINS['deferred_task_deadline_store'][1],'898fa0000000')
+  self.assertEqual(a.PINS['deferred_task_deadline_compare'][1],'398298000000')
+  self.assertFalse(0x20 & 0x16)
  @unittest.skipUnless(os.environ.get('WH3_903_EXE'),'CI excludes game EXE')
  def test_original_executable_static(self):
   proof=a.audit(Path(os.environ['WH3_903_EXE']))
