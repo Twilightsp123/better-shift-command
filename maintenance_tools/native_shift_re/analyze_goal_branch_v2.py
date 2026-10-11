@@ -42,10 +42,16 @@ def analyze(events):
             if (al in (0,1) and e.get('goalUnchangedSinceReceive') is True and
                 e.get('writeSeenSinceReceive') is False and
                 e.get('lastGoalReadSameThread') is True and
-                e.get('lastGoalReadWithin100ms') is True):
+                e.get('lastGoalReadWithin100ms') is True and
+                e.get('pairToExactNativeGoalRead') is True and
+                e.get('decodedGoalMatchesNativeAL') is True and
+                isinstance(e.get('decodedOldGoal'),dict) and
+                e['decodedOldGoal'].get('nearZero') is False):
                 s['old_direction_decisions'].append({
                     'atMs':e.get('atMs'),'predicateReturn':al,
-                    'branchIfFalse':e.get('branchIfFalse')})
+                    'branchIfFalse':e.get('branchIfFalse'),
+                    'decodedOldGoal':e.get('decodedOldGoal'),
+                    'nativeGeometryCorroborated':True})
         elif ev=='GOAL_COMMIT_POST':
             commits+=1;s['commits']+=1
             if s['commit_delay_ms'] is None:
@@ -87,7 +93,7 @@ def analyze(events):
         'goal_commit_delay_ms':v['commit_delay_ms']} for k,v in direction[:20]],
       'geometric_route_conflict_proven':False,
       'physical_crowding_proven':False,'native_fix_proven':False,
-      'reason':'Read and branch use of unchanged motor goal is distinct from incompatibility with native gradual route or collision causality.'}
+      'reason':'Requires same-thread exact member goal read, decoded runtime native heading/dot consistent with AL, and unchanged goal before commit. Even then no native gradual-route incompatibility or physical collision is proven.'}
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--input',required=True,type=Path)
