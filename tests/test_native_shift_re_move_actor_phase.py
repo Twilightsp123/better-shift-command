@@ -38,12 +38,12 @@ def deferred_actor_tick_permitted(tick_mask, actor_action_type, action_active,
 
 class NativeOriginalMoveActorPhase(unittest.TestCase):
     def test_machine_guard_coverage(self):
-        self.assertEqual(len(a.PIN),111)
+        self.assertEqual(len(a.PIN),120)
         self.assertIn('fallback_member_set_bit7',a.PIN)
         self.assertIn('mode_new_written',a.PIN)
         self.assertIn('move_callback_subtask_state58',a.PIN)
     def test_original_direct_edges(self):
-        self.assertEqual(len(a.CALLS),41)
+        self.assertEqual(len(a.CALLS),46)
         self.assertEqual(len(a.JUMPS),1)
         self.assertEqual(a.CALLS['task_to_group_branch'],(0x02F56404,0x03279E40))
         self.assertEqual(a.CALLS['branch_to_fallback'],(0x03279ED8,0x03263AB0))
@@ -110,6 +110,21 @@ class NativeOriginalMoveActorPhase(unittest.TestCase):
         self.assertEqual(a.PIN['fallback_existing_route_discard'][1],'4883635800')
         self.assertEqual(a.PIN['fallback_existing_route_same'][1],'c6436001')
 
+    def test_route_reference_entries_are_segment_objects_not_soldier_completion(self):
+        # 0x030D0A84 creates two explicit route-segment vtables.
+        # Both segment types use 0x030CF3E0 as virtual+0x10 reference query.
+        self.assertEqual(a.CALLS['native_route_segment_node_factory'],
+                         (0x030C78D7,0x030D0A84))
+        self.assertEqual(a.CALLS['route_segment_type0_init'][1],0x030C2164)
+        self.assertEqual(a.CALLS['route_segment_type1_init'][1],0x030C2074)
+        self.assertEqual(a.VTABLES['native_route_segment_type0_v10'],
+                         (0x0390F2C0,0x030CF3E0))
+        self.assertEqual(a.VTABLES['native_route_segment_type1_v10'],
+                         (0x0390F340,0x030CF3E0))
+        self.assertEqual(a.CALLS['route_segment_vfn10_geometry'][1],0x0311C408)
+        self.assertEqual(a.CALLS['route_segment_vfn10_reference'][1],0x030FC6E8)
+        self.assertNotIn('test_soldier_completion',a.CALLS)
+
     def test_fallback_existing_submotor_route_still_conditional(self):
         self.assertEqual(a.CALLS['submotor_existing_context_resync'][1],0x030FDA9C)
         self.assertEqual(a.CALLS['fallback_submotor_fresh'][1],0x031219B0)
@@ -122,7 +137,7 @@ class NativeOriginalMoveActorPhase(unittest.TestCase):
         self.assertFalse(deferred_actor_tick_permitted(0x04,4,False))
         self.assertFalse(deferred_actor_tick_permitted(0x04,16,True,action_finished=True))
     def test_indirect_vtable_target_not_inferred_from_direct_e8(self):
-        self.assertEqual(len(a.VTABLES),4)
+        self.assertEqual(len(a.VTABLES),6)
         self.assertNotIn('member_packet_dispatch_v368',a.CALLS)
     def test_branch_decode_forward_backward_and_reject_non_branch(self):
         self.assertEqual(a.branch_dest(FakePE(bytes.fromhex('e805000000')),0x1000),0x100a)
@@ -162,8 +177,8 @@ class NativeOriginalMoveActorPhase(unittest.TestCase):
         pe=a.OriginalPE(exe)
         try:
             proof=a.verify(pe)
-            self.assertEqual(proof['exact_opcode_guards'],111)
-            self.assertEqual(proof['verified_calls'],41)
+            self.assertEqual(proof['exact_opcode_guards'],120)
+            self.assertEqual(proof['verified_calls'],46)
             self.assertEqual(proof['verified_tail_jumps'],1)
             self.assertFalse(proof['patch_authorized'])
             self.assertEqual(proof['v3_real_runtime_branch'],'unknown')
