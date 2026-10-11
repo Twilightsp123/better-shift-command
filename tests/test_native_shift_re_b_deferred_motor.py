@@ -27,9 +27,9 @@ def member_task_dispatch(code,flag_0x10=False,local_gate=0):
 
 class DeferredMotorContracts(unittest.TestCase):
     def test_native_guarded_sites_count(self):
-        self.assertEqual(len(b.PINS),46)
+        self.assertEqual(len(b.PINS),52)
         self.assertEqual(len(b.VTABLES),3)
-        self.assertEqual(len(b.DIRECT),8)
+        self.assertEqual(len(b.DIRECT),9)
     def test_per_member_action_codes_67_69(self):
         self.assertEqual(member_code(True,0,5),0x67)
         self.assertEqual(member_code(True,0,6),0x68)
@@ -53,6 +53,13 @@ class DeferredMotorContracts(unittest.TestCase):
     def test_member_subaction_uses_distinct_vtables(self):
         self.assertEqual(b.VTABLES[0x03913808+0x10],0x0325e294)
         self.assertEqual(b.VTABLES[0x03add278+0x10],0x0325d9e0)
+    def test_B_group_fanout_ack_is_not_per_member_motor_ack(self):
+        self.assertEqual(b.PINS["B_subtype_once_flag"][1],"80b98000000000")
+        self.assertEqual(b.DIRECT[0x32815c5],0x3265b24)
+        self.assertEqual(b.PINS["B_subtype_dispatch_mark"][1],"4088bb80000000")
+        self.assertEqual(b.PINS["B_subtype_group_completion_gate"][1],"83b89808000000")
+        self.assertNotEqual(b.PINS["member_motor_goal_write"][0],
+                            b.PINS["B_subtype_dispatch_mark"][0])
     def test_common_tick_calls_embedded_action_without_forcing_both_modes(self):
         self.assertEqual(b.PINS["member_tick_subaction_owner"][1],"488d8f28030000")
         self.assertEqual(b.DIRECT[0x30822d2],0x3080f4c)
@@ -78,7 +85,7 @@ class DeferredMotorContracts(unittest.TestCase):
     def test_exact_original_exe(self):
         r=b.verify(Path(os.environ["WH3_903_EXE"]))
         self.assertEqual(r["member_class_census"],38)
-        self.assertEqual(r["pinned_opcode_instructions"],46)
+        self.assertEqual(r["pinned_opcode_instructions"],52)
         self.assertFalse(r["patch_authorized"])
 
 if __name__=="__main__":unittest.main()
