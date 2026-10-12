@@ -49,9 +49,21 @@ put32(member+0x318,0);put32(member+0x710,4);fl(member+0x88,30);fl(member+0x90,40
 putPtr(task+0x28,owner);putBytes(packet+0x50,Buffer.from('02140e42ad45df41','hex'));
 const run1=run();const {logs,hooks}=run1;
 assert.strictEqual(hooks.size,14);assert.strictEqual(logs[0].type,'ready');
+// Real first Windows capture had 21,534 unrelated queue manager callbacks.
+// Flood BEFORE sender events: the prior agent lost 100% of its source records.
+// v3 must retain the source/receiver/queue events without any budget loss.
+for(let i=0;i<21534;i++){
+  const h=hooks.get(0x0304433c);
+  h.onEnter.call({threadId:42,context:{rcx:new Ptr(task),rbx:new Ptr(task)}},
+                 [new Ptr(task),new Ptr(0)]);
+}
+assert(logs.filter(l=>l.ev==='QUEUE_MANAGER_ENTRY').length<=10);
+assert(logs.filter(l=>l.ev==='QUEUE_MANAGER_ENTRY').length>=5);
 function hook(site,registers,ret){const obj=hooks.get(site);assert(obj,'HOOK_MISSING:'+site.toString(16));
   obj.onEnter.call({threadId:42,context:registers,returnAddress:new Ptr(ret||base+0x1)},[registers.rcx,registers.rdx]);
   return obj;}
+hook(0x0304459d,{rcx:new Ptr(task),rbx:new Ptr(task)});
+hook(0x030323c8,{rcx:new Ptr(owner)});
 hook(0x03284304,{rcx:new Ptr(task),rdx:new Ptr(0),rdi:new Ptr(0)});
 hook(0x03284b7b,{rcx:new Ptr(member),rdx:new Ptr(packet)});
 const recvHook=hook(0x0306b9f0,{rcx:new Ptr(member),rdx:new Ptr(packet)},base+0x03284b81);
@@ -84,8 +96,21 @@ assert.strictEqual(recv.explicitlyMatchedSender,true);
 let def=logs.find(l=>l.ev==='DEFERRED_PACKET');assert(def);
 assert.strictEqual(def.receiverFrameMatched,true);
 let sum=logs.find(l=>l.type==='summary');assert(sum);assert.strictEqual(sum.detachErrors.length,0);
+assert.strictEqual(sum.queueManagerCalls,21534);
+assert.strictEqual(sum.queueManagerEntriesLogged,
+                   logs.filter(l=>l.ev==='QUEUE_MANAGER_ENTRY').length);
+assert.strictEqual(sum.dropped,0);
+assert.strictEqual(sum.eventCounts.NATIVE_MEMBER_SEND,1);
+assert.strictEqual(sum.savedCounts.NATIVE_MEMBER_SEND,1);
+assert.strictEqual(sum.eventCounts.QUEUED_CONTINUATION,1);
+assert.strictEqual(sum.savedCounts.QUEUED_CONTINUATION,1);
+assert.strictEqual(sum.pointerPairedSourceCounts.POSTCTOR_REWRITE,1);
+assert.strictEqual(sum.receiverReturnCounts['0x3284b81'],1);
+assert(logs.some(l=>l.ev==='NATIVE_MOVE_ISSUER'));
+assert(logs.some(l=>l.ev==='NATIVE_MEMBER_SEND'));
+
 assert.strictEqual(hooks.size,0);
 // Tampering even a single hook opcode must abort before modifying code.
 const site=0x0306b9f0,was=bytes.get(base+site);bytes.set(base+site,0);
 assert.throws(()=>run(),/EXACT_OPCODE_GUARD_FAILED/);bytes.set(base+site,was);
-console.log('OFFLINE_FRIDA_MOCK_PASS: 14 opcode guards, source->receiver->reversal->groupTick motion, stop, wrong-byte refusal');
+console.log('OFFLINE_FRIDA_MOCK_PASS: 21,534 queue floods suppressed; native sender/receiver/queued preserved; goal reversal; groupTick; stop; wrong-byte refusal');
