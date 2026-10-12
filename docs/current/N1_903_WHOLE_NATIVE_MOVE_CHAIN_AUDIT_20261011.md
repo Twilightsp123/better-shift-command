@@ -921,3 +921,46 @@ bit7 或跳过 Shift 状态继承。修改前必须得到真实实例因果而�
 及 `tests/test_native_shift_re_packet_ctor_callers_bounded.py`；
 真实 EXE 已重审 43/43 指令起点，合成 GitHub CI 执行对应边界/签名合同。
 原始 EXE / 用户私有 JSONL 均不会提交公开 GitHub。
+
+
+## 2026-10-12 接续进展：新一代原生一次性验证包已经达到离线发放标准
+
+**先读独立证据：**
+`docs/current/N1_903_REAL_CAPTURE_SAME_TICK_GOAL_REVERSAL_20261012.md`。
+真实旧 JSONL 在同组 Tick 1584 记录两名士兵于 1 ms 内各自将
+`member+0x1E0` 目标反向（cos ≈ -0.982/-0.998），但随后成员位置在若干
+group Tick 中仍沿之前方向净位移。此证据削弱了“这两人长期目标代际错开”
+的简单根因假说，却同时指向**原生 motor 目标提交和实际逐人成员运动转向的差别**。
+**旧记录没有玩家 RMB/Shift 真实 order 指针，不可归因到 Shift。**
+
+**完整新施工源码已提交：**
+`maintenance_tools/native_shift_re/experiments/n1_one_shot_20261012/`，
+包含 Frida JS 14 个原始 EXE 守卫的观察点、
+一名成员的 A/B/改包 sender→receiver 返回 RVA 绑定、
+`0x0311963A/0x03119660` 真正的主目标提交前后界限、
+`0x02DD579C` 原生群组 Tick 的阵型成员连续位置采样、
+Windows Python 子进程 supervision 和超时/卸载卡住隔离、
+离线保守分析器、原始 PE/unwind/objdump 独立验证、
+JS Node mock 和 Python tests，另有与首次用户日志对应的匿名化摘要和字节级验证 JSON。
+
+**验证等级：**
+- 静态原始 EXE SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a`：**14/14** 真实 Hook 位点原字节 + 指令边界 PASS；另有群组 Tick 所属对象、clock 2 个守卫，A/B/改包三个 sender 返回 RVA、两张任务虚表 PASS。
+- Node JS 语法及 Frida 原生回调 mock：**PASS**。
+- Python 本地 9 项（含假 Frida 长时间 detach 失败下保留完整日志、父进程超时）**PASS**。
+- GitHub 研究分支现有 `test_native_shift_re_n1_one_shot_20261012.py` 入口：**CI PASS**，但公开 CI 不包含游戏 EXE。
+- **Windows 真机第一次 Frida attach / 18 秒单轮游戏采集 NOT RUN**；并未产生可安全发布的 Native 修复 DLL。
+
+**单轮现场用途：**
+只用一队普通步兵，先 RMB 改向一次，再 Shift MOVE→MOVE 连续折返一次；
+默认 18 秒，收集 `bsc_once_source.jsonl` 和自动分析
+`bsc_once_source_report.json`。
+将真实 packet 发送者返回 RVA、同组多名成员提交目标是否同一 Tick、
+以及目标反转后 18 group Tick 的实际逐模型位置分开分析。
+即使此采集成功，也不把 route cache 存活、目标字段存在或渐进转弯本身
+直接定性为碰撞根因。
+
+**严格安全条件不变：**
+不准发布旧跳过 `0x0304459D` 继承 patch；
+不准硬改 `+0xB10 bit7`、`+0x710`、`+0x1E0`、5 单位分流阈值；
+不准用 Lua 重做 Shift；不准修改 main。已匿名聚合统计可以入库，
+用户原始指针日志和游戏 EXE 不入公开仓库。
