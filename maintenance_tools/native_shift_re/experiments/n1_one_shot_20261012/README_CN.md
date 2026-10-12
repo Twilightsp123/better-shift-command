@@ -1,3 +1,15 @@
+# 修复版说明 — 2026-10-12 · PTRFIX
+
+**此包替代 `BSC_N1_903_ONE_SHOT_NATIVE_TEST_READY_20261012.zip`，请勿再使用旧包中的脚本。**
+
+你遇到的 `TypeError: cannot define variable 'ptr'` 是交付脚本顶层 `function ptr()` 与 Frida 内置的 `ptr` 冲突导致。旧版启动后从未达到 `TRACE_ACTIVE`，没有有效实机采集。现在已把助手函数改名、全部探针包在私有作用域内，并新增“Frida 内置 ptr 不可重定义”离线模拟验证。**这次是启动修复，不是 Native 游戏行为修复。**
+
+解压这个新的 ZIP 到一个**新文件夹**，不要将个别文件混入旧包。已安装的 Python、Frida 无需重复安装。对战锤3的操作仍然只有同一队普通步兵 RMB 折返一次与 Shift 连续 MOVE 折返一次，采集默认 18 秒。**一旦再次报错，不要反复重试，只贴 PowerShell 最后几行；不要把本轮启动失败当成游戏运动结论。**
+
+已离线验证：原始 WH3 EXE SHA 固定匹配，14/14 原始机器码及真实反汇编指令起点通过；Node.js 模拟包发送、成员接收和运动采样通过；追加 protected-ptr global collision 反例回归通过；Python 10 项测试中 9 项通过、1 项因为 CI 不提供游戏 EXE 而跳过。尚无 Windows 真机 Frida 脚本加载成功的结果。
+
+---
+
 # Better Shift Command / N1 — 一次性原生来源与折返运动采集（2026-10-12）
 
 ## 测什么？
@@ -19,7 +31,7 @@
 - 14/14 个原生 Hook 入口：**字节守卫、PE 可执行节、unwind 原函数边界、独立 GNU objdump 指令起点 PASS**。
 - 三条 A/B/改包成员虚调用的原生 6 字节与返回 RVA 一致 PASS；两处任务虚表与构造器→发送者 call 守卫 PASS。
 - JavaScript `node --check` PASS；Frida API 离线模拟：**发送→接收→延迟分支→折返目标提交→Hook 撤销 PASS**。
-- Python 9 项自动化测试：错误 EXE 拒绝、来源匹配负对照、超时监督、模拟 Frida 假死卸载 PASS。
+- Python 10 项自动化测试（9 执行通过，1 按条件跳过）：错误 EXE 拒绝、来源匹配负对照、超时监督、模拟 Frida 假死卸载 PASS。
 - **Windows 实机 attach 尚未执行**；工具是一次只读诊断，不是修复 DLL；Frida 临时插桩代码，不改 EXE 文件与游戏业务数据。发包和目标写入事件按成员抽样以限制开销；目标大角度反转判据对已识别成员逐个检查，转弯位置连续采样来自原生群组 Tick。
 
 ## 唯一一次采集如何运行
