@@ -1,0 +1,33 @@
+{
+  "schema": "bsc.n1.exact_move_queue_object_handoff.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "source_grade": "EXACT_ORIGINAL_PE_STATIC",
+  "checked_opcode_guards": 35,
+  "checked_call_edges": 6,
+  "checked_typed_move_virtual_slots": 5,
+  "checked_instruction_boundaries": 35,
+  "known_move_slot_vtable": "0x390b4f0",
+  "queue_replace_predicate": "DL==0 clears existing queue; DL!=0 appends",
+  "issuer_flag_origin": "R9B to R14B to DL",
+  "candidate_task_reuse": {
+    "source_slot_getter": "0x03039FB0",
+    "requires_status_before": 4,
+    "requires_task_plus_24_nonzero": true,
+    "requires_task_plus_158_pointer": true,
+    "next_slot_setter": "0x03040864",
+    "task_pointer_identity_preserved": true,
+    "new_status": 1,
+    "task_geometry_overwrite_offsets": [
+      "0x120",
+      "0x130",
+      "0x140"
+    ],
+    "next_slot_plus_a0": "same prior task pointer",
+    "task_plus_158_cleared_in_setter": false,
+    "member_plus_1e0_changed_in_setter": false
+  },
+  "task_origin_runtime_confirmed": false,
+  "rmb_shift_key_to_r9b_confirmed": false,
+  "user_source_trace_instance_linked": false,
+  "patch_authorized": false
+}
