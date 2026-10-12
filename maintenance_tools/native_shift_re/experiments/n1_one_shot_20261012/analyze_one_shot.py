@@ -8,6 +8,7 @@ import argparse
 from collections import Counter, defaultdict
 import json
 import math
+import itertools
 import struct
 from pathlib import Path
 
@@ -81,6 +82,46 @@ def post_turn_motion(events):
     return result
 
 
+
+CORE_SOURCE_KINDS = ('NATIVE_MEMBER_SEND','MEMBER_RECEIVER','DEFERRED_PACKET',
+                     'GOAL_WRITE_PRE','GOAL_WRITE_POST','QUEUED_CONTINUATION',
+                     'NATIVE_MOVE_ISSUER','GOAL_READ','NATIVE_GOAL_DIRECTION')
+
+def closest_member_separations(events):
+    """Within-group sample-member *center* distance; not a collision test."""
+    windows=defaultdict(lambda:defaultdict(dict))
+    for e in events:
+        if e.get('ev')!='GROUP_TICK_POSITION':continue
+        group,start,tick,member=(e.get('group'),e.get('turnStartTick'),
+                                e.get('groupTick'),e.get('member'))
+        x,z=e.get('x'),e.get('z')
+        if not group or not isinstance(start,int) or not isinstance(tick,int) or not member:continue
+        if not all(isinstance(v,(int,float)) and math.isfinite(v) for v in (x,z)):continue
+        windows[(group,start)][tick][member]=(x,z)
+    result=[]
+    for (_,start),ticks in sorted(windows.items(),key=lambda z:z[0][1]):
+        all_pairs=[]
+        for tick,persons in ticks.items():
+            for (a,pa),(b,pb) in itertools.combinations(persons.items(),2):
+                all_pairs.append((math.dist(pa,pb),tick,a,b))
+        if not all_pairs:continue
+        dist,tick,a,b=min(all_pairs)
+        first=ticks[min(ticks)]
+        last=ticks[max(ticks)]
+        start_dist=math.dist(first[a],first[b]) if a in first and b in first else None
+        end_dist=math.dist(last[a],last[b]) if a in last and b in last else None
+        result.append({'turn_start_tick':start,
+                       'sampled_tick_count':len(ticks),
+                       'sampled_distinct_members':len(set().union(*(set(z) for z in ticks.values()))),
+                       'min_horizontal_member_center_distance':round(dist,6),
+                       'min_distance_tick':tick,
+                       'same_pair_start_sample_distance':round(start_dist,6) if start_dist is not None else None,
+                       'same_pair_end_sample_distance':round(end_dist,6) if end_dist is not None else None,
+                       'physical_collision_proven':False,
+                       'sampled_members_only':True})
+    return result
+
+
 def analyze(rows):
     all_events = [r for r in rows if isinstance(r, dict) and r.get('type') == 'event']
     event_counts = Counter(r.get('ev', '?') for r in all_events)
@@ -129,12 +170,23 @@ def analyze(rows):
             old_goal_impact[row.get('group') or '?'] += 1
     summary = next((r for r in reversed(rows) if isinstance(r,dict) and
                     r.get('type') == 'summary'), None)
+    agent_attempted=(summary or {}).get('eventCounts',{})
+    # Legacy agent counted 21,534 queue entry attempts but saved only 1,697;
+    # all sender identity records were lost to the 1,700 non-priority cap.
+    saved_loss={k:max(0,int(n)-event_counts.get(k,0))
+                for k,n in agent_attempted.items() if isinstance(n,int)}
+    critical_lost={k:saved_loss[k] for k in CORE_SOURCE_KINDS if saved_loss.get(k,0)}
+    total_calculated_loss=sum(saved_loss.values())
+    loss_reconciles=(summary or {}).get('dropped')==total_calculated_loss if summary else None
+    sender_triggered_no_record=not sent_by and agent_attempted.get('NATIVE_MEMBER_SEND',0)>0
     has_ready = any(isinstance(r,dict) and r.get('type') == 'ready' for r in rows)
     errors = [r for r in rows if isinstance(r, dict) and r.get('type') in ('probe_error','bad_payload')]
     groups_ranked = sorted(((key,len(members)) for key,members in groups.items()),
                            key=lambda x: -x[1])
     if not has_ready or not summary or errors or invalid_rva:
         grade = 'INCOMPLETE_OR_INSTRUMENTATION_ERROR'
+    elif sender_triggered_no_record and critical_lost:
+        grade = 'NATIVE_SOURCE_EVENTS_TRIGGERED_BUT_DROPPED_BY_LOGGER'
     elif source_matched and any(source_matched.values()):
         grade = 'RUNTIME_NATIVE_SOURCE_MATCH_CONFIRMED'
     elif recv_by:
@@ -162,6 +214,18 @@ def analyze(rows):
           {'group':group,'tick':clock,'distinct_members':len(actors)}
           for (group,clock),actors in sorted(turns.items()) if len(actors)>=2],
         'sampled_post_reversal_displacement':post_turn_motion(all_events),
+        'sampled_close_approaches':closest_member_separations(all_events),
+        'overlapping_turns_using_existing_sampling_window':[
+          {'reversal_tick':t,'tracked_from_tick':min(eligible)}
+          for (g,t) in sorted(turns)
+          if not any(e.get('ev')=='GROUP_TICK_POSITION' and
+                     e.get('group')==g and e.get('turnStartTick')==t
+                     for e in all_events)
+          for eligible in [[r.get('turnStartTick') for r in all_events
+                           if r.get('ev')=='GROUP_TICK_POSITION' and
+                           r.get('group')==g and isinstance(r.get('turnStartTick'),int) and
+                           r['turnStartTick']<t<=r['turnStartTick']+18]]
+          if eligible],
         'turn_window_position_samples_by_group':{
           group:{'distinct_members':len(members),
                  'members_with_at_least_4_clock_samples':sum(
@@ -171,9 +235,24 @@ def analyze(rows):
         'distinct_sampled_unit_owners':len(actors),
         'groups_ranked_by_distinct_sampled_members':groups_ranked[:12],
         'complete_source_counts_if_agent_summary':(summary or {}).get('sourceCounts',{}),
+        'agent_attempted_event_counts':dict(agent_attempted),
+        'agent_event_counts_dropped_by_logger':saved_loss,
+        'core_identity_records_dropped':critical_lost,
+        'logger_drop_count_reconciles':loss_reconciles,
+        'logger_drop_count_reconstructed':total_calculated_loss,
+        'native_sender_hook_executions':agent_attempted.get('NATIVE_MEMBER_SEND',0),
+        'native_receiver_hook_executions':agent_attempted.get('MEMBER_RECEIVER',0),
+        'queued_hook_executions_from_agent_summary':agent_attempted.get('QUEUED_CONTINUATION',0),
+        'native_move_issuer_hook_executions_from_agent_summary':agent_attempted.get('NATIVE_MOVE_ISSUER',0),
+        'native_sender_pointer_pair_counts':(summary or {}).get('pointerPairedSourceCounts',{}),
+        'native_receiver_return_rva_counts':(summary or {}).get('receiverReturnCounts',{}),
+        'queue_manager_total_hook_calls':(summary or {}).get('queueManagerCalls'),
         'agent_dropped_events':(summary or {}).get('dropped'),
         'agent_detach_errors':(summary or {}).get('detachErrors'),
         'native_queued_hook_events':event_counts['QUEUED_CONTINUATION'],
+        'untyped_member_field60_warning':(
+            'member+0x60 sampled values were never confirmed to be native formation ordinals; '
+            'sampling order or physical arrangement must not be inferred from them'),
         'native_move_issuer_events':event_counts['NATIVE_MOVE_ISSUER'],
         'old_goal_incompatible_with_native_route_proven':False,
         'physical_crowding_causality_proven':False,
@@ -183,6 +262,8 @@ def analyze(rows):
             'The group task 0x03ADD608 is distinct from B route-cache 0x03AE00E8.',
             'Native GOAL_READ is a guarded action predicate, not necessarily a physics integrator.',
             'Only a real gameplay run with correct task/order identity could attribute conflicting old/new movement.',
+            'Unlogged source event counts in the agent summary are NOT absent native events.',
+            'Sampled horizontal center distances are not soldier radii or a proof of collision.',
         ]
     }
 
