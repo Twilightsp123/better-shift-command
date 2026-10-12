@@ -40,7 +40,7 @@ class ExistingTraceDiagnostics(unittest.TestCase):
        {'type':'event','ev':'GOAL_COMMIT_POST','traceId':1,'atMs':103},
        {'type':'event','ev':'SUMMARY','atMs':30002,'droppedEvents':0},
    ]
-   p.write_text('\\n'.join(json.dumps(x) for x in lines)+'\\n')
+   p.write_text('\n'.join(json.dumps(x) for x in lines)+'\n')
    report=audit.diagnose(p)
    self.assertEqual(report['reason'],'RECEIVER_PACKETS_INCOMPATIBLE_WITH_KNOWN_B_BUILDER')
    self.assertEqual(report['packet_flag50_counts'],{'0x2':1})
@@ -53,7 +53,7 @@ class ExistingTraceDiagnostics(unittest.TestCase):
    b=bytearray(88);b[0x50]=0x0e
    p.write_text(json.dumps({'type':'event','ev':'B_DEFERRED_RECEIVE',
        'traceId':1,'member':'0x333','packet58':b.hex(),
-       'source':{'memberFanoutMatched':False}})+'\\n')
+       'source':{'memberFanoutMatched':False}})+'\n')
    report=audit.diagnose(p)
    self.assertEqual(report['packet_count_incompatible_with_known_B_constructor'],0)
    self.assertFalse(report['B_route_execution_confirmed'])
