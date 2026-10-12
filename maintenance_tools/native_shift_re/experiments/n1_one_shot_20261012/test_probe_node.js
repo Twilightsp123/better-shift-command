@@ -31,6 +31,11 @@ function run(overrides={}){
    recv(type,callback){if(type==='stop')stop=callback;},send(x){logs.push(x);},
    Date,Number,Map,Set,Uint8Array,Array,Error,Boolean,Object,Math,
    ...overrides};
+ // Frida ships a non-configurable global `ptr`; a top-level helper called
+ // `function ptr()` collides and prevents the agent from loading at all.
+ // The previous Node mock omitted this built-in and falsely passed.
+ Object.defineProperty(context,'ptr',{value:(n)=>new Ptr(n),
+   writable:false,configurable:false,enumerable:true});
  vm.runInNewContext(script,context,{timeout:10000});
  return {logs,hooks,stop:()=>stop(),context};
 }
