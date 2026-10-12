@@ -13,7 +13,7 @@ from statistics import median
 def diagnose(path):
     counters=Counter()
     source=Counter()
-    flags=Counter();qword44=Counter()
+    flags=Counter();qword44=Counter();post_ctor_rewrite_fingerprint=0
     members=Counter()
     errors=[]
     received={}
@@ -47,6 +47,14 @@ def diagnose(path):
                 raw=bytes.fromhex(item['packet58'])
                 flags[raw[0x50]]+=1
                 qword44[int.from_bytes(raw[0x44:0x4c], 'little')]+=1
+                # Proven separate native sender 0x03284B55..0x03284B7B
+                # starts with ctor flag06 and rewrites +0x50 to 02 and +0x44 to zero.
+                if (len(raw)==0x58 and raw[0x50]==2 and
+                    int.from_bytes(raw[0x44:0x4c],'little')==0 and
+                    (raw[0x51]&1)==0 and
+                    int.from_bytes(raw[0x38:0x3c],'little')==1 and
+                    raw[0x3c:0x40]==bytes.fromhex('00004040')):
+                    post_ctor_rewrite_fingerprint+=1
             except (ValueError,KeyError,IndexError,TypeError):
                 errors.append('INVALID_PACKET_BYTES_'+str(line_no))
         if event=='GOAL_READ':reads.append(item)
@@ -73,8 +81,10 @@ def diagnose(path):
                   and x.get('writeSeenSinceReceive') is False for x in reads)
     if errors:reason='INCOMPLETE_OR_PROBE_ERROR'
     elif counters['B_MEMBER_FANOUT']==0 and not received:reason='NO_B_FANOUT_OR_RECEIVE_CAPTURED'
+    elif received and post_ctor_rewrite_fingerprint==len(received) and source['matched_B_fanout']==0:
+        reason='POST_CTOR_REWRITE_COMPATIBLE_CALLER_UNVERIFIED'
     elif incompatible==len(received) and incompatible_qword44==len(received) and received and source['matched_B_fanout']==0:
-        reason='RECEIVER_PACKETS_INCOMPATIBLE_WITH_KNOWN_B_BUILDER'
+        reason='NOT_UNMODIFIED_CTOR_CALLER_UNVERIFIED'
     elif counters['B_MEMBER_FANOUT']>0 and not received:reason='B_FANOUT_BUT_NO_DEFERRED_RECEIVE'
     elif received and source['matched_B_fanout']==0:reason='RECEIVE_PRESENT_BUT_NO_PACKET_IDENTITY_MATCH'
     else:reason='B_MATCHED_OR_OTHER'
@@ -87,6 +97,9 @@ def diagnose(path):
       'known_B_constructor_RVA':'0x02F5F940',
       'known_B_constructor_opcode':'80c906',
       'packet_count_incompatible_with_known_B_constructor':incompatible,
+      'packet_count_matching_proven_post_ctor_rewrite_fingerprint':post_ctor_rewrite_fingerprint,
+      'post_ctor_rewrite_native_site':'0x03284B55 through 0x03284B7B',
+      'post_ctor_rewrite_caller_executed_in_trace':None,
       'distinct_sampled_members':len(members),
       'receives_per_member':dict(members),
       'first_actual_goal_writes':len(first_posts),
@@ -102,11 +115,12 @@ def diagnose(path):
       'game_fix_proven':False,
       'interpretation':(
        'A mode-gated deferred receiver hook does NOT identify its packet producer. '
-       'Original B packet builder enforces bits 0x06; absence of those bits '
-       'and packet+0x44=3; contradictions are negative evidence for an unmodified '
-       'builder product, but intervening mutation or packet variant is not excluded. ' 
-       'Missing queued hooks does not prove '
-       'there was no Shift command in the game.'
+       '0x02F5F8DC sets 0x06 and +0x44=3, but another original sender '
+       '0x03284B55..0x03284B7B explicitly clears bit 0x04 and +0x44 '
+       'BEFORE member virtual+0x368 dispatch. Thus 0x02/+0x44=0 '
+       'cannot exclude this native constructor family. '
+       'The 28/28 field fingerprint is source-compatible, not an actual '
+       'sender return-IP or queued Shift instance match.'
       )
     }
 
