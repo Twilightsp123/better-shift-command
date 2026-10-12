@@ -1,0 +1,103 @@
+{
+  "schema": "bsc.n1.source_probe_strict_original.v1",
+  "exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "verified_hook_count": 14,
+  "verified": [
+    {
+      "rva": "0x2dd579c",
+      "size": 7,
+      "bytes": "488bc448895810",
+      "function": "0x2dd579c"
+    },
+    {
+      "rva": "0x30323c8",
+      "size": 8,
+      "bytes": "488bc44889581048",
+      "function": "0x30323c8"
+    },
+    {
+      "rva": "0x304433c",
+      "size": 8,
+      "bytes": "488bc44889580848",
+      "function": "0x304433c"
+    },
+    {
+      "rva": "0x304459d",
+      "size": 5,
+      "bytes": "ff4618498d",
+      "function": "0x304433c"
+    },
+    {
+      "rva": "0x306b9f0",
+      "size": 5,
+      "bytes": "48895c2410",
+      "function": "0x306b9f0"
+    },
+    {
+      "rva": "0x306ba5b",
+      "size": 5,
+      "bytes": "e8683defff",
+      "function": "0x306b9f0"
+    },
+    {
+      "rva": "0x30d550f",
+      "size": 6,
+      "bytes": "ff9068030000",
+      "function": "0x30d5490"
+    },
+    {
+      "rva": "0x3115cbc",
+      "size": 7,
+      "bytes": "4c8d89e0010000",
+      "function": "0x3115c94"
+    },
+    {
+      "rva": "0x311963a",
+      "size": 7,
+      "bytes": "0f1187e0010000",
+      "function": "0x311954c"
+    },
+    {
+      "rva": "0x3119660",
+      "size": 10,
+      "bytes": "c787d80100000000803f",
+      "function": "0x311954c"
+    },
+    {
+      "rva": "0x3256209",
+      "size": 2,
+      "bytes": "84c0",
+      "function": "0x3256180"
+    },
+    {
+      "rva": "0x3265d3f",
+      "size": 6,
+      "bytes": "ff9068030000",
+      "function": "0x3265b24"
+    },
+    {
+      "rva": "0x3284304",
+      "size": 8,
+      "bytes": "488bc48850105553",
+      "function": "0x3284304"
+    },
+    {
+      "rva": "0x3284b7b",
+      "size": 6,
+      "bytes": "ff9068030000",
+      "function": "0x3284304"
+    }
+  ],
+  "native_sender_calls": {
+    "0x3284b7b": "0x3284b81",
+    "0x3265d3f": "0x3265d45",
+    "0x30d550f": "0x30d5515"
+  },
+  "verified_task_constructor_to_sender_calls": 2,
+  "verified_distinct_task_vtables": 2,
+  "group_tick_receiver_owner_and_clock_guards": 2,
+  "proof_level": "ORIGINAL_EXE_STATIC_OPCODE_UNWIND_AND_DISASSEMBLY",
+  "frida_windows_attach_tested": false,
+  "game_behavior_fixed": false,
+  "native_patch_authorized": false
+}
