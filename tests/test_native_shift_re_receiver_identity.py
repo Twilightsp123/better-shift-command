@@ -11,6 +11,12 @@ class ReceiverSourceIdentityTest(unittest.TestCase):
   self.assertEqual(a.GUARDS["A_member_virtual_call"][1],
                    a.GUARDS["different_object_virtual_call"][1])
   self.assertEqual(a.GUARDS["different_object_reads_result_bool"][1],"8ad8")
+ def test_virtual_slot_reused_in_non_actor_boolean_getters(self):
+  self.assertEqual(a.GUARDS["A_member_virtual_call"][1],
+                   a.GUARDS["non_actor_getter_A"][1])
+  self.assertEqual(a.GUARDS["non_actor_getter_A_tests_AL"][1],"84c0")
+  self.assertEqual(a.GUARDS["non_actor_getter_B_tests_AL"][1],"84c0")
+  self.assertEqual(a.GUARDS["non_actor_getter_C_tests_AL"][1],"84c0")
  def test_wrong_exe_refuses(self):
   with tempfile.TemporaryDirectory() as t:
    p=Path(t)/"not-wh3.exe";b=b"MZ"+b"x"*100;p.write_bytes(b)
@@ -20,7 +26,7 @@ class ReceiverSourceIdentityTest(unittest.TestCase):
                       "CI excludes game EXE and user's private runtime trace")
  def test_actual_machine_code_and_original_trace(self):
   r=a.audit(os.getenv("WH3_903_EXE"),os.getenv("BSC_REAL_TRACE_JSONL"))
-  self.assertEqual(r["original_byte_guards"],14)
+  self.assertEqual(r["original_byte_guards"],22)
   self.assertEqual(r["receiver_calls_mislabelled_as_B"],28)
   self.assertEqual(r["original_caller_return_address_events"],0)
   self.assertEqual(r["packet_50"],{2:28})
