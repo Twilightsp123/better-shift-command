@@ -24,12 +24,12 @@ class ExistingTraceDiagnostics(unittest.TestCase):
    p=Path(td)/'trace.jsonl'
    p.write_text(json.dumps({'type':'event','ev':'B_DEFERRED_RECEIVE',
        'source':{'memberFanoutMatched':False},'packet58':('00'*88)})+'\n')
-   self.assertEqual(audit.diagnose(p)['reason'],'RECEIVER_PACKETS_INCOMPATIBLE_WITH_KNOWN_B_BUILDER')
+   self.assertEqual(audit.diagnose(p)['reason'],'NOT_UNMODIFIED_CTOR_CALLER_UNVERIFIED')
 
- def test_captured_0x02_flag_excludes_original_B_packet_ctor(self):
+ def test_0x02_packet_matches_original_native_post_ctor_rewriter(self):
   with tempfile.TemporaryDirectory() as td:
    p=Path(td)/'trace.jsonl'
-   b=bytearray(88);b[0x50]=2
+   b=bytearray(88);b[0x50]=2;b[0x38]=1;b[0x3c:0x40]=bytes.fromhex('00004040')
    lines=[
        {'type':'ready'},
        {'type':'event','ev':'B_DEFERRED_RECEIVE','member':'0x123',
@@ -42,10 +42,12 @@ class ExistingTraceDiagnostics(unittest.TestCase):
    ]
    p.write_text('\n'.join(json.dumps(x) for x in lines)+'\n')
    report=audit.diagnose(p)
-   self.assertEqual(report['reason'],'RECEIVER_PACKETS_INCOMPATIBLE_WITH_KNOWN_B_BUILDER')
+   self.assertEqual(report['reason'],'POST_CTOR_REWRITE_COMPATIBLE_CALLER_UNVERIFIED')
    self.assertEqual(report['packet_flag50_counts'],{'0x2':1})
    self.assertEqual(report['first_write_delay_ms']['median'],3)
    self.assertEqual(report['packet_count_incompatible_with_known_B_constructor'],1)
+   self.assertEqual(report['packet_count_matching_proven_post_ctor_rewrite_fingerprint'],1)
+   self.assertIsNone(report['post_ctor_rewrite_caller_executed_in_trace'])
    self.assertFalse(report['B_route_execution_confirmed'])
  def test_B_packet_flag_0x06_requires_actual_source_proof(self):
   with tempfile.TemporaryDirectory() as td:
