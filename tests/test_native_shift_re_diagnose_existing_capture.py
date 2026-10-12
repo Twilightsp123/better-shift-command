@@ -24,7 +24,7 @@ class ExistingTraceDiagnostics(unittest.TestCase):
    p=Path(td)/'trace.jsonl'
    p.write_text(json.dumps({'type':'event','ev':'B_DEFERRED_RECEIVE',
        'source':{'memberFanoutMatched':False},'packet58':('00'*88)})+'\n')
-   self.assertEqual(audit.diagnose(p)['reason'],'RECEIVE_PRESENT_BUT_NO_PACKET_IDENTITY_MATCH')
+   self.assertEqual(audit.diagnose(p)['reason'],'RECEIVER_PACKETS_INCOMPATIBLE_WITH_KNOWN_B_BUILDER')
 
  def test_captured_0x02_flag_excludes_original_B_packet_ctor(self):
   with tempfile.TemporaryDirectory() as td:
