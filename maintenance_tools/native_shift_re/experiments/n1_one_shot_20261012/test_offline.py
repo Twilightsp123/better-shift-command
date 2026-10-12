@@ -19,6 +19,14 @@ ROOT=Path(__file__).resolve().parent
 
 
 class OfflineTests(unittest.TestCase):
+    def test_frida_reserved_global_conflict_is_caught_before_game_attach(self):
+        original=(ROOT/'one_shot_native_source.js').read_text(encoding='utf8')
+        run_one_shot.validate_agent_globals(original)
+        with self.assertRaisesRegex(ValueError, 'FRIDA_PTR_GLOBAL_COLLISION'):
+            run_one_shot.validate_agent_globals(original + '\nfunction ptr(p,o){return null;}\n')
+        with self.assertRaisesRegex(ValueError, 'FRIDA_JS_GLOBAL_SCOPE_NOT_ISOLATED'):
+            run_one_shot.validate_agent_globals("'use strict';\nfunction ptr(p,o){return null;}")
+
     def test_provenance_inferred_only_from_real_sender_pair(self):
         rows=[
             {'type':'ready','guardCount':14},
