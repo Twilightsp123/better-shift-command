@@ -1,3 +1,5 @@
+// Frida runtime hotfix: isolate all helper declarations from built-in globals.
+(function bscN1AgentIsolatedScope(){
 'use strict';
 // BSC N1 observation only. Exact-original EXE & PID are guarded by Python.
 // Frida temporarily patches/restores hooked code; never changes game state.
@@ -26,7 +28,7 @@ const SOURCE_RET = {
 };
 function hex(p,n) {try {return Array.from(new Uint8Array(p.readByteArray(n)))
     .map(b=>b.toString(16).padStart(2,'0')).join('');}catch(_){return null;}}
-function ptr(p,o) {try {return p.add(o).readPointer();}catch(_){return null;}}
+function readMemberPointer(p,o) {try {return p.add(o).readPointer();}catch(_){return null;}}
 function u32(p,o) {try {return p.add(o).readU32();}catch(_){return null;}}
 function flt(p,o){try {let v=p.add(o).readFloat();return Number.isFinite(v)?v:null;}catch(_){return null;}}
 function addr(p) {return p===null?null:p.toString();}
@@ -71,8 +73,8 @@ function sendEvent(kind,fields,always=false){
   send({type:'event',ev:kind,atMs:ms(),seq:++total,...fields});
 }
 function groupOf(member){
-  const owner=ptr(member,0x58);
-  return {unit:addr(owner),group:owner?addr(ptr(owner,0x440)):null};
+  const owner=readMemberPointer(member,0x58);
+  return {unit:addr(owner),group:owner?addr(readMemberPointer(owner,0x440)):null};
 }
 function rememberMember(member, group){
   if(!group||!member||member.isNull())return;
@@ -99,7 +101,7 @@ function cohortSample(group, turn){
 }
 function state(member){
   const g=groupOf(member);
-  const unit=ptr(member,0x58),grp=unit?ptr(unit,0x440):null;
+  const unit=readMemberPointer(member,0x58),grp=unit?readMemberPointer(unit,0x440):null;
   return {...g,groupTick:grp?u32(grp,0x98):null,
     member:addr(member),x:flt(member,0x88),z:flt(member,0x90),
     actorMode:u32(member,0x318),motor710:u32(member,0x710),
@@ -136,8 +138,8 @@ function attach(site,fn){hooks.push(Interceptor.attach(base.add(site),fn));}
 try {
   attach(0x03284304,{
     onEnter(args){
-      const task=args[0];const parent=ptr(task,0x28);
-      const grp=parent?ptr(parent,0x440):null;
+      const task=args[0];const parent=readMemberPointer(task,0x28);
+      const grp=parent?readMemberPointer(parent,0x440):null;
       push(taskFrames,this.threadId,{task:addr(task),unit:addr(parent),group:addr(grp)});
       const key=addr(task),n=(senderTaskSamples.get(key)||0)+1;
       senderTaskSamples.set(key,n);
@@ -216,7 +218,7 @@ try {
     if(isFocusMember(m)&&sampled(m,'GOAL_READ'))sendEvent('GOAL_READ',state(m));
   }});
   attach(0x03256209,{onEnter(){
-    const action=this.context.rbx,m=ptr(action,0x8);
+    const action=this.context.rbx,m=readMemberPointer(action,0x8);
     if(!m || !isTracked(m))return;
     if(isFocusMember(m)&&sampled(m,'DIRECTION_AL'))sendEvent('NATIVE_GOAL_DIRECTION',{
       predicateReturn:this.context.rax.toUInt32()&0xff,...state(m)});
@@ -267,3 +269,5 @@ function shutdown(){if(stopped)return;stopped=true;
 recv('stop',function(){shutdown();});
 send({type:'ready',guardCount:PINS.length,hookCount:hooks.length,
  warning:'Only a source-matched event proves sender provenance; a Shift keypress and physical crowding are not inferred.'});
+
+})();
