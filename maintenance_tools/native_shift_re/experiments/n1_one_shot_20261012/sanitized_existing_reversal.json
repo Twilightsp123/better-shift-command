@@ -1,0 +1,68 @@
+{
+  "schema": "bsc.n1.original_user_trace_anonymized_turn.v1",
+  "capture_period_ms": 30002,
+  "receiver_cadence_by_anonymous_actor": {
+    "S1": {
+      "receiver_count": 26,
+      "all_deltas_11": true,
+      "lookahead_min": 8.999991193904192,
+      "lookahead_max": 9.99466382325981,
+      "lookahead_median": 9.000281921499894,
+      "tick_delta_histogram": {
+        "11": 25
+      }
+    },
+    "S2": {
+      "receiver_count": 2,
+      "all_deltas_11": true,
+      "lookahead_min": 9.502710560763623,
+      "lookahead_max": 9.810341926984304,
+      "lookahead_median": 9.656526243873962,
+      "tick_delta_histogram": {
+        "11": 1
+      }
+    }
+  },
+  "same_group_turn_tick": 1584,
+  "same_group_turn_member_count": 2,
+  "max_time_difference_of_goal_writes_ms": 1,
+  "turns": [
+    {
+      "anonymous_actor": "S1",
+      "clock": 1584,
+      "atMs": 19523,
+      "heading_cosine": -0.982373,
+      "old_lookahead_distance": 6.812,
+      "new_lookahead_distance": 9.586
+    },
+    {
+      "anonymous_actor": "S2",
+      "clock": 1584,
+      "atMs": 19524,
+      "heading_cosine": -0.998467,
+      "old_lookahead_distance": 6.738,
+      "new_lookahead_distance": 9.503
+    }
+  ],
+  "after_turn_progress": [
+    {
+      "anonymous_actor": "S1",
+      "first_reverse_interval": [
+        1592,
+        1593,
+        -0.06693793905365453
+      ],
+      "old_heading_progress_peak_tick": 1591,
+      "old_heading_progress_peak_units": 0.686,
+      "sample_count": 16
+    },
+    {
+      "anonymous_actor": "S2",
+      "first_reverse_interval": null,
+      "old_heading_progress_peak_tick": 1595,
+      "old_heading_progress_peak_units": 0.296,
+      "sample_count": 2
+    }
+  ],
+  "important_caveat": "The recorded turn is native real-time behavior, but no recorded order identity proves whether user initiated RMB or Shift; two members are insufficient to prove cohort crowding."
+}
