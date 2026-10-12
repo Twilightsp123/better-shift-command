@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import subprocess
 import sys
 import threading
@@ -20,6 +21,16 @@ import time
 
 SHA = '518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a'
 PROBE = Path(__file__).with_name('one_shot_native_source.js')
+
+def validate_agent_globals(source: str) -> None:
+    """Reject the specific Frida global namespace collision before attaching."""
+    # Frida's JS runtime reserves globals such as `ptr`; Node standalone
+    # checks missed this in the first delivered 20261012 agent.
+    if not source.lstrip().startswith('// Frida runtime hotfix:') or \
+            '(function bscN1AgentIsolatedScope(){' not in source:
+        raise ValueError('FRIDA_JS_GLOBAL_SCOPE_NOT_ISOLATED')
+    if re.search(r'\bfunction\s+ptr\s*\(', source):
+        raise ValueError('FRIDA_PTR_GLOBAL_COLLISION')
 
 
 def sha256(path: Path) -> str:
@@ -70,6 +81,7 @@ def validate(exe: Path, pid: int, output: Path) -> Path:
         raise ValueError('PID_GAME_VERSION_CHANGED')
     if not PROBE.exists():
         raise ValueError('PROBE_JS_MISSING')
+    validate_agent_globals(PROBE.read_text(encoding='utf-8'))
     return exe
 
 
@@ -177,6 +189,10 @@ def parent(exe: Path, pid: int, out: Path, seconds: int) -> int:
         print('TRACE_INVALID_OR_MISSING_JSONL:' + str(exc), flush=True)
         return return_code if return_code != 0 else 7
     summaries=[x for x in records if x.get('type')=='summary']
+    if not summaries and not any(x.get('type')=='ready' for x in records) and \
+            any(x.get('type')=='probe_error' for x in records):
+        print('TRACE_SETUP_ABORTED_BEFORE_ACTIVE: Frida rejected JS; no gameplay data recorded.', flush=True)
+        return return_code if return_code != 0 else 7
     if not summaries:
         print('TRACE_NO_SUMMARY: Capture may be incomplete; retain JSONL.', flush=True)
         return return_code if return_code != 0 else 7
