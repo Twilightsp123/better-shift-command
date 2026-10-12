@@ -179,6 +179,7 @@ def analyze(rows):
     total_calculated_loss=sum(saved_loss.values())
     loss_reconciles=(summary or {}).get('dropped')==total_calculated_loss if summary else None
     sender_triggered_no_record=not sent_by and agent_attempted.get('NATIVE_MEMBER_SEND',0)>0
+
     has_ready = any(isinstance(r,dict) and r.get('type') == 'ready' for r in rows)
     errors = [r for r in rows if isinstance(r, dict) and r.get('type') in ('probe_error','bad_payload')]
     groups_ranked = sorted(((key,len(members)) for key,members in groups.items()),
