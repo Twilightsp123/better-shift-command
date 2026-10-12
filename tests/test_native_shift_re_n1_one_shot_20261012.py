@@ -27,6 +27,14 @@ class OriginalOneShotJavascriptContracts(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
 
     @unittest.skipUnless(shutil.which("node"), "Node not installed on this runner")
+    def test_frida_ptr_global_namespace_regression(self):
+        completed = subprocess.run(
+            ["node", str(EXPERIMENT / "test_frida_globals.js")],
+            text=True, capture_output=True, timeout=15)
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("FRIDA_GLOBALS_CONFLICT_REGRESSION_PASS", completed.stdout)
+
+    @unittest.skipUnless(shutil.which("node"), "Node not installed on this runner")
     def test_mocked_native_send_receive_and_gradual_motion(self):
         completed = subprocess.run(
             ["node", str(EXPERIMENT / "test_probe_node.js")],
