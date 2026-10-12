@@ -25,6 +25,14 @@ GUARDS={
  "other_class_virtual_call":(0x02a9029e,"ff9068030000"),
  "other_class_dispatch_factory":(0x02a90290,"e8afc40100"),
  "member_receiver_entry":(0x0306b9f0,"48895c2410"),
+ "non_actor_getter_A":(0x02156045,"ff9068030000"),
+ "non_actor_getter_A_tests_AL":(0x02156052,"84c0"),
+ "non_actor_getter_B":(0x0279929b,"ff9068030000"),
+ "non_actor_getter_B_tests_AL":(0x027992a1,"84c0"),
+ "non_actor_getter_C":(0x02824291,"ff9068030000"),
+ "non_actor_getter_C_tests_AL":(0x02824297,"84c0"),
+ "other_class_return_as_pointer":(0x01ae122d,"ff9068030000"),
+ "other_class_moves_RAX_to_RDI":(0x01ae123e,"488bf8"),
 }
 def audit(exe,log):
  pe=StrictPE(exe)
