@@ -24,6 +24,15 @@ PINS={
  'group_task_member_mode_copy':(0x032659CF,'418b4118'),
  'sender_ctor_call_in_new_task':(0x03265B0A,'e8f5e70100'),
  'sender_tick_period_gate':(0x03282F00,'0f2fc8'),
+ 'tick_group_context':(0x03282ECA,'488b8840040000'),
+ 'tick_group_clock':(0x03282ED1,'8b8198000000'),
+ 'tick_global_rate':(0x03282EDC,'8b059a43a800'),
+ 'tick_mul_clock_rate':(0x03282EE7,'f30f59c8'),
+ 'tick_previous_plus_one':(0x03282EF0,'f30f5805cc9c6900'),
+ 'tick_normalize_ms':(0x03282EF8,'f30f590db49e6900'),
+ 'tick_not_due_branch':(0x03282F03,'760f'),
+ 'tick_store_elapsed':(0x03282F07,'f30f114b58'),
+
  'sender_tick_repeat_call':(0x03282F0F,'e8f0130000'),
  'sender_mode_in_task':(0x03284324,'8b5148'),
  'sender_member_array_pointer':(0x032844ED,'488b1cd1'),
@@ -59,6 +68,20 @@ CALLS={
  0x03281C9D:0x03265964,
 }
 VTABLES={0x03ADD618:0x03282E48}
+
+PERIOD_CONSTANTS={
+ 0x0391CBC4:('<f',1.0),
+ 0x0391CDB4:('<f',0.0010000000474974513),
+ 0x03D0727C:('<I',100),
+}
+
+def periodic_sender_due(group_tick,global_rate,previous_scaled_tick):
+    """Reduced 0x03282ECA..0x03282F14 native float predicate, not wall-time."""
+    if not (isinstance(group_tick,int) and 0<=group_tick<2**32):
+        raise ValueError('BAD_TICK')
+    if not (isinstance(global_rate,int) and 1<=global_rate<2**32):
+        raise ValueError('BAD_GLOBAL_RATE')
+    return (group_tick*global_rate*0.001)>previous_scaled_tick+1.0
 
 def rewritten_flag(initial,actor_predicate):
     if not (0<=initial<=255 and 0<=actor_predicate<=255):
@@ -112,13 +135,22 @@ def audit(exe,log=None):
         lea=pe.read(0x032659AD,7,True)
         task_vtable=0x032659AD+7+struct.unpack_from('<i',lea,3)[0]
         if task_vtable!=0x03ADD608:raise ValueError('VTABLE_LEA_CHANGED')
+        for site,(fmt,value) in PERIOD_CONSTANTS.items():
+            got=struct.unpack(fmt,pe.read(site,struct.calcsize(fmt)))[0]
+            if got!=value:raise ValueError('TICK_CONSTANT_CHANGED:'+hex(site))
         result={
           'schema':'bsc.n1.original_member_packet_post_ctor_rewrite.v1',
           'exe_sha256':pe.sha,'source_grade':'EXACT_ORIGINAL_EXE_STATIC',
           'opcode_guards':len(PINS),'e8_edges':len(CALLS),'vtable_types':2,
+          'native_tick_constants_checked':len(PERIOD_CONSTANTS),
           'producer_function':'0x03284304',
           'producer_task_vtable':'0x03ADD608',
           'producer_task_tick':'0x03282E48',
+          'producer_tick_predicate':(
+              'group+0x98 clock * global 0x3D0727C * float32(0.001) '
+              '> previous task+0x58 + float32(1.0); if true update task+0x58 '
+              'and call 0x03284304 (may repeat same actor packet; not Shift evidence)'),
+          'task_per_tick_reissue_capability':True,
           'generic_constructor':'0x02F5F8DC',
           'constructor_then_rewrite_sites':['0x03284B55','0x03284B61',
               '0x03284B65','0x03284B67','0x03284B75','0x03284B7B'],
