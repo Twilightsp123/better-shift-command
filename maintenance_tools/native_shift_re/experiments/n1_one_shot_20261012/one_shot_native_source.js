@@ -56,20 +56,34 @@ for (const [site,raw] of PINS) {
     throw Error('EXACT_OPCODE_GUARD_FAILED_'+site.toString(16));
 }
 const start=Date.now();let total=0,dropped=0,stopped=false;
-const MAX=2400, RESERVED_FOR_TURNS=700, MAX_PER_ACTOR_SOURCE=3, MAX_ACTOR=200;
+const MAX=5000, RESERVED_FOR_TURNS=1500, MAX_PER_ACTOR_SOURCE=3, MAX_ACTOR=200;
+// v3: the original 18-second game run generated 21,534 queue-manager calls;
+// 19,837 of those crowded out ALL of the three sampled sender/receiver triples.
+// Log a bounded diagnostic sample, never every queue-manager call.
+const QUEUE_HEAD_SAMPLE=4, QUEUE_EVERY=4096, MAX_FOCUS_MEMBERS=24;
 const hooks=[],senderRecent=new Map(),receiverFrames=new Map();
 const taskFrames=new Map(),activeActors=new Map(),writeFrames=new Map();
 const turningGroups=new Map(),cohortMembers=new Map(),senderTaskSamples=new Map();
-const eventCounts={};const sourceCounts={};const actorSeen=new Set(),groupSeen=new Set();
+const eventCounts={},savedCounts={},droppedByKind={},sourceCounts={};
+const receiverReturnCounts={},pointerPairedSourceCounts={};
+const actorSeen=new Set(),groupSeen=new Set(),focusMembers=new Set();
+let queueManagerCalls=0;
 function ms(){return Date.now()-start;}
 function sendEvent(kind,fields,always=false){
   eventCounts[kind]=(eventCounts[kind]||0)+1;
   if(stopped && !always)return;
+  // These event kinds are the purpose of the probe, not expendable logging.
   const priority=(kind==='MOTOR_GOAL_REVERSAL' || kind==='GROUP_TICK_POSITION' ||
-                  kind==='POST_TURN_POSITION');
+    kind==='POST_TURN_POSITION' || kind==='NATIVE_MEMBER_SEND' ||
+    kind==='MEMBER_RECEIVER' || kind==='DEFERRED_PACKET' ||
+    kind==='GOAL_WRITE_PRE' || kind==='GOAL_WRITE_POST' ||
+    kind==='GOAL_READ' || kind==='NATIVE_GOAL_DIRECTION' ||
+    kind==='QUEUED_CONTINUATION' || kind==='NATIVE_MOVE_ISSUER' ||
+    kind==='POSTCTOR_SENDER_ENTER');
   if(total>=MAX || (!priority && total>=MAX-RESERVED_FOR_TURNS)){
-    dropped++;return;
+    dropped++;droppedByKind[kind]=(droppedByKind[kind]||0)+1;return;
   }
+  savedCounts[kind]=(savedCounts[kind]||0)+1;
   send({type:'event',ev:kind,atMs:ms(),seq:++total,...fields});
 }
 function groupOf(member){
@@ -89,6 +103,8 @@ function rememberMember(member, group){
 function cohortSample(group, turn){
   const list=[...(cohortMembers.get(group)||new Map()).values()];
   // Sample across the formation (native actor ordinal), not only its front.
+  // +0x60 is an untyped native field; sort for stable bounded sampling only,
+  // NEVER claim it is the soldier's index or physical formation position.
   list.sort((a,b)=>(a.ordinal??0)-(b.ordinal??0));
   if(list.length<=16)return list;
   const selected=[];
@@ -128,11 +144,13 @@ function isTracked(member){const m=addr(member);
   return false;
 }
 function isFocusMember(member){
-  // Only log a stratified slice of high-frequency per-model calls; maintain
-  // all member identities in cohortMembers so actual motor reversals can still
-  // trigger group Tick tracking for the full formation.
-  const ordinal=u32(member,0x60);
-  return ordinal===null || ordinal<3 || ordinal%8===0;
+  // Raw member+0x60 values in the real capture were 304,305,359,361;
+  // they are NOT verified formation ordinals. A modulo-8 filter can silently
+  // discard the entire subject cohort. Take bounded actual identities instead.
+  const key=addr(member);
+  if(focusMembers.has(key))return true;
+  if(focusMembers.size>=MAX_FOCUS_MEMBERS)return false;
+  focusMembers.add(key);return true;
 }
 function attach(site,fn){hooks.push(Interceptor.attach(base.add(site),fn));}
 try {
@@ -173,8 +191,18 @@ try {
       const sendTop=senderRecent.get(this.threadId);
       const direct=!!sendTop && ms()-sendTop.at<250 &&
         sendTop.member===addr(m) && sendTop.packet===addr(p);
+      // Two independent grades: (1) exact same-thread/actor/packet pointer
+      // correlation to a native send hook; (2) receiver return-RVA classification.
+      // A wrapper/thunk can hide the original virtual callsite from the receiver.
+      const pairSource=direct?sendTop.source:null;
+      const rvaKey=rv===null?'OUTSIDE_IMAGE':'0x'+rv.toString(16);
+      if(receiverReturnCounts[rvaKey]!==undefined || Object.keys(receiverReturnCounts).length<32)
+        receiverReturnCounts[rvaKey]=(receiverReturnCounts[rvaKey]||0)+1;
+      else receiverReturnCounts.UNLISTED=(receiverReturnCounts.UNLISTED||0)+1;
+      if(pairSource)pointerPairedSourceCounts[pairSource]=(pointerPairedSourceCounts[pairSource]||0)+1;
       const ctx={thread:this.threadId,member:addr(m),packet:addr(p),
         source,returnRva:rv===null?null:'0x'+rv.toString(16),
+        pairedSenderSource:pairSource,sameThreadMemberPacketPair:direct,
         explicitlyMatchedSender:direct&&sendTop.source===source};
       push(receiverFrames,this.threadId,ctx);
       sourceCounts['RECEIVER_'+source]=(sourceCounts['RECEIVER_'+source]||0)+1;
@@ -205,12 +233,20 @@ try {
       if(at.x===null||at.z===null||at.group!==group)continue;
       sendEvent('GROUP_TICK_POSITION',{turnStartTick:turn.tick,
         triggerMember:turn.members.has(addr(model)),
-        nativeActorOrdinal:entry.ordinal,...at});
+        memberField60Raw:entry.ordinal,...at});
     }
   }});
-  attach(0x0304459d,{onEnter(){sendEvent('QUEUED_CONTINUATION',{thread:this.threadId});}});
-  attach(0x0304433c,{onEnter(args){sendEvent('QUEUE_MANAGER_ENTRY',{
-    thread:this.threadId,manager:addr(args[0])});}});
+  attach(0x0304459d,{onEnter(){
+    const ctl=this.context.rbx,root=readMemberPointer(ctl,0);
+    sendEvent('QUEUED_CONTINUATION',{thread:this.threadId,
+      controller:addr(ctl),rootCandidate:addr(root)});
+  }});
+  attach(0x0304433c,{onEnter(args){
+    queueManagerCalls++;
+    if(queueManagerCalls<=QUEUE_HEAD_SAMPLE || queueManagerCalls%QUEUE_EVERY===0)
+      sendEvent('QUEUE_MANAGER_ENTRY',{thread:this.threadId,
+        manager:addr(args[0]),queueManagerCallNumber:queueManagerCalls});
+  }});
   attach(0x030323c8,{onEnter(args){sendEvent('NATIVE_MOVE_ISSUER',{
     thread:this.threadId,unitCandidate:addr(args[0])});}});
   attach(0x03115cbc,{onEnter(){
@@ -263,8 +299,11 @@ function shutdown(){if(stopped)return;stopped=true;
   let problems=[];for(let i=hooks.length-1;i>=0;i--){
     try{hooks[i].detach();}catch(e){problems.push(String(e));}}
   send({type:'summary',hookCount:hooks.length,eventsSaved:total,
-    dropped,sourceCounts,eventCounts,distinctActors:actorSeen.size,
-    distinctGroups:groupSeen.size,detachErrors:problems});
+    dropped,sourceCounts,eventCounts,savedCounts,droppedByKind,
+    queueManagerCalls,queueManagerEntriesLogged:savedCounts.QUEUE_MANAGER_ENTRY||0,
+    receiverReturnCounts,pointerPairedSourceCounts,
+    distinctActors:actorSeen.size,distinctGroups:groupSeen.size,
+    detachErrors:problems});
 }
 recv('stop',function(){shutdown();});
 send({type:'ready',guardCount:PINS.length,hookCount:hooks.length,
