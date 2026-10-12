@@ -48,6 +48,49 @@ class OfflineTests(unittest.TestCase):
         self.assertFalse(report['physical_crowding_causality_proven'])
         self.assertFalse(report['patch_authorized'])
 
+    def test_real_world_style_19868_drops_are_not_native_sender_absence(self):
+        # Summary stores attempted events even when raw log budget discarded them.
+        # Exact numbers are from the user's first successful 18-second Windows run;
+        # this is a synthetic control, not a copy of user runtime pointers.
+        saved={'QUEUE_MANAGER_ENTRY':1697,'NATIVE_MOVE_ISSUER':1,
+               'POSTCTOR_SENDER_ENTER':2,'MOTOR_GOAL_REVERSAL':10,
+               'POST_TURN_POSITION':151,'GROUP_TICK_POSITION':234}
+        attempted=dict(saved)
+        attempted.update({'QUEUE_MANAGER_ENTRY':21534,'NATIVE_MOVE_ISSUER':7,
+          'POSTCTOR_SENDER_ENTER':4,'NATIVE_MEMBER_SEND':3,
+          'MEMBER_RECEIVER':3,'DEFERRED_PACKET':3,'GOAL_WRITE_PRE':3,
+          'GOAL_WRITE_POST':3,'QUEUED_CONTINUATION':2,'GOAL_READ':3,
+          'NATIVE_GOAL_DIRECTION':3})
+        rows=[{'type':'ready'}]
+        rows.extend({'type':'event','ev':k} for k,n in saved.items() for _ in range(n))
+        rows.append({'type':'summary','dropped':19868,'eventCounts':attempted,
+                     'sourceCounts':{'POSTCTOR_REWRITE':50,
+                                     'RECEIVER_OTHER_OR_UNKNOWN':50},
+                     'detachErrors':[]})
+        report=analyze_one_shot.analyze(rows)
+        self.assertEqual(report['grade'],'NATIVE_SOURCE_EVENTS_TRIGGERED_BUT_DROPPED_BY_LOGGER')
+        self.assertEqual(report['agent_event_counts_dropped_by_logger']['QUEUE_MANAGER_ENTRY'],19837)
+        self.assertEqual(report['core_identity_records_dropped']['QUEUED_CONTINUATION'],2)
+        self.assertEqual(report['core_identity_records_dropped']['NATIVE_MEMBER_SEND'],3)
+        self.assertEqual(report['native_sender_hook_executions'],3)
+        self.assertEqual(report['queued_hook_executions_from_agent_summary'],2)
+        self.assertTrue(report['logger_drop_count_reconciles'])
+        self.assertFalse(report['patch_authorized'])
+
+    def test_horizontal_close_approach_is_not_proof_of_collision(self):
+        samples=[{'type':'event','ev':'GROUP_TICK_POSITION','group':'g',
+             'turnStartTick':658,'groupTick':tick,'member':m,'x':x,'z':z}
+             for tick,pos in [(659,[(0.,0.),(1.124,0.)]),
+                              (660,[(0.,0.),(0.609,0.)]),
+                              (661,[(0.,0.),(0.973,0.)])]
+             for m,(x,z) in [('m'+str(i),pair) for i,pair in enumerate(pos)]]
+        result=analyze_one_shot.analyze([{'type':'ready'},*samples,
+                  {'type':'summary','dropped':0,'detachErrors':[]}])
+        approach=result['sampled_close_approaches'][0]
+        self.assertEqual(approach['min_distance_tick'],660)
+        self.assertAlmostEqual(approach['min_horizontal_member_center_distance'],0.609)
+        self.assertFalse(approach['physical_collision_proven'])
+
     def test_sources_named_without_sender_are_not_positive(self):
         rows=[{'type':'ready'},
               {'type':'event','ev':'MEMBER_RECEIVER','source':'POSTCTOR_REWRITE',
