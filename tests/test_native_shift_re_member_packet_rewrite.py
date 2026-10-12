@@ -12,7 +12,7 @@ import audit_member_packet_post_ctor_rewrite as m
 
 class NativePacketRewrittenAfterConstructor(unittest.TestCase):
     def test_strict_original_byte_sites_not_a_guess(self):
-        self.assertEqual(len(m.PINS),33)
+        self.assertEqual(len(m.PINS),41)
         self.assertEqual(len(m.CALLS),8)
         self.assertEqual(m.PINS['packet_plus50_clear_bit2'],(0x03284B65,'24fb'))
         self.assertEqual(m.PINS['packet_plus44_zero_low32'],(0x03284B75,'894d24'))
@@ -31,6 +31,17 @@ class NativePacketRewrittenAfterConstructor(unittest.TestCase):
         self.assertEqual(m.rewritten_flag(0x16,0),0x12)
         self.assertEqual(m.rewritten_flag(0x06,1),0x03)
 
+    def test_exact_group_tick_reissues_are_conditional_not_shift_specific(self):
+        self.assertEqual(len(m.PERIOD_CONSTANTS),3)
+        self.assertEqual(m.PINS['tick_group_clock'][1],'8b8198000000')
+        self.assertEqual(m.PINS['tick_global_rate'][1],'8b059a43a800')
+        self.assertEqual(m.PINS['tick_not_due_branch'][1],'760f')
+        self.assertEqual(m.PINS['tick_store_elapsed'][1],'f30f114b58')
+        self.assertFalse(m.periodic_sender_due(10,100,0))
+        self.assertTrue(m.periodic_sender_due(11,100,0))
+        self.assertFalse(m.periodic_sender_due(11,100,1.1))
+        with self.assertRaisesRegex(ValueError,'BAD_GLOBAL_RATE'):
+            m.periodic_sender_due(11,0,0)
     def test_missing_flag_or_bad_input_rejected(self):
         with self.assertRaisesRegex(ValueError,'NOT_KNOWN_CONSTRUCTOR'):
             m.rewritten_flag(0x02,0)
