@@ -1,0 +1,52 @@
+{
+  "schema": "bsc.n1.anonymous_goal_geometry_lookahead.v1",
+  "simultaneous_reversal_ticks": [
+    {
+      "tick": 423,
+      "simultaneous_goal_reversals": 2,
+      "lookahead_straight_segment_crossings": 0
+    },
+    {
+      "tick": 465,
+      "simultaneous_goal_reversals": 2,
+      "lookahead_straight_segment_crossings": 0
+    },
+    {
+      "tick": 467,
+      "simultaneous_goal_reversals": 1,
+      "lookahead_straight_segment_crossings": 0
+    },
+    {
+      "tick": 548,
+      "simultaneous_goal_reversals": 3,
+      "lookahead_straight_segment_crossings": 1,
+      "crossing_fraction_samples": [
+        {
+          "member_pair_anonymized": true,
+          "fraction_along_first_lookahead": 0.81843,
+          "fraction_along_second_lookahead": 0.71217
+        }
+      ]
+    },
+    {
+      "tick": 550,
+      "simultaneous_goal_reversals": 1,
+      "lookahead_straight_segment_crossings": 0
+    },
+    {
+      "tick": 658,
+      "simultaneous_goal_reversals": 1,
+      "lookahead_straight_segment_crossings": 0
+    }
+  ],
+  "closest_sampled_member_center": {
+    "turn_start_tick": 658,
+    "tick": 660,
+    "sampled_members": 4,
+    "min_horizontal_center_distance": 0.608719,
+    "collision_proven": false
+  },
+  "physical_collision_cause_proven": false,
+  "rmb_vs_shift_order_instance_captured": false,
+  "warning": "Lookahead goal chords are not curved trajectories or collision boxes"
+}
