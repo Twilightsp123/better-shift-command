@@ -964,3 +964,37 @@ JS Node mock 和 Python tests，另有与首次用户日志对应的匿名化摘
 不准硬改 `+0xB10 bit7`、`+0x710`、`+0x1E0`、5 单位分流阈值；
 不准用 Lua 重做 Shift；不准修改 main。已匿名聚合统计可以入库，
 用户原始指针日志和游戏 EXE 不入公开仓库。
+
+
+## 2026-10-12 Windows 首次 one-shot 探针启动失败及 PTRFIX 修复
+
+玩家原始 PowerShell 日志：`TRACE_STARTING: guarded original SHA and exact PID matched.` 后
+`FAIL_CLOSED:PROBE_SETUP_ERROR: TypeError: cannot define variable 'ptr'`
+（`/script1.js:1`），最终 `TRACE_NO_SUMMARY`；**没有出现 TRACE_ACTIVE，
+这次根本没有开始记录新的游戏数据**。这是新版 Frida JS 首次真实加载暴露的
+软件兼容性错误，不是用户按键、不适用版本或挤压机制的取证结论。
+
+**直接根因**：`one_shot_native_source.js` 原顶层定义了
+`function ptr(p,o)`，与 Frida JS 运行时保留的全局 `ptr` 命名冲突；
+最初 Node mock 没有将该内置对象设为不可配置，从而漏测。
+
+**修复并实际提交研究分支**：
+- agent helper 改名 `readMemberPointer`，并将完整探针封入私有
+  `(function bscN1AgentIsolatedScope(){...})();`；
+- Node mock 现在注入不可写、不可配置的 Frida 内置 `ptr`；
+- 新增 `test_frida_globals.js`：验证旧版裸 `function ptr()` 在受保护运行环境拒绝，
+  而隔离版不会污染 Frida 全局作用域；
+- Windows `run_one_shot.py` 在附加游戏前检查 agent 作用域/冲突名称，
+  并将初始化失败输出为明确 `TRACE_SETUP_ABORTED_BEFORE_ACTIVE`；
+- `test_offline.py` 添加预检负对照，根目录 CI 新增 Node
+  locked-global 回归；GitHub Actions CI 已实际成功。
+- 同一原始 EXE 上重新执行
+  `verify_original_probe.py`：**14/14** Hook RVA 字节、PE、unwind
+  与 GNU objdump 指令边界全部 PASS，目标游戏机器码地址没有修改。
+
+**证据级别**：新增 Windows 启动失败日志证明的只是 QJS 顶层名称冲突；
+修复后的 Node mock、Python 10 测试（9 pass,1 skip）、原始 EXE 静态
+验证全部成功；**修正版本在用户 Windows 实机 Frida Script.load()
+的成功情况仍然 UNKNOWN**。修订后的交付包
+`BSC_N1_903_ONE_SHOT_NATIVE_PTRFIX_20261012.zip` 与原包不同，
+必须解压到新目录，不能混用 JS／runner 旧版；没有 Native 修复补丁。
