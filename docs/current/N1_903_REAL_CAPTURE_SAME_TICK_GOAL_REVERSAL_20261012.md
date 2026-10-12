@@ -36,6 +36,23 @@
 
 ## 一次实机采集的合格准备标准
 
-新单次工具必须（a）原始 EXE SHA 和 13 条确切 x64 指令边界守卫，（b）明确区分 A/B/改包类三处 member 虚调用返回 RVA，不能复用 `+0x368` 的不同对象混淆，（c）记录同组逐名目标反转和之后多 Tick 的位置，（d）在老 Frida `session.detach()` 卡死时由独立 Python 监督者强制限制退出耗时，（e）自动给出保守分析，不把“匹配构造器指纹”当作已执行对应 Shift。
+新单次工具必须（a）原始 EXE SHA 和 14 条确切 x64 指令边界守卫，（b）明确区分 A/B/改包类三处 member 虚调用返回 RVA，不能复用 `+0x368` 的不同对象混淆，（c）记录同组逐名目标反转和之后多 Tick 的位置，（d）在老 Frida `session.detach()` 卡死时由独立 Python 监督者强制限制退出耗时，（e）自动给出保守分析，不把“匹配构造器指纹”当作已执行对应 Shift。
 
 所有这些均需先在原始 EXE 离线 + JS mock + Python 合成/退出超时测试通过；即使通过，**Windows 游戏附加本身仍只能通过一次真实测试验证**。本报告和分析不授权 Native Patch。
+
+
+## 2026-10-12 — 一次性来源／成员 Tick 采集器已达到离线发放标准
+
+研究分支现已实际写入完整代码：
+
+`maintenance_tools/native_shift_re/experiments/n1_one_shot_20261012/`
+
+- `one_shot_native_source.js`：14 处原生 Hook 守卫，真实 A/B/改包调用返回 RVA，同一成员的目标读写和大角度反转；新增 `0x02DD579C` 原生群组 Tick 入口，不依赖等待下一次发包，就能对同组最多 22 名分布于不同阵型序号的士兵连续抽样其位置。
+- `verify_original_probe.py`：在精确原始 EXE SHA 上验证全部 14 个入口的 PE 执行节／unwind 函数、objdump 指令边界，补充 `0x02DD57BA/0x02DD57D9` 的真实群组对象／`+0x98` Tick 守卫，以及三个已确认发送返回 RVA、两个任务虚表。
+- `run_one_shot.py`：Windows 64 位 PID/EXE/SHA fail-closed，默认**18 秒**单次采集；先让 Frida JS 撤销 Hook 并输出 SUMMARY，再由独立 Python 父进程监管（老版本 Python-side `session.detach()` 卡住也不会无限期占用 PowerShell）。如果已保存有效 SUMMARY，即便工作进程退出卡住，仍可保留并分析本轮成果。
+- `analyze_one_shot.py`：严格按实际成员发送者、接收函数的 RETURN RVA、成员实例和原生主目标提交鉴别 A/B/改包来源；仅作为观测判断，不把队列入口命中自动解释成玩家 Shift，也不把目标写入之后的渐进转弯自动解释为碰撞根因。
+- `test_probe_node.js` + `test_offline.py`：在不启动游戏的情况下模拟 Frida，检验相同成员发送/接收/目标反转、随后两个群组 Tick 的正反位移、错误 EXE 拒绝、Native DLL 卸载迟滞/父进程超时、已有完整 SUMMARY 的回收与保留。
+
+**已实际完成验证**：原始 EXE **14/14 机器码守卫和反汇编边界 PASS**，群组 Tick 2 个额外对象守卫 PASS，原生发送返回 RVA/任务虚表 PASS，Node.js 语法与 Frida mock PASS，Python **9/9** 离线合同测试 PASS，GitHub Actions CI PASS。**Windows 游戏真实 attach 尚未进行**；故准确的交付性质是“具备一次真实 Windows 取证试验的离线准备”，**并非已经验证采集器在 Windows 正常运行，更不是 Native 修复通过**。若首轮出现异常，不要求重复相同测试，请保存退出日志和现有部分 JSONL。
+
+本轮没有提交原始游戏 EXE、历史个人日志或含运行时地址的原始证据。继续禁止未证明根因即修改共享状态/转弯门槛。
