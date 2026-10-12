@@ -23,7 +23,39 @@ class ExistingTraceDiagnostics(unittest.TestCase):
   with tempfile.TemporaryDirectory() as td:
    p=Path(td)/'trace.jsonl'
    p.write_text(json.dumps({'type':'event','ev':'B_DEFERRED_RECEIVE',
-       'source':{'memberFanoutMatched':False}})+'\n')
+       'source':{'memberFanoutMatched':False},'packet58':('00'*88)})+'\n')
    self.assertEqual(audit.diagnose(p)['reason'],'RECEIVE_PRESENT_BUT_NO_PACKET_IDENTITY_MATCH')
+
+ def test_captured_0x02_flag_excludes_original_B_packet_ctor(self):
+  with tempfile.TemporaryDirectory() as td:
+   p=Path(td)/'trace.jsonl'
+   b=bytearray(88);b[0x50]=2
+   lines=[
+       {'type':'ready'},
+       {'type':'event','ev':'B_DEFERRED_RECEIVE','member':'0x123',
+        'traceId':1,'atMs':100,'packet58':b.hex(),
+        'source':{'memberFanoutMatched':False}},
+       {'type':'event','ev':'GOAL_COMMIT_PRE','traceId':1,
+        'atMs':102,'before24':'00'*24,'proposed24':'01'*24},
+       {'type':'event','ev':'GOAL_COMMIT_POST','traceId':1,'atMs':103},
+       {'type':'event','ev':'SUMMARY','atMs':30002,'droppedEvents':0},
+   ]
+   p.write_text('\\n'.join(json.dumps(x) for x in lines)+'\\n')
+   report=audit.diagnose(p)
+   self.assertEqual(report['reason'],'RECEIVER_PACKETS_INCOMPATIBLE_WITH_KNOWN_B_BUILDER')
+   self.assertEqual(report['packet_flag50_counts'],{'0x2':1})
+   self.assertEqual(report['first_write_delay_ms']['median'],3)
+   self.assertEqual(report['packet_count_incompatible_with_known_B_constructor'],1)
+   self.assertFalse(report['B_route_execution_confirmed'])
+ def test_B_packet_flag_0x06_requires_actual_source_proof(self):
+  with tempfile.TemporaryDirectory() as td:
+   p=Path(td)/'trace.jsonl'
+   b=bytearray(88);b[0x50]=0x0e
+   p.write_text(json.dumps({'type':'event','ev':'B_DEFERRED_RECEIVE',
+       'traceId':1,'member':'0x333','packet58':b.hex(),
+       'source':{'memberFanoutMatched':False}})+'\\n')
+   report=audit.diagnose(p)
+   self.assertEqual(report['packet_count_incompatible_with_known_B_constructor'],0)
+   self.assertFalse(report['B_route_execution_confirmed'])
 
 if __name__=='__main__':unittest.main()
