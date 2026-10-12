@@ -13,7 +13,7 @@ from statistics import median
 def diagnose(path):
     counters=Counter()
     source=Counter()
-    flags=Counter()
+    flags=Counter();qword44=Counter()
     members=Counter()
     errors=[]
     received={}
@@ -46,6 +46,7 @@ def diagnose(path):
             try:
                 raw=bytes.fromhex(item['packet58'])
                 flags[raw[0x50]]+=1
+                qword44[int.from_bytes(raw[0x44:0x4c], 'little')]+=1
             except (ValueError,KeyError,IndexError,TypeError):
                 errors.append('INVALID_PACKET_BYTES_'+str(line_no))
         if event=='GOAL_READ':reads.append(item)
@@ -58,6 +59,7 @@ def diagnose(path):
     # A packet immediately produced by that builder must have both bit1
     # and bit2 set; this alone is NOT a positive identity classifier.
     incompatible=sum(v for f,v in flags.items() if f & 0x06 != 0x06)
+    incompatible_qword44=sum(v for k,v in qword44.items() if k!=3)
     first_latencies=[]
     changed=0
     for ident,recv in received.items():
@@ -71,7 +73,7 @@ def diagnose(path):
                   and x.get('writeSeenSinceReceive') is False for x in reads)
     if errors:reason='INCOMPLETE_OR_PROBE_ERROR'
     elif counters['B_MEMBER_FANOUT']==0 and not received:reason='NO_B_FANOUT_OR_RECEIVE_CAPTURED'
-    elif incompatible==len(received) and received and source['matched_B_fanout']==0:
+    elif incompatible==len(received) and incompatible_qword44==len(received) and received and source['matched_B_fanout']==0:
         reason='RECEIVER_PACKETS_INCOMPATIBLE_WITH_KNOWN_B_BUILDER'
     elif counters['B_MEMBER_FANOUT']>0 and not received:reason='B_FANOUT_BUT_NO_DEFERRED_RECEIVE'
     elif received and source['matched_B_fanout']==0:reason='RECEIVE_PRESENT_BUT_NO_PACKET_IDENTITY_MATCH'
@@ -80,6 +82,8 @@ def diagnose(path):
       'reason':reason,'input_record_count':lines,
       'event_counts':dict(counters),'source_matching':dict(source),
       'packet_flag50_counts':{hex(k):v for k,v in sorted(flags.items())},
+      'packet_qword44_counts':{hex(k):v for k,v in sorted(qword44.items())},
+      'packet_count_incompatible_with_B_ctor_qword44':incompatible_qword44,
       'known_B_constructor_RVA':'0x02F5F940',
       'known_B_constructor_opcode':'80c906',
       'packet_count_incompatible_with_known_B_constructor':incompatible,
@@ -99,8 +103,9 @@ def diagnose(path):
       'interpretation':(
        'A mode-gated deferred receiver hook does NOT identify its packet producer. '
        'Original B packet builder enforces bits 0x06; absence of those bits '
-       'is negative evidence for that constructor, unless there was an '
-       'intervening unobserved mutation. Missing queued hooks does not prove '
+       'and packet+0x44=3; contradictions are negative evidence for an unmodified '
+       'builder product, but intervening mutation or packet variant is not excluded. ' 
+       'Missing queued hooks does not prove '
        'there was no Shift command in the game.'
       )
     }
