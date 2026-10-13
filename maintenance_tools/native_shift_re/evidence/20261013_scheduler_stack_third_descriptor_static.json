@@ -1,0 +1,27 @@
+{
+  "schema": "bsc.n1.scheduler_stack_and_separate_task_callback.v1",
+  "exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "evidence_level": "EXACT_ORIGINAL_EXE_STATIC",
+  "opcode_instruction_starts": 46,
+  "E8_edges": 5,
+  "typed_callbacks": 5,
+  "dispatcher": {
+    "member_offset": "0x30",
+    "slot_start": "0x818",
+    "slot_stride_bytes": 16,
+    "count": "0x898",
+    "weight": "0x89C / 0x8A0",
+    "cleanup": "0x030DBF3C"
+  },
+  "factory_A_callback": "0x03940EE0->0x0326F0DC",
+  "factory_B_callback": "0x03941408->0x0326F07C",
+  "separate_task_callback": "0x039407A8->0x032701C4",
+  "task_like_offsets": [
+    "0x20",
+    "0x24",
+    "0x25",
+    "0x168"
+  ],
+  "actual_MOVE_slot_plus_A0_identity_verified": false,
+  "native_patch_authorized": false
+}
