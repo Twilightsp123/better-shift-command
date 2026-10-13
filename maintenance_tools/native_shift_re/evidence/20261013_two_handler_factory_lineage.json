@@ -1,0 +1,48 @@
+{
+  "schema": "bsc.n1.two_native_handler_factories_member_task_lineage.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "independently_executed_original_checks": {
+    "opcodes_and_instruction_starts": 31,
+    "direct_e8_edges": 9,
+    "typed_vtable_and_static_callback_pointers": 12,
+    "rip_relative_vtable_installs": 2,
+    "register_preservation_leaf_functions": 2
+  },
+  "factories": [
+    {
+      "factory_rva": "0x0326F0DC",
+      "static_callback_table": "0x03940ED8",
+      "static_registered_pointer_location": "0x03D19A88",
+      "allocated_bytes": 104,
+      "installed_vtable": "0x039156F8",
+      "typed_method_offset": "0x100",
+      "typed_method_rva": "0x0327BCF8",
+      "source_fields": [
+        "parent+0x68 -> handler+0x58",
+        "parent+0x50 -> handler+0x60"
+      ],
+      "downstream": "member virtual+0x348 -> member timer"
+    },
+    {
+      "factory_rva": "0x0326F07C",
+      "static_callback_table": "0x03941400",
+      "static_registered_pointer_location": "0x03D19C10",
+      "allocated_bytes": 96,
+      "installed_vtable": "0x03915830",
+      "typed_method_offset": "0x100",
+      "typed_method_rva": "0x0327BD38",
+      "source_fields": [
+        "parent+0x60 -> handler+0x58"
+      ],
+      "downstream": "source virtual+0x60/+0x70 -> two alternate member timer families"
+    }
+  ],
+  "register_proof": "Leaf callees 0x030C4BBC..0x030C4C32 and 0x03264D88..0x03264E1D have no calls and no R9/R10 instructions on pinned original EXE",
+  "previous_missing_vtable_origin_resolved": true,
+  "static_registration_not_runtime_invocation": true,
+  "player_RMB_or_Shift_instance_to_factory_verified": false,
+  "member_crowding_cause_verified": false,
+  "native_patch_authorized": false,
+  "original_game_exe_committed": false,
+  "user_runtime_log_committed": false
+}
