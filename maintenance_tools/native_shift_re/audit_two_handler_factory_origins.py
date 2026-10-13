@@ -29,6 +29,14 @@ PINS = {
  0x0327BE4B:'e820fbdeff', 0x0327BE59:'ff5070',
  0x0327BE86:'e8c1f6deff',
  0x03264D88:'488d0519036a00',0x030C4BBC:'4883ec18',
+ 0x0327711C:'488d05e52aaa00',
+ 0x03277123:'48394138',
+ 0x03277129:'488d05e02aaa00',
+ 0x03277130:'48394138',
+ 0x0327714C:'488b4138',
+ 0x03277168:'488d0d1929aa00',
+ 0x03277214:'488b4138',
+ 0x03277224:'488d0d5d28aa00',
 }
 EDGES={
  0x0326F092:0x0327C6B0,
@@ -117,6 +125,10 @@ def audit(exe):
       '0x03D19A88':'0x03940ED8 (callback +0x08 is 0x0326F0DC)',
       '0x03D19C10':'0x03941400 (callback +0x08 is 0x0326F07C)'},
    'keyboard_or_queued_order_selector_for_registry_entries':None,
+   'native_runtime_type_predicates':{
+     'B_family':'0x0327711C checks [object+0x38] == 0x03D19C08 or 0x03D19C10',
+     'A_family':'0x0327714C and 0x03277214 check [object+0x38] against a small set including 0x03D19A88'},
+   'type_predicate_to_MOVE_queue_order_link_proven':False,
    'variant_one':{
      'factory_callback':'0x0326F0DC','callback_descriptor_slot':'0x03940EE0',
      'alloc_bytes':0x68,'installed_vtable':'0x039156F8',
