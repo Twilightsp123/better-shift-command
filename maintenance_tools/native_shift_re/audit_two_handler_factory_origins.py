@@ -45,6 +45,12 @@ TABLE={
  0x03915930:0x0327BD38,   # variant two's vtable+0x100
  0x03941408:0x0326F07C,   # callback on an upstream factory descriptor
  0x03940EE0:0x0326F0DC,   # parallel upstream factory descriptor
+ 0x03940ED8:0x0326FFF4,   # first callback class entry
+ 0x03941400:0x0326FF60,   # second callback class entry
+ 0x03940F00:0x03270098,   # first callback class +0x28
+ 0x03941428:0x03270C68,   # second callback class +0x28
+ 0x03D19A88:0x03940ED8,  # static callback registry points to first class
+ 0x03D19C10:0x03941400,  # registry points to second class
 }
 LEA_VTABLE={
  0x0326F0BE:0x03915830,
@@ -107,6 +113,10 @@ def audit(exe):
    'exact_E8_calls':len(EDGES),'typed_pointer_table_entries':len(TABLE),
    'RIP_relative_vtable_installs':len(LEA_VTABLE),
    'source_register_preserving_called_leaf_bodies':leaves,
+   'upstream_static_callback_registry':{
+      '0x03D19A88':'0x03940ED8 (callback +0x08 is 0x0326F0DC)',
+      '0x03D19C10':'0x03941400 (callback +0x08 is 0x0326F07C)'},
+   'keyboard_or_queued_order_selector_for_registry_entries':None,
    'variant_one':{
      'factory_callback':'0x0326F0DC','callback_descriptor_slot':'0x03940EE0',
      'alloc_bytes':0x68,'installed_vtable':'0x039156F8',
