@@ -1,6 +1,6 @@
 # N1 / 2026-10-13 / 型别确认的同成员两种动作子类及真正 motor 提交分叉
 
-**此结果覆盖上一轮不严谨的“0x0306A8C0 自动接续 0x032599C8”的拼接。** 固定原始 EXE SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a`；本地独立 PE/unwind/objdump 检查 **19 个 opcode、5 个 E8/E9 直接控制流目标、6 个 typed vtable 槽、2 个 RIP LEA vtable 安装** PASS，原始游戏 EXE 未修改。
+**此结果覆盖上一轮不严谨的“0x0306A8C0 自动接续 0x032599C8”的拼接。** 固定原始 EXE SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a`；本地独立 PE/unwind/objdump 检查 **21 个 opcode、7 个 E8/E9 直接控制流目标、6 个 typed vtable 槽、2 个 RIP LEA vtable 安装** PASS，原始游戏 EXE 未修改。
 
 ## 相同一名成员，两个不同虚函数安装不同动作对象，但目标存储位置相同
 
@@ -75,3 +75,14 @@ B 类型其它更新/派发消费者仍可间接触及 motor，不能排除。
 回归 `tests/test_native_shift_re_dual_member_action_subtypes.py`，
 研究分支 `research/n1-native-shift-behavior-patch-20261009`，
 **无 EXE、含指针原始日志、原生代码写入、main 修改**。
+
+
+**补充（同一位置的清理/切换时序）**：两种动作安装器不仅把不同子类创建在相同的
+`member+0x330`，而且在安装前都先通过
+`0x0306A9A7 CALL 0x02DB0A10`（+0x580 方案）
+或 `0x0306A8D7 CALL 0x02DB0A10`（+0x5B8 方案）
+清理同一 `member+0x328` 当前动作控制状态。后面才分别调用
+`0x03249350` 和 `0x03248EC8` 构造不同 vtable 的动作对象。
+此先清理再构造的调用次序已纳入精确机器码验证与回归。
+本轮累计 **21/21 原始 opcode、7/7 直接 E8/E9、6/6 同类型对象虚槽、
+2/2 vtable LEA**，而不是将动作切换等同于多个同时保留的子类实例。
