@@ -118,3 +118,6 @@ See [finding](../../docs/current/N1_903_LAYOUT_COUNT_NOT_ARRIVAL_DISCONFIRMATION
 
 
 N1 9.0.3 registration reverse references: `audit_factory_registry_xrefs.py --exe PATH --out PATH` (exact SHA required); synthetic tests `test_native_shift_re_factory_registry_xrefs.py`. Static only, no native gameplay patch. See `docs/current/N1_903_FACTORY_REGISTRY_REVERSE_XREF_AUDIT_20261013.md`.
+
+
+Third typed handler post-constructor negative: `audit_third_handler_post_ctor_v8.py` checks 16 original exact-SHA constructor → virtual+8 bounded paths and destructor; not a setter proof or patch. See `docs/current/N1_903_THIRD_HANDLER_POST_CTOR_V8_NEGATIVE_20261013.md`.

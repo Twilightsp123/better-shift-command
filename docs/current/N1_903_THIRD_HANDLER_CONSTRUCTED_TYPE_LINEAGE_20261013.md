@@ -17,3 +17,7 @@
 新增只读代码 audit_third_handler_type_lineage.py、配套test_native_shift_re_third_handler_type_lineage.py和脱敏静态报告，更新AI handoff。无游戏补丁、无原始EXE和用户指针JSONL上传、无main改动。
 
 下一条需要关闭的边：第三类型对象+0x88非空赋值来源与MOVE slot+0xA0真实指针别名；之后比较fresh/queued继承几何如何分配到同一兵牌具体成员。
+
+## 2026-10-13 排除性静态成果：第三处理器 16 处构造返回后并不直接设置+0x88
+
+新独立原始 EXE 审计 `audit_third_handler_post_ctor_v8.py` 表明，前轮类型化的 16 条 `0x0326581C` E8 创建路径随后都调用同一对象的 `vtable+0x08`，该槽实际为 `0x008D3280`（字节 `c20000`，空返回）；其中12个尾跳，4个调用。逐路径检查返回后至该虚方法之间无直接+0x88操作数。类型化析构器 `0x03266FC0` 对+0x80/+0x98有资源处理，未直接访问+0x88。这个结果**只排除有界片段的直接 setter**，不排除间接调用/其它 lifecycle 赋值，也不证明同一指针等于MOVE slot+0xA0。详见 `docs/current/N1_903_THIRD_HANDLER_POST_CTOR_V8_NEGATIVE_20261013.md`；无游戏修复、无main更改。
