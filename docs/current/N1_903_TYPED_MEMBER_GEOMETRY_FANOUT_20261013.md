@@ -104,3 +104,7 @@
 但尚未有 CMD/Shift 输入实例、`task+0x160` 与具体子类的指针配对，
 因此不说 RMB 使用 A、Shift 使用 B；
 目前对“哪条造成 Shift 挤压”没有因果结论，不授权任何 gameplay 修改。
+
+
+## 2026-10-13 对 0x03117D44 的进一步类型纠正（原始 EXE 核验）
+参见 docs/current/N1_903_TYPED_MEMBER_SUBCLASS_GEOMETRY_20261013.md。此前称 0x0390FE38 为控制器虚表方法槽的说法不准确：构造器 0x030EE464 实际安装成员子类 vtable 0x0390FAB0，所以 0x0390FE38 = 同一成员子类 +0x388，方法 0x03117D44。这个子类 +0x368=0x03117CE0（再 tailjmp 0x0306B9F0），+0x580/0x5B8 与另外两个确认的成员类型相同。+0x260=0x008D3330 是固定返回 false 的短函数，因此在该 vtable 持续有效时初始几何门槛不阻止 0x03117D44 组装记录。0x03117E8C 后续仍有逐成员条件，不能把它说成人人无条件收到同一目标。另独立排除 0x0326F4C4 的 +0x88 覆盖误判：它创建 0x90 字节另一个 vtable=0x03915038 的辅助对象；0x0326519B 则属 vtable 0x03ADDE08 的其他对象。精确 EXE 29 opcode、5 E8、2 E9、3 LEA、18 typed slots，8/8 本地回归 PASS；没有 MOVE task 实例指针串接，没有挤压因果修复，禁止 native gameplay patch。

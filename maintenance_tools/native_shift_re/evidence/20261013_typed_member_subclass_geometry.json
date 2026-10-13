@@ -1,0 +1,25 @@
+{
+  "schema": "bsc.n1.typed_member_geometry_and_false_plus88_writer.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof_grade": "EXACT_EXE_STATIC",
+  "opcode_instruction_starts": 29,
+  "typed_member_vtable_slots": 18,
+  "direct_E8": 5,
+  "direct_E9": 2,
+  "RIP_LEA": 3,
+  "local_tests": 8,
+  "typed_constructor": "0x030EE464 installs 0x0390FAB0",
+  "specialized_member": {
+    "vtable": "0x0390FAB0",
+    "plus260": "0x008D3330 always false",
+    "plus368": "0x03117CE0",
+    "plus388": "0x03117D44",
+    "plus580": "0x0306A990",
+    "plus5B8": "0x0306A8C0"
+  },
+  "geometry_fanout": "0x03117D44 -> 0x0324983C -> 0x03117E8C",
+  "other_type_adapter": "0x0326F4C4 allocates 0x90-byte vtable 0x03915038; SIMD write covers its +0x88 (not third handler)",
+  "other_type_write": "0x0326519B belongs vtable 0x03ADDE08",
+  "confirmed_MOVE_subtask_to_geometry_instance": false,
+  "native_patch_authorized": false
+}
