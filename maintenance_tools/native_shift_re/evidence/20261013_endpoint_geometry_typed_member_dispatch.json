@@ -1,0 +1,43 @@
+{
+  "schema": "bsc.n1.endpoint_geometry_typed_dispatch.static.v1",
+  "exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "guarded_opcode_sites": 49,
+  "owner_functions_verified": 10,
+  "non_unwind_pinned": 10,
+  "direct_edges_verified": 6,
+  "vtable_slots_verified": 5,
+  "input_to_temporary_record_mapping": {
+    "+0x48": "+0x48",
+    "+0x4c": "+0x4c",
+    "+0x50": "+0x50",
+    "+0x54": "+0x60"
+  },
+  "packing_function": "0x0324983C",
+  "packed_record_handler": "0x03117E8C",
+  "fanout_array_count": "[owner+0xB64]",
+  "fanout_array_ptr": "[owner+0xB68]",
+  "fanout_virtual_method": "+0x5B8",
+  "fanout_conditional": true,
+  "typed_member_vtable_pairings": [
+    {
+      "vtable_receiver_slot": "0x038FD9C0",
+      "vtable_action_slot": "0x038FDC10"
+    },
+    {
+      "vtable_receiver_slot": "0x03910868",
+      "vtable_action_slot": "0x03910AB8"
+    }
+  ],
+  "receiver_interface": "[member_vtable+0x368]==0x0306B9F0",
+  "geometry_action_interface": "[same_member_vtable+0x5B8]==0x0306A8C0",
+  "member_action_storage": "member+0x330 nested parameters +0x38",
+  "member_action_constructor": "0x03248EC8 ->0x03249510 ->0x02F5E8A4",
+  "common_builder_updates_next_subtask_list_at": "0x03105C83",
+  "common_builder_directly_snapshots_these_four_endpoints": false,
+  "alternate_unknown_indirect_consumers_excluded": false,
+  "historical_instance_link_to_stage1_object_proven": false,
+  "rmb_shift_instance_identity_proven": false,
+  "member_class_fully_typed": false,
+  "crowding_cause_proven": false,
+  "native_patch_authorized": false
+}
