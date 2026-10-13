@@ -1,0 +1,35 @@
+{
+  "schema": "bsc.n1.group_selected_alternate_native_actor_timers.static.v1",
+  "exact_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "local_original_exe_instruction_guards": 31,
+  "local_original_exe_direct_E8": 8,
+  "local_original_exe_vtable_slots": 15,
+  "local_additional_action_constructor_opcode_guards": 2,
+  "local_additional_action_update_slots": 2,
+  "local_additional_LEA_installs": 2,
+  "repo_source_contract_guard_sites": 30,
+  "repo_source_contract_vtable_slots": 17,
+  "exact_group_method_pointer_slot": "0x03915930 -> 0x0327BD38",
+  "group_method_table_base_confirmed": false,
+  "source_branch_condition": "group-related interface method +0x60 result; if null fallback +0x70 result",
+  "task_family_a": {
+    "install": "0x0306B970",
+    "vtable": "0x03AC8200",
+    "callback": "+0x08 0x02F73260 -> member+0x4C0",
+    "result_action_vtable": "0x03ACD6D0",
+    "action_tick": "0x0307CAD0"
+  },
+  "task_family_b": {
+    "install": "0x0306B54C",
+    "vtable": "0x03AC7FF0",
+    "callback": "+0x08 0x02F73074 -> member+0x4B8",
+    "result_action_vtable": "0x03ACD5A0",
+    "action_tick": "0x0307C464"
+  },
+  "shared_status_callback": "+0x10=0x02F838E8",
+  "previous_task_family": "0x03906C88 != 0x03AC7FF0 and != 0x03AC8200",
+  "at_least_typed_member_action_subclasses": 5,
+  "rmb_shift_instance_linked": false,
+  "causal_crowding_repair_proven": false,
+  "native_patch_authorized": false
+}
