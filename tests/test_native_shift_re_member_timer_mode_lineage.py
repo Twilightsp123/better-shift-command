@@ -8,8 +8,8 @@ from audit_wh3_full_native_chain import StrictPE
 
 class NativeMemberTimerModeLineage(unittest.TestCase):
  def test_exact_new_original_opcode_count_and_caller_edges(self):
-  self.assertEqual(len(m.PINS),35)
-  self.assertEqual(len(m.EDGES),9)
+  self.assertEqual(len(m.PINS),46)
+  self.assertEqual(len(m.EDGES),10)
   self.assertEqual(len(m.VTABLES),18)
   self.assertEqual(m.PINS[0x02d99e64],'0fb64202')
   self.assertEqual(m.PINS[0x02d99e68],'884102')
@@ -56,6 +56,17 @@ class NativeMemberTimerModeLineage(unittest.TestCase):
   self.assertNotEqual(m.VTABLES[0x03acd210],0x032599c8)
   self.assertNotEqual(m.VTABLES[0x03acd210],0x03259950)
 
+ def test_fallback_subclass_computes_target_minus_member_relative_XZ(self):
+  self.assertEqual(m.PINS[0x0304e6ae],'f30f108a880000')
+  self.assertEqual(m.PINS[0x0304e6b9],'f30f1082900000')
+  self.assertEqual(m.PINS[0x0304e6c5],'f30f5c88880000')
+  self.assertEqual(m.PINS[0x0304e6cd],'f30f5c80900000')
+  self.assertEqual(m.PINS[0x0304e6d5],'f30f118be00000')
+  self.assertEqual(m.PINS[0x0304e6dd],'f30f1183e40000')
+  self.assertEqual(m.PINS[0x0307c3af],'c7807002000001')
+  self.assertEqual(m.PINS[0x0307c3cb],'80a0110b0000df')
+  self.assertEqual(m.PINS[0x0307c436],'41ff91c8000000')
+  self.assertEqual(m.EDGES[0x0307c3b9],0x0307885c)
  def test_wrong_binary_fails_closed(self):
   with tempfile.TemporaryDirectory() as d:
    p=Path(d)/'wrong.exe';old=b'MZ'+b'NOT_WH3'*100;p.write_bytes(old)
@@ -64,8 +75,8 @@ class NativeMemberTimerModeLineage(unittest.TestCase):
  @unittest.skipUnless(os.getenv('WH3_903_EXE'),'Exact original EXE excluded from public CI')
  def test_actual_original_exe_mode_lineage(self):
   result=m.audit(Path(os.environ['WH3_903_EXE']))
-  self.assertEqual(result['guarded_x64_instruction_starts'],35)
-  self.assertEqual(result['verified_E8_edges'],9)
+  self.assertEqual(result['guarded_x64_instruction_starts'],46)
+  self.assertEqual(result['verified_E8_edges'],10)
   self.assertEqual(result['typed_vtable_entries'],18)
   self.assertFalse(result['queued_shift_or_RMB_identity_proven'])
   self.assertFalse(result['native_crowding_fix_authorized'])
