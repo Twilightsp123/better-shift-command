@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Exact WH3 native stage-1 MOVE projection from inherited subtask geometry.
 
-This shows how the queued MOVE successor can retain/use the prior subtask
-motion direction to seed a new geometry segment. It does NOT show that this
+This shows the *conditional* state-1 route: a fresh native builder
+recomputes task+0x24 and only if it equals 1 does the successor inherit
+prior subtask direction. It must never be modeled as unconditional reuse. It does NOT show that this
 causes the known Shift crowding, and is not a patch.
 """
 import argparse,json,re,struct,shutil
@@ -37,6 +38,27 @@ PINS={
  0x0311E6E2:'f30f114b54', # projection + component
  0x0311E6E7:'f30f114350',
  0x0311E6EC:'4c89af58010000', # clear MAIN pointer, subtask+0x20 stays
+ 0x0311E5B3:'44886f24', # state1 projection recomputed-gate control
+ 0x0311E61E:'e85d05ffff', # state1 projection recomputed-gate control
+ 0x0311E636:'e8d1010000', # state1 projection recomputed-gate control
+ 0x0311E63F:'0f859b010000', # state1 projection recomputed-gate control
+ 0x0311E6F8:'488bce', # state1 projection recomputed-gate control
+ 0x0311E772:'e895000000', # state1 projection recomputed-gate control
+ 0x0311E829:'4c8baa60010000', # state1 projection recomputed-gate control
+ 0x0311E891:'33ff', # state1 projection recomputed-gate control
+ 0x0311EAC7:'e8940affff', # state1 projection recomputed-gate control
+ 0x0311EACC:'448ac0', # state1 projection recomputed-gate control
+ 0x0311EAD4:'84c0', # state1 projection recomputed-gate control
+ 0x0311EB04:'4584c0', # state1 projection recomputed-gate control
+ 0x0311EB09:'84d2', # state1 projection recomputed-gate control
+ 0x0311EB0D:'418af9', # state1 projection recomputed-gate control
+ 0x0311EB10:'40887e24', # state1 projection recomputed-gate control
+ 0x0311EB14:'413af9', # state1 projection recomputed-gate control
+ 0x0311EB17:'0f85bb000000', # state1 projection recomputed-gate control
+ 0x0311EB1D:'f3410f104608', # state1 projection recomputed-gate control
+ 0x0311EBC2:'894e20', # state1 projection recomputed-gate control
+ 0x0311EC07:'c7462801000000', # state1 projection recomputed-gate control
+ 0x0311EC0E:'c7462004000000', # state1 projection recomputed-gate control
 }
 CONSTANT=0x0391CBC8
 STAGE1=0x0311E578
@@ -74,12 +96,45 @@ def audit(exe):
         branch=pe.read(0x0311DEC0,6,True)
         if 0x0311DEC0+6+struct.unpack_from('<i',branch,2)[0]!=STAGE1:
             raise ValueError('STAGE1_DISPATCH_DEST_CHANGED')
+        # Critical negative-control: the state-1 transition DOES NOT always
+        # transfer the previous subtask. +0x24 is reset, recomputed by the
+        # same native helper used by fresh state-0, then branch-gates projection.
+        direct_calls={
+          0x0311E636:0x0311E80C,
+          0x0311E772:0x0311E80C,
+          0x0311EAC7:0x0310F560,
+        }
+        jcc_edges={
+          0x0311DEC0:0x0311E578,
+          0x0311E63F:0x0311E7E0,
+          0x0311EB17:0x0311EBD8,
+        }
+        for site,dest in direct_calls.items():
+            raw=pe.read(site,5,True)
+            if raw[0]!=0xe8 or site+5+struct.unpack_from('<i',raw,1)[0]!=dest:
+                raise ValueError('STAGE1_NATIVE_CALL_DRIFT:'+hex(site))
+        for site,dest in jcc_edges.items():
+            raw=pe.read(site,6,True)
+            if raw[0]!=0x0f or site+6+struct.unpack_from('<i',raw,2)[0]!=dest:
+                raise ValueError('STAGE1_GATE_BRANCH_DRIFT:'+hex(site))
         scalar=struct.unpack('<f',pe.read(CONSTANT,4))[0]
         if scalar!=0.5:raise ValueError('STAGE1_PROJECTION_CONST_CHANGED')
         return {
           'schema':'bsc.n1.original_inherited_move_projection.v1',
           'exe_sha256':pe.sha,
           'static_guard_count':boundary_count,'constant_scale':scalar,
+          'stage1_native_call_edges_checked':len(direct_calls),
+          'stage1_conditional_branch_edges_checked':len(jcc_edges),
+          'stage1_task_plus24_cleared_before_recompute':'0x0311E5B3',
+          'task_plus24_recomputed_by_common_builder':'0x0311E636 -> 0x0311E80C',
+          'common_builder_called_from_fresh_state0':'0x0311E772 -> 0x0311E80C',
+          'builder_helper_AL_gate':'0x0311EAC7 -> 0x0310F560',
+          'builder_task_plus24_store':'0x0311EB10',
+          'state1_post_builder_projection_gate':'0x0311E63B / 0x0311E63F',
+          'state1_old_projection_only_if_recomputed_flag_is_one':True,
+          'state1_flag_not_one_skips_old_subtask_transfer_and_main_pointer_clear':True,
+          'new_geometry_copy_occurs_before_projection_gate':True,
+          'every_queued_move_inherits_prior_direction':False,
           'state_one_branch':'0x0311DEBD -> 0x0311E578',
           'task_new_route_geometry':'0x120..0x14F copied to active task geometry',
           'prior_subtask_source':'[task+0x158]',
