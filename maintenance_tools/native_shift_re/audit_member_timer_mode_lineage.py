@@ -25,6 +25,8 @@ PINS={
  0x030698b7:'80bbc005000001',0x030698c0:'488d8ba8040000',
  0x030698ca:'ff9080000000',0x03069906:'488dbb28030000',
  0x03069910:'e8fb70d4ff',0x03069924:'e8ab4cfeff',
+ 0x0304e5e9:'488d0518eca700',0x0304e5f0:'488903',
+ 0x0307c388:'48895c2408',
 }
 EDGES={
  0x0306b53b:0x02f5f1e8,0x02f5f20e:0x02d99e58,
@@ -41,6 +43,8 @@ VTABLES={
  0x03910ab8:0x0306a8c0,0x03910af0:0x0306b0f8,
  0x03906c88:0x02f63b38,0x03906c90:0x02f7301c,
  0x03906c98:0x02f83868,
+ 0x03acd208:0x03052f30,0x03acd210:0x0307c388,
+ 0x03acd218:0x0308279c,
 }
 # These two original, bounded x64 leaf functions have no PE unwind entry.
 LEAVES={
@@ -79,6 +83,9 @@ def audit(exe):
         lea=pe.read(0x02f5f1fd,7,True)
         if 0x02f5f1fd+7+struct.unpack_from('<i',lea,3)[0]!=0x03906c88:
             raise ValueError('TIMER_VTABLE_INSTALL_CHANGED')
+        more=pe.read(0x0304e5e9,7,True)
+        if 0x0304e5e9+7+struct.unpack_from('<i',more,3)[0]!=0x03acd208:
+            raise ValueError('FALLBACK_ACTION_VTABLE_INSTALL_CHANGED')
         return dict(
             schema='bsc.n1.member_timer_mode_provenance.static.v1',
             exact_original_exe_sha256=actual_sha,
@@ -92,6 +99,11 @@ def audit(exe):
             mode_origin='descriptor+0x02 copied by 0x02D99E58 to task+0x42',
             three_group_factory_sites_initialize_descriptor_02_zero=True,
             timer_branch='task+0x42 != 0: virtual+0x580; ==0: virtual+0x4B0',
+            action_installers_are_at_least_three_typed_subclasses=True,
+            action_plus_4b0_constructed_subtype='0x03ACD208 +0x08=0x0307C388',
+            action_plus_580_constructed_subtype='0x03913808 +0x08=0x032599C8',
+            action_plus_5b8_constructed_subtype='0x03ADAA08 +0x08=0x03259950',
+
             other_timer_mode='0x02F79CC4 can dispatch +0x580 or +0x5F0',
             timer_condition='scaled group clock compared with task+0x9C',
             actor_4b0_status_gates=['member+0x5C0','member+0x4A8 virtual+0x80','member+0x330 current action'],
