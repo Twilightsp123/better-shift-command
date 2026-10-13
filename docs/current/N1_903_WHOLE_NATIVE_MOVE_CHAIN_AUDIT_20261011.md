@@ -1312,3 +1312,52 @@ CI 新增 `audit_typed_member_geometry_fanout.py` 和
 下一步静态优先枚举描述符 `+0x02` 的所有写入和
 `+0x348` 的调用者任务类型；**不要求玩家重复游戏测试，
 不做 Native Patch，不修改 main。**
+
+
+## 2026-10-13 — 新优先纠正：群组任务 +0x60/+0x70 分叉及至少五种成员动作类
+
+最新完整研究入口：
+`docs/current/N1_903_ALTERNATE_MEMBER_TIMERS_FIVE_ACTION_SUBTYPES_20261013.md`；
+本轮只读源码
+`maintenance_tools/native_shift_re/audit_alternate_member_timer_families.py`，
+回归
+`tests/test_native_shift_re_alternate_member_timer_families.py`，
+机器可读证据
+`maintenance_tools/native_shift_re/evidence/20261013_alt_timers_five_actor_subtypes.json`。
+精确 SHA 游戏 EXE 上本地检查
+**31 个 opcode/指令边界、8 个直接 E8、15 个原生槽位、2 个 RIP vtable
+构造、2 个分支目标 PASS**；额外两类动作的 2 个原代码及 2 个更新槽、
+2 处 RIP 安装指令亦各自通过。提交仓库的同等严格只读工具固定
+30 opcode、8 E8、17 槽位、4 LEA；Github 合成测试 PASS。
+
+**重要类型结论**：`0x03915930` 静态指针指向群组函数
+`0x0327BD38`，**尚未证明其虚表起始地址，不能再断言
+0x03915900+0x30**。该函数有两条不同原生来源：
+群组接口 `+0x60` 非空时，在其它 member+0x5C0/旧任务条件下
+走 `0x0306B970` 创建 `0x03AC8200` 任务；
+`+0x60` 为空但 `+0x70` 非空时
+走 `0x0306B54C` 创建 `0x03AC7FF0` 任务。
+两种对象都在 `member+0x4A8`，安装前清理同一
+`member+0x490`。两种任务的 `+0x10=0x02F838E8`
+同属**状态完成回调**，不同于旧 `0x03906C88`
+基于群组时钟的定时类。
+
+任务 `0x03AC7FF0+8=0x02F73074` 调成员
+`+0x4B8`，成员 `0x03069948` 安装
+动作类 `0x03ACD5A0`／`+8=0x0307C464`；
+任务 `0x03AC8200+8=0x02F73260` 调成员
+`+0x4C0`，通过 `0x0306A7E8`
+安装动作类 `0x03ACD6D0`／`+8=0x0307CAD0`。
+注意两种成员类型的 `+0x4C0` 实现未必相同：
+另一个 `0x02DC39CC` 会沿原生 `owner+0xB64/B68` 对象数组传播，
+不是简单的单成员赋值。因此上轮“三种成员动作子类”**只是不完整枚举**，
+当前类型确认至少五种，仍不证明穷尽。
+
+**严禁**把这些分支按 RMB/Shift 键位直接命名：
+这里的判断是成员所属 group 虚方法返回、既有延迟任务和
+动作子类，而非玩家 R9B/Shift 实例键位日志；
+没有 `MOVE slot 0x0390B4F0` 到该组函数的实例身份，
+故不能据此发布挤压修复补丁。
+下一步聚焦该群组对象的具体 constructor/owner，
+是否真从 MOVE task `+0x160` 到此处分派，
+以及五类动作如何写入实际 motor goal。
