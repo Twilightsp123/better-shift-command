@@ -8,7 +8,7 @@ from audit_wh3_full_native_chain import StrictPE
 
 class InheritedNativeProjection(unittest.TestCase):
  def test_stage1_original_object_field_operations(self):
-  self.assertEqual(len(m.PINS),57)
+  self.assertEqual(len(m.PINS),67)
   self.assertEqual(m.PINS[0x0311E64C],'48894320')
   self.assertEqual(m.PINS[0x0311E6EC],'4c89af58010000')
   self.assertEqual(m.PINS[0x0311DEAA],'4533ed')
@@ -51,6 +51,15 @@ class InheritedNativeProjection(unittest.TestCase):
   self.assertEqual(m.PINS[0x0311EB10],'40887e24')
   # Presence of native helper alone cannot identify Shift or guaranteed carryover.
 
+ def test_native_context_field4e4_is_proven_pointer_array_count(self):
+  self.assertEqual(m.PINS[0x0311EBC8],'e87f6ffeff')
+  self.assertEqual(m.PINS[0x03105B68],'8b81e4040000')
+  self.assertEqual(m.PINS[0x03105B8E],'488b87e8040000')
+  self.assertEqual(m.PINS[0x03105B9C],'4e8b34f8')
+  self.assertEqual(m.PINS[0x03105D3C],'8b87e4040000')
+  self.assertEqual(m.PINS[0x03105D45],'443bf8')
+  # Array element type still UNKNOWN. Do not call it a soldier or waypoint count.
+
  def test_common_builder_is_not_unique_to_shift_queued_state(self):
   # One helper called from state0 AND state1. This excludes the naive
   # interpretation that the helper's presence identifies Shift.
@@ -69,9 +78,9 @@ class InheritedNativeProjection(unittest.TestCase):
                       'Private original game binary not present in GitHub CI')
  def test_original_game_rva_and_0_5_constant(self):
   proof=m.audit(os.environ['WH3_903_EXE'])
-  self.assertEqual(proof['static_guard_count'],57)
+  self.assertEqual(proof['static_guard_count'],67)
   self.assertEqual(proof['constant_scale'],.5)
-  self.assertEqual(proof['stage1_native_call_edges_checked'],3)
+  self.assertEqual(proof['stage1_native_call_edges_checked'],4)
   self.assertEqual(proof['stage1_conditional_branch_edges_checked'],3)
   self.assertTrue(proof['state1_old_projection_only_if_recomputed_flag_is_one'])
   self.assertTrue(proof['state1_flag_not_one_skips_old_subtask_transfer_and_main_pointer_clear'])
