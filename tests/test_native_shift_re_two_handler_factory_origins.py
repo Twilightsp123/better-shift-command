@@ -20,6 +20,16 @@ class TwoHandlerFactoryOrigins(unittest.TestCase):
   self.assertEqual(a.LEA_VTABLE[0x0326F0BE],0x03915830)
   self.assertEqual(a.LEA_VTABLE[0x0326F122],0x039156F8)
 
+ def test_upstream_callback_tables_are_present_in_static_registry(self):
+  self.assertEqual(a.TABLE[0x03D19A88],0x03940ED8)
+  self.assertEqual(a.TABLE[0x03D19C10],0x03941400)
+  self.assertEqual(a.TABLE[0x03940ED8],0x0326FFF4)
+  self.assertEqual(a.TABLE[0x03941400],0x0326FF60)
+  self.assertEqual(a.TABLE[0x03940F00],0x03270098)
+  self.assertEqual(a.TABLE[0x03941428],0x03270C68)
+  self.assertEqual(len(a.TABLE),12)
+  # Static registration only, NOT RMB/Shift command-instance provenance.
+
  def test_factory_variants_have_different_object_sizes_and_source_fields(self):
   self.assertEqual(a.PINS[0x0326F09B],'b960000000')
   self.assertEqual(a.PINS[0x0326F0A0],'4c8b4b60')
