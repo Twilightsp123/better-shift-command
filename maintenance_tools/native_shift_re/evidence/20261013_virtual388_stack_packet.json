@@ -1,0 +1,27 @@
+{
+  "schema": "bsc.n1.virtual388_stack_packet_provenance.v1",
+  "sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "original_EXE_pinned_checks": {
+    "opcode_instruction_sites": 24,
+    "source_E8": 3,
+    "virtual_dispatches": 3
+  },
+  "caller": "0x03010724",
+  "frame": "RBP = entry RSP-0x128; stack reserve 0x1E8",
+  "receiver": "RDI -> RCX; [RDI] -> RAX",
+  "call_sites": [
+    "0x03010B0F",
+    "0x03010DAE",
+    "0x03011078"
+  ],
+  "RDX": "LEA [RBP+0] immediate in same bounded function",
+  "record_writes": [
+    "[RBP+0x6C] |= 0x20",
+    "movss [RBP+0x58],xmm0"
+  ],
+  "upstream_helper": "0x030A48A4",
+  "direct_input_is_MOVE_task_subtask": false,
+  "nonlocal_source_proven": false,
+  "runtime_vtable_identity_proven": false,
+  "patch_authorized": false
+}

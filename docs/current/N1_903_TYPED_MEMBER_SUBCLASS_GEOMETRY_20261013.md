@@ -28,3 +28,7 @@
 
 新代码：maintenance_tools/native_shift_re/audit_typed_member_subclass_geometry.py；测试：tests/test_native_shift_re_typed_member_subclass_geometry.py；脱敏证据：maintenance_tools/native_shift_re/evidence/20261013_typed_member_subclass_geometry.json。
 不得上传原始 EXE 或用户运行时指针 JSONL，不修改 main。
+
+
+## 2026-10-13 新证据：同一原生方法链的三条 virtual+0x388 参数来自栈局部记录
+详见 docs/current/N1_903_VIRTUAL388_STACK_PACKET_20261013.md。原始 EXE 24/24 opcode/unwind/objdump、3/3 E8、3/3 virtual+0x388 入口检查 PASS。函数 0x03010724 用 RBP=entry RSP-0x128、额外分配 0x1E8 栈，分别在 0x03010B0F / 0x03010DAE / 0x03011078 之前 LEA RDX,[RBP+0]，并更新局部 [RBP+0x58] float、[RBP+0x6C] bit 0x20。**这三条调用的几何输入是栈上临时记录，不是直接传 task+0x160 指针。** 该调用者内 RBP+0x158 也是栈局部/传参位置，不能和 task+0x158 混淆。每次上游调用 0x030A48A4，后续必须逆查实际几何数据来源与同一 MOVE 实例。其余 v+0x388 调用者的对象类型尚未定型，禁止假定属于这个成员子类；无 gameplay patch。
