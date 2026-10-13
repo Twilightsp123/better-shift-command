@@ -67,7 +67,16 @@ PINS={
  0x0311EAE9:'408ad7', # exact native helper/threshold projection gate
  0x0311EAEC:'41b901000000', # exact native helper/threshold projection gate
  0x0311EB07:'7407', # exact native helper/threshold projection gate
- 0x0311EB0B:'7503', # exact native helper/threshold projection gate
+ 0x0311EB0B:'7503', # exact native helper/threshold projection gate 0x0311EBC8:'e87f6ffeff', # typed count +0x4E4 and pointer array +0x4E8
+ 0x03105B68:'8b81e4040000', # typed count +0x4E4 and pointer array +0x4E8
+ 0x03105B86:'85c0', # typed count +0x4E4 and pointer array +0x4E8
+ 0x03105B88:'0f84c0010000', # typed count +0x4E4 and pointer array +0x4E8
+ 0x03105B8E:'488b87e8040000', # typed count +0x4E4 and pointer array +0x4E8
+ 0x03105B9C:'4e8b34f8', # typed count +0x4E4 and pointer array +0x4E8
+ 0x03105D3C:'8b87e4040000', # typed count +0x4E4 and pointer array +0x4E8
+ 0x03105D42:'41ffc7', # typed count +0x4E4 and pointer array +0x4E8
+ 0x03105D45:'443bf8', # typed count +0x4E4 and pointer array +0x4E8
+ 0x03105D48:'0f8240feffff', # typed count +0x4E4 and pointer array +0x4E8
 }
 CONSTANT=0x0391CBC8
 STAGE1=0x0311E578
@@ -112,6 +121,7 @@ def audit(exe):
           0x0311E636:0x0311E80C,
           0x0311E772:0x0311E80C,
           0x0311EAC7:0x0310F560,
+          0x0311EBC8:0x03105B4C,
         }
         jcc_edges={
           0x0311DEC0:0x0311E578,
@@ -140,6 +150,10 @@ def audit(exe):
           'builder_helper_AL_gate':'0x0311EAC7 -> 0x0310F560',
           'helper_AL_false_skips_positive_gate_at':'0x0311EAD6 / 0x0311EB07',
           'controller_field_4e4_threshold':'0x0311EAD8 compares [RBX+0x4E4] to ECX=2',
+          'same_context_count_and_pointer_array':'0x03105B68 reads +0x4E4 as count; 0x03105B8E reads +0x4E8 pointer array',
+          'indexed_array_entry_proven_at':'0x03105B9C loads [array+R15*8]',
+          'array_loop_proven_at':'0x03105D3C..0x03105D48 re-reads count and loops index',
+          'array_element_semantic_type':'UNKNOWN (not proven to be soldier count or route waypoint count)',
           'field_below_two_yields_DL_one':'0x0311EAE0 / 0x0311EAE4',
           'field_ge_two_yields_DL_zero':'0x0311EADE / 0x0311EAE9',
           'positive_gate_formula_only_on_reached_builder_path':(
