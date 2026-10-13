@@ -20,3 +20,8 @@
 下一步先检查 0x030A48A4 的原生输入和返回分支，沿这份本地记录的浮点目标数据追向真正的 MOVE 几何来源，再按成员身份与 old/new route generation 作配对。不得根据栈记录 RDX 与 task+0x160 的布局相似直接补丁。当前没有足够证据证明原生 crowding 根因、发布修复 DLL 或改写 CA 原生渐进转向。
 
 新增 audit_virtual388_stack_packet.py、test_native_shift_re_virtual388_stack_packet.py 与脱敏 evidence JSON。原始 EXE、含指针原始 JSONL 没有提交 GitHub，不修改 main，不要求玩家重测 Shift 挤压。
+
+
+## 第6轮静态类型校正
+
+本文件的3条栈参数来源在调用点范围内成立，但上游0x030A48A4不是直接生成几何记录的函数；0x02F5FCAC/0x02F5FE28此前被遗漏为两类原生record构造器。五条0x030A48A4调用分别可通向3条virtual+0x388或2条virtual+0x380。最重要的是，相关查询0x03039C7C使用与MOVE队列相同的root+0x2A0/index*0x120槽位布局，但MOVE槽位vtable 0x0390B4F0的+0xB8固定返回false，故不能说所有Shift MOVE无条件执行此特殊几何路径。详见docs/current/N1_903_MOVE_QUEUE_MEMBER_GATE_20261013.md。

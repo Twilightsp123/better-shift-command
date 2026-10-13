@@ -1,0 +1,40 @@
+{
+  "schema": "bsc.n1.move_slot_optional_member_packet_gate.v1",
+  "exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof_grade": "EXACT_ORIGINAL_EXE_STATIC",
+  "opcodes_and_objdump_instruction_starts": 94,
+  "unwind_or_explicit_leaf_owners": 12,
+  "direct_E8_edges": 17,
+  "typed_MOVE_vtable_slots": 4,
+  "indirect_v380_dispatches": 2,
+  "indirect_v388_dispatches": 3,
+  "queue_layout": {
+    "queue_embedded_at_root": "0x278",
+    "slot_wrapper_first_at_root": "0x288",
+    "native_slot_first_at_root": "0x2A0",
+    "slot_stride_bytes": 288,
+    "count_at_root": "0x2F88",
+    "active_index_at_root": "0x2F8C"
+  },
+  "getter_queue_root": "[callback_owner+0x28]",
+  "getter_MOVE_plusB8_gate": "0x008D3330 returns false",
+  "MOVE_plusB0_gate": "0x008D3330 returns false",
+  "getter_fallback_vector": "float32(0,0,0)",
+  "packed_result_float_plus_flag": true,
+  "caller_temp_packet_argument": "RBP+0x00 in function 0x03010724",
+  "caller_world_reference": "5th argument from 0x03045F80 stack [rsp+0x20] to callee [rbp+0x150]",
+  "helper_calls_in_caller": 5,
+  "packet_constructors": {
+    "0x02F5FCAC": 4,
+    "0x02F5FE28": 1
+  },
+  "optional_float_default": -1,
+  "native_angle_unit_scale": 0.01745329238474369,
+  "both_packet_constructors_set_minus_one_default": true,
+  "implicit_MOVE_slot_is_special_plusB8_type": false,
+  "special_member_virtual388_always_executed_for_SHIFT": false,
+  "original_SHIFT_instance_execution_proven": false,
+  "queue_instance_identity_across_functions_proven": false,
+  "member_crowding_cause_proven": false,
+  "native_patch_authorized": false
+}

@@ -121,3 +121,6 @@ N1 9.0.3 registration reverse references: `audit_factory_registry_xrefs.py --exe
 
 
 Third typed handler post-constructor negative: `audit_third_handler_post_ctor_v8.py` checks 16 original exact-SHA constructor → virtual+8 bounded paths and destructor; not a setter proof or patch. See `docs/current/N1_903_THIRD_HANDLER_POST_CTOR_V8_NEGATIVE_20261013.md`.
+
+
+WH3 9.0.3 MOVE queue/member geometry type-gate: `audit_move_queue_member_gate.py --exe EXE --out PRIVATE.json` strictly verifies exact original SHA and 94 native instruction starts, conditional +0xB8 MOVE slot gate, stack coordinate provenance and two packet subtypes. Synthetic regression: `tests/test_native_shift_re_move_queue_member_gate.py`. Static research only; no Native gameplay patch. See `docs/current/N1_903_MOVE_QUEUE_MEMBER_GATE_20261013.md`.
