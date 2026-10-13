@@ -59,6 +59,15 @@ PINS={
  0x0311EBC2:'894e20', # state1 projection recomputed-gate control
  0x0311EC07:'c7462801000000', # state1 projection recomputed-gate control
  0x0311EC0E:'c7462004000000', # state1 projection recomputed-gate control
+ 0x0311EAD6:'7411', # exact native helper/threshold projection gate
+ 0x0311EAD8:'398be4040000', # exact native helper/threshold projection gate
+ 0x0311EADE:'7309', # exact native helper/threshold projection gate
+ 0x0311EAE0:'448d49ff', # exact native helper/threshold projection gate
+ 0x0311EAE4:'418ad1', # exact native helper/threshold projection gate
+ 0x0311EAE9:'408ad7', # exact native helper/threshold projection gate
+ 0x0311EAEC:'41b901000000', # exact native helper/threshold projection gate
+ 0x0311EB07:'7407', # exact native helper/threshold projection gate
+ 0x0311EB0B:'7503', # exact native helper/threshold projection gate
 }
 CONSTANT=0x0391CBC8
 STAGE1=0x0311E578
@@ -129,6 +138,13 @@ def audit(exe):
           'task_plus24_recomputed_by_common_builder':'0x0311E636 -> 0x0311E80C',
           'common_builder_called_from_fresh_state0':'0x0311E772 -> 0x0311E80C',
           'builder_helper_AL_gate':'0x0311EAC7 -> 0x0310F560',
+          'helper_AL_false_skips_positive_gate_at':'0x0311EAD6 / 0x0311EB07',
+          'controller_field_4e4_threshold':'0x0311EAD8 compares [RBX+0x4E4] to ECX=2',
+          'field_below_two_yields_DL_one':'0x0311EAE0 / 0x0311EAE4',
+          'field_ge_two_yields_DL_zero':'0x0311EADE / 0x0311EAE9',
+          'positive_gate_formula_only_on_reached_builder_path':(
+             '0x0310F560 returns AL != 0 AND controller+0x4E4 >= 2; '
+             'other early exit paths may skip this gate entirely'),
           'builder_task_plus24_store':'0x0311EB10',
           'state1_post_builder_projection_gate':'0x0311E63B / 0x0311E63F',
           'state1_old_projection_only_if_recomputed_flag_is_one':True,
