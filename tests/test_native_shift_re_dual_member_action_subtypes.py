@@ -8,7 +8,7 @@ from audit_wh3_full_native_chain import StrictPE
 
 class NativeDualMemberSubtype(unittest.TestCase):
  def test_actor_same_action_slot_two_typed_subclasses(self):
-  self.assertEqual(len(m.PINS),19)
+  self.assertEqual(len(m.PINS),21)
   self.assertEqual(len(m.VTABLES),6)
   self.assertEqual(m.PINS[0x0306A99A],m.PINS[0x0306A8CA])
   self.assertEqual(m.PINS[0x0306A9AC],m.PINS[0x0306A8DC])
@@ -17,6 +17,12 @@ class NativeDualMemberSubtype(unittest.TestCase):
    self.assertEqual(geom-alt,0x5B8-0x580)
    self.assertEqual(m.VTABLES[alt],0x0306A990)
    self.assertEqual(m.VTABLES[geom],0x0306A8C0)
+ def test_two_action_installers_cleanup_same_storage_before_replacement(self):
+  self.assertEqual(m.CONTROL[0x0306A9A7],('E8',0x02DB0A10))
+  self.assertEqual(m.CONTROL[0x0306A8D7],('E8',0x02DB0A10))
+  self.assertLess(0x0306A9A7,0x0306A9BB)
+  self.assertLess(0x0306A8D7,0x0306A8EB)
+
  def test_action_embedded_vtable_tick_variants_are_not_equal(self):
   self.assertEqual(m.VTABLES[0x03913810],0x032599C8)
   self.assertEqual(m.VTABLES[0x03ADAA10],0x03259950)
@@ -38,8 +44,8 @@ class NativeDualMemberSubtype(unittest.TestCase):
  @unittest.skipUnless(os.getenv('WH3_903_EXE'),'Exact original game EXE excluded from GitHub')
  def test_exact_original_vtables_and_two_subclasses(self):
   report=m.audit(os.environ['WH3_903_EXE'])
-  self.assertEqual(report['original_opcode_guards'],19)
-  self.assertEqual(report['exact_direct_call_or_jump_edges'],5)
+  self.assertEqual(report['original_opcode_guards'],21)
+  self.assertEqual(report['exact_direct_call_or_jump_edges'],7)
   self.assertEqual(report['typed_vtable_slots'],6)
   self.assertFalse(report['which_subclass_user_RMB_or_Shift_chooses_proven'])
   self.assertFalse(report['native_patch_authorized'])
