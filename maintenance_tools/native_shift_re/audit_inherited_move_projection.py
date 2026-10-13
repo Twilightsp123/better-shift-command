@@ -67,7 +67,8 @@ PINS={
  0x0311EAE9:'408ad7', # exact native helper/threshold projection gate
  0x0311EAEC:'41b901000000', # exact native helper/threshold projection gate
  0x0311EB07:'7407', # exact native helper/threshold projection gate
- 0x0311EB0B:'7503', # exact native helper/threshold projection gate 0x0311EBC8:'e87f6ffeff', # typed count +0x4E4 and pointer array +0x4E8
+ 0x0311EB0B:'7503', # exact native helper/threshold projection gate
+ 0x0311EBC8:'e87f6ffeff', # typed count +0x4E4 and pointer array +0x4E8
  0x03105B68:'8b81e4040000', # typed count +0x4E4 and pointer array +0x4E8
  0x03105B86:'85c0', # typed count +0x4E4 and pointer array +0x4E8
  0x03105B88:'0f84c0010000', # typed count +0x4E4 and pointer array +0x4E8
