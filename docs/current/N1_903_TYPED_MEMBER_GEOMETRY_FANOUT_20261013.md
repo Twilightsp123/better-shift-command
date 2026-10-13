@@ -71,3 +71,36 @@
 3. 对同一原生 MOVE 实例比较 fresh state0 与 gated state1 的动作记录几何；普通 RMB 的队列重置并不等于该层不做 CA 平滑转弯。
 
 不新增游戏测试，不变动 gameplay 和 main。
+
+## 2026-10-13 新增：同一原生成员可在 +0x580 / +0x5B8 安装不同动作子类（最新优先结论）
+
+见 `docs/current/N1_903_DUAL_TYPED_MEMBER_ACTION_SUBTYPES_20261013.md`；
+研究源码 `audit_dual_member_action_subtypes.py`、同名前缀单元测试。
+在精确 SHA EXE 上通过 19/19 opcode、5/5 原生 E8/E9、
+6/6 同一成员 typed vtable、2/2 RIP LEA 安装验证；CI PASS。
+
+**必须覆盖本文件旧错误推断**：上一次找到
+`0x03117E8C -> virtual+0x5B8=0x0306A8C0
+-> ctor 0x03248EC8` 的成员几何安装，
+并不直接沿 `0x032599C8` 更新 motor。
+实际上 `+0x5B8` 的子类 vtable 是 `0x03ADAA08`，
+其 `+0x08=0x03259950`；而
+`0x032599C8` 属于**另一子类** vtable `0x03913808`，
+由**相同成员对象**虚函数 `+0x580=0x0306A990`
+通过构造器 `0x03249350` 安装。
+两者都以 `lea rbx,[member+0x328]; lea rcx,[rbx+8]`
+在**同一 `member+0x330` 动作位置**构造不同子类。
+`+0x580` 调用可在
+`0x02F79C3D/0x02F79D6E/0x02F7A116` 看到；
+`+0x5B8` 在 `0x03117EF7/0x03118040`。
+前一类动作的 `0x032599C8` 条件路径
+`0x03259C55 -> 0x0306EF1C -> 0x0306EF96 ->
+0x0311954C` 能到达此前实机命中过的
+`0x0311963A` motor goal 写入。
+**切勿推断**这也必然是另一类型 `+0x5B8` 的真实 tick 路径。
+
+**新的可修复层搜索方向是动作类选择/转换及成员的目标对应**，
+不只是假定改写 oldSubtask 的四个 float。
+但尚未有 CMD/Shift 输入实例、`task+0x160` 与具体子类的指针配对，
+因此不说 RMB 使用 A、Shift 使用 B；
+目前对“哪条造成 Shift 挤压”没有因果结论，不授权任何 gameplay 修改。
