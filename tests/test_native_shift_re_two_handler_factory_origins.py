@@ -30,6 +30,15 @@ class TwoHandlerFactoryOrigins(unittest.TestCase):
   self.assertEqual(len(a.TABLE),12)
   # Static registration only, NOT RMB/Shift command-instance provenance.
 
+ def test_native_runtime_type_checks_use_registration_identity(self):
+  self.assertEqual(a.PINS[0x0327711C],'488d05e52aaa00')
+  self.assertEqual(a.PINS[0x03277129],'488d05e02aaa00')
+  self.assertEqual(a.PINS[0x0327714C],'488b4138')
+  self.assertEqual(a.PINS[0x03277168],'488d0d1929aa00')
+  self.assertEqual(a.PINS[0x03277214],'488b4138')
+  self.assertEqual(a.PINS[0x03277224],'488d0d5d28aa00')
+  self.assertEqual(len(a.PINS),39)
+
  def test_factory_variants_have_different_object_sizes_and_source_fields(self):
   self.assertEqual(a.PINS[0x0326F09B],'b960000000')
   self.assertEqual(a.PINS[0x0326F0A0],'4c8b4b60')
