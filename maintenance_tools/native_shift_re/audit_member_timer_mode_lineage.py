@@ -27,12 +27,19 @@ PINS={
  0x03069910:'e8fb70d4ff',0x03069924:'e8ab4cfeff',
  0x0304e5e9:'488d0518eca700',0x0304e5f0:'488903',
  0x0307c388:'48895c2408',
+ 0x0304e6ae:'f30f108a880000',0x0304e6b9:'f30f1082900000',
+ 0x0304e6c5:'f30f5c88880000',0x0304e6cd:'f30f5c80900000',
+ 0x0304e6d5:'f30f118be00000',0x0304e6dd:'f30f1183e40000',
+ 0x0307c3af:'c7807002000001',0x0307c3b9:'e89ec4ffff',
+ 0x0307c3cb:'80a0110b0000df',0x0307c3e2:'80bbb100000001',
+ 0x0307c436:'41ff91c8000000',
 }
 EDGES={
  0x0306b53b:0x02f5f1e8,0x02f5f20e:0x02d99e58,
  0x032774b0:0x032638c4,0x03277b6e:0x032638c4,0x0327bd0b:0x032638c4,
  0x02f73061:0x02f79bb8,0x02f838b6:0x02f79bb8,
  0x03069910:0x02db0a10,0x03069924:0x0304e5d4,
+ 0x0307c3b9:0x0307885c,
 }
 VTABLES={
  0x038fd9a0:0x0306b510,0x038fd9c0:0x0306b9f0,
@@ -101,6 +108,10 @@ def audit(exe):
             timer_branch='task+0x42 != 0: virtual+0x580; ==0: virtual+0x4B0',
             action_installers_are_at_least_three_typed_subclasses=True,
             action_plus_4b0_constructed_subtype='0x03ACD208 +0x08=0x0307C388',
+            fallback_ctor_relative_target_dx_dz='action+0xE0,+0xE4 = target(+0x88,+0x90) minus member(+0x88,+0x90), when target pointer nonnull',
+            fallback_action_tick_sets_member_plus270_one=True,
+            fallback_action_tick_may_clear_member_plusB11_bit0x20=True,
+            fallback_action_tick_conditional_virtual_plus_c8=True,
             action_plus_580_constructed_subtype='0x03913808 +0x08=0x032599C8',
             action_plus_5b8_constructed_subtype='0x03ADAA08 +0x08=0x03259950',
 
