@@ -169,3 +169,34 @@ append 转移时，这段投影是否经过相同几何检查；
 之间的具体子任务/群组指针引用，不能以虚表偏移猜类型。
 当前**仅定位到精确可能补丁层，不授权写补丁**；无需重复以前的
 挤压症状实机证明。
+
+
+### 2026-10-13 新优先证据：state=1 旧方向投影存在重新计算的原生门槛
+
+**最新入口：** `docs/current/N1_903_STAGE1_PROJECTION_RECOMPUTED_GATE_20261013.md`；
+字节/实际 PE 审计可复现输出见
+`maintenance_tools/native_shift_re/evidence/20261013_stage1_projection_recomputed_gate_static.json`。
+本节**修正上面章节可能产生的“进入 state1 就一定投影旧方向”印象**：
+
+- `0x0311E5B3` 首先清 `task+0x24`；
+- `0x0311E636` 调用 `0x0311E80C` 公共生成器（新建 state0 也调用它）；
+- 生成器通过 `0x0310F560` helper AL 和同一上下文
+  `+0x4E4` 数量门槛决定此条 reached-branch 是否写
+  `task+0x24=1`；正条件是 **AL!=0 && count>=2**，
+  但函数其他早退分支不能套这个简化式；
+- `+0x4E4` 在 `0x03105B4C` 通过
+  `+0x4E8` 指针数组逐项 `[base + index*8]` 的循环证明是
+  **数组元素计数**，不是已确认的士兵数或 Shift 路点数；
+- `0x0311E63F` 若重算结果 `task+0x24!=1` 则直接跳到尾声，
+  **跳过本轮旧 subtask 引用移交/投影以及主 `task+0x158` 清除**；
+  仅当为 1 才执行 `0x0311E64C` 和 `0x0311E6EC`。
+
+精确原始 EXE 上新增独立只读审计
+**46/46 opcode/反汇编站点、4/4 直接 E8、3/3 条件转移** PASS，
+本地 6/6 回归 PASS，GitHub 全合并工具已补 67 条 opcode
+位置并纳入公共 CI（公开 CI 不含原始 EXE，静态真 EXE 结果由离线独立脚本保证）。
+目前对玩家的特定 RMB/Shift 场次是否命中正门槛、该结果与
+多名成员几何挤压的**因果**仍为 UNKNOWN。Native Patch 不授权；
+禁止靠设置 `task+0x24`、`context+0x4E4`、清 `task+0x158`
+强制修改 CA 渐进转弯。下一步静态逆向 helper `0x0310F560`
+及 `context+0x4E8` 数组元素类型，勿重复旧游戏测试。
