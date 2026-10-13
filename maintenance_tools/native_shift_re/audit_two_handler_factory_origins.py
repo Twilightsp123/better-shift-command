@@ -66,6 +66,11 @@ LEA_VTABLE={
 }
 LEAF_BOUNDS={
  0x03264D88:(0x03264D88,0x03264E1D),
+ # Native x64 leaf functions without PE unwind; fixed boundaries checked
+ # against exact original machine bytes and complete objdump instruction starts.
+ 0x0327711C:(0x0327711C,0x0327713C),
+ 0x0327714C:(0x0327714C,0x03277186),
+ 0x03277214:(0x03277214,0x0327724E),
 }
 PRESERVE_REGS=('r9','r10')
 
@@ -75,7 +80,7 @@ def opcode_boundaries(pe):
  for at,code in PINS.items():
   if pe.read(at,len(code)//2,True).hex()!=code:
    raise ValueError('OPCODE_CHANGED:'+hex(at))
-  owner=pe.function(at) or LEAF_BOUNDS.get(at)
+  owner=pe.function(at) or next((fn for fn in LEAF_BOUNDS.values() if fn[0] <= at < fn[1]),None)
   if owner is None:raise ValueError('UNWIND_OR_LEAF_NOT_PINNED:'+hex(at))
   if owner not in cache:
    asm=pe.disasm(owner[0],owner[1]-owner[0])

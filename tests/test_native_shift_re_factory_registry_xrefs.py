@@ -50,6 +50,27 @@ class NativeRegistryXrefContracts(unittest.TestCase):
         self.assertEqual([(x['site'], x['target']) for x in refs],
                          [('0x00004008', '0x03940ED8')])
         self.assertIn('consumer unproven', refs[0]['evidence'])
+    def test_original_non_unwind_leaf_owners_are_explicitly_bounded(self):
+        self.assertEqual(origins.LEAF_BOUNDS[0x0327711C], (0x0327711C, 0x0327713C))
+        self.assertEqual(origins.LEAF_BOUNDS[0x0327714C], (0x0327714C, 0x03277186))
+        self.assertEqual(origins.LEAF_BOUNDS[0x03277214], (0x03277214, 0x0327724E))
+        self.assertEqual(a.PINNED_NO_UNWIND_LEAVES[0x008F9650], (0x008F9650, 0x008F9658))
+
+    def test_registry_family_identity_is_not_one_factory(self):
+        self.assertEqual(a.REGISTRY_POINTER_LINKS[0x03D19C08], 0x03941388)
+        self.assertEqual(a.REGISTRY_POINTER_LINKS[0x03D19C10], 0x03941400)
+        self.assertEqual(a.REGISTRY_POINTER_LINKS[0x03941390], 0x0326EF10)
+        self.assertEqual(a.REGISTRY_POINTER_LINKS[0x03941408], 0x0326F07C)
+        self.assertEqual(a.REGISTRY_POINTER_LINKS[0x03D19A88], 0x03940ED8)
+        self.assertEqual(len(a.REGISTRY_POINTER_LINKS), 9)
+
+    def test_shared_upstream_dispatcher_layout_is_distinct_from_move_queue(self):
+        self.assertEqual(a.DISPATCHER_FIELD_PINS[0x0326FF88], '488b5310')
+        self.assertEqual(a.DISPATCHER_FIELD_PINS[0x0326FF97], '48399cc218080000')
+        self.assertEqual(a.DISPATCHER_FIELD_PINS[0x03270064], '488b5310')
+        self.assertEqual(a.DISPATCHER_FIELD_PINS[0x03270073], '48399cca18080000')
+        self.assertEqual(len(a.DISPATCHER_FIELD_PINS), 6)
+
     def test_different_registry_candidates_are_not_collapsed(self):
         self.assertNotEqual(a.TARGETS[0x03D19C08], a.TARGETS[0x03D19C10])
         self.assertEqual(len(a.TYPE_PREDICATE_LEAS), 4)

@@ -1,0 +1,39 @@
+{
+  "schema": "bsc.n1.exact_903_factory_dispatcher_static.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "source": "user-supplied original EXE independently checked in this conversation",
+  "checks": {
+    "original_opcodes_and_instruction_starts": 39,
+    "direct_E8_calls": 9,
+    "typed_static_pointer_slots": 12,
+    "condition_predicate_RIP_targets": 4,
+    "dispatcher_source_sites": 6
+  },
+  "pinned_no_unwind_leaf_spans": [
+    [
+      "0x0327711C",
+      "0x0327713C"
+    ],
+    [
+      "0x0327714C",
+      "0x03277186"
+    ],
+    [
+      "0x03277214",
+      "0x0327724E"
+    ]
+  ],
+  "registry_links": {
+    "0x03D19A88": "0x03940ED8",
+    "0x03D19C08": "0x03941388",
+    "0x03D19C10": "0x03941400",
+    "0x03941390": "0x0326EF10",
+    "0x03941408": "0x0326F07C",
+    "0x03940EE0": "0x0326F0DC"
+  },
+  "upstream_source": "parent+0x10 -> dispatcher +0x898 count, +0x818 pointer vector with 16-byte stride",
+  "same_as_MOVE_queue_not_proven": true,
+  "runtime_instance_identity_unobserved": true,
+  "original_exe_committed": false,
+  "native_gameplay_patch": false
+}

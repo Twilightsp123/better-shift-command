@@ -53,3 +53,32 @@ parent 实际构造器**，证实它获取的对象地址是否来自
 `MOVE slot (vtable 0x0390B4F0) +0xA0`，而后再区分
 inherited state=1 与 fresh state=0 的成员目标分配。
 没有此边，不发布 Native Patch，也不让玩家重复验证挤压。
+
+
+## 2026-10-13 原始 EXE 实跑复核和修正（本次对话）
+
+本次用户重新提供 `Warhammer3.zip`，内含 `Warhammer3.exe`，本地独立
+SHA256 实测 **完全匹配**固定 9.0.3。实测 **39/39 固定机器码和指令边界、
+9/9 E8、12/12 类型化指针、4/4 RIP 目标 PASS**。此前的
+`audit_two_handler_factory_origins.py` 把合法无 unwind 叶函数
+`0x0327711C..0x0327713C`、`0x0327714C..0x03277186`、
+`0x03277214..0x0327724E` 漏在区间识别之外；
+因此旧工具在真的拿到 EXE 时会 fail closed。本次修复为受固定地址和
+机器码双重保护的显式 leaf span，**不放开任何未知指令地址**。
+`audit_factory_registry_xrefs.py` 也修复这个上游依赖与叶函数过滤问题。
+
+新增可复核的区别：
+- `0x03D19A88` 指向 `0x03940ED8`，其中回调 `+8` 为 A 工厂 `0x0326F0DC`；
+- `0x03D19C10` 指向 `0x03941400`，其中回调 `+8` 为 B 工厂 `0x0326F07C`；
+- **`0x03D19C08` 指向的是另一张 `0x03941388` 描述符**，其 `+8` 是
+  `0x0326EF10`，不能把整个 B-family 的谓词直接归为 B 工厂实例。
+
+此外直接检查 `0x0326FFF4` 和 `0x0326FF60` 两条工厂调度回调：
+二者都从 `parent+0x10` 取上游调度器，以 `+0x898` 的值计算索引，
+读 `+0x818 + index*16` 并与当前 parent 地址比较。这是真实共享的
+上游 **dispatcher 结构布局**。它不同于已确认的 MOVE 槽位队列
+`+0x2D10`，不能因同样叫 queue 就将其强行当成 MOVE task。
+
+当前尚未完成 `MOVE slot+0xA0` 至工厂 parent 的指针同一性连接。
+原始 EXE 验证仍属于 **静态逆向**，不是 Shift 现场分支记录，也不是 Native
+游戏修复。此次不上传 EXE、原始用户 JSONL 或发布 gameplay patch。

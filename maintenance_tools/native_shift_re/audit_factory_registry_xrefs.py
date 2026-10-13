@@ -57,6 +57,65 @@ def raw_candidates(pe):
             if decoded is not None and decoded[0] in TARGETS:
                 yield site, decoded[0], match.group().hex()
 
+# These small exact-build leaf functions legitimately lack unwind records.
+# No arbitrary owner inference and no scanning through a separate function.
+PINNED_NO_UNWIND_LEAVES = {
+    0x0327711C: (0x0327711C, 0x0327713C),
+    0x0327714C: (0x0327714C, 0x03277186),
+    0x03277214: (0x03277214, 0x0327724E),
+    0x008F95B0: (0x008F95B0, 0x008F95B8),
+    0x008F9650: (0x008F9650, 0x008F9658),
+    0x008F9660: (0x008F9660, 0x008F9668),
+}
+
+# Pointers are image-base-relative static VALUES: they do not prove the
+# descriptor's callback ran. 0x03D19C08 is NOT B's 0x03D19C10 descriptor.
+REGISTRY_POINTER_LINKS = {
+    0x03D19A88: 0x03940ED8,
+    0x03D19C08: 0x03941388,
+    0x03D19C10: 0x03941400,
+    0x03940ED8: 0x0326FFF4,
+    0x03940EE0: 0x0326F0DC,
+    0x03941388: 0x0326FCF4,
+    0x03941390: 0x0326EF10,
+    0x03941400: 0x0326FF60,
+    0x03941408: 0x0326F07C,
+}
+
+# These two parent-dispatcher callbacks independently inspect the top slot
+# of the same 0x898/0x818-layout manager. It is NOT the MOVE slot ring
+# (MOVE-queue operations include +0x2D10).
+DISPATCHER_FIELD_PINS = {
+    0x0326FF88: '488b5310',
+    0x0326FF8C: '8b8298080000',
+    0x0326FF97: '48399cc218080000',
+    0x03270064: '488b5310',
+    0x03270068: '8b8a98080000',
+    0x03270073: '48399cca18080000',
+}
+
+def checked_owner(pe, site):
+    found = pe.function(site)
+    if found is not None:
+        return found
+    return next((owner for owner in PINNED_NO_UNWIND_LEAVES.values()
+                 if owner[0] <= site < owner[1]), None)
+
+def verify_registry_and_dispatcher(pe):
+    import struct
+    for site, target in REGISTRY_POINTER_LINKS.items():
+        observed = struct.unpack('<Q', pe.read(site, 8))[0]
+        if observed != pe.base + target:
+            raise ValueError(f'REGISTRY_POINTER_DRIFT:0x{site:08X}')
+    checked = {}
+    for site, raw in DISPATCHER_FIELD_PINS.items():
+        if pe.read(site, len(raw)//2, True).hex() != raw:
+            raise ValueError(f'UPSTREAM_DISPATCHER_OPCODE_DRIFT:0x{site:08X}')
+        owner = checked_owner(pe, site)
+        if owner is None or site not in instruction_index(pe, owner, checked):
+            raise ValueError(f'UPSTREAM_DISPATCHER_MID_INSTRUCTION:0x{site:08X}')
+    return len(REGISTRY_POINTER_LINKS), len(DISPATCHER_FIELD_PINS)
+
 def instruction_index(pe, owner, cache):
     if owner not in cache:
         asm = pe.disasm(owner[0], owner[1] - owner[0])
@@ -72,9 +131,9 @@ def code_xrefs(pe):
     cache = {}
     found = []
     for site, target, raw in raw_candidates(pe):
-        owner = pe.function(site)
+        owner = checked_owner(pe, site)
         if owner is None:
-            # Unwind-free leaves require independently established bounds.
+            # Unverified unwind-free spans must NOT be trusted.
             continue
         instruction = instruction_index(pe, owner, cache).get(site)
         if instruction is None:
@@ -109,7 +168,7 @@ def verify_predicate_targets(pe):
         decoded = decode_rip_site(pinned, site)
         if decoded is None or decoded[0] != expected:
             raise ValueError(f'TYPE_PREDICATE_RIP_TARGET_CHANGED:0x{site:08X}')
-        owner = pe.function(site)
+        owner = checked_owner(pe, site)
         if owner is None or site not in instruction_index(pe, owner, cache):
             raise ValueError(f'TYPE_PREDICATE_MID_INSTRUCTION:0x{site:08X}')
     return len(TYPE_PREDICATE_LEAS)
@@ -119,11 +178,17 @@ def audit(exe):
     try:
         factory.audit(exe)   # prerequisite typed callback and factory guard
         count = verify_predicate_targets(pe)
+        registry_count, dispatcher_count = verify_registry_and_dispatcher(pe)
         code, pointers = code_xrefs(pe), pointer_xrefs(pe)
         return dict(
             schema='bsc.n1.factory_registry_reverse_xrefs.v1',
             original_exe_sha256=pe.sha, level='EXACT_EXE_STATIC_XREF',
             checked_predicate_lea_targets=count,
+            verified_registry_descriptor_pointers=registry_count,
+            verified_dispatcher_opcode_and_instruction_sites=dispatcher_count,
+            type_3D19C08_differs_from_factory_B_3D19C10=True,
+            upstream_shared_dispatcher_layout='parent+0x10 -> dispatcher count +0x898; top pointer +0x818[index*16]',
+            dispatcher_identified_as_MOVE_queue=False,
             rip_relative_code_xrefs=code, aligned_static_pointer_xrefs=pointers,
             code_xref_count=len(code), pointer_xref_count=len(pointers),
             exact_parent_to_MOVE_task_identity=False,
