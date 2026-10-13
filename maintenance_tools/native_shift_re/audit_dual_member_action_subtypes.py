@@ -12,9 +12,9 @@ from audit_wh3_full_native_chain import StrictPE
 
 PINS={
  0x0306A99A:'488d9928030000',0x0306A9AC:'488d4b08',
- 0x0306A9BB:'e890e91d00',
+ 0x0306A9A7:'e86460d4ff',0x0306A9BB:'e890e91d00',
  0x0306A8CA:'488d9928030000',0x0306A8DC:'488d4b08',
- 0x0306A8EB:'e8d8e51d00',
+ 0x0306A8D7:'e83461d4ff',0x0306A8EB:'e8d8e51d00',
  0x0324935C:'488d15a5a46c00',0x03248EE4:'488d051d1b8900',
  0x032599C8:'48895c2410',0x03259950:'4881c1c0000000',
  0x03259957:'e93c335cfe',0x03259C55:'e8c252e1ff',
@@ -24,6 +24,8 @@ PINS={
  0x03117EF7:'ff90b8050000',0x03118040:'41ff90b8050000',
 }
 CONTROL={
+ 0x0306A9A7:('E8',0x02DB0A10),
+ 0x0306A8D7:('E8',0x02DB0A10),
  0x0306A9BB:('E8',0x03249350),
  0x0306A8EB:('E8',0x03248EC8),
  0x03259C55:('E8',0x0306EF1C),
@@ -64,6 +66,8 @@ def audit(exe):
           'typed_vtable_slots':len(VTABLES),
           'rip_relative_vtable_installs':len(VTABLE_LEA),
           'same_member_action_storage':'member+0x328+8 = member+0x330',
+          'both_action_installers_cleanup_same_member_storage_first':'0x02DB0A10',
+          'cleanup_calls_are_before_subclass_construction':True,
           'typed_member_interfaces':{
              '+0x580':'0x0306A990 -> 0x03249350 -> vtable 0x03913808',
              '+0x5B8':'0x0306A8C0 -> 0x03248EC8 -> vtable 0x03ADAA08'},
