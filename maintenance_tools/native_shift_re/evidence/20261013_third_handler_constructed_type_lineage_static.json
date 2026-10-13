@@ -1,0 +1,27 @@
+{
+  "schema": "bsc.n1.third_handler_type_lineage.v1",
+  "exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "static_original_exe_checks": {
+    "opcode_instruction_starts": 45,
+    "E8_calls": 18,
+    "E9_jumps": 1,
+    "RIP_LEAS": 3,
+    "typed_pointers": 6
+  },
+  "constructor_E8_callers": 16,
+  "typed_path": [
+    "0x0326581C",
+    "0x03ADE428+0xD0",
+    "0x008F96B0",
+    "0x03D19BD8",
+    "0x039407A8",
+    "0x032701C4"
+  ],
+  "geometry_callback": [
+    "0x039407B0",
+    "0x0326F16C",
+    "0x0326EA44"
+  ],
+  "same_as_MOVE_task_instance_proven": false,
+  "native_patch_authorized": false
+}
