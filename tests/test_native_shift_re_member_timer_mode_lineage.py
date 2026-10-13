@@ -8,9 +8,9 @@ from audit_wh3_full_native_chain import StrictPE
 
 class NativeMemberTimerModeLineage(unittest.TestCase):
  def test_exact_new_original_opcode_count_and_caller_edges(self):
-  self.assertEqual(len(m.PINS),32)
+  self.assertEqual(len(m.PINS),35)
   self.assertEqual(len(m.EDGES),9)
-  self.assertEqual(len(m.VTABLES),15)
+  self.assertEqual(len(m.VTABLES),18)
   self.assertEqual(m.PINS[0x02d99e64],'0fb64202')
   self.assertEqual(m.PINS[0x02d99e68],'884102')
   self.assertEqual(m.PINS[0x032638d7],'c6410200')
@@ -44,6 +44,18 @@ class NativeMemberTimerModeLineage(unittest.TestCase):
   self.assertEqual(m.PINS[0x030698ca],'ff9080000000')
   self.assertEqual(m.EDGES[0x03069910],0x02db0a10)
   self.assertEqual(m.EDGES[0x03069924],0x0304e5d4)
+ def test_zero_descriptor_selects_a_third_not_RMB_specific_action_subclass(self):
+  self.assertEqual(m.PINS[0x032638d7],'c6410200')
+  self.assertEqual(m.PINS[0x02d99e64],'0fb64202')
+  self.assertEqual(m.PINS[0x02d99e68],'884102')
+  self.assertEqual(m.PINS[0x0304e5e9],'488d0518eca700')
+  self.assertEqual(m.PINS[0x0304e5f0],'488903')
+  self.assertEqual(m.VTABLES[0x03acd208],0x03052f30)
+  self.assertEqual(m.VTABLES[0x03acd210],0x0307c388)
+  self.assertEqual(m.VTABLES[0x03acd218],0x0308279c)
+  self.assertNotEqual(m.VTABLES[0x03acd210],0x032599c8)
+  self.assertNotEqual(m.VTABLES[0x03acd210],0x03259950)
+
  def test_wrong_binary_fails_closed(self):
   with tempfile.TemporaryDirectory() as d:
    p=Path(d)/'wrong.exe';old=b'MZ'+b'NOT_WH3'*100;p.write_bytes(old)
@@ -52,9 +64,9 @@ class NativeMemberTimerModeLineage(unittest.TestCase):
  @unittest.skipUnless(os.getenv('WH3_903_EXE'),'Exact original EXE excluded from public CI')
  def test_actual_original_exe_mode_lineage(self):
   result=m.audit(Path(os.environ['WH3_903_EXE']))
-  self.assertEqual(result['guarded_x64_instruction_starts'],32)
+  self.assertEqual(result['guarded_x64_instruction_starts'],35)
   self.assertEqual(result['verified_E8_edges'],9)
-  self.assertEqual(result['typed_vtable_entries'],15)
+  self.assertEqual(result['typed_vtable_entries'],18)
   self.assertFalse(result['queued_shift_or_RMB_identity_proven'])
   self.assertFalse(result['native_crowding_fix_authorized'])
 if __name__=='__main__':unittest.main()
