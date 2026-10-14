@@ -3,11 +3,17 @@
 import hashlib, pathlib, struct, sys
 EXPECTED='518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a'
 p=pathlib.Path(sys.argv[1] if len(sys.argv)>1 else 'Warhammer3.exe')
-b=p.read_bytes(); assert hashlib.sha256(b).hexdigest()==EXPECTED,'EXE SHA mismatch; fail-closed'
-pe=struct.unpack_from('<I',b,0x3c)[0]; assert b[pe:pe+4]==b'PE\0\0'
+b=p.read_bytes()
+if hashlib.sha256(b).hexdigest()!=EXPECTED:
+ raise ValueError('EXE SHA mismatch; fail-closed')
+pe=struct.unpack_from('<I',b,0x3c)[0]
+if b[pe:pe+4]!=b'PE\0\0':
+ raise ValueError('Invalid PE signature')
 n=struct.unpack_from('<H',b,pe+6)[0]; opt=pe+24
-assert struct.unpack_from('<H',b,opt)[0]==0x20b
-assert struct.unpack_from('<Q',b,opt+24)[0]==0x140000000
+if struct.unpack_from('<H',b,opt)[0]!=0x20b:
+ raise ValueError('Expected PE32+ image')
+if struct.unpack_from('<Q',b,opt+24)[0]!=0x140000000:
+ raise ValueError('Unexpected PE ImageBase')
 size_opt=struct.unpack_from('<H',b,pe+20)[0]
 sects=[]
 for i in range(n):
@@ -18,13 +24,15 @@ for i in range(n):
 def read(rva,n):
  for name,va,size,rp,rs in sects:
   if va<=rva and rva+n<=va+rs:
-   assert name=='.00cfg',f'RVA {rva:x} outside verified executable code'
+   if name!='.00cfg':
+    raise ValueError(f'RVA {rva:x} outside verified executable code')
    return b[rp+rva-va:rp+rva-va+n]
  raise AssertionError(f'RVA not in raw section: {rva:x}')
 def check(rva,hexx,description):
  exp=bytes.fromhex(hexx)
  got=read(rva,len(exp))
- assert got==exp,f'{description}: byte mismatch RVA 0x{rva:x}: {got.hex()} != {exp.hex()}'
+ if got!=exp:
+  raise ValueError(f'{description}: byte mismatch RVA 0x{rva:x}: {got.hex()} != {exp.hex()}')
  print(f'PASS 0x{rva:08X}: {description}')
 # Instruction signatures (not a whole-control-flow proof). Each keyed to fixed SHA.
 check(0x0328153d,'48 8b 41 78','aux+0x78 read')
