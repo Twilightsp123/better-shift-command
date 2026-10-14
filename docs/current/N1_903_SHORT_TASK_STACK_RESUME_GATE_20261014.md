@@ -82,3 +82,8 @@
 只有确认这一具体序列可能破坏同一兵牌成员目标对应时，才定位最小 Native Patch。尚无跨代实例命中、相邻士兵错误目标的因果证据；`native_patch_authorized=false`。没有写游戏内存、EXE、DLL 或 `main`，也没要求玩家重复折返测试。
 
 附带 `audit_move_shorttask_resume_gate.py` 和 `test_native_shift_re_move_shorttask_resume_gate.py`、机器可读静态证据。原始 EXE 及含内存指针日志不上传 GitHub。
+
+
+## 2026-10-14 优先纠错：正常成功 MOVE→MOVE 交接清退旧 shortTask
+
+见 `docs/current/N1_903_QUEUED_HANDOFF_TASK_MANAGER_RESET_20261014.md` 及同名只读审计工具。固定原始 EXE 72 opcode/objdump、11 E8、1 E9、6 branch、6 vtable 全部通过；本地 14 项测试 PASS。成功继承时下一 MOVE +0x48 接受旧**大 task**，但 `0x030445B1` 先 pop 旧 MOVE，`0x030445BA/BC` 以 EDX=0 调用 `0x02F4FD5C(queue+8 manager,0)` 清空旧 **shortTask**，然后 `0x030445CB` group 清理，再 `0x030445D3` 激活后继槽位。此清理受 manager+0x250!=0 门槛约束，正常单位更新 tick 退出会恢复该字节为1；manager+0x250==0 及继承失败分支均不能据此排除。故以前将正常成功继承的跨代挤压归因于旧 shortTask 被新任务压栈后复活，应当降级/排除。继续聚焦保留的大 task state1 几何、当前 group 的成员目标索引及 motor，不发布 game patch。

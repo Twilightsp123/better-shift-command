@@ -1,0 +1,24 @@
+{
+  "schema": "bsc.n1.queued_move_success_manager_stack_clear.v1",
+  "original_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "grade": "EXACT_ORIGINAL_EXE_STATIC",
+  "opcode_and_instruction_boundaries": 72,
+  "E8_edges": 11,
+  "E9_edges": 1,
+  "conditional_branch_targets": 6,
+  "typed_vtable_slots": 6,
+  "local_test_count": 14,
+  "manager_origin": "queue+8 -> UnitRoot+0x2FA0",
+  "success_order": [
+    "0x030445AB reuse bigTask",
+    "0x030445B1 old slot pop",
+    "0x030445BC manager clear-to-0",
+    "0x030445CB group scheduler cleanup",
+    "0x030445D3 next activation"
+  ],
+  "guard_manager_plus250_nonzero": true,
+  "normal_success_old_shorttask_resumption_refuted": true,
+  "other_branches_unresolved": true,
+  "original_shift_input_instance_unproven": true,
+  "native_patch_authorized": false
+}
