@@ -80,3 +80,13 @@
 - 本文件以及 AI handoff 与前轮 Shared Geometry Manager 的纠正维护。
 
 原始 EXE、用户带运行时指针 JSONL、Native gameplay 代码均不提交公开 GitHub；只修改研究分支。
+
+## 2026-10-14 第14轮：B 路线节点普通转换的真实 RDX、参考建立与失效重建（当前优先）
+
+固定 SHA 原始 EXE 只读审计 `audit_b_node_route_identity_gate.py`：**140/140 原码及 objdump 指令起点、17/17 E8、8/8 JCC、3/3 不同任务虚表** PASS；**17/17** 本地单元测试 PASS，含私有真实 EXE 测试。完整见 `docs/current/N1_903_B_NODE_REFERENCE_LIFECYCLE_20261014.md`。
+
+重要机器码正证据：`0x0312907E LEA RDX,[node+0x20]` 之后调用 `0x0311BE18`，其无 unwind 叶函数 `0x03037A48` 和完整验证器体没有 RDX/EDX/DX/DL 访问或额外调用；后续转入 `0x030FDA9C` 时 RDX 未变，原转换器 `0x030FDAC7` 直接读 `[RDX]`，返回值写 `node+0x70`。**这不是大任务 `task+0x160` 的地址。**
+
+携带旧大任务的节点 `0x030ECB10` 初始设 `node+0x08=1`，不会立即触发此普通重算。其初始 `node+0x70` 由 `0x030FE1E4` 创建的路线对象提供，`0x030C7858` 在条件满足时写 `route+0x78` 参考；B 任务 `0x03281444 → 0x030DEA20` 随后比较这个参考，失效会同时清除 `aux+0x58` 节点和 `aux+0x20` 大任务引用，进而有条件走普通节点构造器。这是原生**任务来源转换条件**，仍未证明对应玩家 Shift 的错误目标或物理挤压。
+
+**跨类型必须禁止：** `0x03AE0128 +0x10=0x03281408` 是本研究 B 辅助任务，`0x03AE00E8` 和 `0x03AE0108` 为不同任务类；`manager+0x2F8` 清退函数 `0x03109DD4` 也不是 B 节点链 `manager+0x2D0` 的运动消费者。尤其 `0x030DEA55` 的 `[vtable+0x160]` 是**虚方法指针**，不是 `bigTask+0x160`。B 节点到成员 motor goal 的真实身份边仍未接通。**native_patch_authorized=false**，无实机新测试或 gameplay 修改。
