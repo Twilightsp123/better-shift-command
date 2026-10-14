@@ -1,0 +1,52 @@
+{
+  "schema": "bsc.n1.short_move_task_group_generation_late_binding.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof_grade": "EXACT_ORIGINAL_EXE_STATIC + SYNTHETIC_ORDERING_COUNTEREXAMPLE",
+  "code_opcode_and_objdump_starts": 91,
+  "direct_E8_edges": 19,
+  "typed_vtable_slots": 3,
+  "local_test_cases": 13,
+  "group_pool_return": [
+    "0x0301B8E4",
+    "0x030197A8",
+    "0x0302C2D4",
+    "context+0x150+0x58"
+  ],
+  "group_pool_acquire": [
+    "0x0301B834",
+    "0x030C2C3C",
+    "0x0301B96D -> root+0x32F8"
+  ],
+  "group_destructor_vtable": "0x0390F5F0+0x10 -> 0x030C61D4",
+  "deallocation_flag_zero_skips_free": true,
+  "short_task_root": "0x02F2C74D -> task+0x08",
+  "task_live_group_read": "0x02F563F4 -> 0x02F563FD -> 0x02F56404",
+  "group_generation_token_proven": false,
+  "actual_old_task_late_callback_in_shift_proven": false,
+  "final_crowding_cause_proven": false,
+  "native_patch_authorized": false,
+  "synthetic_controls": {
+    "reuse_same_pointer": {
+      "old_task_epoch": 0,
+      "new_group_epoch": 1,
+      "pointer_equal": true,
+      "epoch_mismatch": true
+    },
+    "different_pointer": {
+      "old_task_epoch": 0,
+      "new_group_epoch": 1,
+      "pointer_equal": false,
+      "epoch_mismatch": true
+    },
+    "no_refresh": {
+      "old_task_epoch": 0,
+      "new_group_epoch": 0,
+      "pointer_equal": true,
+      "epoch_mismatch": false
+    },
+    "old_task_retired": {
+      "fanout": false,
+      "epoch_mismatch": false
+    }
+  }
+}
