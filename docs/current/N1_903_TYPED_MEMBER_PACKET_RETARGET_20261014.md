@@ -33,3 +33,8 @@
 - `maintenance_tools/native_shift_re/evidence/20261014_typed_member_packet_retarget_static.json`：脱敏静态结论，不含原始 EXE / 运行时指针。
 
 此次未修改 `main`、原始游戏文件或 Native gameplay，也没有让玩家重做已确认的折返测试。
+
+
+## 2026-10-14 — 原生 MOVE UnitRoot / Group 的共同来源与双发包入口（精确 EXE）
+
+最新只读审计 `audit_move_group_common_context.py` 在 SHA256 固定的原始 EXE 上实测 **98/98 opcode 与 objdump 指令起点、15/15 E8、2/2 typed vtable 槽、3/3 RIP 虚表安装** PASS；本地 **10/10 测试通过**。细节及负证据见 `docs/current/N1_903_MOVE_GROUP_COMMON_CONTEXT_20261014.md`。真实 group 构造器 `0x030C2D40` 接收 `UnitRoot+0x30`，将 `[UnitRoot+0x38]` 赋值给 `group+0x10`；上级构造器另外保存 `group+0xA10=UnitRoot`，`0x0301B8E4` 再保存 `UnitRoot+0x32F8=group`。发令入口 `0x0302DB44` 配置 `root+0x270` 后走 `0x030D5490`；MOVE 工作短期任务 `0x02F2C734` 保存 `shortTask+0x8=UnitRoot`，其 `0x02F561E8` 状态回调可沿 `UnitRoot+0x32F8 → 0x03279E40 → 0x030D554C → 0x030D5490` 进行另一次**条件性**成员发包。`0x03008894` 与 `0x030D554C` 静态访问同一表达式 `[[[UnitRoot+0x38]+0x440]+0x160]`，但通过不同转换函数准备成员记录；不保证运行时输出相同，不代表 Shift 实例必定双发包。此 `routeContext+0x160` 也**不是已证明**队列复用 `bigTask+0x160` 的别名。下一条要证明的是同一 queued MOVE state=1 的两路发包输入和逐成员目标代际，未授权任何 gameplay patch，禁止重复玩家折返测试。

@@ -1,0 +1,51 @@
+{
+  "schema": "bsc.n1.original_MOVE_group_shared_context_and_two_fanouts.v1",
+  "original_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "verification_grade": "EXACT_ORIGINAL_EXE_STATIC",
+  "opcode_and_objdump_instruction_starts": 98,
+  "unwind_or_explicit_leaf_function_bodies": 14,
+  "direct_E8_calls": 15,
+  "typed_vtable_method_pointers": 2,
+  "RIP_installed_vtables": 3,
+  "root_group_identity_source": {
+    "0x0301B8E4": "stores created group into UnitRoot+0x32F8",
+    "0x0301B834": "stores R8 in constructor parameter block +0x08",
+    "0x030C2C3C": "stores UnitRoot into group+0xA10",
+    "0x030C2D40": "stores MEM[UnitRoot+0x38] into group+0x08 and group+0x10"
+  },
+  "symbolic_sources": {
+    "group": {
+      "owner": "ROOT",
+      "plus_10_context": "MEM[ROOT+0x38]"
+    },
+    "route_config": {
+      "root": "ROOT",
+      "source_context": "MEM[ROOT+0x38]",
+      "source_geometry": "MEM[MEM[MEM[ROOT+0x38]+0x440]+0x160]",
+      "route_payload_creator": "0x031219B0",
+      "result_field": "root+0x270"
+    },
+    "deferred_fanout": {
+      "group": {
+        "owner": "ROOT",
+        "plus_10_context": "MEM[ROOT+0x38]"
+      },
+      "source_context": "MEM[ROOT+0x38]",
+      "source_geometry": "MEM[MEM[MEM[ROOT+0x38]+0x440]+0x160]",
+      "input_to_converter": "MEM[MEM[MEM[ROOT+0x38]+0x440]+0x160]+0x18",
+      "converter": "0x030FDA9C"
+    },
+    "queue_big_task_plus160_alias_proven": false
+  },
+  "immediate_move_route_and_fanout": "0x0302DB44 -> 0x0301287C writes root+0x270 -> 0x030D5490",
+  "conditional_task_to_group": "0x03025D70 -> 0x02F2C734(task+8=root) -> 0x02F561E8 -> root+0x32F8 -> 0x03279E40",
+  "conditional_task_mode_gate": "0x03279E62 helper 0x02DC2E04; zero skips 0x030D554C",
+  "task_group_uses_root_route_descriptor": "group+0xA10 -> root+0x270 -> route+0x40/+0x44 on fallback",
+  "deferred_member_fanout": "group+0x10 -> +0x440 -> +0x160+0x18 -> 0x030FDA9C -> 0x030D5490",
+  "immediate_and_deferred_fanout_have_different_geometry_inputs": true,
+  "task_callback_always_fanout": false,
+  "two_fanouts_in_same_player_SHIFT_instance_observed": false,
+  "group_context_plus160_equals_queued_big_task_plus160_proven": false,
+  "same_soldier_goal_generation_mismatch_proven": false,
+  "native_gameplay_patch_authorized": false
+}
