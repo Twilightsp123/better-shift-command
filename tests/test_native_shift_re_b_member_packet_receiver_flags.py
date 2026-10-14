@@ -17,9 +17,10 @@ class BPacketReceiverFlagEvidence(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             fake = Path(temp) / 'Warhammer3.exe'
             fake.write_bytes(b'MZ' + bytes(64))
-            proc = subprocess.run([sys.executable, str(SCRIPT), str(fake)], capture_output=True, text=True)
-        self.assertNotEqual(proc.returncode, 0)
-        self.assertIn('EXE SHA mismatch', proc.stderr)
+            for opts in ([], ['-O']):
+                proc = subprocess.run([sys.executable, *opts, str(SCRIPT), str(fake)], capture_output=True, text=True)
+                self.assertNotEqual(proc.returncode, 0)
+                self.assertIn('EXE SHA mismatch', proc.stderr)
 
     def test_packet_gate_symbolic_controls_not_runtime(self):
         # Models the observed packet flag predicate only; NOT original gameplay timing.
