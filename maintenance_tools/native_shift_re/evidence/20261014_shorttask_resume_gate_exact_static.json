@@ -1,0 +1,94 @@
+{
+  "schema": "bsc.n1.short_task_scheduler_resume.v1",
+  "sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof_level": "EXACT_ORIGINAL_EXE_STATIC",
+  "opcode_and_disassembly_starts": 69,
+  "function_or_explicit_leaf_owners": 12,
+  "direct_E8_edges": 13,
+  "verified_branches": 5,
+  "typed_vtable_slots": 4,
+  "manager_type_proven": true,
+  "manager_alias": "root ctor [root+0x280] = &root+0x2FA0; queue+8 -> wrapper+0x10 -> MOVE slot+0x18 -> shortTask allocator manager",
+  "manager_array_stride_bytes": 16,
+  "manager_count_offset": 576,
+  "manager_task_record_offset": 512,
+  "previous_task_dispatch": "vtable+0x18 = 0x008D3280 (ret 0 for shortTask)",
+  "latest_task_dispatch": "vtable+0x10 = 0x02F561E8 for shortTask",
+  "manager_pop_after_last_done": true,
+  "tick_order": "0x03043648: queue 0x0304433C before manager 0x03043520",
+  "shortTask_A0_guard_can_be_rearmed_on_associated_plus25": true,
+  "shared_state_20_24_gate_for_main_fanout": true,
+  "shortTask_plus74_is_descriptor_selector_not_required_fanout_gate": true,
+  "current_group_read_when_dispatch": "[shortTask+8] -> [UnitRoot+0x32F8]",
+  "old_task_immediate_update_when_nonlast": false,
+  "old_task_can_regain_top_after_new_task_removed": true,
+  "no_gameplay_proof_of_old_short_task_reactivation": true,
+  "no_gameplay_proof_of_cross_generation_send": true,
+  "native_patch_authorized": false,
+  "offline_counterexamples": {
+    "new_on_top": {
+      "before": {
+        "top": "new",
+        "old_virtual": "+0x18 no-op",
+        "old_dispatched": false
+      },
+      "after": {
+        "top": "new",
+        "old_dispatched": false
+      },
+      "stale_packet_possible_under_given_assumptions": false
+    },
+    "new_removed_old_unprocessed": {
+      "before": {
+        "top": "new",
+        "old_virtual": "+0x18 no-op",
+        "old_dispatched": false
+      },
+      "after": {
+        "top": "old",
+        "old_dispatched": true,
+        "shared_state_eligibility_assumed": true
+      },
+      "stale_packet_possible_under_given_assumptions": true
+    },
+    "new_removed_old_was_dispatched": {
+      "before": {
+        "top": "new",
+        "old_virtual": "+0x18 no-op",
+        "old_dispatched": false
+      },
+      "after": {
+        "top": "old",
+        "old_dispatched": false,
+        "shared_state_eligibility_assumed": true
+      },
+      "stale_packet_possible_under_given_assumptions": false
+    },
+    "explicit_rearm": {
+      "before": {
+        "top": "new",
+        "old_virtual": "+0x18 no-op",
+        "old_dispatched": false
+      },
+      "after": {
+        "top": "old",
+        "old_dispatched": true,
+        "shared_state_eligibility_assumed": true
+      },
+      "stale_packet_possible_under_given_assumptions": true
+    },
+    "old_shared_not_ready": {
+      "before": {
+        "top": "new",
+        "old_virtual": "+0x18 no-op",
+        "old_dispatched": false
+      },
+      "after": {
+        "top": "old",
+        "old_dispatched": false,
+        "shared_state_eligibility_assumed": false
+      },
+      "stale_packet_possible_under_given_assumptions": false
+    }
+  }
+}

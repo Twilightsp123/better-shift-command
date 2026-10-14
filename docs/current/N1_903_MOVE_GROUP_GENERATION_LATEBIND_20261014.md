@@ -85,3 +85,11 @@ GNU objdump 指令起点、RIP/虚表和原始 E8 校验：**91/91 处指令、1
 
 本轮新增 `audit_move_group_generation_latebind.py`、同名回归测试和静态证据 JSON，
 不上传 EXE 和用户原始指针 JSONL；不修改 `main`；无需用户重复已确认的折返。
+
+## 2026-10-14 第10轮：shortTask 栈顶 Tick 身份与重新激活门槛纠错
+
+原始 EXE 静态逆向与本地实测新增 `audit_move_shorttask_resume_gate.py` / 13 个回归：**69/69 原 opcode 与 objdump 指令起点、13/13 E8、5/5 原生分支目标、4/4 类型化虚表槽** PASS。详见 `docs/current/N1_903_SHORT_TASK_STACK_RESUME_GATE_20261014.md`。
+
+已由 UnitRoot 构造器 `0x03007AD1/0x03007B62` 定型 `root+0x280 = &root+0x2FA0`；队列封装器和 MOVE 槽位构造把这一**同一管理器指针**依次传给 `wrapper+0x10 → MOVE slot+0x18`；`0x03025D70 → 0x02F2FFB0` 从该管理器分配 shortTask。原生 `0x03043520` 只对栈顶任务调用 `virtual+0x10`；较早 shortTask 的 `virtual+0x18` 指向原生空方法 `0x008D3280`，因此旧任务被新 shortTask 压栈时**不能立刻通过此 Tick 发包**。但新任务出栈后，旧任务可能重新成为栈顶（取决于管理器与完成条件）。
+
+另严格纠正前轮报告：`shortTask+0x74` **是两种 descriptor 构造路径的分叉，不是成员发包的必要非零门槛**；两路均可到 `0x02F563F4 → 0x02F56404`。字段 `shortTask+0xA0` 非零通常跳过新的分发准备，但关联状态 `+0x25` 的原生条件路径可以先把它清零，因而不是永久单次锁。离线合成反例仅说明可能性，尚无同一玩家 Shift 任务跨代实例或挤压因果证明，不授权 Native gameplay patch。未修改 main，不要求重复实机折返。
