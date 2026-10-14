@@ -45,3 +45,10 @@ otherwise:
 接下来先静态解析 `0x0310F560` 返回 AL 的各条路径，追查 `context+0x4E4` 的真实读写和对象类型，再寻找在真实 MOVE 实例上辨识成功／失败分支的方法。**不需要再为证明 Shift 挤压而重复游戏测试。**
 
 所有源码、文档及测试只提交 `research/n1-native-shift-behavior-patch-20261009`；不提交游戏 EXE、用户原始 JSONL 或可识别玩家内存地址。
+
+
+## 2026-10-14 — 大任务推进、路线描述符与成员发包共用原生几何管理器（新类型化审计）
+
+新脚本 `maintenance_tools/native_shift_re/audit_shared_move_geometry_manager.py` 直接在固定 SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a` 原始 EXE 上通过 **81/81 机器码+unwind/objdump指令起点、12/12 E8 直接调用、2/2 typed vtable**；本地 **13/13 单元测试 PASS（含真正 EXE 校验）**。中文独立报告：`docs/current/N1_903_SHARED_MOVE_GEOMETRY_MANAGER_20261014.md`。
+
+经原始 ctx+0x440→routeContext+0x160 字段来源确认的 **manager** 同时支持三路调用 `0x030FDA9C(manager+0x18)`：路线描述符构造 `0x03121A99`，管理器路线节点生成 `0x03129092`，group目标适配/成员发包 `0x030D55F5`。关联上游 `0x02DD5A2C→0x02DD579C→0x03128E80` 读取该 manager，遍历 manager+0x1F0 的 bigTask 并通过 `0x0311DE74` 推进任务；此前证明的继承式 state=1 投影仍只在原生门槛成功时执行。转换器的某些分支写 `converter+0x1D0 = manager+0x1E8` 计数/状态字段，**未证明它是 generation ID**。这属于强于“函数复用”的静态管理器身份链，但 **manager+0x160 与 bigTask+0x160 不是已证实的指针同一性**；输出分别落在不同路线对象，不能宣称发生了目标代际错配或 Shift 物理挤压。正常成功 MOVE→MOVE 交接清退旧 shortTask 的反证继续有效。未授权 native gameplay patch，不修改 main/原始 EXE/含指针日志，不要求用户重复实机折返。

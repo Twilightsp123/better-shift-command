@@ -137,3 +137,10 @@ WH3 9.0.3 MOVE queue/member geometry type-gate: `audit_move_queue_member_gate.py
 
 
 Native WH3 9.0.3 shortTask scheduler typed stack: `audit_move_shorttask_resume_gate.py --exe PATH --out PRIVATE.json` validates exact SHA, 69 opcode instruction starts, 13 E8 calls, 5 branches and 4 vtable slots. Tests: `tests/test_native_shift_re_move_shorttask_resume_gate.py`. Shows non-top shortTasks have no-op +0x18 and +0x74 selects descriptor branches; NOT a gameplay patch. See `docs/current/N1_903_SHORT_TASK_STACK_RESUME_GATE_20261014.md`.
+
+
+## 2026-10-14 — 大任务推进、路线描述符与成员发包共用原生几何管理器（新类型化审计）
+
+新脚本 `maintenance_tools/native_shift_re/audit_shared_move_geometry_manager.py` 直接在固定 SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a` 原始 EXE 上通过 **81/81 机器码+unwind/objdump指令起点、12/12 E8 直接调用、2/2 typed vtable**；本地 **13/13 单元测试 PASS（含真正 EXE 校验）**。中文独立报告：`docs/current/N1_903_SHARED_MOVE_GEOMETRY_MANAGER_20261014.md`。
+
+经原始 ctx+0x440→routeContext+0x160 字段来源确认的 **manager** 同时支持三路调用 `0x030FDA9C(manager+0x18)`：路线描述符构造 `0x03121A99`，管理器路线节点生成 `0x03129092`，group目标适配/成员发包 `0x030D55F5`。关联上游 `0x02DD5A2C→0x02DD579C→0x03128E80` 读取该 manager，遍历 manager+0x1F0 的 bigTask 并通过 `0x0311DE74` 推进任务；此前证明的继承式 state=1 投影仍只在原生门槛成功时执行。转换器的某些分支写 `converter+0x1D0 = manager+0x1E8` 计数/状态字段，**未证明它是 generation ID**。这属于强于“函数复用”的静态管理器身份链，但 **manager+0x160 与 bigTask+0x160 不是已证实的指针同一性**；输出分别落在不同路线对象，不能宣称发生了目标代际错配或 Shift 物理挤压。正常成功 MOVE→MOVE 交接清退旧 shortTask 的反证继续有效。未授权 native gameplay patch，不修改 main/原始 EXE/含指针日志，不要求用户重复实机折返。

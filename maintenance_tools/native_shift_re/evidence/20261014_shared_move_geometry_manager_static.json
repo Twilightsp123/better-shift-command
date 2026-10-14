@@ -1,0 +1,32 @@
+{
+  "schema": "bsc.n1.shared_move_geometry_manager_three_converter_sites.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof_grade": "EXACT_EXE_STATIC",
+  "opcode_and_instruction_starts": 81,
+  "unwind_or_explicit_leaf_owners": 13,
+  "verified_E8_edges": 12,
+  "verified_typed_vtable_entries": 2,
+  "route_source": {
+    "group_plus_10": "MEM[UnitRoot+0x38]",
+    "route_context": "MEM[MEM[UnitRoot+0x38]+0x440]",
+    "shared_manager": "MEM[MEM[MEM[UnitRoot+0x38]+0x440]+0x160]",
+    "group_fanout_first_converter_argument": "MEM[MEM[MEM[UnitRoot+0x38]+0x440]+0x160]+0x18",
+    "manager_tick_first_argument": "MEM[MEM[MEM[UnitRoot+0x38]+0x440]+0x160]",
+    "manager_task_node_converter_first_argument": "MEM[MEM[MEM[UnitRoot+0x38]+0x440]+0x160]+0x18",
+    "original_route_node_converter_first_argument": "MEM[MEM[MEM[UnitRoot+0x38]+0x440]+0x160]+0x18",
+    "queued_big_task_plus_160_alias_proven": false
+  },
+  "route_context_tick": "0x02DD5B5D -> 0x02DD579C (object+0x160) -> 0x03128E80",
+  "queued_big_task_head": "manager+0x1F0 via 0x0310EE26 and 0x03128EA8",
+  "queued_big_task_state1": "0x03128F1D -> 0x0311DE74; conditional state1 old projection -> nextSubtask+0x48..0x54",
+  "manager_node_conversion": "0x0312908E RCX=&manager+0x18; 0x03129092 CALL 0x030FDA9C; node+0x70=result",
+  "group_fanout_conversion": "0x030D55DD manager=[routeContext+0x160]; 0x030D55E4 RCX=&manager+0x18; 0x030D55F5 CALL same converter",
+  "route_node_conversion": "0x03121A91 RCX=&manager+0x18; 0x03121A99 CALL same converter",
+  "converter_common_subobject_offset": 24,
+  "converter_conditional_counter": "[converter_first_arg+0x1D0]=[manager+0x1E8] may increment on native branches, not necessarily once per call",
+  "same_manager_instance_in_a_particular_SHIFT_battle_confirmed": false,
+  "big_task_plus160_equals_manager_plus160": false,
+  "manager_conversion_output_equal_to_big_task_subtask_proven": false,
+  "state1_projection_causes_crowding_proven": false,
+  "native_patch_authorized": false
+}

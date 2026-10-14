@@ -95,3 +95,10 @@ python maintenance_tools/native_shift_re/audit_move_group_common_context.py --ex
 ## 2026-10-14 原生短期 MOVE Group 当前指针晚绑定与对象池重用（最新严格负/正证据）
 
 新增 `audit_move_group_generation_latebind.py` 和同名前缀回归，固定 SHA 原始 EXE 通过 **91/91 opcode/unwind/objdump、19/19 E8、3/3 类型虚表**，13/13 本地测试 PASS。`0x0301B8E4` 每次路线重建先通过 `0x030197A8 → 0x0302C2D4` 把旧 group 送回 `context+0x150+0x58` 对象池，虚表 `0x0390F5F0+0x10=0x030C61D4` 的回收析构以 edx=0 跳过释放对象本体，再由 `0x0301B834 → 0x030C2C3C` 重新使用并写 `root+0x32F8`。短期任务 `0x02F2C734` 保存 `task+0x08=UnitRoot`，状态回调 `0x02F561E8` 到分发点才在 `0x02F563F4/FD` 读取**当前** `root+0x32F8`，把与短任务关联的临时参数交给 `0x03279E40`。后续清理检查 `0x02F5652D/7B` 在调用之后且受状态门槛限制。**指针相等并不保证 group 同代，可能发生对象池 ABA**，离线已给出有/无回收、任务已清退的对照反例。仍未证明真实 Shift 存在“旧 shortTask 在新 group 重建后继续进入回调”的时序，不能认定 Shift 挤压根因，不得改 EXE / Native gameplay。详见 `docs/current/N1_903_MOVE_GROUP_GENERATION_LATEBIND_20261014.md`。
+
+
+## 2026-10-14 — 大任务推进、路线描述符与成员发包共用原生几何管理器（新类型化审计）
+
+新脚本 `maintenance_tools/native_shift_re/audit_shared_move_geometry_manager.py` 直接在固定 SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a` 原始 EXE 上通过 **81/81 机器码+unwind/objdump指令起点、12/12 E8 直接调用、2/2 typed vtable**；本地 **13/13 单元测试 PASS（含真正 EXE 校验）**。中文独立报告：`docs/current/N1_903_SHARED_MOVE_GEOMETRY_MANAGER_20261014.md`。
+
+经原始 ctx+0x440→routeContext+0x160 字段来源确认的 **manager** 同时支持三路调用 `0x030FDA9C(manager+0x18)`：路线描述符构造 `0x03121A99`，管理器路线节点生成 `0x03129092`，group目标适配/成员发包 `0x030D55F5`。关联上游 `0x02DD5A2C→0x02DD579C→0x03128E80` 读取该 manager，遍历 manager+0x1F0 的 bigTask 并通过 `0x0311DE74` 推进任务；此前证明的继承式 state=1 投影仍只在原生门槛成功时执行。转换器的某些分支写 `converter+0x1D0 = manager+0x1E8` 计数/状态字段，**未证明它是 generation ID**。这属于强于“函数复用”的静态管理器身份链，但 **manager+0x160 与 bigTask+0x160 不是已证实的指针同一性**；输出分别落在不同路线对象，不能宣称发生了目标代际错配或 Shift 物理挤压。正常成功 MOVE→MOVE 交接清退旧 shortTask 的反证继续有效。未授权 native gameplay patch，不修改 main/原始 EXE/含指针日志，不要求用户重复实机折返。
