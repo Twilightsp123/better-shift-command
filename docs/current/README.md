@@ -1,5 +1,7 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
-Current documentation authority — updated 2026-10-10
+Current documentation authority — updated 2026-10-15
+
+**Latest read-only member packet audit (2026-10-15):** [N1_903_B_MEMBER_PACKET_RECEIVER_FLAGS_20261015.md](N1_903_B_MEMBER_PACKET_RECEIVER_FLAGS_20261015.md) records the conditional path `aux+0x78 → node+0x70 → 0x03265B24 → member virtual+0x368`, the `packet+0x50 & 0x20` gate plus mode helper, and correction that the variable constructor ORs `0x06` rather than unconditionally assigning it. [Audit](../../maintenance_tools/native_shift_re/audit_b_member_packet_receiver_flags.py) / [test](../../tests/test_native_shift_re_b_member_packet_receiver_flags.py) — 10 original-EXE byte guards, 4 local tests including private EXE, no native gameplay patch.
 
 > **PRODUCT CAUSE CORRECTION:** [PRODUCT_CAUSE_CORRECTION_20261010.md](PRODUCT_CAUSE_CORRECTION_20261010.md) is mandatory first reading. **Native Shift MOVE does not have a proven full-stop defect.** The user-observed issue is that **soldier models in one unit card turn/arrive asynchronously**, leading to mixed facing and internal crowding. The conspicuous MOVE→ATTACK pause was **our legacy Lua Controller regression**, not an established vanilla bug. Previous "braking-first" assumptions in older N1 reports are superseded as design priorities; their disassembly remains research evidence.
 
