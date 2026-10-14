@@ -31,3 +31,10 @@ A separate simple motion-geometry **possibility example**, NOT a WH3 observation
 Read-only `audit_member_heading_divergence.py` in conversation artifact **BSC_903_PER_MEMBER_DIRECTION_STATIC_PROOF_20261010.zip** verified **42 exact x64 instruction guards, 6 direct E8 call targets, native strategy VTable target, constructor RIP-reference, and original half-grid scalar** against the pinned game EXE. **8/8 local tests PASS**, including exact EXE verification, alternative-base-code checks, hash-failure protection and isolated collision-geometry counterexample. Archive includes complete source, tests, original LLVM excerpts, JSON evidence, Chinese full report and SHA256 manifest; game EXE excluded.
 
 **N1 next causal discriminator:** confirm which native strategy ordinary Shift selects, and distinguish each member's *assigned orientation/slot destination* from its **actual movement velocity** and path-follow completion. Do not force common member+0xB0 orientation, synchronize local path indices, or replace native group formation rules. No DLL/PACK/Windows/WH3 test, **no playable patch yet**.
+
+
+## 2026-10-14 新的原生二次朝向/位置修正证据（覆盖旧“直通”推断）
+
+原始 EXE 最新严格审计 `audit_packet_member_retarget.py` 实测 **84/84 opcode+objdump 指令起点、11/11 E8、3/3 类型化成员虚表、1/1 RIP 构造器、3/3 float32 常量** PASS；本地 **10/10** 单元回归通过。详见 `docs/current/N1_903_TYPED_MEMBER_PACKET_RETARGET_20261014.md`。
+
+先前 `record[i]+0x22` 仅是 packet+0x40 **初始朝向种子**：原生 `0x02F5F868 → 0x02F72520 → 0x0307F478` 会根据成员 `+0x2E8` 的对象状态和本人 `+0x984`（满足条件时加 `(s-0.5)*0x4000` 的原生整数转化）覆盖 packet+0x40。原生成员接收器 `0x0306B9F0` 在 packet+0x51 bit2 分支还经 `0x0307F5C8 → 0x0307F690 → 0x0307F4E4` 进行个人位置偏移，并接触 `0x03107FD8` 路线/空间处理。真实成员构造器 `0x0304DAF8` 安装匹配虚表 `0x0390D4F8`，确证相关字段的类型来源。不可将初始阵型几何直接当最终 motor goal，也不可删除原生修正来做所谓 slot 修复。与排队 Shift 实际 state=1 实例身份及挤压因果的连接仍未证明，禁止发布 gameplay patch。

@@ -29,3 +29,10 @@ Reproducible companion archive `BSC_N1_903_SLOT_MAPPING_CAUSAL_20261010.zip` (co
 ## 2026-10-10 cross-check of index stability and native counterpaths
 
 [N1_903_SLOT_IDENTITY_POSITIVE_AND_NEGATIVE.md](N1_903_SLOT_IDENTITY_POSITIVE_AND_NEGATIVE.md) strengthens the **same fanout** `member[i] -> record[i]` proof, but now shows original `0x030E0460` detaches from old group and mode3 `0x030DD3F4` can swap-last on member removal. Different strategies have different removal index policies. This disproves any assumption of immutable group indices across *all* lifecycles; it does **not** establish that next MOVE's newly built group changes index when the UnitRoot source array is stable. Original group post-fanout `0x030E0AA8` also performs status/geometry updates, limiting claims of collision inevitability. Mode3 actual queued Shift activation and actual physical collision still unverified. **No patch authorized**.
+
+
+## 2026-10-14 新的原生二次朝向/位置修正证据（覆盖旧“直通”推断）
+
+原始 EXE 最新严格审计 `audit_packet_member_retarget.py` 实测 **84/84 opcode+objdump 指令起点、11/11 E8、3/3 类型化成员虚表、1/1 RIP 构造器、3/3 float32 常量** PASS；本地 **10/10** 单元回归通过。详见 `docs/current/N1_903_TYPED_MEMBER_PACKET_RETARGET_20261014.md`。
+
+先前 `record[i]+0x22` 仅是 packet+0x40 **初始朝向种子**：原生 `0x02F5F868 → 0x02F72520 → 0x0307F478` 会根据成员 `+0x2E8` 的对象状态和本人 `+0x984`（满足条件时加 `(s-0.5)*0x4000` 的原生整数转化）覆盖 packet+0x40。原生成员接收器 `0x0306B9F0` 在 packet+0x51 bit2 分支还经 `0x0307F5C8 → 0x0307F690 → 0x0307F4E4` 进行个人位置偏移，并接触 `0x03107FD8` 路线/空间处理。真实成员构造器 `0x0304DAF8` 安装匹配虚表 `0x0390D4F8`，确证相关字段的类型来源。不可将初始阵型几何直接当最终 motor goal，也不可删除原生修正来做所谓 slot 修复。与排队 Shift 实际 state=1 实例身份及挤压因果的连接仍未证明，禁止发布 gameplay patch。
