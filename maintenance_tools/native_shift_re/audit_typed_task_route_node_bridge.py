@@ -161,6 +161,8 @@ PINS = {int(a,16):bytes.fromhex(h) for a,h in (line.split() for line in r'''
 03279EC1 488bcf
 03279ED2 4c8bc3
 03279ED5 488bd7
+03279EB3 e894b6e5ff
+03279EB8 eb23
 03279ED8 e8d39bfeff
 03281408 4053
 03281411 488b4958
@@ -215,6 +217,7 @@ E8 = {
     0x02F5641E:0x02F4EFE0,
     0x03263AC5:0x030C35A0,
     0x03263EB4:0x03263D68,
+    0x03279EB3:0x030D554C,
     0x03279ED8:0x03263AB0,
     0x03281426:0x03281444,
     0x032814C6:0x0326775C,
@@ -232,6 +235,10 @@ E8 = {
     0x03129085:0x0311BE18,
     0x03279E62:0x02DC2E04,
 }
+# 0x03279E40 runs exactly one of A record fanout or B task factory
+# in one call: A tail-jumps over the B constructor after its E8.
+EXCLUSIVE_JUMP = {0x03279EB8:0x03279EDD}
+
 # Gate endpoints are real x64 conditional branch targets, not guessed labels.
 JCC = {
     0x02F56310:(b'\x0f\x84',0x02F5640E),
@@ -301,6 +308,10 @@ def audit(exe):
             if b[0]!=0xE8 or at+5+struct.unpack_from('<i',b,1)[0]!=dest:
                 raise ValueError('E8_CHANGED:'+hex(at))
         for at,(prefix,target) in JCC.items():checked_branch(pe,at,prefix,target)
+        for at,dest in EXCLUSIVE_JUMP.items():
+            ins=pe.read(at,2,True)
+            if ins[0]!=0xeb or at+2+struct.unpack_from('<b',ins,1)[0]!=dest:
+                raise ValueError('MODE_A_EXIT_TO_B_CHANGED:'+hex(at))
         for at,dest in INSTALLED_TABLES.items():
             ins=pe.read(at,7,True)
             if ins[:3] not in (b'\x48\x8d\x05',b'\x48\x8d\x15') or \
@@ -318,10 +329,15 @@ def audit(exe):
             'sha256':pe.sha,'proof':'EXACT_ORIGINAL_EXE_STATIC',
             'opcode_instruction_starts':pins,'unwind_or_pinned_leaf_owners':owners,
             'direct_E8':len(E8),'branch_targets':len(JCC),
+            'A_to_B_exclusion_jumps':len(EXCLUSIVE_JUMP),
             'vtable_RIP_installs':len(INSTALLED_TABLES),
             'typed_vtable_slots':len(TYPED_METHODS),
             'native_B_task_factory':'0x03279E40 mode-zero branch -> 0x03263AB0 installs 0x03AE0128',
             'distinct_adjacent_vtables':[hex(v) for v in INSTALLED_TABLES.values()],
+            'same_dispatch_call_A_record_fanout_and_B_task_are_mutually_exclusive':True,
+            'A_selected_call':'0x03279EB3 -> 0x030D554C; 0x03279EB8 JMP 0x03279EDD skips B constructor',
+            'B_selected_call':'0x03279E69 JE 0x03279EBA -> 0x03279ED8 -> 0x03263AB0',
+            'B_node70_is_same_call_A_record_i_proven':False,
             'B_vtable_plus_10':'0x03281408; NOT 0x03AE00E8+0x50',
             'short_task_flag_74_nonzero_aux':'0x02F56358 direct aux; stack arg5 zero -> aux+0x20=NULL',
             'short_task_flag_74_zero_aux':'0x02F56431 -> 0x03263E7C -> 0x03263D68; arg5 from big task getter -> aux+0x20',

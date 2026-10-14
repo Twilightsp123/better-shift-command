@@ -32,6 +32,13 @@ class TypedTaskRouteNode(unittest.TestCase):
         self.assertEqual(a.PINS[0x03263AEE],bytes.fromhex('48894750'))
         self.assertEqual(a.PINS[0x03263AF6],bytes.fromhex('48894758'))
 
+    def test_same_dispatch_B_task_does_not_also_issue_A_fanout(self):
+        self.assertEqual(a.JCC[0x03279E69],(b'\x74',0x03279EBA))
+        self.assertEqual(a.E8[0x03279EB3],0x030D554C)
+        self.assertEqual(a.EXCLUSIVE_JUMP[0x03279EB8],0x03279EDD)
+        self.assertEqual(a.E8[0x03279ED8],0x03263AB0)
+        self.assertEqual(a.PINS[0x03279EB8],bytes.fromhex('eb23'))
+
     def test_short_task_flag74_two_distinct_abi_constructors(self):
         self.assertEqual(a.PINS[0x02F5630C],bytes.fromhex('40387374'))
         self.assertEqual(a.JCC[0x02F56310][1],0x02F5640E)
@@ -121,8 +128,8 @@ class TypedTaskRouteNode(unittest.TestCase):
                 aux_route_exists=False,old_subtask_exists=True)
 
     def test_pin_counts_and_types(self):
-        self.assertEqual(len(a.PINS),168)
-        self.assertEqual(len(a.E8),22)
+        self.assertEqual(len(a.PINS),170)
+        self.assertEqual(len(a.E8),23)
         self.assertEqual(len(a.JCC),5)
         self.assertEqual(len(a.INSTALLED_TABLES),3)
         self.assertEqual(len(a.TYPED_METHODS),3)
@@ -137,8 +144,10 @@ class TypedTaskRouteNode(unittest.TestCase):
     @unittest.skipUnless(os.getenv('WH3_903_EXE'), 'Original EXE excluded from public CI')
     def test_exact_original_exe(self):
         r=a.audit(Path(os.environ['WH3_903_EXE']))
-        self.assertEqual(r['opcode_instruction_starts'],168)
-        self.assertEqual(r['direct_E8'],22)
+        self.assertEqual(r['opcode_instruction_starts'],170)
+        self.assertEqual(r['direct_E8'],23)
+        self.assertEqual(r['A_to_B_exclusion_jumps'],1)
+        self.assertTrue(r['same_dispatch_call_A_record_fanout_and_B_task_are_mutually_exclusive'])
         self.assertEqual(r['branch_targets'],5)
         self.assertEqual(r['vtable_RIP_installs'],3)
         self.assertFalse(r['native_patch_authorized'])
