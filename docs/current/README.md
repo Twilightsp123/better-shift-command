@@ -1,6 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**2026-10-15 第17轮（最新）：** [普通 B fast-route 与 node fallback 的逐字段成员发包输入对照](N1_903_ORDINARY_B_TWO_SENDER_INPUT_EQUIVALENCE_20261015.md)。固定 SHA 原始 EXE 82/82 decoded 指令、7/7 E8、2/2 typed B vtable，11/11 本地回归（含原始 EXE）。两入口都通过同一个 `0x03265B24` 以相同已初始化参数布局做 `member[i]/record[i]` 发包，差别集中于路线指针 `aux+0x60` vs `aux+0x78→node+0x70` 和生效门槛/时间，不能推断真实两次路线或最终 motor goal 相同。[机器码](../../maintenance_tools/native_shift_re/b_two_path_compare_pins_20261015.txt) · [审计](../../maintenance_tools/native_shift_re/audit_b_two_path_input_contract_20261015.py) · [回归](../../tests/test_native_shift_re_b_two_path_input_contract.py)。没有 gameplay patch。
+
 **第16轮最新：** [普通 B 在旧 bigTask 引用清理后有 direct-route 与 node-fallback 两条互斥成员发包路径](N1_903_ORDINARY_B_RELEASE_PACKET_EXCLUSIVITY_20261015.md)。固定原始 EXE 72/72 指令与起点、11/11 E8、4/4 JCC、2/2 typed B vtable，本地 10/10 测试通过。成功 direct-route 会设 aux+0x80=1，使后续 +0x10 跳过重复发送。详细见中文报告、[审计源码](../../maintenance_tools/native_shift_re/audit_b_release_packet_paths_20261015.py)和[回归](../../tests/test_native_shift_re_b_release_packet_paths_20261015.py)。未确定真实 Shift 物理挤压根因，不授权补丁。
 
 **2026-10-15 第15轮（最新搜索方案）：** [按首个状态差异、任务释放窗口和两名成员目标做因果搜索](N1_903_CAUSAL_DIFFERENTIAL_SEARCH_BLUEPRINT_20261015.md)。固定 EXE **87/87 原码与指令起点、13/13 E8，9/9 本地回归通过**。新发现：slot+0x9A bit2 经 descriptor+0x44 传至 shortTask+0x74，使普通 B 随后沿用保存朝向或再按 live group 计算；B 构造前 `0x02F50FE4` 可能已清零 slot+0xA0 的 bigTask 引用。因此后续需要在释放前绑定任务身份，不能用发包后槽位状态反推旧任务。[工具](../../maintenance_tools/native_shift_re/audit_two_stage_heading.py) · [机码清单](../../maintenance_tools/native_shift_re/native_two_stage_heading_pins.txt) · [测试](../../tests/test_native_shift_re_two_stage_heading.py)。未修复 gameplay。
