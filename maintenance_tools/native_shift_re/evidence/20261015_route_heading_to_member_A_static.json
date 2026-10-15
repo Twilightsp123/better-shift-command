@@ -1,0 +1,45 @@
+{
+  "schema": "bsc.n1.route_heading_to_member_conditional.v1",
+  "date": "2026-10-15",
+  "source": "user-provided original SHA-locked EXE, sanitized static evidence; no runtime pointers",
+  "sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "image_base": "0x140000000",
+  "proof": "EXACT_ORIGINAL_EXE_STATIC",
+  "independent_full_audit": {
+    "guarded_opcode_instruction_starts": 83,
+    "e8": 15,
+    "jcc": 5,
+    "typed_member_vtable": 1,
+    "local_unittest": "17/17 PASS including one private EXE check",
+    "public_local_unittest": "16 PASS 1 SKIP when private EXE absent"
+  },
+  "verified_chain": [
+    "0x03025E76/0x03026015 supplies two conditional R8W headings to 0x0301287C",
+    "0x03012893 R8W -> RBX, 0x03012935 RBX -> R9W, 0x030ECAFA writes temporary route record+0x38",
+    "0x030EC9EC copier moves record+0x38 to node+0x20+0x38 (node+0x58)",
+    "0x031219B0 valid mode/flag path calls 0x030FDA9C and stores node+0x70",
+    "0x03008894 copies record+0x38 into descriptor+0x44 and attaches node to descriptor+0x18; UnitRoot+0x270 holds descriptor",
+    "0x0302DB44 immediate branch consumes UnitRoot+0x270 -> descriptor+0x18 -> node+0x70 for 0x030D5490",
+    "0x03279E40 deferred A mode and missing temporary heading allow descriptor+0x44 fallback; explicit temporary +0x32 overrides",
+    "0x030D554C converts selected A heading before 0x030D5490 member fanout"
+  ],
+  "win64_stack_argument_contract": {
+    "queued_call_sites": [
+      "0x03025E91",
+      "0x03026022"
+    ],
+    "immediate_call_site": "0x0302DBC4",
+    "caller_stack_plus_28": "1 in all three observed calls",
+    "caller_stack_plus_20": "0 for queued, 1 for immediate",
+    "callee_stack_plus_D8": "caller+0x28",
+    "callee_stack_plus_D0": "caller+0x20",
+    "runtime_branch_guards_still_required": true
+  },
+  "limits": {
+    "hotkey_RMB_Shift_instances_directly_bound": false,
+    "queued_member_uses_exact_immediate_node_proven": false,
+    "B_mode_uses_deferred_A_fallback_proven": false,
+    "same_unit_two_member_motor_goal_mismatch_proven": false,
+    "gameplay_patch_authorized": false
+  }
+}
