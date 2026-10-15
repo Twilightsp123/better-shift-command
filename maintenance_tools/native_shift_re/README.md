@@ -194,3 +194,5 @@ python -m unittest discover -s tests -p "test_native_shift_re_b_member_packet_ta
 原始 EXE 只读审计：**72/72** 队列机器码起点、**64/64** 类型化直接 E8 MOVE 调用、**4/4** MOVE 虚表、**69/69** 状态代码起点、**8/8** E8、**6/6** JCC。更详细的独立审计与整合审计在本地联合 **32/32 PASS**（含 3 项私有 EXE 测试）。工具依赖 GNU objdump 和同目录已有的 `audit_b_member_packet_task_lifecycle.py` 提供的 OriginalEXE 类，公有 CI 不需要也不得上传原始 EXE。
 
 **类型与因果边界：** R9B=0/!=0 表示替换/追加队列请求，不能视为 RMB/Shift 键位的绝对动态身份；新槽位初始 NULL，只有队列后续推进资格通过才有条件复用 bigTask。state1 可条件性走 state2→state3→state4 并满足普通 B 回调 tuple (4,0,3)；仍未验证同一个 shortTask 与特定玩家 Shift 的完整生命周期、成员目标代际错误或游戏修复。中文报告在 [RMB/Shift 原生差异](../../docs/current/N1_903_RMB_SHIFT_QUEUE_STATE_LIFECYCLE_20261015.md)，`native_patch_authorized=false`。
+
+**第12轮新增类型化对象身份桥：** `audit_move_slot_shorttask_binding.py` 在原始 EXE 验证 36/36 原码与 decoded instruction starts、6/6 E8 和 Win64 栈帧别名，证明 `shortTask+0x80=&MOVE slot+0xA0`，通过 `0x02F4EFE0` 晚绑定读取该 slot bigTask；新创建路径经 `0x02F41644` 可反写 `slot+0xA0`。测试 `tests/test_native_shift_re_move_slot_shorttask_binding.py` 8项，带私有原始 EXE 时本轮四套测试整体 **40/40 PASS**，公有 CI 应跳过 4 项真实 EXE 测试。不能混淆合法的新 shortTask 与已经清退的旧 shortTask，尚无 gameplay patch。
