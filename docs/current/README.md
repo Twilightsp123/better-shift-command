@@ -1,6 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**第12轮新对象身份证据（追加）：** [新 MOVE 槽+0xA0 → 新 shortTask+0x80 的精确地址别名](N1_903_RMB_SHIFT_QUEUE_STATE_LIFECYCLE_20261015.md)。原始 EXE 36/36 opcode/instruction starts、6/6 E8、Win64 stack alias 校验；总体本地 40/40 回归（4 项真实私有 EXE），说明后继 shortTask 可以读取继承 bigTask，无需假设旧 shortTask 复活。 [代码](../../maintenance_tools/native_shift_re/audit_move_slot_shorttask_binding.py) · [测试](../../tests/test_native_shift_re_move_slot_shorttask_binding.py)。静态证据，尚非 Shift 挤压因果或 gameplay fix。
+
 **2026-10-15 第12轮 RMB vs queued MOVE 原生差异（最新）：** [命令队列布尔开关、64 个类型化调用者、同一 bigTask state1→2→3→4 条件生命周期](N1_903_RMB_SHIFT_QUEUE_STATE_LIFECYCLE_20261015.md)。原始 EXE 校验：72/72 队列指令、64/64 MOVE 真实 E8、4/4 MOVE vtable，69/69 状态指令、8/8 E8、6/6 条件跳转；本地完整 32/32 回归（含私有原始 EXE）。[审计源码](../../maintenance_tools/native_shift_re/audit_rmb_shift_lifecycle.py) · [状态原码](../../maintenance_tools/native_shift_re/state_lifecycle_exact_pins.txt) · [队列原码](../../maintenance_tools/native_shift_re/rmb_shift_exact_pins.txt) · [回归](../../tests/test_native_shift_re_rmb_shift_lifecycle.py)。**R9B 不是玩家 Shift 键身份，条件性状态链不是实际挤压因果；无 gameplay patch。**
 
 
