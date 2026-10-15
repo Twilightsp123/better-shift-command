@@ -1,6 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**第17轮追加（2026-10-15）：** [初始 node0 与 fallback node1 的转换门槛差异](N1_903_ORDINARY_B_TWO_SENDER_INPUT_EQUIVALENCE_20261015.md)：前者输入 record+0x4C=1，强制尝试几何转换；后者从 0x030ECA50 构造时该字节为0，仅 mode helper=1 才会立即尝试转换。两审计合计99条原始指令、12条E8、2个类型化B虚表；本地18/18测试（含两项真正原始EXE）PASS。**node+0x08 标志为1仍不保证 node+0x70 非空**。新增 [门槛审计](../../maintenance_tools/native_shift_re/audit_b_node_initialization_gates_20261015.py) 与 [测试](../../tests/test_native_shift_re_b_node_initialization_gates.py)。不代表挤压根因或 patch。
+
 **2026-10-15 第17轮（最新）：** [普通 B fast-route 与 node fallback 的逐字段成员发包输入对照](N1_903_ORDINARY_B_TWO_SENDER_INPUT_EQUIVALENCE_20261015.md)。固定 SHA 原始 EXE 82/82 decoded 指令、7/7 E8、2/2 typed B vtable，11/11 本地回归（含原始 EXE）。两入口都通过同一个 `0x03265B24` 以相同已初始化参数布局做 `member[i]/record[i]` 发包，差别集中于路线指针 `aux+0x60` vs `aux+0x78→node+0x70` 和生效门槛/时间，不能推断真实两次路线或最终 motor goal 相同。[机器码](../../maintenance_tools/native_shift_re/b_two_path_compare_pins_20261015.txt) · [审计](../../maintenance_tools/native_shift_re/audit_b_two_path_input_contract_20261015.py) · [回归](../../tests/test_native_shift_re_b_two_path_input_contract.py)。没有 gameplay patch。
 
 **第16轮最新：** [普通 B 在旧 bigTask 引用清理后有 direct-route 与 node-fallback 两条互斥成员发包路径](N1_903_ORDINARY_B_RELEASE_PACKET_EXCLUSIVITY_20261015.md)。固定原始 EXE 72/72 指令与起点、11/11 E8、4/4 JCC、2/2 typed B vtable，本地 10/10 测试通过。成功 direct-route 会设 aux+0x80=1，使后续 +0x10 跳过重复发送。详细见中文报告、[审计源码](../../maintenance_tools/native_shift_re/audit_b_release_packet_paths_20261015.py)和[回归](../../tests/test_native_shift_re_b_release_packet_paths_20261015.py)。未确定真实 Shift 物理挤压根因，不授权补丁。
