@@ -1,6 +1,6 @@
 # BSC N1 — 第 3 轮：普通 B packet 与成员内联任务生命周期
 
-**原始 EXE 静态验证：72/72 机器码与指令起点、23/23 E8、7/7 类型化虚表；本地 10/10 回归通过（包含原始 EXE）。**
+**原始 EXE 静态验证：84/84 机器码与指令起点、23/23 E8、8/8 类型化虚表；本地 11/11 回归通过（包含原始 EXE）。**
 
 ## 主要发现
 
@@ -9,6 +9,8 @@
 3. 任务真实虚表 `0x03905E18+0x10=0x02F83B24`。条件性分支能通过具体成员的虚方法 `+0x5B0/+0x580/+0x568` 进入 **`member+0x328`** 子动作更新，但仍没有证明最终 **`member+0x1E0`** 主运动目标改变，也没有证明这些路径在玩家 Shift 折返时实际命中。
 4. 在 `0x03081EB4` 的成员更新中，检测有效位后调用的是该任务 **virtual+0x80**，不是上面的 **+0x10**。因此真实 +0x10 调度调用点仍待类型化查证。
 5. 构造器 `0x02F5F7C8` 还有 `0x02ECA999`、`0x02F448FC` 两处不同对象布局的已验证调用；**不能全局修改它来模拟 Shift 专用修复**。
+
+**新增原始机器码正证据（本轮继续）：** `0x03905E18+0x80 = 0x008F4DD0` 只取 `task+0x90` 的 bit `0x10`（`0x008F4DD0/0x008F4DD7/0x008F4DDA`）。`0x02D99F74` 将输入 packet 的 bit `0x10` 复制至 task 字段；`0x03082353/0x03082356` 在成员 Tick 比较其返回值是否为 1。因此**对刚构造且标志未发生后续变化的普通 B `0x07/0x0E` 任务，此查询返回零**。这一点是具体位逻辑，不代表成员不会移动，也不代表与 queued Shift 实机发生次序已接通。
 
 ## 必须保留的证据边界
 
@@ -24,7 +26,7 @@
 
 Target: original Windows x64 Warhammer3.exe SHA256 518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a; PE ImageBase 0x140000000. All addresses are RVAs.
 
-Exact local verification: **72/72 machine-code and decoded instruction starts, 23/23 E8 call targets, 7/7 typed vtable slots; 10/10 local regression tests including the private original EXE**. These checks do not establish a runtime Shift execution path or a gameplay repair.
+Exact local verification: **84/84 machine-code and decoded instruction starts, 23/23 E8 call targets, 8/8 typed vtable slots; 11/11 local regression tests including the private original EXE**. These checks do not establish a runtime Shift execution path or a gameplay repair.
 
 ## Ordinary B packet flag branches
 
