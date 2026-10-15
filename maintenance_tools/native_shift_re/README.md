@@ -220,3 +220,11 @@ python -m unittest discover -s tests -p "test_native_shift_re_b_member_packet_ta
 `MOVE slot+0x9A bit2` 的两种朝向输入，通过 bit0 的四条构造分支最终写 descriptor+0x42/+0x44，由 `0x02F2C834` 复制到 shortTask+0x72/+0x74。后续普通 B 生成器 `0x02F4F514` 用 +0x74 决定使用保存角度或重新使用当前 group+0xBF0 计算。**关键生命周期反证：** 生成器在读 +0x74 前先调用 `0x02F50FE4`，有条件将 `*[shortTask+0x80] = MOVE slot+0xA0` 清零并递减旧 bigTask ref；不能在此操作后用 slot 字段反推其之前的任务身份。无 gameplay patch，也没有证明 Shift 兵牌拥挤根因。
 
 运行：`python maintenance_tools/native_shift_re/audit_two_stage_heading.py --exe PRIVATE/Warhammer3.exe --out PRIVATE/two_stage.json`。测试：`python -m unittest discover -s tests -p test_native_shift_re_two_stage_heading.py -v`。详细因果搜索与停止标准见 [蓝图](../../docs/current/N1_903_CAUSAL_DIFFERENTIAL_SEARCH_BLUEPRINT_20261015.md)。
+
+## 2026-10-15 Round 16 — Ordinary B direct route versus node fallback
+
+Fixed original WH3 Win64 EXE: 72/72 pinned instruction starts and bytes, 11/11 direct E8, 4/4 JCC, 2/2 typed ordinary-B vtable slots, 10/10 local regressions (including private original EXE). Source: `audit_b_release_packet_paths_20261015.py`; pins: `b_ordinary_identity_pins_20261015.txt`; tests: `tests/test_native_shift_re_b_release_packet_paths_20261015.py`. Private EXE remains outside GitHub; public CI skips exact-EXE test.
+
+Original `0x02F4F514` releases an old task reference before constructing new route geometry. `node+0x70` flows through `0x03263F64 descriptor+0x28`, `0x03279EE8` and `0x03263EC4` into ordinary B `aux+0x60`. B constructor initializes `aux+0x78=NULL` and `aux+0x80=0`. Its typed +0x08 method `0x03271B0C` can send using `aux+0x60` directly and set `aux+0x80=1`, so +0x10 `0x03281520` skips repeated fanout. Only when no direct route exists does the first method create `aux+0x78` node for later +0x10 consumption. This is a control-flow exclusion, not a proof of actual Shift input or crowding cause.
+
+Run: `python maintenance_tools/native_shift_re/audit_b_release_packet_paths_20261015.py --exe PRIVATE/Warhammer3.exe --out PRIVATE/b_paths.json`; `python -m unittest discover -s tests -p test_native_shift_re_b_release_packet_paths_20261015.py -v`. See [Chinese findings](../../docs/current/N1_903_ORDINARY_B_RELEASE_PACKET_EXCLUSIVITY_20261015.md). No gameplay patch.
