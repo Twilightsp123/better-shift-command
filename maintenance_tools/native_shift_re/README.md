@@ -196,3 +196,9 @@ python -m unittest discover -s tests -p "test_native_shift_re_b_member_packet_ta
 **类型与因果边界：** R9B=0/!=0 表示替换/追加队列请求，不能视为 RMB/Shift 键位的绝对动态身份；新槽位初始 NULL，只有队列后续推进资格通过才有条件复用 bigTask。state1 可条件性走 state2→state3→state4 并满足普通 B 回调 tuple (4,0,3)；仍未验证同一个 shortTask 与特定玩家 Shift 的完整生命周期、成员目标代际错误或游戏修复。中文报告在 [RMB/Shift 原生差异](../../docs/current/N1_903_RMB_SHIFT_QUEUE_STATE_LIFECYCLE_20261015.md)，`native_patch_authorized=false`。
 
 **第12轮新增类型化对象身份桥：** `audit_move_slot_shorttask_binding.py` 在原始 EXE 验证 36/36 原码与 decoded instruction starts、6/6 E8 和 Win64 栈帧别名，证明 `shortTask+0x80=&MOVE slot+0xA0`，通过 `0x02F4EFE0` 晚绑定读取该 slot bigTask；新创建路径经 `0x02F41644` 可反写 `slot+0xA0`。测试 `tests/test_native_shift_re_move_slot_shorttask_binding.py` 8项，带私有原始 EXE 时本轮四套测试整体 **40/40 PASS**，公有 CI 应跳过 4 项真实 EXE 测试。不能混淆合法的新 shortTask 与已经清退的旧 shortTask，尚无 gameplay patch。
+
+## 2026-10-15 第13轮：队列与即时群组重建的 CFG 排除证据
+
+新增 `audit_move_dispatch_branch_split.py` + `move_dispatch_branch_split_manifest.txt` + `tests/test_native_shift_re_move_dispatch_branch_split.py`：对用户固定 SHA Win64 原始 EXE 检验 **37/37 机器码/objdump 指令起点、17/17 E8、5/5 JCC/E9**，在同一 unwind 函数 `0x030323C8` 做保守 CFG 可达性检验。**常规队列分支**有 `0x030326BE CALL 0x02F50410`，经 `0x030326E9 JMP 0x0303296A` 直接跳过即时 `0x03032965 CALL 0x0302DB44`；**另一组模式/命令分支**才有条件 `group rebuild → route configure → member fanout`。槽位激活 `0x03025D70` 无直接调用同一 group 构造器，但读当前 `UnitRoot+0x32F8` 的空间记录（转换源 `group+0xBF0`）计算新朝向并调用路线配置，然后创建短期任务。短期任务回调晚绑定当前 group。严格控制流证明不代表用户 Shift 实机分支、root cause 或游戏补丁。
+
+运行 `python maintenance_tools/native_shift_re/audit_move_dispatch_branch_split.py --exe PRIVATE/Warhammer3.exe --out PRIVATE/branch_split.json`，`python -m unittest discover -s tests -p test_native_shift_re_move_dispatch_branch_split.py -v`。本地详细审计 **11/11** PASS（含私有 EXE）；上传的 GitHub 合同测试另包括一个独立子用例，CI 无 EXE 应当跳过原始二进制测试。完整见 [中文报告](../../docs/current/N1_903_QUEUED_VS_IMMEDIATE_GROUP_BRANCH_20261015.md)。
