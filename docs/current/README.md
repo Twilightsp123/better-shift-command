@@ -1,6 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**2026-10-15 第12轮 RMB vs queued MOVE 原生差异（最新）：** [命令队列布尔开关、64 个类型化调用者、同一 bigTask state1→2→3→4 条件生命周期](N1_903_RMB_SHIFT_QUEUE_STATE_LIFECYCLE_20261015.md)。原始 EXE 校验：72/72 队列指令、64/64 MOVE 真实 E8、4/4 MOVE vtable，69/69 状态指令、8/8 E8、6/6 条件跳转；本地完整 32/32 回归（含私有原始 EXE）。[审计源码](../../maintenance_tools/native_shift_re/audit_rmb_shift_lifecycle.py) · [状态原码](../../maintenance_tools/native_shift_re/state_lifecycle_exact_pins.txt) · [队列原码](../../maintenance_tools/native_shift_re/rmb_shift_exact_pins.txt) · [回归](../../tests/test_native_shift_re_rmb_shift_lifecycle.py)。**R9B 不是玩家 Shift 键身份，条件性状态链不是实际挤压因果；无 gameplay patch。**
+
 
 **2026-10-15 第 10 轮重要更新：** [MOVE shortTask → 普通 B packet → 成员 motor 目标的完整类型化条件链](N1_903_MOVE_SHORTTASK_B_MOTOR_CHAIN_20261015.md)。由原始 `0x02F561E8 → 0x02F4F514 → 0x03279EE8` 连接到 `0x03AE00E8` 普通 B 类型，再经 `record[i]+0x2C → packet+0x34 → task+0x74 → member+0x328` 的条件性动作链触达 `member+0x1E0`。严格 SHA 的 218 个独立机器码/指令起点、28 E8、10 类型化虚表，完整本地 30/30 离线测试 PASS。**state=4 不是已证的 Shift inherited state=1 实例；无 gameplay patch。** [只读审计](../../maintenance_tools/native_shift_re/audit_move_to_motor_goal_bridge.py) · [机码 manifest](../../maintenance_tools/native_shift_re/move_to_motor_goal_manifest.txt) · [回归](../../tests/test_native_shift_re_move_to_motor_goal_bridge.py)。
 
