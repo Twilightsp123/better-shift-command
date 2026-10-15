@@ -49,9 +49,20 @@
   },
   "shorttask_associated_task_getter": "0x02F4EFE0 uses +0x80 indirect or +0x98 fallback",
   "public_ci_original_exe_included": false,
-  "local_regression": "32/32 PASS including three private original-EXE tests",
+  "local_regression": "40/40 PASS including four private original-EXE tests",
   "player_shift_hotkey_proven": false,
   "shorttask_identity_across_state_history_proven": false,
   "same_unit_member_goal_generation_cause_proven": false,
-  "native_gameplay_patch_authorized": false
+  "native_gameplay_patch_authorized": false,
+  "successor_slot_shorttask_alias": {
+    "native_caller": "0x03025DD7",
+    "stack_descriptor_alias": "[RBP-0x70] == [RSP+0x40+0x50]",
+    "copier": "0x02F2C834 copies descriptor+0x50 into shortTask+0x80",
+    "getter": "0x02F4EFE0 dereferences shortTask+0x80 to current MOVE slot+0xA0",
+    "fallback_task_writer": "0x02F41675 stores newly created task into *[shortTask+0x80]",
+    "original_opcode_verified": 36,
+    "e8_edges_verified": 6,
+    "same_reused_bigTask_runtime_instance_observed": false,
+    "member_goal_mismatch_proven": false
+  }
 }
