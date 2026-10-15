@@ -212,3 +212,11 @@ python -m unittest discover -s tests -p "test_native_shift_re_b_member_packet_ta
 `audit_route_heading_to_member.py` 针对固定原始 SHA `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a`，只读检查 **83/83 opcode/objdump starts、15/15 E8、5/5 JCC、1/1 具体成员 vtable**，含两处无 unwind 叶函数的定界检查；本地完整 17/17 回归通过（含真实原始 EXE），公开 CI 缺 EXE 时必须跳过真实二进制测试。
 
 已证数据边：`0x0301287C R8W → 0x030ECAB0 record+0x38 → 0x030EC9EC node+0x58`，在原生 gate 下由 `0x030FDA9C` 生成 node+0x70；同一源还写入 `routeDescriptor+0x44`，并挂在 `UnitRoot+0x270`。即时路径使用 descriptor+0x18→node+0x70，shortTask 的 A 路径仅当临时参数没提供朝向时读取 descriptor+0x44；B 分支不可归并。见 [中文报告](../../docs/current/N1_903_R8_HEADING_TO_MEMBER_A_FANOUT_20261015.md)。严格禁用 gameplay patch，不上传原始 EXE/内存指针。命令：`python maintenance_tools/native_shift_re/audit_route_heading_to_member.py --exe PRIVATE/Warhammer3.exe --out PRIVATE/r14.json`；测试：`python -m unittest discover -s tests -p test_native_shift_re_route_heading_to_member.py -v`。
+
+## 2026-10-15 第15轮：MOVE 朝向来源的二次选择与 B 前释放
+
+新只读审计 `audit_two_stage_heading.py`（清单 `native_two_stage_heading_pins.txt`，测试 `tests/test_native_shift_re_two_stage_heading.py`）在用户固定 SHA 原始 EXE 上验证 **87/87 opcode/objdump starts、13/13 E8、5/5 无 unwind 叶函数 ret**，本地 9/9 测试 PASS（含原始 EXE，错误版本和 Python -O 负例）；GitHub CI 不上传游戏 EXE，原码测试应自动 skip。
+
+`MOVE slot+0x9A bit2` 的两种朝向输入，通过 bit0 的四条构造分支最终写 descriptor+0x42/+0x44，由 `0x02F2C834` 复制到 shortTask+0x72/+0x74。后续普通 B 生成器 `0x02F4F514` 用 +0x74 决定使用保存角度或重新使用当前 group+0xBF0 计算。**关键生命周期反证：** 生成器在读 +0x74 前先调用 `0x02F50FE4`，有条件将 `*[shortTask+0x80] = MOVE slot+0xA0` 清零并递减旧 bigTask ref；不能在此操作后用 slot 字段反推其之前的任务身份。无 gameplay patch，也没有证明 Shift 兵牌拥挤根因。
+
+运行：`python maintenance_tools/native_shift_re/audit_two_stage_heading.py --exe PRIVATE/Warhammer3.exe --out PRIVATE/two_stage.json`。测试：`python -m unittest discover -s tests -p test_native_shift_re_two_stage_heading.py -v`。详细因果搜索与停止标准见 [蓝图](../../docs/current/N1_903_CAUSAL_DIFFERENTIAL_SEARCH_BLUEPRINT_20261015.md)。
