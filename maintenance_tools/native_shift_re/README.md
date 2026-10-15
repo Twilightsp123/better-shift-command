@@ -160,3 +160,14 @@ Read-only SHA-pinned standard-library check: `audit_b_member_packet_receiver_fla
     python -m unittest discover -s tests -p test_native_shift_re_b_member_packet_receiver_flags.py -v
 
 With `WH3_903_EXE` pointed to the private original EXE, the fourth test additionally revalidates the actual bytes. Strict SHA and byte mismatches fail closed even under `python -O`. Local evidence: 10/10 byte guards, 4/4 tests. CI skips the real EXE; static proof is not gameplay success. Details: [packet receiver flags](../../docs/current/N1_903_B_MEMBER_PACKET_RECEIVER_FLAGS_20261015.md).
+
+## 第 3 轮（2026-10-15）普通 B packet 和成员内联任务
+
+`audit_b_member_packet_task_lifecycle.py` 使用标准 Python 库和 GNU objdump 对固定 SHA 的原始 EXE 只读验证 **72/72 指令起点/机器码、23/23 E8、7/7 类型化虚表**。本地 `test_native_shift_re_b_member_packet_task_lifecycle.py` 10/10 PASS（私有 EXE 存在时，其中一项审计原始代码；GitHub CI 会跳过此项）。
+
+```
+python maintenance_tools/native_shift_re/audit_b_member_packet_task_lifecycle.py --exe PRIVATE/Warhammer3.exe --out PRIVATE/b_member_task.json
+python -m unittest discover -s tests -p "test_native_shift_re_b_member_packet_task_lifecycle.py" -v
+```
+
+重点：`0x0326A3A0` 的普通 B 调用可构造 `0x07/0x0E` flags；`0x0306B9F0` 在 mode/flag 条件通过时将成员内联任务构造到 `member+0x4A8`，holder `+0x490`，有效标记 `+0x5C0`；具体类型虚表 `0x03905E18+0x10=0x02F83B24` 条件性进入成员 `+0x328` 子动作处理。没有证明 motor goal 或玩家 Shift 实际分叉。见 [本轮中文报告](../../docs/current/N1_903_B_MEMBER_PACKET_TASK_LIFECYCLE_20261015.md)。不含 EXE、不含 runtime 指针、不含补丁。
