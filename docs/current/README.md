@@ -1,6 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**2026-10-16 第18轮（最新）：** [普通 B fallback 节点的 manager+0x2D0 重算、UnitRoot 哨兵验证与每次调用一次转换预算](N1_903_B_FALLBACK_MANAGER_RETRY_20261016.md)。固定 SHA 原始 EXE **78/78 指令起点、9/9 E8、9/9 JCC、1/1 B 虚表，本地 13/13 回归（含私有原始 EXE）PASS**。`record+0x48=-1` 使后续验证器从当前 Group/UnitRoot 状态取得数值，**不需要 mode helper 必须变为1** 才有后续转换机会。管理器标记 `node+0x08=1` 前没有要求 `node+0x70` 非空，空路线只能作为条件性假设而非已证的挤压错误。[审计](../../maintenance_tools/native_shift_re/audit_b_fallback_manager_retry_20261016.py) · [回归](../../tests/test_native_shift_re_b_fallback_manager_retry.py)。不授权 gameplay patch。
+
 **第17轮追加（2026-10-15）：** [初始 node0 与 fallback node1 的转换门槛差异](N1_903_ORDINARY_B_TWO_SENDER_INPUT_EQUIVALENCE_20261015.md)：前者输入 record+0x4C=1，强制尝试几何转换；后者从 0x030ECA50 构造时该字节为0，仅 mode helper=1 才会立即尝试转换。两审计合计99条原始指令、12条E8、2个类型化B虚表；本地18/18测试（含两项真正原始EXE）PASS。**node+0x08 标志为1仍不保证 node+0x70 非空**。新增 [门槛审计](../../maintenance_tools/native_shift_re/audit_b_node_initialization_gates_20261015.py) 与 [测试](../../tests/test_native_shift_re_b_node_initialization_gates.py)。不代表挤压根因或 patch。
 
 **2026-10-15 第17轮（最新）：** [普通 B fast-route 与 node fallback 的逐字段成员发包输入对照](N1_903_ORDINARY_B_TWO_SENDER_INPUT_EQUIVALENCE_20261015.md)。固定 SHA 原始 EXE 82/82 decoded 指令、7/7 E8、2/2 typed B vtable，11/11 本地回归（含原始 EXE）。两入口都通过同一个 `0x03265B24` 以相同已初始化参数布局做 `member[i]/record[i]` 发包，差别集中于路线指针 `aux+0x60` vs `aux+0x78→node+0x70` 和生效门槛/时间，不能推断真实两次路线或最终 motor goal 相同。[机器码](../../maintenance_tools/native_shift_re/b_two_path_compare_pins_20261015.txt) · [审计](../../maintenance_tools/native_shift_re/audit_b_two_path_input_contract_20261015.py) · [回归](../../tests/test_native_shift_re_b_two_path_input_contract.py)。没有 gameplay patch。
