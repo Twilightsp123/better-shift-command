@@ -1,0 +1,57 @@
+{
+  "schema": "bsc.n1.queued_move_rmb_differential.v1",
+  "date": "2026-10-15",
+  "source": "original fixed SHA, exact PE64 machine code; no raw EXE or runtime pointers",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "image_base": "0x140000000",
+  "proof": "EXACT_ORIGINAL_EXE_STATIC",
+  "queue_instruction_starts": 72,
+  "state_instruction_starts": 69,
+  "move_e8_call_sites_owned_and_decoded": 64,
+  "move_typed_vtable_slots": 4,
+  "state_e8_targets": 8,
+  "state_jcc_targets": 6,
+  "local_r9_writer_distribution": {
+    "local_zero": 54,
+    "local_one": 3,
+    "forwarded_or_dynamic": 7
+  },
+  "proven_internal_queue_r8_to_r9_append_sites": [
+    "0x030444C1",
+    "0x03044531"
+  ],
+  "refined_writer_counts": {
+    "local_zero": 54,
+    "literal_or_internal_one": 5,
+    "still_dynamic": 5
+  },
+  "native_fifo_capacity_slots": 40,
+  "new_move_task_pointer_initially_null": true,
+  "old_task_reuse_only_if_eligible": true,
+  "same_big_task_conditional_state_history": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "state1_direct_fallback": [
+    1,
+    4
+  ],
+  "fallback_stage_code": [
+    1,
+    2
+  ],
+  "short_task_b_dispatch_gate": {
+    "state": 4,
+    "flag": 0,
+    "stage": 3
+  },
+  "shorttask_associated_task_getter": "0x02F4EFE0 uses +0x80 indirect or +0x98 fallback",
+  "public_ci_original_exe_included": false,
+  "local_regression": "32/32 PASS including three private original-EXE tests",
+  "player_shift_hotkey_proven": false,
+  "shorttask_identity_across_state_history_proven": false,
+  "same_unit_member_goal_generation_cause_proven": false,
+  "native_gameplay_patch_authorized": false
+}
