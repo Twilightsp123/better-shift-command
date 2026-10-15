@@ -1,3 +1,23 @@
+# BSC N1 — 第 3 轮：普通 B packet 与成员内联任务生命周期
+
+**原始 EXE 静态验证：72/72 机器码与指令起点、23/23 E8、7/7 类型化虚表；本地 10/10 回归通过（包含原始 EXE）。**
+
+## 主要发现
+
+1. 普通 B 发包的具体调用者 `0x0326A3A0` 通过不同原生条件构造出 **`0x07` 或 `0x0E`** 的 packet flag，二者都缺 `0x20`。不能把 `0x02F5F8DC` 错称为固定发出 `0x06`；也不能默认同一兵牌两人同时得到不同标志。
+2. 在 mode helper 为零且 flag 不含 `0x20` 时，`0x0306B9F0` 清理并安装 **`member+0x4A8`** 的内联任务，其 holder 是 **`member+0x490`**，有效标记是 **`member+0x5C0`**。这些不同于 `member+0x328` 动作槽。
+3. 任务真实虚表 `0x03905E18+0x10=0x02F83B24`。条件性分支能通过具体成员的虚方法 `+0x5B0/+0x580/+0x568` 进入 **`member+0x328`** 子动作更新，但仍没有证明最终 **`member+0x1E0`** 主运动目标改变，也没有证明这些路径在玩家 Shift 折返时实际命中。
+4. 在 `0x03081EB4` 的成员更新中，检测有效位后调用的是该任务 **virtual+0x80**，不是上面的 **+0x10**。因此真实 +0x10 调度调用点仍待类型化查证。
+5. 构造器 `0x02F5F7C8` 还有 `0x02ECA999`、`0x02F448FC` 两处不同对象布局的已验证调用；**不能全局修改它来模拟 Shift 专用修复**。
+
+## 必须保留的证据边界
+
+上面全部是固定 SHA 原始机器码与离线分支反例。尚未完成同一 queued inherited MOVE `state=1` 的真实群组和成员身份连接；普通 B 虚表 `0x03AE00E8` 不能与继承大任务 B 虚表 `0x03AE0128` 混为同类；没有 gameplay patch，没有 Windows 游戏测试，更没有宣称问题已修复。
+
+对应源码在 `maintenance_tools/native_shift_re/audit_b_member_packet_task_lifecycle.py`，测试在 `tests/test_native_shift_re_b_member_packet_task_lifecycle.py`。下一步直接追内联任务 +0x10 调度者与 `member+0x328 → motor goal`，保留 CA 原生队列、渐进转弯、寻路避障与 Shift ATTACK。
+
+---
+
 # BSC N1 — Member packet and task lifecycle (2026-10-15)
 
 ## Verified static evidence
