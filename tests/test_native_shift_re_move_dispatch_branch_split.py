@@ -9,7 +9,7 @@ import audit_move_dispatch_branch_split as m
 class MoveBranchSplit(unittest.TestCase):
  def test_manifest_counts(self):
   q=m.load()
-  self.assertEqual(tuple(len(q[x]) for x in ('PIN','CALL','JMP')),(39,17,6))
+  self.assertEqual(tuple(len(q[x]) for x in ('PIN','CALL','JMP')),(41,17,6))
  def test_enqueue_branch_ends_before_group_call(self):
   q=m.load()
   self.assertEqual(q['JMP'][0x030326E9],0x0303296A)
@@ -56,6 +56,13 @@ class MoveBranchSplit(unittest.TestCase):
   self.assertEqual(q['PIN'][0x03025E5B].hex(),'f6839a00000002')
   self.assertEqual(q['PIN'][0x03025E69].hex(),'0f840a010000')
   self.assertEqual(q['JMP'][0x03025E69],0x03025F79)
+ def test_route_config_R8_sources_differ_by_bit2(self):
+  pins=m.load()['PIN']
+  self.assertEqual(pins[0x03025E76].hex(),'440fb78398000000')
+  self.assertEqual(pins[0x03026015].hex(),'440fb7c0')
+  call=m.load()['CALL']
+  self.assertEqual(call[0x03025E91],0x0301287C)
+  self.assertEqual(call[0x03026022],0x0301287C)
  def test_callback_late_reads_live_root_group(self):
   p=m.load()['PIN']
   self.assertEqual(p[0x02F563F4].hex(),'488b4b08')
@@ -78,7 +85,7 @@ class MoveBranchSplit(unittest.TestCase):
  @unittest.skipUnless(os.getenv('WH3_903_EXE'),'private original EXE not included in GitHub CI')
  def test_private_exact_binary(self):
   result=m.audit(Path(os.environ['WH3_903_EXE']))
-  self.assertEqual(result['opcode_instruction_starts'],39)
+  self.assertEqual(result['opcode_instruction_starts'],41)
   self.assertEqual(result['direct_e8'],17)
   self.assertEqual(result['conditional_unconditional_jumps'],6)
   self.assertFalse(result['queue_branch_can_reach_group_rebuild_call'])
