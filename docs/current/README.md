@@ -1,6 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**第14轮（2026-10-15，最新）:** [两类后继 MOVE 的 R8 朝向经 route record+0x38、descriptor+0x44、node+0x58，条件性进入成员 A 类发包](N1_903_R8_HEADING_TO_MEMBER_A_FANOUT_20261015.md)。固定 SHA 原始 EXE：**83/83 原码及 objdump 指令起点、15/15 E8、5/5 JCC、1/1 成员 typed vtable；本地 17/17 测试 PASS（含私有原始 EXE）**。已证明即时 branch 从 `UnitRoot+0x270 → node+0x70` 下发；短期任务 A 路径可在临时朝向缺失时从 `descriptor+0x44` 回退，明确朝向会覆盖该来源。B 分支和最终 motor goal 错配仍不能由此断定。 [审计代码](../../maintenance_tools/native_shift_re/audit_route_heading_to_member.py) · [测试](../../tests/test_native_shift_re_route_heading_to_member.py)。无 gameplay patch。
+
 **第13轮新增同一路线配置器的两种朝向输入（最新）：** 在 queued MOVE 激活中，slot bit2=1 时 `0x03025E76` 从 `slot+0x98` 取16位朝向，bit2=0 时 `0x03026015` 使用当前 group+0xBF0 空间坐标导出的朝向，两条分支都进入 `0x0301287C`。字节/对象链及反证见 [第13轮报告](N1_903_QUEUED_VS_IMMEDIATE_GROUP_BRANCH_20261015.md)。本轮第一审计 41/41 指令、17/17 E8、6/6 分支，第二位来源审计19/19指令、2/2 E8、3/3分支，本地联合23/23测试PASS；没有发现玩家 Shift 专属或已确认的挤压根因。
 
 **第13轮进一步闭合 MOVE 路线标志来源：** [队列和即时 group 两分支的 CFG、MOVE slot+0x9A bit2 由命令描述符+0x5A 搬运和按条件 OR 0x06 的原码证明](N1_903_QUEUED_VS_IMMEDIATE_GROUP_BRANCH_20261015.md)。新审计 39/39 opcode、17/17 E8、6/6 JCC/E9，加独立字段审计 19/19 opcode、2/2 E8、3/3 JCC，原始私有 EXE 本地联合 **22/22 测试 PASS**。只有 slot bit2=0 才使用当前 group+0xBF0 位置基准来计算这一分支的朝向。新增 [位来源审计](../../maintenance_tools/native_shift_re/audit_move_slot_bit2_provenance.py) 和 [回归](../../tests/test_native_shift_re_move_slot_bit2_provenance.py)；未证明玩家 Shift 对应或挤压根因，不授权 patch。
