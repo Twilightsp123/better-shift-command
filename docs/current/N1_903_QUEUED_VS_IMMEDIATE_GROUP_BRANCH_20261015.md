@@ -4,7 +4,7 @@
 
 目标是用户给出的固定 Win64 原始 `Warhammer3.exe`，SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a`；所有地址为 PE ImageBase `0x140000000` 下的 RVA。
 
-第13轮对原始 EXE 的只读验证：**37/37 完整指令字节和 GNU objdump 真正指令起点、17/17 E8 直接调用、5/5 E9/JCC 目标**，再用同一 unwind 所属函数内的静态 CFG 可达性检验确认两路互斥。本地完整验证 **11/11 PASS（其中1项使用用户原始 EXE）**。GitHub 新增的合同测试有12项，其中1项在没有私有 EXE 的公开 CI 必须 SKIP。这里的证明等级是 **EXACT_ORIGINAL_EXE_STATIC + SYNTHETIC_CONTRACT**；并非用户 RMB/Shift 键位的运行时辨识、不是物理碰撞根因验证，也没有 Native gameplay patch。
+第13轮对原始 EXE 的只读验证：**39/39 完整指令字节和 GNU objdump 真正指令起点、17/17 E8 直接调用、6/6 E9/JCC 目标**，再用同一 unwind 所属函数内的静态 CFG 可达性检验确认两路互斥。本地完整验证 **12/12 PASS（其中1项使用用户原始 EXE）**。GitHub 新增的合同测试有12项，其中1项在没有私有 EXE 的公开 CI 必须 SKIP。这里的证明等级是 **EXACT_ORIGINAL_EXE_STATIC + SYNTHETIC_CONTRACT**；并非用户 RMB/Shift 键位的运行时辨识、不是物理碰撞根因验证，也没有 Native gameplay patch。
 
 ## 一、纠正此前可能误追的 group 代际假设
 
@@ -47,9 +47,25 @@
 
 ## 四、可复现证据与维护
 
-- `maintenance_tools/native_shift_re/move_dispatch_branch_split_manifest.txt`：37 个原始指令编码、17 条 E8、5 条 JCC/E9；
+- `maintenance_tools/native_shift_re/move_dispatch_branch_split_manifest.txt`：39 个原始指令编码、17 条 E8、6 条 JCC/E9；
 - `maintenance_tools/native_shift_re/audit_move_dispatch_branch_split.py`：固定完整 SHA、unwind、原始字节、objdump 指令起点、真实分支目标、函数内 CFG 可达性、group/shortTask 静态链；
 - `tests/test_native_shift_re_move_dispatch_branch_split.py`：合成 CFG 与反例、错误 SHA fail-closed、禁止覆盖原始 EXE、私有真 EXE 完整检查；
 - 本地报告和 JSON 均没有原始游戏 EXE、DLL 或用户运行时指针。
 
 **native_patch_authorized=false**。没有游戏内修复验证；继续只研究研究分支 `research/n1-native-shift-behavior-patch-20261009`，不改 main，不要求用户再次证明折返挤压。
+
+## 五、第13轮继续：slot+0x9A bit2 的命令描述符来源与分支反证
+
+新增独立只读审计 `audit_move_slot_bit2_provenance.py`：固定用户 EXE **19/19 原始指令字节及 objdump 起点、2/2 E8、3/3 JCC** PASS，另检查无 unwind 叶函数结尾。两个本地审计模块合计 **22/22 单元测试通过**（含两项真实 EXE）。公开仓库中的两个测试模块合计定义 23 项，其中两项需要用户私有 EXE，不能把没有 EXE 的 CI 当原码实测。
+
+此处已经闭合真实 typed 字段来源：
+
+1. 统一 MOVE `0x030323FF MOV RDI,R8` 把当前**命令描述符指针**保存在 RDI；入队路径 `0x030326DB MOV R9,RDI` 把它传给 `0x030326E4 CALL 0x030090BC`。
+2. 这个 MOVE slot 构造器 `0x030090C6 MOV RBX,R9`，`0x030090DB LEA RCX,[slot+0x40]`、`0x030090DF MOV RDX,RBX`，`0x030090E2 CALL 0x03009100` 复制描述符至槽位。
+3. 经真实无 unwind 叶函数 `0x03009100..0x030091D1`，源 `descriptor+0x5A` 的低 7 位用逐位 XOR/AND 操作搬运到 `(slot+0x40)+0x5A=slot+0x9A`。最关键的 bit2 由 `0x03009186..0x03009190` 复制；合成 128×128 个源/初始目的位组合验证了此逐位结果与 source 低7位一致。这里**不能**假定高 bit7 也被复制。
+4. **源可以在复制前被 CA 原生代码修改。** 在符合路线几何重整条件的入队支，`0x03032679 OR BYTE [descriptor+0x5A],0x06`，故强制设置 bit1 和 bit2；`0x0303249E` 与 `0x03032577` 等原生 JCC 可直接到 `0x030326A2`，绕过这次 OR。
+5. 后继 MOVE 激活 `0x03025E5B TEST BYTE [slot+0x9A],0x02`、`0x03025E69 JE 0x03025F79`。只有 slot bit2 为零，才能**经这条分支**读取当前 group+0xBF0 空间位置基准来重算朝向。由逻辑与真实机码共同证明，执行过上述 `OR 0x06` 的本次命令**不会**选中这条特定采样分支；绕过 OR 且 bit2 原先为零的命令则可能选中它。
+
+这是一条实际的 `命令描述符旗标 → 可能的命令几何归一化 → MOVE slot 旗标 → 后继转向几何输入选择` 的有类型数据链。**它不是键盘 Shift 键身份、不是哪个兵模最终目标在游戏内出错的证据。** 修改 bit2 可能直接改变原生路线/避障行为，当前禁止 gameplay patch。
+
+新增源码 `maintenance_tools/native_shift_re/audit_move_slot_bit2_provenance.py`、测试 `tests/test_native_shift_re_move_slot_bit2_provenance.py`，原始 EXE/包含进程地址的 JSONL 不提交 GitHub。下一步沿这两个 bit2 分支比较具体成员目标记录与动作代际，优先查是否存在生成不同但成员未同步切换的目标。
