@@ -1,6 +1,9 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+
+**2026-10-15 第 10 轮重要更新：** [MOVE shortTask → 普通 B packet → 成员 motor 目标的完整类型化条件链](N1_903_MOVE_SHORTTASK_B_MOTOR_CHAIN_20261015.md)。由原始 `0x02F561E8 → 0x02F4F514 → 0x03279EE8` 连接到 `0x03AE00E8` 普通 B 类型，再经 `record[i]+0x2C → packet+0x34 → task+0x74 → member+0x328` 的条件性动作链触达 `member+0x1E0`。严格 SHA 的 218 个独立机器码/指令起点、28 E8、10 类型化虚表，完整本地 30/30 离线测试 PASS。**state=4 不是已证的 Shift inherited state=1 实例；无 gameplay patch。** [只读审计](../../maintenance_tools/native_shift_re/audit_move_to_motor_goal_bridge.py) · [机码 manifest](../../maintenance_tools/native_shift_re/move_to_motor_goal_manifest.txt) · [回归](../../tests/test_native_shift_re_move_to_motor_goal_bridge.py)。
+
 **第 3 轮 / 2026-10-15 原生成员任务生命周期（最新）：** [类型化 packet 0x07/0x0E、inline task +0x4A8 / +0x5C0 与 action +0x328](N1_903_B_MEMBER_PACKET_TASK_LIFECYCLE_20261015.md)。固定 SHA 原始 EXE 审计 84/84 指令及机码、23/23 E8、8/8 虚表，本地 11/11 测试（包含真实 EXE）；静态证据不证明玩家 Shift 命中，另已验证任务 +0x80 只查询 bit0x10，0x07/0x0E 在安装后初始返回 0；未授权 gameplay patch。源码 [audit_b_member_packet_task_lifecycle.py](../../maintenance_tools/native_shift_re/audit_b_member_packet_task_lifecycle.py)，测试 [test_native_shift_re_b_member_packet_task_lifecycle.py](../../tests/test_native_shift_re_b_member_packet_task_lifecycle.py)。
 
 
