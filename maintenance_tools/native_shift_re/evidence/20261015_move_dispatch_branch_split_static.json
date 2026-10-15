@@ -2,7 +2,7 @@
   "schema": "bsc.n1.wh3_original_dispatch_branch_split.v1",
   "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
   "proof": "EXACT_ORIGINAL_EXE_STATIC",
-  "instruction_opcode_and_start_count": 39,
+  "instruction_opcode_and_start_count": 41,
   "e8_edge_count": 17,
   "jcc_jmp_count": 6,
   "dispatch_entry": "0x030323C8",
@@ -35,15 +35,29 @@
     "no_direct_group_constructor_call_in_function": true,
     "group_spatial_branch_gate": "slot+0x9A bit2 == 0 at 0x03025E5B/69",
     "group_spatial_sample_helper": "0x02D4BE38 → 0x0311D0CC",
-    "group_spatial_sample_field": "current UnitRoot+0x32F8 group+0xBF0"
+    "group_spatial_sample_field": "current UnitRoot+0x32F8 group+0xBF0",
+    "heading_R8_branch_comparison": {
+      "slot_plus9A_bit2_set": {
+        "site": "0x03025E76",
+        "source": "MOVE slot+0x98 16-bit stored heading",
+        "route_config_call": "0x03025E91"
+      },
+      "slot_plus9A_bit2_clear": {
+        "site": "0x03026015",
+        "source": "converted current group+0xBF0 XZ reference relative heading",
+        "route_config_call": "0x03026022"
+      },
+      "same_configurator": "0x0301287C",
+      "actual_shift_gameplay_crowding_cause_proven": false
+    }
   },
   "short_task_callback": {
     "late_current_group_read": "0x02F563FD",
     "member_dispatch": "0x02F56404"
   },
-  "local_private_original_exe_audit": "39/39 opcodes+starts; 17/17 E8; 6/6 JCC/JMP; additional 19/19 + 2/2 + 3/3 bit2 audit",
-  "local_unittest": "22/22 PASS including two original EXE checks",
-  "public_ci_contract_tests": "23 tests defined across two new test files; two private EXE tests skip when absent",
+  "local_private_original_exe_audit": "41/41 first audit opcode/starts, 17/17 E8, 6/6 JCC/JMP; 19/19 bit2 audit + 2/2 E8 + 3/3 JCC",
+  "local_unittest": "23/23 PASS including 2 real user original-EXE tests",
+  "public_ci_contract_tests": "24 tests defined across two new modules; 2 original-EXE tests require private EXE and skip publicly",
   "player_shift_key_instance_bound": false,
   "observed_shift_member_motor_goal_mismatch": false,
   "gameplay_patch_authorized": false,
