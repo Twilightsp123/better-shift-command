@@ -1,0 +1,47 @@
+{
+  "schema": "bsc.n1.b_generic_node_manager_retry.v1",
+  "target_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "imagebase": "0x140000000",
+  "level": "EXACT_ORIGINAL_EXE_STATIC",
+  "passes": {
+    "opcode_instruction_starts": 78,
+    "e8_direct_edges": 9,
+    "jcc_edges": 9,
+    "typed_B_vtable": 1,
+    "local_regression_tests": 13,
+    "local_original_exe_tests": 1
+  },
+  "node1_constructor": {
+    "record_plus48": "0xffffffff",
+    "record_plus4c": 0,
+    "node_plus4": 1,
+    "node_plus8": 0,
+    "node_plus70": "NULL",
+    "chain": "manager+0x2D0"
+  },
+  "manager_retry": {
+    "function": "0x03128E80",
+    "validator": "0x0311BE18",
+    "budget": "at most one successful validator-gated conversion attempt per manager invocation",
+    "direct_converter": "0x030FDA9C",
+    "gate": "node+4 nonzero and node+8 zero and budget<1 and validator return nonzero"
+  },
+  "validator_branch": {
+    "record_plus48_not_minus1": "return field directly",
+    "record_plus48_minus1": "group+0xA10 UnitRoot -> 0x03037A48 -> UnitRoot+0xA4 or +0x184"
+  },
+  "consumer": {
+    "typed_vtable": "0x03AE00E8+0x10",
+    "method": "0x03281520",
+    "checks": "node+0x08!=0",
+    "reads": "node+0x70",
+    "extra_nonnull_guard_in_method": false
+  },
+  "bounded_risk": "if converter returns NULL, processed node bit may be set without route; real Shift NULL not observed",
+  "limits": {
+    "gameplay_Crowding_cause_proven": false,
+    "player_shift_instance_bound": false,
+    "group_epoch_bound": false,
+    "patch_authorized": false
+  }
+}
