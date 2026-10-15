@@ -1,7 +1,7 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
-**第 3 轮 / 2026-10-15 原生成员任务生命周期（最新）：** [类型化 packet 0x07/0x0E、inline task +0x4A8 / +0x5C0 与 action +0x328](N1_903_B_MEMBER_PACKET_TASK_LIFECYCLE_20261015.md)。固定 SHA 原始 EXE 审计 72/72 指令及机码、23/23 E8、7/7 虚表，本地 10/10 测试（包含真实 EXE）；静态证据不证明玩家 Shift 命中，未授权 gameplay patch。源码 [audit_b_member_packet_task_lifecycle.py](../../maintenance_tools/native_shift_re/audit_b_member_packet_task_lifecycle.py)，测试 [test_native_shift_re_b_member_packet_task_lifecycle.py](../../tests/test_native_shift_re_b_member_packet_task_lifecycle.py)。
+**第 3 轮 / 2026-10-15 原生成员任务生命周期（最新）：** [类型化 packet 0x07/0x0E、inline task +0x4A8 / +0x5C0 与 action +0x328](N1_903_B_MEMBER_PACKET_TASK_LIFECYCLE_20261015.md)。固定 SHA 原始 EXE 审计 84/84 指令及机码、23/23 E8、8/8 虚表，本地 11/11 测试（包含真实 EXE）；静态证据不证明玩家 Shift 命中，另已验证任务 +0x80 只查询 bit0x10，0x07/0x0E 在安装后初始返回 0；未授权 gameplay patch。源码 [audit_b_member_packet_task_lifecycle.py](../../maintenance_tools/native_shift_re/audit_b_member_packet_task_lifecycle.py)，测试 [test_native_shift_re_b_member_packet_task_lifecycle.py](../../tests/test_native_shift_re_b_member_packet_task_lifecycle.py)。
 
 
 
