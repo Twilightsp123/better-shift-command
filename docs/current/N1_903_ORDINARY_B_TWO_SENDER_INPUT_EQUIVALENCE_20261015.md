@@ -42,3 +42,17 @@ Windows x64 原始 `Warhammer3.exe`，SHA256 `518c4f292f275142df13b96b9db704a3db
 - 本地独立完整证据包另有完整 disassembly 参数表与脱敏结果。未公开游戏 EXE、私有 runtime pointer、未验证 Native patch。
 
 `native_patch_authorized=false`。只维护 `research/n1-native-shift-behavior-patch-20261009`；不可改 main。
+
+## 第17轮进一步：已找出初始 node0 与 fallback node1 的第一次构造门槛差异
+
+针对同一固定 SHA 原始 EXE，新独立审计 `audit_b_node_initialization_gates_20261015.py` 通过 **17/17 原始机器码及真正指令起点、5/5 E8**，本地 **7/7** 测试通过，包含实际 EXE 检查。
+
+初始节点：`0x02F4F5C3` 的输入记录从栈 `rsp+0x50` 开始，`0x02F4F5C8` 将 `[rsp+0x9C]=(record+0x4C)=1`，经 `0x02F4F5DE` 调普通节点构造器 `0x031219B0`。
+
+fallback 节点：`0x03271BE9 CALL 0x030ECA50` 组装输入；原生叶函数 `0x030ECA56 XOR R10D,R10D`、`0x030ECAAB MOV [RCX+0x4C],R10B` 保证新的输入 `record+0x4C=0`，之后 `0x03271C04` 同样调用 `0x031219B0`。
+
+**首次不同的强制条件：** 节点构造器 `0x03121A82` 读取 mode helper；`0x03121A87/89` 若 AL=1，直接到转换分支，否则 `0x03121A8B/8F` 只有在输入 `record+0x4C==1` 时才允许转换。故初始 node0 **必尝试** `0x030FDA9C`，fallback node1 由于未设置强制标志，**只有 mode helper=1 才在本次构造立即尝试转换**。否则 `node+0x70` 保持清零、`node+0x08` 未被标记，等待后续有条件重算。这解释了为什么两个节点未必在同一阶段 ready。
+
+**关键限制：** `0x03121A99` 调转换器后，`0x03121A9E` 无条件写其返回值至 `node+0x70`，`0x03121AA2` 直接写 `node+0x08=1`；未发现中间检测 RAX 是否为空。因此 **node+0x08==1 并不等于 node+0x70 非空**。当前仍缺真实 queued Shift 中的 mode/group 身份以及生成路线是否正确，不能直接 Hook 这两处 flag 或把正常 deferred 当作错误。
+
+更新 [审计](../../maintenance_tools/native_shift_re/audit_b_node_initialization_gates_20261015.py) 和 [回归](../../tests/test_native_shift_re_b_node_initialization_gates.py)。本轮两项私有 EXE 审计合计 **99 个原始指令位置、12 条 E8、2 个 B 虚表槽，本地 18/18 测试 PASS**，分属两个独立原码验证模块，数字只描述静态覆盖。无 Native gameplay patch。
