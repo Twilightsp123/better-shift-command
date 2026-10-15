@@ -8,7 +8,7 @@ from pathlib import Path
 from audit_b_member_packet_task_lifecycle import OriginalEXE, SHA
 
 MANIFEST=Path(__file__).with_name('move_dispatch_branch_split_manifest.txt')
-EXPECTED={'PIN':37,'CALL':17,'JMP':5}
+EXPECTED={'PIN':39,'CALL':17,'JMP':6}
 QUEUED=0x030326A2
 QUEUED_E8=0x030326BE
 QUEUE_EXIT=0x030326E9
@@ -121,6 +121,7 @@ def audit(exe,manifest=MANIFEST):
                 'activation_direct_calls':len(direct),
                 'activation_route_update_calls':['0x03025E91','0x03026022'],
                 'activation_uses_current_group_plusB38':True,
+                'group_reference_sample_requires_move_slot_plus9A_bit2_clear':True,
                 'sampled_group_spatial_field':'group+0xB38 + 0xB8 = group+0xBF0; 0x0311D0CC returns transformed XZ',
                 'activation_creates_new_shortTask_at':'0x030260AF',
                 'shorttask_callback_late_reads_UnitRoot_plus32F8':True,
