@@ -49,3 +49,19 @@
 - `tests/test_native_shift_re_rmb_shift_lifecycle.py`：8 项测试。公开 CI 没 EXE 应为 7 PASS / 1 SKIP。独立的完整 Round12 资源包还包含另外两份详细审计源码、24 项详细回归和脱敏 JSON 证据。
 
 **native_patch_authorized=false；没有修改 main、游戏 EXE、包含指针的用户日志。**
+
+## 六、第12轮续查：新 shortTask 的关联 bigTask 身份终于闭合
+
+新增固定 SHA 原始 EXE 的**36/36 机器码/解码指令起点、6/6 直接 E8**，两个无 unwind 叶函数与 Win64 栈参数别名核验（`audit_move_slot_shorttask_binding.py`）；联合审计回归提高为 **40/40 PASS**，其中 **4项使用私有原始 EXE**。该结果属于静态原码，不是新实机折返。
+
+精确指针传递：
+
+1. 新 MOVE 槽位激活 `0x03025DD7 LEA R14,[MOVEslot+0xA0]` 获取的**是大任务指针字段的地址**；`0x03025E39` 说明激活时另有兼容性检查可清空该槽位所持有的旧 bigTask。
+2. `0x0302608D MOV [RBP-0x70],R14` 将该地址放进短任务描述符。由三个原生 PUSH、`RBP=entryRSP-0xB8`、`RSP=entryRSP-0x1B8` 严格可得 `[RBP-0x70]=[RSP+0x40+0x50]`，并在 `0x0302609F/AF` 把描述符送进 `0x02F2C734`。
+3. 构造器 `0x02F2C758` 将复制目标设成 `&shortTask+0x30`，`0x02F2C770` 把源设成描述符，`0x02F2C784` 调用无 unwind 的 `0x02F2C834`：`0x02F2C8A7` 读描述符 `+0x50`，`0x02F2C8AB` 写目的 `+0x50`。因此**`shortTask+0x80 = &MOVEslot+0xA0`**。
+4. 关联任务 getter `0x02F4EFE0` 确实先读 `shortTask+0x80`，若该**地址非空**，则再解引用得到 `MOVEslot+0xA0` 当前存储的 bigTask；仅地址为空时使用 `shortTask+0x98` 备份。
+5. 当该槽位任务当前为 NULL，`0x02F2C7BF/0x02F2C7C7` 合格分支经 `0x02F2C81B→0x02F41644` 创建新 bigTask，`0x02F41675` 通过 `*[shortTask+0x80]` 将它写回同一个 MOVE slot+0xA0。成功交接的后继槽可先存同一旧 bigTask；这条机制不要求**旧 shortTask**复活。
+
+至此，**成功继承后，新 MOVE 槽位创建的短期任务与该槽位保留的同一个 bigTask 具有确切地址连接**。这比“同一大任务可能在某个短任务里出现”更强，而且不会与此前正常成功 MOVE→MOVE 交接清退旧 shortTask 的负证据冲突。
+
+仍未证明玩家某次 Shift 继承的具体状态历程、group generation、两个相邻成员最后 motor goal 的错误代际和挤压因果。不要用“短期任务复活”解释新 shortTask 的合法晚绑定，也不授权修改原生 gameplay。新增 [严格源码](../../maintenance_tools/native_shift_re/audit_move_slot_shorttask_binding.py) · [回归](../../tests/test_native_shift_re_move_slot_shorttask_binding.py)。
