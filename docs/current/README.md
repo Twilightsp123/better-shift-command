@@ -1,6 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**第16轮最新：** [普通 B 在旧 bigTask 引用清理后有 direct-route 与 node-fallback 两条互斥成员发包路径](N1_903_ORDINARY_B_RELEASE_PACKET_EXCLUSIVITY_20261015.md)。固定原始 EXE 72/72 指令与起点、11/11 E8、4/4 JCC、2/2 typed B vtable，本地 10/10 测试通过。成功 direct-route 会设 aux+0x80=1，使后续 +0x10 跳过重复发送。详细见中文报告、[审计源码](../../maintenance_tools/native_shift_re/audit_b_release_packet_paths_20261015.py)和[回归](../../tests/test_native_shift_re_b_release_packet_paths_20261015.py)。未确定真实 Shift 物理挤压根因，不授权补丁。
+
 **2026-10-15 第15轮（最新搜索方案）：** [按首个状态差异、任务释放窗口和两名成员目标做因果搜索](N1_903_CAUSAL_DIFFERENTIAL_SEARCH_BLUEPRINT_20261015.md)。固定 EXE **87/87 原码与指令起点、13/13 E8，9/9 本地回归通过**。新发现：slot+0x9A bit2 经 descriptor+0x44 传至 shortTask+0x74，使普通 B 随后沿用保存朝向或再按 live group 计算；B 构造前 `0x02F50FE4` 可能已清零 slot+0xA0 的 bigTask 引用。因此后续需要在释放前绑定任务身份，不能用发包后槽位状态反推旧任务。[工具](../../maintenance_tools/native_shift_re/audit_two_stage_heading.py) · [机码清单](../../maintenance_tools/native_shift_re/native_two_stage_heading_pins.txt) · [测试](../../tests/test_native_shift_re_two_stage_heading.py)。未修复 gameplay。
 
 **第14轮（2026-10-15，最新）:** [两类后继 MOVE 的 R8 朝向经 route record+0x38、descriptor+0x44、node+0x58，条件性进入成员 A 类发包](N1_903_R8_HEADING_TO_MEMBER_A_FANOUT_20261015.md)。固定 SHA 原始 EXE：**83/83 原码及 objdump 指令起点、15/15 E8、5/5 JCC、1/1 成员 typed vtable；本地 17/17 测试 PASS（含私有原始 EXE）**。已证明即时 branch 从 `UnitRoot+0x270 → node+0x70` 下发；短期任务 A 路径可在临时朝向缺失时从 `descriptor+0x44` 回退，明确朝向会覆盖该来源。B 分支和最终 motor goal 错配仍不能由此断定。 [审计代码](../../maintenance_tools/native_shift_re/audit_route_heading_to_member.py) · [测试](../../tests/test_native_shift_re_route_heading_to_member.py)。无 gameplay patch。
