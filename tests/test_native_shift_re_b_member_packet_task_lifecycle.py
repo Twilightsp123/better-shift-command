@@ -43,20 +43,29 @@ class NativeBTaskLifecycle(unittest.TestCase):
 
     def test_task_update_and_member_action_are_distinct_vtables(self):
         self.assertEqual(m.VTABLE[(0x03905E18,0x10)],0x02F83B24)
+        self.assertEqual(m.VTABLE[(0x03905E18,0x80)],0x008F4DD0)
         self.assertEqual(m.VTABLE[(0x0390D4F8,0x568)],0x0306A8FC)
         self.assertEqual(m.VTABLE[(0x0390D4F8,0x580)],0x0306A990)
         self.assertEqual(m.VTABLE[(0x0390D4F8,0x5b0)],0x0306AD00)
         self.assertEqual(m.PINS[0x0308234D],'ff9080000000')
 
     def test_exact_static_edge_inventory(self):
-        self.assertEqual(len(m.PINS),72)
+        self.assertEqual(len(m.PINS),84)
         self.assertEqual(len(m.E8),23)
-        self.assertEqual(len(m.VTABLE),7)
+        self.assertEqual(len(m.VTABLE),8)
         self.assertEqual(m.E8[0x0326A423],0x02F5F8DC)
         self.assertEqual(m.E8[0x0326A466],0x02F5F8DC)
         self.assertEqual(m.E8[0x0306BA5B],0x02F5F7C8)
         self.assertEqual(m.E8[0x02ECA999],0x02F5F7C8)
         self.assertEqual(m.E8[0x02F448FC],0x02F5F7C8)
+
+    def test_packet_flags_immediately_after_copy_make_bit10_query_false(self):
+        self.assertFalse(m.inline_query_bit10(0x07))
+        self.assertFalse(m.inline_query_bit10(0x0e))
+        self.assertTrue(m.inline_query_bit10(0x16))
+        self.assertEqual(m.PINS[0x008F4DD0],'0fb68190000000')
+        self.assertEqual(m.PINS[0x02D9A01A],'2410')
+        self.assertEqual(m.PINS[0x03082356],'753e')
 
     def test_guard_not_python_assert_optimized_away(self):
         with tempfile.TemporaryDirectory() as d:
@@ -78,9 +87,9 @@ class NativeBTaskLifecycle(unittest.TestCase):
     @unittest.skipUnless(os.getenv('WH3_903_EXE'),'original EXE not in public GitHub CI')
     def test_private_exact_exe_audit(self):
         result=m.audit(Path(os.environ['WH3_903_EXE']))
-        self.assertEqual(result['verified_instruction_starts'],72)
+        self.assertEqual(result['verified_instruction_starts'],84)
         self.assertEqual(result['verified_direct_calls'],23)
-        self.assertEqual(result['verified_typed_vtable_slots'],7)
+        self.assertEqual(result['verified_typed_vtable_slots'],8)
         self.assertFalse(result['runtime_shift_branch_observed'])
         self.assertFalse(result['native_patch_authorized'])
 
