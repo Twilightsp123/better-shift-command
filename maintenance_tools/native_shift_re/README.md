@@ -173,3 +173,10 @@ python -m unittest discover -s tests -p "test_native_shift_re_b_member_packet_ta
 重点：`0x0326A3A0` 的普通 B 调用可构造 `0x07/0x0E` flags；`0x0306B9F0` 在 mode/flag 条件通过时将成员内联任务构造到 `member+0x4A8`，holder `+0x490`，有效标记 `+0x5C0`；具体类型虚表 `0x03905E18+0x10=0x02F83B24` 条件性进入成员 `+0x328` 子动作处理。没有证明 motor goal 或玩家 Shift 实际分叉。见 [本轮中文报告](../../docs/current/N1_903_B_MEMBER_PACKET_TASK_LIFECYCLE_20261015.md)。不含 EXE、不含 runtime 指针、不含补丁。
 
 **本轮追加精确 bit 查询：** 类型化虚表 `0x03905E18+0x80=0x008F4DD0` 读取 `task+0x90` 的 bit 0x10，bit 复制函数 `0x02D99F74` 与成员 Tick `0x0308234D` 已核实；`0x07/0x0E` 在内联任务刚安装时这个 bit 都为 0。总计 84/84 opcode、23/23 E8、8/8 vtable，11/11 本地测试。仍不代表实际 Shift 时序或最终 motor goal。
+
+## 2026-10-15 第 10 轮：MOVE shortTask 与成员运动目标的有类型证明
+
+- 新证据：MOVE `0x02F561E8` 只在特定条件进入 `0x02F4F514`，再经当前 `UnitRoot+0x32F8` group 到 `0x03279EE8`。mode helper = 0 时构造 `0x03AE00E8` 普通 B 对象，独立于带旧大任务的 `0x03AE0128`。
+- 新代码 `audit_move_to_motor_goal_bridge.py` 加上 `move_to_motor_goal_manifest.txt` 严格 SHA/PE/真实 objdump 指令起点，核验 **218/218 唯一指令、28/28 E8、10/10 类型化虚表**。附加构造器 RIP/vtable、E9 早退、无 unwind 叶函数检查。
+- 命令：`python maintenance_tools/native_shift_re/audit_move_to_motor_goal_bridge.py --exe PRIVATE/Warhammer3.exe --out PRIVATE/typed_goal.json`。回归：`python -m unittest discover -s tests -p test_native_shift_re_move_to_motor_goal_bridge.py -v`。
+- 在没有私有原始 EXE 的公开 CI 中为 7 PASS + 1 SKIP；本地额外完整分段审计和测试合计 **30/30 PASS**。这是条件性静态控制/数据流，不证明真实 queued Shift、物理挤压根因和补丁。详见 [中文研究报告](../../docs/current/N1_903_MOVE_SHORTTASK_B_MOTOR_CHAIN_20261015.md)。不得提交 EXE 或运行时指针。
