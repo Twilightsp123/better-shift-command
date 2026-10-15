@@ -11,6 +11,18 @@ from pathlib import Path
 SHA = "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a"
 IMAGEBASE = 0x140000000
 PINS = {
+    0x008F4DD0: "0fb68190000000",
+    0x008F4DD7: "c0e804",
+    0x008F4DDA: "2401",
+    0x008F4DDC: "c3cc",
+    0x02D99FD9: "0fb64150",
+    0x02D9A017: "324250",
+    0x02D9A01A: "2410",
+    0x02D9A01C: "32c1",
+    0x02D9A01E: "41884050",
+    0x02D9A06B: "c3",
+    0x03082353: "413ac7",
+    0x03082356: "753e",
     0x02ECA989: "488d4b18",
     0x02ECA999: "e82a4e0900",
     0x02F448E4: "488d8fe0050000",
@@ -100,6 +112,7 @@ E8 = {
  0x0306A927: 0x032490D0, 0x030822D2: 0x03080F4C,
 }
 VTABLE = {
+ (0x03905E18,0x80): 0x008F4DD0,
  (0x03905E18,0x00): 0x02F63C30,
  (0x03905E18,0x08): 0x02F737D0,
  (0x03905E18,0x10): 0x02F83B24,
@@ -118,6 +131,11 @@ def ordinary_b_flag(aux_flag_0f, formation_helper_nonzero):
 def receiver_uses_inline_slot(mode_helper_result, packet_plus50):
     """0x0306B9F0 static branch predicate, NOT a movement-timing model."""
     return mode_helper_result == 0 and (packet_plus50 & 0x20) == 0
+
+
+def inline_query_bit10(initial_packet_flags):
+    """Read-only expression for vt+0x80 of the just-constructed inline task."""
+    return bool(initial_packet_flags & 0x10)
 
 
 def time_gate_open(current_tick, task_start_tick):
@@ -201,6 +219,10 @@ def audit(exe):
             # The packet builder at 0x02F5F8DC is a valid leaf, not a pdata entry.
             if owner is None and 0x02F5F8DC<=rva<0x02F5F963:
                 bounds=(0x02F5F8DC,0x02F5F963)
+            elif owner is None and 0x008F4DD0<=rva<0x008F4DDD:
+                bounds=(0x008F4DD0,0x008F4DDD)
+            elif owner is None and 0x02D99F74<=rva<0x02D9A06C:
+                bounds=(0x02D99F74,0x02D9A06C)
             elif owner is not None:bounds=owner[:2]
             else:raise ValueError('UNWIND_OWNER_UNRESOLVED:'+hex(rva))
             if bounds not in instructions:
@@ -232,6 +254,7 @@ def audit(exe):
                 'member_inline_task':'0x4a8','member_task_slot':'0x490','member_task_active':'0x5c0'},
             'receiver_mode0_without_bit20_goes_inline_slot':True,
             'inline_task_update':{'vtable':'0x3905e18','slot':'0x10','target':'0x2f83b24'},
+            'inline_task_plus80_query':'bit4 of task+0x90 copied packet flags; 0x07/0x0e -> 0 at installation, no future mutation excluded',
             'next_handoff':'task -> member +0x328 action variants; final motor goal still unknown',
             'runtime_shift_branch_observed':False,
             'same_unit_member_packet_kind_divergence_observed':False,
