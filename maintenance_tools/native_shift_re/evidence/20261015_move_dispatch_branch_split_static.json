@@ -1,0 +1,47 @@
+{
+  "schema": "bsc.n1.wh3_original_dispatch_branch_split.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof": "EXACT_ORIGINAL_EXE_STATIC",
+  "instruction_opcode_and_start_count": 37,
+  "e8_edge_count": 17,
+  "jcc_jmp_count": 5,
+  "dispatch_entry": "0x030323C8",
+  "queued_branch": {
+    "entry": "0x030326A2",
+    "queue_insert": "0x030326BE",
+    "slot_ctor": "0x030326E4",
+    "exit_jump": "0x030326E9",
+    "jump_target": "0x0303296A",
+    "can_reach_direct_group_builder": false
+  },
+  "immediate_group_branch": {
+    "entry": "0x030326EE",
+    "call_group": "0x03032965",
+    "build_group": "0x0302DB8E",
+    "configure_route": "0x0302DBC4",
+    "fanout_member": "0x0302DBDB",
+    "can_reach_queue_insert": false,
+    "conditional": true
+  },
+  "successor_slot_activation": {
+    "function": "0x03025D70",
+    "route_config_calls": [
+      "0x03025E91",
+      "0x03026022"
+    ],
+    "current_group_read": "0x03025FB8",
+    "group_spatial_source": "group+0xBF0 via 0x02D4BE38 and 0x0311D0CC",
+    "new_short_task_constructor": "0x030260AF",
+    "no_direct_group_constructor_call_in_function": true
+  },
+  "short_task_callback": {
+    "late_current_group_read": "0x02F563FD",
+    "member_dispatch": "0x02F56404"
+  },
+  "local_private_original_exe_audit": "37/37 opcode/starts, 17/17 E8, 5/5 branches PASS",
+  "local_unittest": "11/11 PASS including one private EXE test",
+  "public_ci_contract_tests": "11 tests independent + 1 optional private EXE (expected SKIP without EXE)",
+  "player_shift_key_instance_bound": false,
+  "observed_shift_member_motor_goal_mismatch": false,
+  "gameplay_patch_authorized": false
+}
