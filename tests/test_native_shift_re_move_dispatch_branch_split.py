@@ -9,7 +9,7 @@ import audit_move_dispatch_branch_split as m
 class MoveBranchSplit(unittest.TestCase):
  def test_manifest_counts(self):
   q=m.load()
-  self.assertEqual(tuple(len(q[x]) for x in ('PIN','CALL','JMP')),(34,16,5))
+  self.assertEqual(tuple(len(q[x]) for x in ('PIN','CALL','JMP')),(37,17,5))
  def test_enqueue_branch_ends_before_group_call(self):
   q=m.load()
   self.assertEqual(q['JMP'][0x030326E9],0x0303296A)
@@ -46,6 +46,11 @@ class MoveBranchSplit(unittest.TestCase):
   self.assertEqual(q[0x03025FC6],0x02D4BE38)
   self.assertEqual(q[0x03025FEE],0x0118309C)
   self.assertEqual(q[0x03025FFB],0x00531E54)
+ def test_group_spatial_reference_source(self):
+  p=m.load()['PIN'];q=m.load()['CALL']
+  self.assertEqual(p[0x02D4BE3F].hex(),'4881c1b8000000')
+  self.assertEqual(q[0x02D4BE4B],0x0311D0CC)
+  self.assertEqual(0xb38+0xb8,0xbf0)
  def test_callback_late_reads_live_root_group(self):
   p=m.load()['PIN']
   self.assertEqual(p[0x02F563F4].hex(),'488b4b08')
@@ -68,8 +73,8 @@ class MoveBranchSplit(unittest.TestCase):
  @unittest.skipUnless(os.getenv('WH3_903_EXE'),'private original EXE not included in GitHub CI')
  def test_private_exact_binary(self):
   result=m.audit(Path(os.environ['WH3_903_EXE']))
-  self.assertEqual(result['opcode_instruction_starts'],34)
-  self.assertEqual(result['direct_e8'],16)
+  self.assertEqual(result['opcode_instruction_starts'],37)
+  self.assertEqual(result['direct_e8'],17)
   self.assertEqual(result['conditional_unconditional_jumps'],5)
   self.assertFalse(result['queue_branch_can_reach_group_rebuild_call'])
   self.assertFalse(result['native_gameplay_patch_authorized'])
