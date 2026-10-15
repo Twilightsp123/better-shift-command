@@ -1,6 +1,10 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**第 3 轮 / 2026-10-15 原生成员任务生命周期（最新）：** [类型化 packet 0x07/0x0E、inline task +0x4A8 / +0x5C0 与 action +0x328](N1_903_B_MEMBER_PACKET_TASK_LIFECYCLE_20261015.md)。固定 SHA 原始 EXE 审计 72/72 指令及机码、23/23 E8、7/7 虚表，本地 10/10 测试（包含真实 EXE）；静态证据不证明玩家 Shift 命中，未授权 gameplay patch。源码 [audit_b_member_packet_task_lifecycle.py](../../maintenance_tools/native_shift_re/audit_b_member_packet_task_lifecycle.py)，测试 [test_native_shift_re_b_member_packet_task_lifecycle.py](../../tests/test_native_shift_re_b_member_packet_task_lifecycle.py)。
+
+
+
 **Latest read-only member packet audit (2026-10-15):** [N1_903_B_MEMBER_PACKET_RECEIVER_FLAGS_20261015.md](N1_903_B_MEMBER_PACKET_RECEIVER_FLAGS_20261015.md) records the conditional path `aux+0x78 → node+0x70 → 0x03265B24 → member virtual+0x368`, the `packet+0x50 & 0x20` gate plus mode helper, and correction that the variable constructor ORs `0x06` rather than unconditionally assigning it. [Audit](../../maintenance_tools/native_shift_re/audit_b_member_packet_receiver_flags.py) / [test](../../tests/test_native_shift_re_b_member_packet_receiver_flags.py) — 10 original-EXE byte guards, 4 local tests including private EXE, no native gameplay patch.
 
 > **PRODUCT CAUSE CORRECTION:** [PRODUCT_CAUSE_CORRECTION_20261010.md](PRODUCT_CAUSE_CORRECTION_20261010.md) is mandatory first reading. **Native Shift MOVE does not have a proven full-stop defect.** The user-observed issue is that **soldier models in one unit card turn/arrive asynchronously**, leading to mixed facing and internal crowding. The conspicuous MOVE→ATTACK pause was **our legacy Lua Controller regression**, not an established vanilla bug. Previous "braking-first" assumptions in older N1 reports are superseded as design priorities; their disassembly remains research evidence.
