@@ -4,7 +4,7 @@
 
 目标是用户给出的固定 Win64 原始 `Warhammer3.exe`，SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a`；所有地址为 PE ImageBase `0x140000000` 下的 RVA。
 
-第13轮对原始 EXE 的只读验证：**39/39 完整指令字节和 GNU objdump 真正指令起点、17/17 E8 直接调用、6/6 E9/JCC 目标**，再用同一 unwind 所属函数内的静态 CFG 可达性检验确认两路互斥。本地完整验证 **12/12 PASS（其中1项使用用户原始 EXE）**。GitHub 新增的合同测试有12项，其中1项在没有私有 EXE 的公开 CI 必须 SKIP。这里的证明等级是 **EXACT_ORIGINAL_EXE_STATIC + SYNTHETIC_CONTRACT**；并非用户 RMB/Shift 键位的运行时辨识、不是物理碰撞根因验证，也没有 Native gameplay patch。
+第13轮对原始 EXE 的只读验证：**41/41 完整指令字节和 GNU objdump 真正指令起点、17/17 E8 直接调用、6/6 E9/JCC 目标**，再用同一 unwind 所属函数内的静态 CFG 可达性检验确认两路互斥。本地完整验证 **13/13 PASS（其中1项使用用户原始 EXE）**。GitHub 新增的合同测试有12项，其中1项在没有私有 EXE 的公开 CI 必须 SKIP。这里的证明等级是 **EXACT_ORIGINAL_EXE_STATIC + SYNTHETIC_CONTRACT**；并非用户 RMB/Shift 键位的运行时辨识、不是物理碰撞根因验证，也没有 Native gameplay patch。
 
 ## 一、纠正此前可能误追的 group 代际假设
 
@@ -47,7 +47,7 @@
 
 ## 四、可复现证据与维护
 
-- `maintenance_tools/native_shift_re/move_dispatch_branch_split_manifest.txt`：39 个原始指令编码、17 条 E8、6 条 JCC/E9；
+- `maintenance_tools/native_shift_re/move_dispatch_branch_split_manifest.txt`：41 个原始指令编码、17 条 E8、6 条 JCC/E9；
 - `maintenance_tools/native_shift_re/audit_move_dispatch_branch_split.py`：固定完整 SHA、unwind、原始字节、objdump 指令起点、真实分支目标、函数内 CFG 可达性、group/shortTask 静态链；
 - `tests/test_native_shift_re_move_dispatch_branch_split.py`：合成 CFG 与反例、错误 SHA fail-closed、禁止覆盖原始 EXE、私有真 EXE 完整检查；
 - 本地报告和 JSON 均没有原始游戏 EXE、DLL 或用户运行时指针。
@@ -56,7 +56,7 @@
 
 ## 五、第13轮继续：slot+0x9A bit2 的命令描述符来源与分支反证
 
-新增独立只读审计 `audit_move_slot_bit2_provenance.py`：固定用户 EXE **19/19 原始指令字节及 objdump 起点、2/2 E8、3/3 JCC** PASS，另检查无 unwind 叶函数结尾。两个本地审计模块合计 **22/22 单元测试通过**（含两项真实 EXE）。公开仓库中的两个测试模块合计定义 23 项，其中两项需要用户私有 EXE，不能把没有 EXE 的 CI 当原码实测。
+新增独立只读审计 `audit_move_slot_bit2_provenance.py`：固定用户 EXE **19/19 原始指令字节及 objdump 起点、2/2 E8、3/3 JCC** PASS，另检查无 unwind 叶函数结尾。两个本地审计模块合计 **23/23 单元测试通过**（含两项真实 EXE）。公开仓库中的两个测试模块合计定义 24 项，其中两项需要用户私有 EXE，不能把没有 EXE 的 CI 当原码实测。
 
 此处已经闭合真实 typed 字段来源：
 
@@ -69,3 +69,14 @@
 这是一条实际的 `命令描述符旗标 → 可能的命令几何归一化 → MOVE slot 旗标 → 后继转向几何输入选择` 的有类型数据链。**它不是键盘 Shift 键身份、不是哪个兵模最终目标在游戏内出错的证据。** 修改 bit2 可能直接改变原生路线/避障行为，当前禁止 gameplay patch。
 
 新增源码 `maintenance_tools/native_shift_re/audit_move_slot_bit2_provenance.py`、测试 `tests/test_native_shift_re_move_slot_bit2_provenance.py`，原始 EXE/包含进程地址的 JSONL 不提交 GitHub。下一步沿这两个 bit2 分支比较具体成员目标记录与动作代际，优先查是否存在生成不同但成员未同步切换的目标。
+
+## 六、同一个路线配置器的两种 R8 朝向参数来源（当前优先）
+
+继续在 `0x03025D70` 同一原始 unwind 函数的两条分支检查 Route Configurator 的参数来源：
+
+- `slot+0x9A & 0x02 != 0`：在 `0x03025E76 MOVZX R8D,WORD PTR [MOVEslot+0x98]` 直接使用槽位保存的朝向码。此后至 `0x03025E91 CALL 0x0301287C` 没有新的 R8 写入（按原始解码顺序核查）。
+- `slot+0x9A & 0x02 == 0`：`0x03025E69 JE 0x03025F79` 进入当前 group 空间坐标采样；经 `0x02D4BE38 → 0x0311D0CC` 得到 X/Z，`0x0118309C` 计算角度并由 `0x00531E54` 转换，`0x03026015 MOVZX R8D,AX` 交给 **同一个** `0x03026022 CALL 0x0301287C`。此后至 CALL 同样无 R8 写入。
+
+由此，**在后继队列 MOVE 的这两个具体条件分支中，首次明确对照的原生路线几何参数差异就是 R8 朝向码的来源**：预存的 slot 方向 vs 当前 group 空间位置导出的方向。旧任务状态继承可能影响传入的其它字段，但本节不把它们等同于上述 bit2，也不把 bit2 当用户 Shift 键。
+
+新增两处原始字节及 decoded instruction-start 验证（`0x03025E76`、`0x03026015`），完整第一审计现为 **41/41 opcode/starts、17/17 E8、6/6 JCC/E9**；两审计本地共 **23/23 PASS**（2 项使用私有原始 EXE）。下一步优先验证这两个 R8 输入最终形成的 `UnitRoot+0x270` 路线描述符是否在成员 `record[i]` 的空间坐标/朝向处造成错误的成员交叉；现在不能直接判定其中一个更“正确”，也不能统一设置 flag。
