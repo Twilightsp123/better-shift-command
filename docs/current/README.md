@@ -1,6 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**第13轮进一步闭合 MOVE 路线标志来源：** [队列和即时 group 两分支的 CFG、MOVE slot+0x9A bit2 由命令描述符+0x5A 搬运和按条件 OR 0x06 的原码证明](N1_903_QUEUED_VS_IMMEDIATE_GROUP_BRANCH_20261015.md)。新审计 39/39 opcode、17/17 E8、6/6 JCC/E9，加独立字段审计 19/19 opcode、2/2 E8、3/3 JCC，原始私有 EXE 本地联合 **22/22 测试 PASS**。只有 slot bit2=0 才使用当前 group+0xBF0 位置基准来计算这一分支的朝向。新增 [位来源审计](../../maintenance_tools/native_shift_re/audit_move_slot_bit2_provenance.py) 和 [回归](../../tests/test_native_shift_re_move_slot_bit2_provenance.py)；未证明玩家 Shift 对应或挤压根因，不授权 patch。
+
 **2026-10-15 第13轮（最新）：** [原生 MOVE 入队与即时 Group 重建的互斥分支、后继 group+0xBF0 朝向数据源](N1_903_QUEUED_VS_IMMEDIATE_GROUP_BRANCH_20261015.md)。固定 SHA 原始 EXE **37/37 指令起点、17/17 E8、5/5 JCC/E9**，本地 **11/11** 测试（包含真实原始 EXE）PASS。确认常规队列分支通过 `0x030326E9` 跳过即时 `0x0302DB44`；槽位激活才有条件计算当前 group 空间数据并重配路线。[原码 manifest](../../maintenance_tools/native_shift_re/move_dispatch_branch_split_manifest.txt) · [审计器](../../maintenance_tools/native_shift_re/audit_move_dispatch_branch_split.py) · [回归](../../tests/test_native_shift_re_move_dispatch_branch_split.py)。注意这不是 RMB/Shift 键位直接一一对应，也不是已确认的挤压根因。
 
 **第12轮新对象身份证据（追加）：** [新 MOVE 槽+0xA0 → 新 shortTask+0x80 的精确地址别名](N1_903_RMB_SHIFT_QUEUE_STATE_LIFECYCLE_20261015.md)。原始 EXE 36/36 opcode/instruction starts、6/6 E8、Win64 stack alias 校验；总体本地 40/40 回归（4 项真实私有 EXE），说明后继 shortTask 可以读取继承 bigTask，无需假设旧 shortTask 复活。 [代码](../../maintenance_tools/native_shift_re/audit_move_slot_shorttask_binding.py) · [测试](../../tests/test_native_shift_re_move_slot_shorttask_binding.py)。静态证据，尚非 Shift 挤压因果或 gameplay fix。
