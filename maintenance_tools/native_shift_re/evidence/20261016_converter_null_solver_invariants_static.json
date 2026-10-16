@@ -1,0 +1,51 @@
+{
+  "schema": "bsc.n1.route_converter_null_and_solver_invariant.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof": "EXACT_ORIGINAL_EXE_STATIC",
+  "local_independent_audits": [
+    {
+      "pin_sites": 76,
+      "e8": 10,
+      "branches": 9
+    },
+    {
+      "pin_sites": 35,
+      "e8": 2,
+      "branches": 6
+    }
+  ],
+  "local_unittest": {
+    "passed": 22,
+    "failed": 0,
+    "private_original_exe_tests": 2,
+    "public_without_exe_expected_skipped": 2
+  },
+  "converter": {
+    "entry_rva": "0x030FDA9C",
+    "final_return": "0x030FE0B8 MOV RAX,RBX",
+    "zero_candidate_branch": "0x030FDDC2 JBE 0x030FDEA3",
+    "allocator_failure_branch": "0x030FDEF1 JE 0x030FDF6F"
+  },
+  "solver": {
+    "entry_rva": "0x03125A1C",
+    "same_container_base": "0x04360378",
+    "container_count_offset": "+0x04",
+    "return2_requires_positive_count_at_check": true,
+    "return1_uses_earlier_nonempty_iteration": true,
+    "return1_virtual_method": "+0x18 of prior virtual+0x08-returned object R15",
+    "return1_can_clear_count_proven": false
+  },
+  "manager": {
+    "converter_call": "0x03129092",
+    "route_write": "0x03129097",
+    "handled_write": "0x0312909E",
+    "non_null_check_between_writes": false
+  },
+  "unknowns": {
+    "solver1_and_zero_count_joint_runtime": true,
+    "concurrent_writers": true,
+    "actual_shift_route_null": true,
+    "physical_crowding_cause": true
+  },
+  "patch_authorized": false
+}
