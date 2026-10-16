@@ -1,0 +1,44 @@
+{
+  "schema": "bsc.n1.member_goal_world_frame_consumer.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof": "EXACT_ORIGINAL_EXE_STATIC + SYNTHETIC_GEOMETRY_COUNTEREXAMPLE",
+  "verified_original_opcode_starts": 98,
+  "verified_E8_targets": 7,
+  "verified_JCC_targets": 6,
+  "local_independent_regression": "15/15 PASS including private original EXE",
+  "public_repository_test_definitions": 16,
+  "world_goal_chain": [
+    "0x030720D1/0x030723CC: RDX=&member+0x838 -> 0x0311954C",
+    "0x0311963A writes member+0x1e0, 0x03119658 writes member+0x1f0",
+    "0x030822F9 -> 0x03054B84 member conditional movement branch",
+    "0x0305501D reads &member+0x1e0; 0x03055029 -> 0x0311CED4",
+    "0x0311CEDB reads optional member+0x1f0 anchor; if nonnull 0x0311CEE8 -> 0x02F38640 uses anchor+0x18 affine matrix",
+    "0x03055032..0x03055060 subtracts member current xyz for motion direction/velocity checks"
+  ],
+  "anchor_math": {
+    "translation_offsets": [
+      "+0x00",
+      "+0x04",
+      "+0x08"
+    ],
+    "matrix_offsets": "+0x20..+0x40, 3x3",
+    "no_anchor": "stored xyz copied as-is",
+    "synthetic_counterexample": "identical local (2,0,0) => world (2,0,0) or (-2,0,0) with opposing frames",
+    "real_shift_anchor_mismatch_observed": false
+  },
+  "extra_member_goal_writer": {
+    "call_sequence": "0x03082301 -> 0x03088808 -> (guards) 0x03088A49 -> 0x03060D74",
+    "store_sites": [
+      "0x03060E5A",
+      "0x03060E66"
+    ],
+    "gate": "member state 0x78 or 0x79, extra valid state and random threshold",
+    "normal_queued_shift_uses_this_proven": false
+  },
+  "limitations": {
+    "world_target_member_pair_runtime_confirmed": false,
+    "frame_generation_mismatch_confirmed": false,
+    "steering_or_collision_cause_confirmed": false,
+    "gameplay_patch_authorized": false
+  }
+}
