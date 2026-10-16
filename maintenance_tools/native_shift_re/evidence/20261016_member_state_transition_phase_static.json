@@ -1,0 +1,39 @@
+{
+  "schema": "bsc.n1.member_state_transition_same_vtable_round26.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof": "EXACT_ORIGINAL_EXE_STATIC",
+  "checks": {
+    "opcode_starts": 142,
+    "e8_edges": 15,
+    "jump_targets": 14,
+    "same_typed_member_vtable_slots": 5,
+    "local_tests_pass": 18,
+    "local_original_exe_test": true,
+    "repository_tests_defined": 19,
+    "remote_CI_confirmed": false
+  },
+  "typed_table": "0x0390D4F8",
+  "member_flag_writers": {
+    "virtual+0x128": "0x0307FB0C set 0x06",
+    "virtual+0x130": "0x0307FC3C clear bit4, set bit2",
+    "virtual+0x138": "0x0307FB50 clear bit4, set bits 0x0A"
+  },
+  "member_action_state": {
+    "virtual+0x538": "0x0306A100 writes member+0x324=4",
+    "virtual+0x550": "0x0306A53C guarded writes member+0x324=16"
+  },
+  "conditional_reset": "0x03068154 four conditional sites at 0x03068235/6B/93/AF",
+  "tick_order": {
+    "flag_reads": "0x03082268/7D/81 before movement branch",
+    "inline_action": "0x030822D2 -> 0x03080F4C; 0x030822E4 skips neighbor",
+    "neighbor": "0x030822F9 -> 0x03054B84, 0x03082301 -> 0x03088808",
+    "later_optional_reset": "0x03082399 -> 0x03068154; cannot change already chosen branch retroactively"
+  },
+  "important_negative": "state+0x324=0 is insufficient to imply neighbor path: bit8, bit4 and B20 gates are independent",
+  "unknown": {
+    "actual_player_shift_instance_bound": false,
+    "member_pair_phase_split_runtime": false,
+    "causal_crowding_source": false,
+    "patch_authorized": false
+  }
+}
