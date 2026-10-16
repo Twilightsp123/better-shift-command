@@ -256,3 +256,9 @@ Two SHA-pinned read-only modules for original EXE `518c4f292f275142df13b96b9db70
 - Combined **22/22 tests PASS on the private original EXE in the independent standalone local audit** (2 exact-file checks); public CI must skip game EXE checks, and CI status itself is not confirmed.
 
 Important: `0x030FDA9C` can follow a conditional count-zero path returning RBX=0, but actual coexistence of solver nonzero and zero count is NOT proved. `0x03129092` stores converter result at node+0x70 and marks node+0x08 handled without a null check. This does NOT establish real Shift NULL, soldier crowding, or patch eligibility. See [current technical report](../../docs/current/N1_903_CONVERTER_NULL_RETURN_GATES_20261016.md). Do not edit original EXE or publicize runtime pointers.
+
+## 2026-10-16 Round 20 — Solver converter scratch-record provenance
+
+Read-only exact original SHA audit: 60/60 pinned opcodes and decoded instruction starts, 8/8 E8, 3/3 JCC, 11/11 local standalone tests PASS (one private original EXE). Repository files: `solver_temp_record_provenance_pins_20261016.txt`, `audit_solver_temp_record_provenance_20261016.py`, and `tests/test_native_shift_re_solver_temp_record_provenance_20261016.py` (8 CI-safe tests including one optional private binary audit). Detailed Chinese report: [current study](../../docs/current/N1_903_SOLVER_TEMP_RECORD_TYPE_PROVENANCE_20261016.md).
+
+`0x030F5AE4` builds converter-local `[RBP+0x60]`; `0x030FDD78` passes this work record to solver R8. Its `+8/+0xC` come from separate 32-bit values, whereas the solver's gated `0x03125B0B` interprets `work+8` as a QWORD pointer before virtual+0x08, then virtual+0x18 on the returned R15 object. This path's runtime reachability and typed vtable are **unproved**. The original B record+0=NULL cannot be substituted for work+0. No gameplay patch or user retest; do not treat speculative empty-route result as confirmed bug.
