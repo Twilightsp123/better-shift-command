@@ -246,3 +246,13 @@ Read-only strict SHA auditor `audit_b_fallback_manager_retry_20261016.py` valida
 Fallback `0x030ECA50` records `+0x48=-1` and `+0x4C=0`; node constructor `0x031219B0` creates an unhandled node (`+0x04=1,+0x08=0,+0x70=NULL`) in manager `+0x2D0`. Separate manager tick `0x03128E80` calls `0x0311BE18`; the -1 sentinel resolves `group+0xA10` UnitRoot status through leaf `0x03037A48`. If result nonzero and the local one-attempt budget is available, `0x030FDA9C` creates route output for `node+0x70` and marks `node+0x08=1`. This route does **not** require mode helper to change to1, although it may run on a different update cycle. If converter hypothetically returns NULL, handled flag alone does not protect the B consumer, but no real Shift NULL/crowding causal proof exists. See [Chinese findings](../../docs/current/N1_903_B_FALLBACK_MANAGER_RETRY_20261016.md).
 
 Run `python maintenance_tools/native_shift_re/audit_b_fallback_manager_retry_20261016.py --exe PRIVATE/Warhammer3.exe --out PRIVATE/retry.json`; synthetic tests: `python -m unittest discover -s tests -p test_native_shift_re_b_fallback_manager_retry.py -v`. No EXE committed; no patch.
+
+## 2026-10-16 Round 19 — route converter result and candidate-count precondition
+
+Two SHA-pinned read-only modules for original EXE `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a`:
+
+- `converter_return_guard_manifest_20261016.txt` and `audit_converter_return_contract_20261016.py` verify 76/76 decoded machine instructions, 10/10 E8 and 9/9 branch destinations; `tests/test_native_shift_re_converter_return_contract_20261016.py` tests conditional zero candidate return and manager's handled flag without claiming real Shift execution.
+- `solver_candidate_invariant_pins_20261016.txt` and `audit_solver_candidate_invariant_20261016.py` verify 35/35 instructions, 2/2 E8 and 6/6 branches; `tests/test_native_shift_re_solver_candidate_invariant_20261016.py` separates native solver result2 (positive candidate count required) from result1 (earlier positive count, later virtual+0x18 may change state).
+- Combined **22/22 tests PASS on the private original EXE in the independent standalone local audit** (2 exact-file checks); public CI must skip game EXE checks, and CI status itself is not confirmed.
+
+Important: `0x030FDA9C` can follow a conditional count-zero path returning RBX=0, but actual coexistence of solver nonzero and zero count is NOT proved. `0x03129092` stores converter result at node+0x70 and marks node+0x08 handled without a null check. This does NOT establish real Shift NULL, soldier crowding, or patch eligibility. See [current technical report](../../docs/current/N1_903_CONVERTER_NULL_RETURN_GATES_20261016.md). Do not edit original EXE or publicize runtime pointers.
