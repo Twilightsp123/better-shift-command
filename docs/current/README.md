@@ -1,6 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**2026-10-16 第20轮（最新）：** [求解器特殊虚调用使用转换器临时工作记录而非普通 B 原始节点的类型纠错](N1_903_SOLVER_TEMP_RECORD_TYPE_PROVENANCE_20261016.md)。原始 EXE **60/60 指令字节与起点、8/8 E8、3/3 JCC，独立本地 11/11 测试 PASS（含私有 EXE）**。`0x030F5AE4` 写 work+0、+8/+C，`0x03125A1C` 的 R8 指向此 work，不能将原始 `node+0x20` 的字段零值套用，也不能声称 result1 virtual+0x18 会清候选数。低优先级 NULL 路线疑点暂缓，回到相邻 member 目标与 steering 的同实例验证。 [审计源码](../../maintenance_tools/native_shift_re/audit_solver_temp_record_provenance_20261016.py) · [回归](../../tests/test_native_shift_re_solver_temp_record_provenance_20261016.py)。未授权 gameplay patch。
+
 **2026-10-16 第19轮（最新）：** [转换器 `0x030FDA9C` 条件性 NULL 返回与前置求解器候选计数约束](N1_903_CONVERTER_NULL_RETURN_GATES_20261016.md)。固定 SHA 原始 EXE 两组只读验证 **76/76+35/35 指令、10/10+2/2 E8、9/9+6/6 分支**，本地 **22/22 PASS（两项私有原始 EXE）**。重要反证：求解器返回2需要候选数非零；返回1仍存在待核查的 virtual+0x18 对容器的影响。空路线的合法实机发生、Shift 身份及挤压因果均未证明；**不授权直接更改节点有效位**。[转换器审计](../../maintenance_tools/native_shift_re/audit_converter_return_contract_20261016.py) · [求解器审计](../../maintenance_tools/native_shift_re/audit_solver_candidate_invariant_20261016.py)。
 
 **2026-10-16 第18轮（最新）：** [普通 B fallback 节点的 manager+0x2D0 重算、UnitRoot 哨兵验证与每次调用一次转换预算](N1_903_B_FALLBACK_MANAGER_RETRY_20261016.md)。固定 SHA 原始 EXE **78/78 指令起点、9/9 E8、9/9 JCC、1/1 B 虚表，本地 13/13 回归（含私有原始 EXE）PASS**。`record+0x48=-1` 使后续验证器从当前 Group/UnitRoot 状态取得数值，**不需要 mode helper 必须变为1** 才有后续转换机会。管理器标记 `node+0x08=1` 前没有要求 `node+0x70` 非空，空路线只能作为条件性假设而非已证的挤压错误。[审计](../../maintenance_tools/native_shift_re/audit_b_fallback_manager_retry_20261016.py) · [回归](../../tests/test_native_shift_re_b_fallback_manager_retry.py)。不授权 gameplay patch。
