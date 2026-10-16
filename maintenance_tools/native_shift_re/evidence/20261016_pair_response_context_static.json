@@ -1,0 +1,27 @@
+{
+  "schema": "bsc.n1.pair_response_context_provenance.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof": "EXACT_ORIGINAL_EXE_STATIC",
+  "validated_instruction_starts": 31,
+  "real_direct_e8_calls": 5,
+  "calls": [
+    "0x030557BC",
+    "0x0307B219",
+    "0x0307B3DD",
+    "0x0324F503",
+    "0x03260D11"
+  ],
+  "common_source_expression": "read [source+0x440], then [result+0xF0], pass as RDX",
+  "member_case_expression": "0x03054C86 &member+0x58 -> 0x03055771 source pointer; other callers have distinct source provenance",
+  "receiver": "0x030800F7 preserves RDX; 0x0308024D creates &context+0x1D8; 0x03080257 invokes virtual+0x10",
+  "direct_member_speed_goal_store_found_in_this_handler": false,
+  "indirect_virtual_target_typed": false,
+  "indirect_virtual_speed_side_effect_proven": false,
+  "special_Shift_input_identity_proven": false,
+  "independently_executed_tests": {
+    "passed": 9,
+    "failed": 0,
+    "used_true_original_exe": true
+  },
+  "patch_authorized": false
+}
