@@ -1,0 +1,43 @@
+{
+  "schema": "bsc.n1.member_tick_split_and_typed_component.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof": "EXACT_ORIGINAL_EXE_STATIC",
+  "audit": {
+    "instruction_starts": 66,
+    "e8_targets": 8,
+    "branch_targets": 8,
+    "component_vtable_slots": 1,
+    "constructor_lea_sites": 2,
+    "unwind_owner_functions": 6,
+    "private_local_tests_passed": 14
+  },
+  "mutually_exclusive_member_tick": {
+    "flags_field": "member+0x108",
+    "bit0x08": "vtable+0x498; jmp 0x030823A9",
+    "bit0x04_and_state4_or16": "0x030822D2 -> 0x03080F4C(&member+0x328), then jmp 0x030823A9",
+    "bit0x04_clear_and_B20_null": "0x030822F9 -> 0x03054B84 then 0x03082301 -> 0x03088808",
+    "bit0x04_clear_and_B20_nonnull": "member vtable+0x490 skip neighbor"
+  },
+  "component": {
+    "vtable": "0x03ACD0D8",
+    "vtable_plus_0x10": "0x03082CD4",
+    "constructor_installs": [
+      "0x0304E82A/3B",
+      "0x0304FFB9/C3"
+    ],
+    "inner_calls": [
+      "0x03082E40 -> 0x03085AC0",
+      "0x03082E6D -> 0x03085AC0"
+    ],
+    "writer": "0x03085D89: component+0xE0",
+    "different_root": "0x03085D06: [component+0x08] -> external object; 0x03085D0A/12 read its +0xE0/+0xE8",
+    "component_plus_e4_is_byte_flags": true
+  },
+  "not_proven": [
+    "same unit Shift member states diverge at same tick",
+    "this type gate causes crowding",
+    "component+0xE0 equals member velocity",
+    "native patch safe"
+  ],
+  "gameplay_patch_authorized": false
+}
