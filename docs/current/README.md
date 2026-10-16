@@ -1,6 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**2026-10-16 第21轮（最新）：** [从 B 路线发包直追到逐成员 action 锁存与最终 motor goal 提交门槛](N1_903_MEMBER_GOAL_COMMIT_GATES_20261016.md)。固定 SHA 原始 EXE **60/60 指令/起点、5/5 E8、8/8 JCC、0.01f 阈值**，验证最终目标函数 8 个直接调用点和路线安装器 25 个直接调用点，本地 12/12 回归 PASS。已经明确每名士兵的目标接收还受各自 action/goal 条件影响，但未证明这导致 Shift 折返拥挤。 [只读审计](../../maintenance_tools/native_shift_re/audit_member_goal_commit_gates_20261016.py) · [回归](../../tests/test_native_shift_re_member_goal_commit_gates_20261016.py)。不授权 gameplay patch。
+
 **2026-10-16 第20轮（最新）：** [求解器特殊虚调用使用转换器临时工作记录而非普通 B 原始节点的类型纠错](N1_903_SOLVER_TEMP_RECORD_TYPE_PROVENANCE_20261016.md)。原始 EXE **60/60 指令字节与起点、8/8 E8、3/3 JCC，独立本地 11/11 测试 PASS（含私有 EXE）**。`0x030F5AE4` 写 work+0、+8/+C，`0x03125A1C` 的 R8 指向此 work，不能将原始 `node+0x20` 的字段零值套用，也不能声称 result1 virtual+0x18 会清候选数。低优先级 NULL 路线疑点暂缓，回到相邻 member 目标与 steering 的同实例验证。 [审计源码](../../maintenance_tools/native_shift_re/audit_solver_temp_record_provenance_20261016.py) · [回归](../../tests/test_native_shift_re_solver_temp_record_provenance_20261016.py)。未授权 gameplay patch。
 
 **2026-10-16 第19轮（最新）：** [转换器 `0x030FDA9C` 条件性 NULL 返回与前置求解器候选计数约束](N1_903_CONVERTER_NULL_RETURN_GATES_20261016.md)。固定 SHA 原始 EXE 两组只读验证 **76/76+35/35 指令、10/10+2/2 E8、9/9+6/6 分支**，本地 **22/22 PASS（两项私有原始 EXE）**。重要反证：求解器返回2需要候选数非零；返回1仍存在待核查的 virtual+0x18 对容器的影响。空路线的合法实机发生、Shift 身份及挤压因果均未证明；**不授权直接更改节点有效位**。[转换器审计](../../maintenance_tools/native_shift_re/audit_converter_return_contract_20261016.py) · [求解器审计](../../maintenance_tools/native_shift_re/audit_solver_candidate_invariant_20261016.py)。
