@@ -1,0 +1,34 @@
+{
+  "schema": "bsc.n1.member_neighbor_pair_response.v1",
+  "date": "2026-10-16",
+  "exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof": "EXACT_ORIGINAL_EXE_STATIC + SYNTHETIC_FILTER_TRUTH_TABLE",
+  "checks": {
+    "instruction_starts": 122,
+    "e8_edges": 18,
+    "jcc_edges": 8,
+    "unwind_functions": 5,
+    "independent_local_unittests_passed": 12,
+    "local_actual_original_exe_tests": 1
+  },
+  "candidate_producer": "0x03054DB3 calls 0x03062988; queries 0x03062688 and populates returned candidate vector",
+  "type_filter": "0x0306288D..0x030628AD: if bitmask filter selected, same affiliation candidate requires common 0x01, differing affiliation requires common 0x02 at member+0x6C",
+  "candidate_selected": "0x03054DEC->0x030765B0, 0x03054DF7->0x03068B98, compare affiliation+0x80, class+0x74, horizontal positions+0x88/+0x90, velocity+0xE0/+0xE8; 0x03054F26 stores selected pointer in RSI",
+  "world_goal_branch": "0x03055029 calls 0x0311CED4 and compares resolved world xyz - current position; this is a conditional branch",
+  "conditional_response_calls": [
+    "0x03055647->0x0324EB24",
+    "0x0305566A->0x0324E9DC",
+    "0x03055688->0x0324E814",
+    "0x030556A1->0x0324EE00"
+  ],
+  "pairwise_response_call": "0x030557BC->0x030800C4; member RCX, selected neighbor R8=RSI, context RDX, packed relative motion",
+  "virtual_output_boundary": "0x0308024D/257 -> object [context+0x1D8] virtual+0x10; target vtable/velocity effects untyped",
+  "unknowns": {
+    "player_shift_instance_bound": false,
+    "same_group_epoch_neighbor_pair_bound": false,
+    "world_goals_matched_runtime": false,
+    "pair_response_writes_velocity_proven": false,
+    "physical_crowding_root_cause_proven": false
+  },
+  "gameplay_patch_authorized": false
+}
