@@ -1,0 +1,31 @@
+{
+  "schema": "bsc.n1.r37_b2_converted_route_dual_phase.v1",
+  "proof": "EXACT_SHA_NEW_EXE_NATIVE_STATIC",
+  "sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "file_size": 232531920,
+  "imagebase": "0x140000000",
+  "full_pinned_instruction_starts": 183,
+  "unwind_functions": 9,
+  "no_unwind_leafs": [
+    "old_root_route_release_leaf",
+    "B2_base_ctor_leaf",
+    "B2_record_leaf"
+  ],
+  "direct_e8_target_checks": 23,
+  "control_transfer_target_checks": 9,
+  "B2_vtable_slots_checked": 2,
+  "B2_identity": "B2 constructor installs 0x03AE5800; virtual+0x08 0x03276970, +0x10 0x032863A0",
+  "B2_initial_route": "shortTask converter 0x02F545DA node+0x70 -> 0x03268DD4 record+0x28 -> B2 ctor +0x60",
+  "root_route_holds_node_ref": "0x02F3BB44 stores node at record+0x18 and increments node+0x04, publishes record in UnitRoot+0x270; prior record cleanup 0x0301E890 conditionally decrements node+0x04",
+  "B2_initial_route_has_independent_ref_proven": false,
+  "B2_constructor_R11_live_across_direct_helper": "0x030C861C leaf verified to preserve R11 without nested CALL; do not generalize Win64 volatile rules",
+  "B2_direct_phase": "if B2+0x60 != NULL, virtual+0x08 can call 0x0326A994 and mark B2+0x80=1",
+  "B2_deferred_phase": "if B2+0x60 == NULL, virtual+0x08 calls node-builder 0x03126A58 into B2+0x78; virtual+0x10 requires node+0x08 != 0 before calling 0x0326A994",
+  "shared_member_sender": "both B2 phases use 0x0326A994 -> per-member virtual+0x368; member receiver may create inline task or choose member action method",
+  "sequential_B2_direct_then_deferred_duplicate_on_normal_done_path": false,
+  "route_node_nonnull_when_ready_guaranteed": false,
+  "route_pointer_conflict_between_same_shift_members_observed": false,
+  "actual_engine_tick_schedule_verified": false,
+  "shift_crowding_root_cause_proven": false,
+  "gameplay_patch_authorized": false
+}
