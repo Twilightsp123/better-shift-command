@@ -1,0 +1,42 @@
+{
+  "schema": "bsc.n1.group_rebuild_nonatomic_transition.v1",
+  "exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof": "EXACT_ORIGINAL_EXE_STATIC",
+  "original_exe_opcode_guards": 72,
+  "verified_direct_e8": 15,
+  "directly_calling_rebuild_sites": [
+    "0x0301A284",
+    "0x030200EF",
+    "0x0302DB8E",
+    "0x0303DCFF"
+  ],
+  "native_order": [
+    "0x0301B902 retire old Group vector",
+    "0x0301B91F checkout same pool",
+    "0x0301B968 initialize Group",
+    "0x0301B96D write Root active Group"
+  ],
+  "early_direct_root_store_in_caller_found": false,
+  "initial_pool_lifo_reuse_possible": true,
+  "legacy_r30_return_bound_rejection_universal": false,
+  "offline_v2_scope": "rebuild_begin/end; interim root_pointer_stale_during_transaction is NOT stable snapshot",
+  "independent_local_tests": {
+    "with_private_exe": {
+      "passed": 20,
+      "skipped": 0
+    },
+    "without_private_exe": {
+      "passed": 19,
+      "skipped": 1
+    }
+  },
+  "limitations": {
+    "indirect_callback_effects_excluded": false,
+    "real_shift_rebuild_branch_observed": false,
+    "invalid_dereference_proven": false,
+    "atomic_snapshot_proven": false,
+    "collector_hook_safe": false,
+    "root_cause_proven": false,
+    "patch_authorized": false
+  }
+}
