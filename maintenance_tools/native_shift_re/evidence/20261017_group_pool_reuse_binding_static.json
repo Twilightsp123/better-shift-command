@@ -1,0 +1,21 @@
+{
+  "schema": "bsc.n1.group_lifecycle_r30",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "proof": "EXACT_ORIGINAL_EXE_STATIC",
+  "instruction_sites": 120,
+  "direct_calls": 21,
+  "recompute_group_binding_writers": 11,
+  "tests_with_private_exe": 15,
+  "tests_without_exe": {
+    "pass": 14,
+    "skip": 1
+  },
+  "pool_getter": "0x0301B834",
+  "pool_returner": "0x0302C2D4",
+  "root_binding": "UnitRoot+0x32F8",
+  "root_recompute": "0x0301DC0C",
+  "native_pointer_is_generation": false,
+  "group_binding_revision_is_object_lifetime": false,
+  "group_pool_reuse_observed_in_shift": false,
+  "gameplay_patch_authorized": false
+}
