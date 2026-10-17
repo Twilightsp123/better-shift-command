@@ -2,7 +2,9 @@
 """Isolated static-regression tests. Synthetic helper tests are NOT gameplay evidence."""
 import os,struct,tempfile,unittest
 from pathlib import Path
-import audit_r35_group_transaction as a
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'maintenance_tools'/'native_shift_re'))
+import audit_r35_group_transaction_20261017 as a
 
 class BscR35Static(unittest.TestCase):
  def test_manifest_inventory(self):
