@@ -1,0 +1,38 @@
+{
+  "schema": "bsc.n1.ab_member_receiver_position_dispatch.v1",
+  "reference_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "evidence": "EXACT_ORIGINAL_EXE_STATIC",
+  "checks": {
+    "complete_instruction_starts": 88,
+    "direct_e8": 9,
+    "jcc_and_jmp": 5,
+    "typed_member_vtable_slots": 3,
+    "local_test_pass_with_original_exe": 18,
+    "local_without_exe_pass": 17,
+    "local_without_exe_skip": 1,
+    "repository_test_definitions": 19
+  },
+  "A_member_receiver_mode": "0x030D5509 MOV R8B,1",
+  "B_member_receiver_mode": "0x03265D39 XOR R8D,R8D",
+  "typed_member_vtable": "0x0390D4F8",
+  "slots": {
+    "receiver_0x368": "0x0306B9F0",
+    "member_0x100": "0x03073568 -> 0x0315F4E0",
+    "member_0xe8": "0x03073224 -> 0x0315EC98"
+  },
+  "inline_branch_condition": "mode_helper==0 and packet+0x50 bit0x20==0",
+  "member_method_selection": "member+0x104 in [1,2] => +0x100; other values => +0xe8",
+  "verified_member_position_stores": [
+    "0x0315F52C",
+    "0x0315F53E",
+    "0x0315F311",
+    "0x0315F327",
+    "0x0315F33F"
+  ],
+  "member_flag_rewrite": "(member+0x108 & 0xF7) | 0x02",
+  "R9B_64bit_bug_proven": false,
+  "runtime_shift_packet_mode_observed": false,
+  "member_pair_position_out_of_sync_observed": false,
+  "crowding_root_cause_proven": false,
+  "native_patch_authorized": false
+}
