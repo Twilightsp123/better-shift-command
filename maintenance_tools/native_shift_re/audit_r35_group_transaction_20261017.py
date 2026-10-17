@@ -12,7 +12,7 @@ HERE=Path(__file__).resolve().parent
 SHA='9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496'
 IMAGE_BASE=0x140000000
 SIZED=232531920
-PIN_FILE=HERE/'r35_pins.txt'
+PIN_FILE=HERE/'r35_new_exe_group_packet_pins_20261017.txt'
 LEAF_GROUPS={'descriptor_leaf','getter_leaf','clear_slot_leaf'}
 # A small positive callgraph; never equate static reachability with real Shift hits.
 E8={
