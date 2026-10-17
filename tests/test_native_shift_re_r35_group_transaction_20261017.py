@@ -52,6 +52,7 @@ class BscR35Static(unittest.TestCase):
   exe=os.environ.get('BSC_NEW_EXE')
   if not exe or not Path(exe).exists():self.skipTest('User WH3 EXE not shipped/available in GitHub CI')
   r=a.audit(exe)
+  self.assertEqual(r['sha256'],a.SHA)
   self.assertEqual(r['verified_full_instructions'],119)
   self.assertEqual(r['verified_E8_calls'],17)
   self.assertEqual(r['verified_control_transfers'],3)
