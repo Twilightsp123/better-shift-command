@@ -1,0 +1,198 @@
+# WH3 BSC R37: OLD/NONMATCHING EXE MUST BE REJECTED
+# SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496
+# Every address is RVA. Complete decoded opcodes, not byte substrings.
+# shortTask_B2_prepare bounds=02F54510:02F5463E
+02F54510 48895c2410 # mov    QWORD PTR [rsp+0x10],rbx
+02F54527 e8b41a0000 # call   0x2f55fe0
+02F5452C 80797400 # cmp    BYTE PTR [rcx+0x74],0x0
+02F54534 7556 # jne    0x2f5458c
+02F545DA e879241d00 # call   0x3126a58
+02F545DF 41b001 # mov    r8b,0x1
+02F545E2 488bd0 # mov    rdx,rax
+02F545E5 488bcf # mov    rcx,rdi
+02F545E8 488bd8 # mov    rbx,rax
+02F545EB e85475feff # call   0x2f3bb44
+02F545FF 488b5370 # mov    rdx,QWORD PTR [rbx+0x70]
+02F5460E 488d4c2450 # lea    rcx,[rsp+0x50]
+02F54613 e8bc473100 # call   0x3268dd4
+02F54618 488b4f08 # mov    rcx,QWORD PTR [rdi+0x8]
+02F54621 488b89f8320000 # mov    rcx,QWORD PTR [rcx+0x32f8]
+02F54628 e81fa73200 # call   0x327ed4c
+# shortTask_publish_route bounds=02F3BB44:02F3BBF1
+02F3BB44 4053 # rex push rbx
+02F3BB51 4881c1e8010000 # add    rcx,0x1e8
+02F3BB58 e8332d0e00 # call   0x301e890
+02F3BB5D c6818000000001 # mov    BYTE PTR [rcx+0x80],0x1
+02F3BB77 48894108 # mov    QWORD PTR [rcx+0x8],rax
+02F3BB97 48895118 # mov    QWORD PTR [rcx+0x18],rdx
+02F3BBB8 ff4204 # inc    DWORD PTR [rdx+0x4]
+02F3BBBB 488b4308 # mov    rax,QWORD PTR [rbx+0x8]
+02F3BBBF 48898870020000 # mov    QWORD PTR [rax+0x270],rcx
+02F3BBC6 4584c0 # test   r8b,r8b
+# old_root_route_release_leaf bounds=0301E890:0301E8AD
+0301E890 80b98000000000 # cmp    BYTE PTR [rcx+0x80],0x0
+0301E897 7413 # je     0x301e8ac
+0301E899 488b4118 # mov    rax,QWORD PTR [rcx+0x18]
+0301E89D 4885c0 # test   rax,rax
+0301E8A2 ff4804 # dec    DWORD PTR [rax+0x4]
+0301E8A5 c6818000000000 # mov    BYTE PTR [rcx+0x80],0x0
+0301E8AC c3 # ret
+# B2_base_ctor_leaf bounds=030C861C:030C868F
+030C861C 4c8bd1 # mov    r10,rcx
+030C861F 488d056a1b8400 # lea    rax,[rip+0x841b6a]        # 0x390a190
+030C8626 488901 # mov    QWORD PTR [rcx],rax
+030C8629 488b4208 # mov    rax,QWORD PTR [rdx+0x8]
+030C862D 4c8b4010 # mov    r8,QWORD PTR [rax+0x10]
+030C8631 4d8b8840040000 # mov    r9,QWORD PTR [r8+0x440]
+030C8638 458b819c000000 # mov    r8d,DWORD PTR [r9+0x9c]
+030C864A 48895110 # mov    QWORD PTR [rcx+0x10],rdx
+030C865A 48894118 # mov    QWORD PTR [rcx+0x18],rax
+030C8662 c6821801000001 # mov    BYTE PTR [rdx+0x118],0x1
+030C868B 498bc2 # mov    rax,r10
+030C868E c3 # ret
+# B2_record_leaf bounds=03268DD4:03268E3A
+03268DD4 f30f10057ca4e000 # movss  xmm0,DWORD PTR [rip+0xe0a47c]        # 0x4073258
+03268DDE f30f1101 # movss  DWORD PTR [rcx],xmm0
+03268DF7 48894110 # mov    QWORD PTR [rcx+0x10],rax
+03268DFF f30f114108 # movss  DWORD PTR [rcx+0x8],xmm0
+03268E04 66894120 # mov    WORD PTR [rcx+0x20],ax
+03268E18 488bc1 # mov    rax,rcx
+03268E20 48895128 # mov    QWORD PTR [rcx+0x28],rdx
+03268E24 c7413403000000 # mov    DWORD PTR [rcx+0x34],0x3
+03268E2B 44884938 # mov    BYTE PTR [rcx+0x38],r9b
+03268E35 c6413c00 # mov    BYTE PTR [rcx+0x3c],0x0
+# B2_dispatch bounds=0327ED4C:0327EDEA
+0327ED73 e8b890b4ff # call   0x2dc7e30
+0327ED78 84c0 # test   al,al
+0327ED7A 7437 # je     0x327edb3
+0327EDB3 488d8bf0080000 # lea    rcx,[rbx+0x8f0]
+0327EDBA e83d03ccff # call   0x2f3f0fc
+0327EDBF 488d8b08090000 # lea    rcx,[rbx+0x908]
+0327EDCB 4c8bc7 # mov    r8,rdi
+0327EDCE 488d93f0080000 # lea    rdx,[rbx+0x8f0]
+0327EDD5 e85a9ffeff # call   0x3268d34
+# B2_ctor bounds=03268D34:03268DD1
+03268D34 4053 # rex push rbx
+03268D3A 4d8bd8 # mov    r11,r8
+03268D40 e8d7f8e5ff # call   0x30c861c
+03268D45 488d15b4ca8700 # lea    rdx,[rip+0x87cab4]        # 0x3ae5800
+03268D4C 488913 # mov    QWORD PTR [rbx],rdx
+03268D4F 418b03 # mov    eax,DWORD PTR [r11]
+03268D7C 498b4328 # mov    rax,QWORD PTR [r11+0x28]
+03268D80 48894360 # mov    QWORD PTR [rbx+0x60],rax
+03268D84 418b4330 # mov    eax,DWORD PTR [r11+0x30]
+03268DBC 488bc3 # mov    rax,rbx
+03268DBF 4883637800 # and    QWORD PTR [rbx+0x78],0x0
+03268DC4 c6838000000000 # mov    BYTE PTR [rbx+0x80],0x0
+# B2_vmethod_08 bounds=03276970:03276A82
+03276970 48895c2408 # mov    QWORD PTR [rsp+0x8],rbx
+03276982 488b4160 # mov    rax,QWORD PTR [rcx+0x60]
+03276989 488bd9 # mov    rbx,rcx
+0327698C 4885c0 # test   rax,rax
+0327698F 747b # je     0x3276a0c
+0327699A 488945e7 # mov    QWORD PTR [rbp-0x19],rax
+032769D5 e85e32e5ff # call   0x30c9c38
+032769DD 741b # je     0x32769fa
+032769DF 488b4b10 # mov    rcx,QWORD PTR [rbx+0x10]
+032769E3 4c8d4de7 # lea    r9,[rbp-0x19]
+032769E7 4c8b4318 # mov    r8,QWORD PTR [rbx+0x18]
+032769EB 488b5108 # mov    rdx,QWORD PTR [rcx+0x8]
+032769EF 488bc8 # mov    rcx,rax
+032769F2 e89d3fffff # call   0x326a994
+032769FA 498b01 # mov    rax,QWORD PTR [r9]
+03276A00 ff5008 # call   QWORD PTR [rax+0x8]
+03276A03 c6838000000001 # mov    BYTE PTR [rbx+0x80],0x1
+03276A0A eb65 # jmp    0x3276a71
+03276A0C 488b4178 # mov    rax,QWORD PTR [rcx+0x78]
+03276A10 4885c0 # test   rax,rax
+03276A13 7403 # je     0x3276a18
+03276A15 ff4804 # dec    DWORD PTR [rax+0x4]
+03276A18 488b4110 # mov    rax,QWORD PTR [rcx+0x10]
+03276A4D e88ab0e7ff # call   0x30f1adc
+03276A52 488b4b30 # mov    rcx,QWORD PTR [rbx+0x30]
+03276A5A 488b8140040000 # mov    rax,QWORD PTR [rcx+0x440]
+03276A61 488b8860010000 # mov    rcx,QWORD PTR [rax+0x160]
+03276A68 e8ebffeaff # call   0x3126a58
+03276A6D 48894378 # mov    QWORD PTR [rbx+0x78],rax
+# B2_vmethod_10 bounds=032863A0:0328647D
+032863A0 48895c2408 # mov    QWORD PTR [rsp+0x8],rbx
+032863AA 80b98000000000 # cmp    BYTE PTR [rcx+0x80],0x0
+032863B7 0f85a1000000 # jne    0x328645e
+032863BD 488b4178 # mov    rax,QWORD PTR [rcx+0x78]
+032863C1 4885c0 # test   rax,rax
+032863C4 0f84a1000000 # je     0x328646b
+032863CA 80780800 # cmp    BYTE PTR [rax+0x8],0x0
+032863CE 0f8497000000 # je     0x328646b
+032863D4 488b4070 # mov    rax,QWORD PTR [rax+0x70]
+032863E6 4889442420 # mov    QWORD PTR [rsp+0x20],rax
+03286427 e80c38e4ff # call   0x30c9c38
+0328642C 4885c0 # test   rax,rax
+0328642F 741e # je     0x328644f
+03286431 488b4b10 # mov    rcx,QWORD PTR [rbx+0x10]
+03286435 4c8d4c2420 # lea    r9,[rsp+0x20]
+0328643A 4c8b4318 # mov    r8,QWORD PTR [rbx+0x18]
+0328643E 488b5108 # mov    rdx,QWORD PTR [rcx+0x8]
+03286445 e84a45feff # call   0x326a994
+0328644A 488bc8 # mov    rcx,rax
+03286457 4088bb80000000 # mov    BYTE PTR [rbx+0x80],dil
+0328645E 488b4318 # mov    rax,QWORD PTR [rbx+0x18]
+03286462 83b89808000000 # cmp    DWORD PTR [rax+0x898],0x0
+03286469 7403 # je     0x328646e
+0328646B 4032ff # xor    dil,dil
+0328646E 40887b20 # mov    BYTE PTR [rbx+0x20],dil
+# route_node_builder bounds=03126A58:03126B61
+03126A58 48895c2408 # mov    QWORD PTR [rsp+0x8],rbx
+03126ACD 6683630800 # and    WORD PTR [rbx+0x8],0x0
+03126AE1 c7430401000000 # mov    DWORD PTR [rbx+0x4],0x1
+03126AED 4883637000 # and    QWORD PTR [rbx+0x70],0x0
+03126B23 488b8950010000 # mov    rcx,QWORD PTR [rcx+0x150]
+03126B2A e80113caff # call   0x2dc7e30
+03126B2F 3c01 # cmp    al,0x1
+03126B31 7406 # je     0x3126b39
+03126B33 807e4c01 # cmp    BYTE PTR [rsi+0x4c],0x1
+03126B37 7515 # jne    0x3126b4e
+03126B39 488d4f18 # lea    rcx,[rdi+0x18]
+03126B41 e8e2bffdff # call   0x3102b28
+03126B46 48894370 # mov    QWORD PTR [rbx+0x70],rax
+03126B4A c6430801 # mov    BYTE PTR [rbx+0x8],0x1
+# B2_member_sender bounds=0326A994:0326AC04
+0326A994 488bc4 # mov    rax,rsp
+0326A9B7 4d8bf9 # mov    r15,r9
+0326A9C7 48895108 # mov    QWORD PTR [rcx+0x8],rdx
+0326A9FB 4d8b07 # mov    r8,QWORD PTR [r15]
+0326A9FE 488b92300b0000 # mov    rdx,QWORD PTR [rdx+0xb30]
+0326AA05 e8e2f2e6ff # call   0x30d9cec
+0326AA14 e89fc0e6ff # call   0x30d6ab8
+0326AA1C 488d55b7 # lea    rdx,[rbp-0x49]
+0326AA20 448b4e24 # mov    r9d,DWORD PTR [rsi+0x24]
+0326AA27 4d8b07 # mov    r8,QWORD PTR [r15]
+0326AA2E 41ff5248 # call   QWORD PTR [r10+0x48]
+0326AA38 395e24 # cmp    DWORD PTR [rsi+0x24],ebx
+0326AA44 488b4628 # mov    rax,QWORD PTR [rsi+0x28]
+0326AA4B 4c8b34c8 # mov    r14,QWORD PTR [rax+rcx*8]
+0326AA53 49c1e004 # shl    r8,0x4
+0326AABD 7403 # je     0x326aac2
+0326AAD9 e832470000 # call   0x326f210
+0326AB19 e88ecad0ff # call   0x2f775ac
+0326ABAF ff9068030000 # call   QWORD PTR [rax+0x368]
+0326ABB5 41ffc4 # inc    r12d
+0326ABBD 443b6624 # cmp    r12d,DWORD PTR [rsi+0x24]
+0326ABC1 0f827dfeffff # jb     0x326aa44
+0326ABCD e8deaae7ff # call   0x30e56b0
+# member_receiver bounds=03070A48:03070C4A
+03070A48 48895c2410 # mov    QWORD PTR [rsp+0x10],rbx
+03070A6A 488bda # mov    rbx,rdx
+03070A7B e8b073d5ff # call   0x2dc7e30
+03070A83 84c0 # test   al,al
+03070A87 f6425020 # test   BYTE PTR [rdx+0x50],0x20
+03070A8B 7530 # jne    0x3070abd
+03070A8D 488d8f90040000 # lea    rcx,[rdi+0x490]
+03070AB3 e8183defff # call   0x2f647d0
+03070AB8 e975010000 # jmp    0x3070c32
+03070B23 4c8b1f # mov    r11,QWORD PTR [rdi]
+03070B2F 8b8704010000 # mov    eax,DWORD PTR [rdi+0x104]
+03070B3C 83f801 # cmp    eax,0x1
+03070B4C 4c894dd0 # mov    QWORD PTR [rbp-0x30],r9
+03070B52 741b # je     0x3070b6f
+03070B66 41ff9300010000 # call   QWORD PTR [r11+0x100]
+03070B9C 41ff93e8000000 # call   QWORD PTR [r11+0xe8]
