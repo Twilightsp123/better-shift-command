@@ -116,8 +116,8 @@ def audit(exe):
  try:
   if p.base!=IMAGE_BASE:raise ValueError('IMAGEBASE_MISMATCH')
   if len(p.d)!=SIZED:raise ValueError('EXE_SIZE_MISMATCH')
-  with open(exe,'rb') as f: actual=hashlib.file_digest(f,'sha256').hexdigest()
-  if actual!=SHA:raise ValueError('EXE_SHA256_MISMATCH:'+actual)
+  with open(exe,'rb') as f: actual_sha=hashlib.file_digest(f,'sha256').hexdigest()
+  if actual_sha!=SHA:raise ValueError('EXE_SHA256_MISMATCH:'+actual_sha)
   groups=get_pins();pins={};decoded={};validated_owners=set();used_leaf=[]
   for name,(span,entries) in groups.items():
    lo,hi=span
@@ -177,7 +177,7 @@ def audit(exe):
   return {
    'schema':'bsc.n1.wh3_r35_shorttask_group_packet_transaction.v1',
    'evidence':'READ_ONLY_NEW_EXE_NATIVE_STATIC',
-   'sha256':actual, 'size':len(p.d),'imagebase':hex(p.base),
+   'sha256':actual_sha, 'size':len(p.d),'imagebase':hex(p.base),
    'verified_full_instructions':len(pins),
    'verified_unwind_functions':len(validated_owners),
    'verified_no_unwind_leaf_regions':used_leaf,
