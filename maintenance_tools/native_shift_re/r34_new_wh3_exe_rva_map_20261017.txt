@@ -1,0 +1,49 @@
+# READ-ONLY RVA map, PE x64, old EXE -> new supplied EXE
+# OLD_SHA256 518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a
+# NEW_SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496
+# NEW_FILE_SIZE 232531920; IMAGE_BASE 140000000
+# Not a full-function semantic identity proof; not an approved native hook.
+# old_rva new_rva function_role
+030323C8 030374CC MOVE_queue
+03025D70 0302AE74 MOVE_work
+0301287C 030179B0 route_config
+02F2C734 02F31778 shorttask_create
+02F561E8 02F5B1E4 shorttask_callback
+02F563F4 02F5B3F0 shorttask_get_UnitRoot
+02F563FD 02F5B3F9 shorttask_latebind_Group
+02F56404 02F5B400 callback_A_B_dispatch_call
+03279E40 0327ECA4 Group_A_B_dispatch
+030D554C 030DA5D8 Group_A_sender
+03263AB0 03268920 Group_B_sender
+0301B8E4 030209EC Group_rebuild
+030445D3 030496D7 queue_activation_call
+0306B9F0 03070A48 member_packet_receiver
+03054B84 03059BC8 member_steering
+0311CED4 03121F54 world_goal_resolver
+0305502E 0305A072 world_goal_after_call_observation
+0315F4E0 0316460C member_position_simple
+0315EC98 03163DC4 member_position_complex
+03081EB4 03086F04 member_tick
+03062988 030679CC neighbor_candidate_collector
+030800C4 03085114 pair_response
+0311954C 0311E5DC member_goal_commit
+03073224 03078268 member_vtable_E8_method
+03073568 030785AC member_vtable_100_method
+02F38640 02F3D668 world_goal_frame_transform
+0302DB44 03032C48 immediate_Group_setup
+02F4F514 02F54510 shorttask_reconfig
+# PROVEN_E8 src_new dest_new
+0302AF95 030179B0
+0302B126 030179B0
+0302B1B3 02F31778
+02F5B400 0327ECA4
+0327ED17 030DA5D8
+0327ED3C 03268920
+030782CF 03163DC4
+030785B5 0316460C
+03087349 03059BC8
+03059DF7 030679CC
+0305A800 03085114
+# Caveat: vtable +0x368/+0x100/+0xE8 slot triple yields 28 candidate tables.
+# Audit: 318 instruction starts; 281 old opcodes exact; 37 relocated E8/RIP;
+# 35 new E8 decoded, 18/35 rebased destinations proven; 11 branch targets checked.
