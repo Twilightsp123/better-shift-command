@@ -1,0 +1,42 @@
+{
+  "schema": "bsc.n1.round32_queued_group_latebind.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "evidence": "FIXED_ORIGINAL_EXE_STATIC",
+  "instruction_starts": 39,
+  "selected_e8_targets": 13,
+  "typed_unwind_functions": 7,
+  "independent_local_tests": {
+    "private_exe_present": {
+      "passed": 16,
+      "skipped": 0
+    },
+    "without_exe": {
+      "passed": 15,
+      "skipped": 1
+    }
+  },
+  "queued_handoff": [
+    "0x030445D3->0x030433B0",
+    "0x030433E3->0x03043424",
+    "0x0304346B virtual+0x08",
+    "0x0304348B virtual+0x10"
+  ],
+  "bounded_direct_e8_rebuild_in_activators": false,
+  "immediate_builder_rebuild": "0x0302DB8E -> 0x0301B8E4",
+  "callback_current_group_reads": [
+    "0x02F5627B",
+    "0x02F563FD",
+    "0x02F5649E"
+  ],
+  "callback_dispatch": "0x02F563F4 [task+0x08] UnitRoot -> 0x02F563FD [UnitRoot+0x32F8] Group -> 0x02F56404 0x03279E40",
+  "conditional_A": "0x03279EB3 -> 0x030D554C",
+  "conditional_B": "0x03279ED8 -> 0x03263AB0",
+  "prior_artifact_oct14_already_described_group_pool_reuse": true,
+  "unknowns": {
+    "queue_indirect_group_rebuild": false,
+    "actual_SHIFT_callback_group_mismatch": false,
+    "member_pair_goal_conflict": false,
+    "root_cause": false,
+    "patch_authorized": false
+  }
+}
