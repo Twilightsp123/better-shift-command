@@ -1,6 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**2026-10-17 第35轮（新版 EXE 原生时相限定审计）：** [MOVE slot→shortTask→当前 Group→A/B packet 原生事务与路线晚绑定](N1_R35_SHORTTASK_GROUP_PACKET_IDENTITY_20261017.md)。严格锁定新 EXE SHA `9bd58c63…f42be496`，本地只读复核 **119/119 指令及 objdump 真实起点、17/17 E8、3/3 条件控制转移、2/2 类型化虚表槽**；有私有新版 EXE 时 **11/11 本地测试 PASS**，无 EXE 时10 PASS/1 SKIP（并非 GitHub CI PASS）。shortTask 创建保留 UnitRoot 和对 MOVE slot+0xA0 的可变引用；发包前回调才读取 `Root+0x32F8` Group，两条直接成员循环均使用本 Group 的数组/数量而不是每个成员重新读取 Root Group。A 分发可直接 fanout，B 首先创建 Group 中的路线任务，其后续发包阶段需独立定型；A/B 有条件重新读取当前 `Root+0x270` 的路线。callback 的 Group 比较出现在分发之后，**不等于存在发包前验证门槛；也不证明玩家 Shift 发生错配**。本轮没有实机新版 Shift 采样、运动根因或 gameplay patch。[新版只读审计](../../maintenance_tools/native_shift_re/audit_r35_group_transaction_20261017.py) · [119条机码](../../maintenance_tools/native_shift_re/r35_new_exe_group_packet_pins_20261017.txt) · [回归](../../tests/test_native_shift_re_r35_group_transaction_20261017.py)。
+
 **2026-10-17 第34轮（新版 EXE RVA 地址重绑定）：** [用户新上传 Win64 Warhammer3.exe SHA `9bd58c63…f42be496` 的原生地址重定位和跨函数调用核验](N1_R34_WH3_NEW_EXE_ADDRESS_REBIND_20261017.md)。EXE 232531920 字节，与此前 9.0.3 固定 SHA `518c4f29…850596ecc822a` 不同；在新版验证 318/318 真实指令起点和 PE unwind 所有者、281/318 原字节未变、37 相对地址编码变化、35 个 E8 实际解码（其中 18 个两端重绑定一致）、11/11 跳转目标；本地9/9私有 EXE 回归 PASS。核心 MOVE-work `0x03025D70→0x0302AE74`、Group A/B `0x03279E40→0x0327ECA4`、成员 Tick `0x03081EB4→0x03086F04`。**旧 RVA 严禁直接用于新版 Hook；没有实机新版 Shift 命中、根因或 gameplay patch**。[完整新旧 RVA 表](../../maintenance_tools/native_shift_re/r34_new_wh3_exe_rva_map_20261017.txt)；完整只读审计脚本/6原码清单/本地测试/证据 JSON 随本轮离线完整资源包交付，不含游戏 EXE。
 
 
