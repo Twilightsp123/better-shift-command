@@ -1,0 +1,148 @@
+# queue_slot_to_task bounds=0302AE74:0302B1E6 (leaf routines explicitly labeled)
+0302AE88 488da848ffffff # lea    rbp,[rax-0xb8]
+0302AE8F 4881eca0010000 # sub    rsp,0x1a0
+0302AEDB 4c8db3a0000000 # lea    r14,[rbx+0xa0]
+0302B188 488b5318 # mov    rdx,QWORD PTR [rbx+0x18]
+0302B191 4c897590 # mov    QWORD PTR [rbp-0x70],r14
+0302B1A3 4c8d4c2440 # lea    r9,[rsp+0x40]
+0302B1B3 e8c065f0ff # call   0x2f31778
+
+# shorttask_ctor bounds=02F31778:02F31877 (leaf routines explicitly labeled)
+02F31791 48895108 # mov    QWORD PTR [rcx+0x8],rdx
+02F3179C 4c8d4130 # lea    r8,[rcx+0x30]
+02F317C5 498bc8 # mov    rcx,r8
+02F317C8 e8ab000000 # call   0x2f31878
+
+# descriptor_leaf bounds=02F31878:02F318FE (leaf routines explicitly labeled)
+02F318C1 0fb74242 # movzx  eax,WORD PTR [rdx+0x42]
+02F318C5 66894142 # mov    WORD PTR [rcx+0x42],ax
+02F318C9 0fb64244 # movzx  eax,BYTE PTR [rdx+0x44]
+02F318CD 884144 # mov    BYTE PTR [rcx+0x44],al
+02F318EB 488b4250 # mov    rax,QWORD PTR [rdx+0x50]
+02F318EF 48894150 # mov    QWORD PTR [rcx+0x50],rax
+02F318FD c3 # ret
+
+# getter_leaf bounds=02F53FDC:02F53FF4 (leaf routines explicitly labeled)
+02F53FDC 488b8180000000 # mov    rax,QWORD PTR [rcx+0x80]
+02F53FE8 488b00 # mov    rax,QWORD PTR [rax]
+02F53FEC 488b8198000000 # mov    rax,QWORD PTR [rcx+0x98]
+
+# clear_slot_leaf bounds=02F55FE0:02F5601B (leaf routines explicitly labeled)
+02F55FE0 488b8180000000 # mov    rax,QWORD PTR [rcx+0x80]
+02F55FEC 488b00 # mov    rax,QWORD PTR [rax]
+02F55FF4 ff4818 # dec    DWORD PTR [rax+0x18]
+02F55FFE 48832000 # and    QWORD PTR [rax],0x0
+02F56003 488b8198000000 # mov    rax,QWORD PTR [rcx+0x98]
+
+# callback bounds=02F5B1E4:02F5B5E3 (leaf routines explicitly labeled)
+02F5B2DF 83782004 # cmp    DWORD PTR [rax+0x20],0x4
+02F5B2EE 40387024 # cmp    BYTE PTR [rax+0x24],sil
+02F5B302 89b3a4000000 # mov    DWORD PTR [rbx+0xa4],esi
+02F5B3F0 488b4b08 # mov    rcx,QWORD PTR [rbx+0x8]
+02F5B3F4 488d542450 # lea    rdx,[rsp+0x50]
+02F5B3F9 488b89f8320000 # mov    rcx,QWORD PTR [rcx+0x32f8]
+02F5B400 e89f383200 # call   0x327eca4
+02F5B405 e9a9000000 # jmp    0x2f5b4b3
+02F5B42D e8bad83000 # call   0x3268cec
+02F5B4B3 4038b3a0000000 # cmp    BYTE PTR [rbx+0xa0],sil
+02F5B4C0 4038b3a1000000 # cmp    BYTE PTR [rbx+0xa1],sil
+02F5B4CD 488b8390000000 # mov    rax,QWORD PTR [rbx+0x90]
+02F5B4DD 40387060 # cmp    BYTE PTR [rax+0x60],sil
+02F5B4E7 488b5058 # mov    rdx,QWORD PTR [rax+0x58]
+02F5B529 493988f8320000 # cmp    QWORD PTR [r8+0x32f8],rcx
+02F5B532 e819961700 # call   0x30d4b50
+02F5B571 488b0f # mov    rcx,QWORD PTR [rdi]
+02F5B577 493988f8320000 # cmp    QWORD PTR [r8+0x32f8],rcx
+02F5B580 e8cb951700 # call   0x30d4b50
+02F5B5A6 488b8af8320000 # mov    rcx,QWORD PTR [rdx+0x32f8]
+02F5B5AD e84ac3e0ff # call   0x2d678fc
+02F5B5B6 e895951700 # call   0x30d4b50
+02F5B5BB 488bcb # mov    rcx,rbx
+
+# group_A_B_dispatch bounds=0327ECA4:0327ED4C (leaf routines explicitly labeled)
+0327ECA4 48895c2408 # mov    QWORD PTR [rsp+0x8],rbx
+0327ECAE 488b4110 # mov    rax,QWORD PTR [rcx+0x10]
+0327ECC6 e86591b4ff # call   0x2dc7e30
+0327ECCD 744f # je     0x327ed1e
+0327ECDC 498b81100a0000 # mov    rax,QWORD PTR [r9+0xa10]
+0327ECE3 488b8870020000 # mov    rcx,QWORD PTR [rax+0x270]
+0327ECEA 440fb74144 # movzx  r8d,WORD PTR [rcx+0x44]
+0327ECF4 0f2f1d19346a00 # comiss xmm3,DWORD PTR [rip+0x6a3419]        # 0x3922114
+0327ED10 4883c210 # add    rdx,0x10
+0327ED17 e8bcb8e5ff # call   0x30da5d8
+0327ED1E 498db9f0080000 # lea    rdi,[r9+0x8f0]
+0327ED25 488bcf # mov    rcx,rdi
+0327ED28 e8cf03ccff # call   0x2f3f0fc
+0327ED3C e8df9bfeff # call   0x3268920
+
+# B_fallback_current_Root_route bounds=03268CEC:03268D31 (leaf routines explicitly labeled)
+03268CF0 498b8070020000 # mov    rax,QWORD PTR [r8+0x270]
+03268D01 f30f104040 # movss  xmm0,DWORD PTR [rax+0x40]
+03268D24 e8affeffff # call   0x3268bd8
+
+# A_formation_build bounds=030DA5D8:030DA6B3 (leaf routines explicitly labeled)
+030DA5ED 8b4924 # mov    ecx,DWORD PTR [rcx+0x24]
+030DA5F0 85c9 # test   ecx,ecx
+030DA601 488b83300b0000 # mov    rax,QWORD PTR [rbx+0xb30]
+030DA608 4c8b8b100a0000 # mov    r9,QWORD PTR [rbx+0xa10]
+030DA681 e8a2840200 # call   0x3102b28
+030DA68F e888feffff # call   0x30da51c
+
+# A_member_fanout bounds=030DA51C:030DA5D5 (leaf routines explicitly labeled)
+030DA51C 48895c2408 # mov    QWORD PTR [rsp+0x8],rbx
+030DA52E 4c8b99300b0000 # mov    r11,QWORD PTR [rcx+0xb30]
+030DA53B e878c5ffff # call   0x30d6ab8
+030DA54F 498bcb # mov    rcx,r11
+030DA556 41ff5248 # call   QWORD PTR [r10+0x48]
+030DA55C 397724 # cmp    DWORD PTR [rdi+0x24],esi
+030DA561 488b4728 # mov    rax,QWORD PTR [rdi+0x28]
+030DA57C 488b1cf0 # mov    rbx,QWORD PTR [rax+rsi*8]
+030DA595 41b001 # mov    r8b,0x1
+030DA59B ff9068030000 # call   QWORD PTR [rax+0x368]
+030DA5A1 ffc6 # inc    esi
+030DA5A3 3b7724 # cmp    esi,DWORD PTR [rdi+0x24]
+
+# B_context_construct bounds=03268920:03268ABB (leaf routines explicitly labeled)
+03268920 48895c2410 # mov    QWORD PTR [rsp+0x10],rbx
+0326893F 488d05dace8700 # lea    rax,[rip+0x87ceda]        # 0x3ae5820
+03268946 488907 # mov    QWORD PTR [rdi],rax
+03268950 48894738 # mov    QWORD PTR [rdi+0x38],rax
+0326895B 498b03 # mov    rax,QWORD PTR [r11]
+03268983 48894770 # mov    QWORD PTR [rdi+0x70],rax
+03268993 888780000000 # mov    BYTE PTR [rdi+0x80],al
+03268A15 488b4758 # mov    rax,QWORD PTR [rdi+0x58]
+03268A53 488b7128 # mov    rsi,QWORD PTR [rcx+0x28]
+03268A60 488b1e # mov    rbx,QWORD PTR [rsi]
+03268A6B e82052e0ff # call   0x306dc90
+
+# B_vmethod bounds=03286288:032862C2 (leaf routines explicitly labeled)
+03286288 4053 # rex push rbx
+03286291 488b4958 # mov    rcx,QWORD PTR [rcx+0x58]
+032862A6 e819000000 # call   0x32862c4
+
+# B_delayed_dispatch bounds=032863A0:0328647D (leaf routines explicitly labeled)
+032863A0 48895c2408 # mov    QWORD PTR [rsp+0x8],rbx
+032863B7 0f85a1000000 # jne    0x328645e
+032863BD 488b4178 # mov    rax,QWORD PTR [rcx+0x78]
+032863CA 80780800 # cmp    BYTE PTR [rax+0x8],0x0
+03286427 e80c38e4ff # call   0x30c9c38
+03286445 e84a45feff # call   0x326a994
+03286454 ff5008 # call   QWORD PTR [rax+0x8]
+
+# B_member_fanout bounds=0326A994:0326AC04 (leaf routines explicitly labeled)
+0326A994 488bc4 # mov    rax,rsp
+0326AA38 395e24 # cmp    DWORD PTR [rsi+0x24],ebx
+0326AA44 488b4628 # mov    rax,QWORD PTR [rsi+0x28]
+0326AA4B 4c8b34c8 # mov    r14,QWORD PTR [rax+rcx*8]
+0326AA57 4c0345c7 # add    r8,QWORD PTR [rbp-0x39]
+0326AAB6 41399e18030000 # cmp    DWORD PTR [r14+0x318],ebx
+0326AAC2 418a470f # mov    al,BYTE PTR [r15+0xf]
+0326ABAF ff9068030000 # call   QWORD PTR [rax+0x368]
+0326ABB5 41ffc4 # inc    r12d
+0326ABD2 488b4dc7 # mov    rcx,QWORD PTR [rbp-0x39]
+
+# group_cleanup bounds=030D4B50:030D4B75 (leaf routines explicitly labeled)
+030D4B50 4053 # rex push rbx
+030D4B59 4881c1f0080000 # add    rcx,0x8f0
+030D4B60 e897a5e6ff # call   0x2f3f0fc
+030D4B6B 4883c420 # add    rsp,0x20
