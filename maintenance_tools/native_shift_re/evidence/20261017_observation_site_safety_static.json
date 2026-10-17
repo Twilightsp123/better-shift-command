@@ -1,0 +1,36 @@
+{
+  "schema": "bsc.n1.round29_static_observation_feasibility.v1",
+  "original_exe_sha256": "518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a",
+  "original_exe_bytes": 252021192,
+  "verification": {
+    "original_code_instruction_starts": 21,
+    "e8_targets": 3,
+    "local_private_original_exe_unittests_passed": 22,
+    "local_no_exe_tests_passed": 21,
+    "local_no_exe_tests_skipped": 1
+  },
+  "typed_sites": {
+    "0x0306B9F0": "RCX member, RDX packet, no provenance epoch",
+    "0x0311954C": "RCX member, RDX goal record, may skip goal",
+    "0x03081EB4": "RCX member, per-member Tick not unit-wide barrier",
+    "0x0305502E": "after world resolver: RDI member, RAX points to caller stack xyz prior to position subtract"
+  },
+  "safety": {
+    "engine_barrier_verified": false,
+    "group_generation_lifecycle_verified": false,
+    "member_lifecycle_generation_verified": false,
+    "motion_output_writer_typed": false,
+    "runtime_hook_safety_proven": false,
+    "collection_ready": false
+  },
+  "comparison_v2": {
+    "cross_phase_rejected": true,
+    "time_skew_guard_ns": 200000,
+    "time_guard_is_not_native_barrier": true,
+    "index_adjacent_not_spatial_neighbor": true,
+    "earlier_missing_stages_block_first_claim": true,
+    "external_lineage_not_verified": true
+  },
+  "gameplay_cause_proven": false,
+  "patch_authorized": false
+}
