@@ -1,3 +1,9 @@
+# LEGACY R30 MODEL: return-with-binding unconditionally raises. This is NOT
+# a universal native WH3 invariant: verified 0x0301B8E4 retires groups before
+# its direct UnitRoot+0x32F8 rebind. Prefer group_rebuild_transaction_replay_20261017.py
+# when modeling this bounded non-atomic rebuild. Do not use legacy rejection
+# as evidence of a game bug. Public R30 regression intentionally tests this
+# restrictive, now documented legacy behavior.
 #!/usr/bin/env python3
 """Offline event ledger; NEVER a game Hook, and event completeness is unproved."""
 import argparse,json,re
