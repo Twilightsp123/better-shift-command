@@ -1,0 +1,118 @@
+# member_ctor bounds=03052BA8:0305362D count=4
+03052D20 488d0529fc8b00 # lea    rax,[rip+0x8bfc29]        # 0x3912950
+03052D34 488903 # mov    QWORD PTR [rbx],rax
+0305306F 488d8bd8080000 # lea    rcx,[rbx+0x8d8]
+03053128 e86becffff # call   0x3051d98
+
+# pending_record_ctor bounds=03051D98:03051DF1 count=8
+03051D98 4883ec28 # sub    rsp,0x28
+03051D9C 66832100 # and    WORD PTR [rcx],0x0
+03051DB2 f30f114104 # movss  DWORD PTR [rcx+0x4],xmm0
+03051DC2 f30f114908 # movss  DWORD PTR [rcx+0x8],xmm1
+03051DCF f30f11410c # movss  DWORD PTR [rcx+0xc],xmm0
+03051DD4 4883c110 # add    rcx,0x10
+03051DE0 e8b3dbd4ff # call   0x2d9f998
+03051DE8 45884b28 # mov    BYTE PTR [r11+0x28],r9b
+
+# member_tick bounds=03086F04:0308774C count=15
+03086F2C 488bf9 # mov    rdi,rcx
+03086F48 4533f6 # xor    r14d,r14d
+03086FD2 4438b7d8080000 # cmp    BYTE PTR [rdi+0x8d8],r14b
+03086FD9 0f8490000000 # je     0x308706f
+03086FDF 8a8700090000 # mov    al,BYTE PTR [rdi+0x900]
+03086FE5 4c8d87dc080000 # lea    r8,[rdi+0x8dc]
+03086FF1 488d97e8080000 # lea    rdx,[rdi+0x8e8]
+03086FFD 458acf # mov    r9b,r15b
+03087005 488bcf # mov    rcx,rdi
+0308700C 4488b7d8080000 # mov    BYTE PTR [rdi+0x8d8],r14b
+03087013 e8a0edfdff # call   0x3065db8
+03087018 664489b7d8080000 # mov    WORD PTR [rdi+0x8d8],r14w
+03087034 f20f1187dc080000 # movsd  QWORD PTR [rdi+0x8dc],xmm0
+0308705B 0f1187e8080000 # movups XMMWORD PTR [rdi+0x8e8],xmm0
+03087349 e87a28fdff # call   0x3059bc8
+
+# pending_apply bounds=03065DB8:03065F43 count=12
+03065DD6 498be8 # mov    rbp,r8
+03065DD9 488bfa # mov    rdi,rdx
+03065DDC 488bd9 # mov    rbx,rcx
+03065E82 488bcb # mov    rcx,rbx
+03065E8A 0f1007 # movups xmm0,XMMWORD PTR [rdi]
+03065E95 448ac6 # mov    r8b,sil
+03065E98 488bd5 # mov    rdx,rbp
+03065E9B 488bcb # mov    rcx,rbx
+03065E9E 0f1183e0010000 # movups XMMWORD PTR [rbx+0x1e0],xmm0
+03065EA5 f20f104f10 # movsd  xmm1,QWORD PTR [rdi+0x10]
+03065EAA f20f118bf0010000 # movsd  QWORD PTR [rbx+0x1f0],xmm1
+03065EB2 e8bdea0e00 # call   0x3154974
+
+# delta_install bounds=03154974:03154A96 count=24
+03154974 48895c2408 # mov    QWORD PTR [rsp+0x8],rbx
+03154983 418ad9 # mov    bl,r9b
+03154986 458ad8 # mov    r11b,r8b
+03154989 4c8bd2 # mov    r10,rdx
+0315498C 488bf9 # mov    rdi,rcx
+0315498F e8004c0100 # call   0x3169594
+03154994 f2410f1002 # movsd  xmm0,QWORD PTR [r10]
+0315499C 8a9108010000 # mov    dl,BYTE PTR [rcx+0x108]
+031549A4 f20f1181e0000000 # movsd  QWORD PTR [rcx+0xe0],xmm0
+031549AC 80ca02 # or     dl,0x2
+031549D9 0f28ca # movaps xmm1,xmm2
+031549DC f3410f591a # mulss  xmm3,DWORD PTR [r10]
+031549E1 f3410f594a04 # mulss  xmm1,DWORD PTR [r10+0x4]
+031549E7 f3410f595208 # mulss  xmm2,DWORD PTR [r10+0x8]
+031549FC f30f59d8 # mulss  xmm3,xmm0
+03154A10 f20f11813c010000 # movsd  QWORD PTR [rcx+0x13c],xmm0
+03154A18 898144010000 # mov    DWORD PTR [rcx+0x144],eax
+03154A1E f30f100552e8f100 # movss  xmm0,DWORD PTR [rip+0xf1e852]        # 0x4073278
+03154A26 f30f11814c010000 # movss  DWORD PTR [rcx+0x14c],xmm0
+03154A2E f30f100d46e8f100 # movss  xmm1,DWORD PTR [rip+0xf1e846]        # 0x407327c
+03154A44 f30f118950010000 # movss  DWORD PTR [rcx+0x150],xmm1
+03154A4C 889108010000 # mov    BYTE PTR [rcx+0x108],dl
+03154A70 750c # jne    0x3154a7e
+03154A78 ff9028010000 # call   QWORD PTR [rax+0x128]
+
+# unlink_leaf bounds=03169594:03169629 count=4
+03169594 488b5120 # mov    rdx,QWORD PTR [rcx+0x20]
+031695DB eb44 # jmp    0x3169621
+03169621 4c8989f8000000 # mov    QWORD PTR [rcx+0xf8],r9
+03169628 c3 # ret
+
+# target_alt bounds=03071C84:03071CEA count=9
+03071C84 48895c2408 # mov    QWORD PTR [rsp+0x8],rbx
+03071C98 418af9 # mov    dil,r9b
+03071C9B 498bf0 # mov    rsi,r8
+03071C9E 488bda # mov    rbx,rdx
+03071CA1 488be9 # mov    rbp,rcx
+03071CB5 0f1185e0010000 # movups XMMWORD PTR [rbp+0x1e0],xmm0
+03071CC1 f20f118df0010000 # movsd  QWORD PTR [rbp+0x1f0],xmm1
+03071CC9 e856de0e00 # call   0x315fb24
+03071CE5 e98e420100 # jmp    0x3085f78
+
+# delta_alt bounds=0315FB24:0315FC3B count=11
+0315FB24 48895c2408 # mov    QWORD PTR [rsp+0x8],rbx
+0315FB3C e8539a0000 # call   0x3169594
+0315FB41 4584d2 # test   r10b,r10b
+0315FB44 7515 # jne    0x315fb5b
+0315FB5B f20f10050537f100 # movsd  xmm0,QWORD PTR [rip+0xf13705]        # 0x4073268
+0315FB68 f20f11813c010000 # movsd  QWORD PTR [rcx+0x13c],xmm0
+0315FB76 898144010000 # mov    DWORD PTR [rcx+0x144],eax
+0315FBAB 66898748010000 # mov    WORD PTR [rdi+0x148],ax
+0315FBBA f30f11874c010000 # movss  DWORD PTR [rdi+0x14c],xmm0
+0315FBCA f30f118f50010000 # movss  DWORD PTR [rdi+0x150],xmm1
+0315FC16 ff9028010000 # call   QWORD PTR [rax+0x128]
+
+# integrator bounds=03146FF0:03148523 count=14
+03147019 488bd9 # mov    rbx,rcx
+03147060 f30f108150010000 # movss  xmm0,DWORD PTR [rcx+0x150]
+03147068 f30f10894c010000 # movss  xmm1,DWORD PTR [rcx+0x14c]
+03147199 f30f118b3c010000 # movss  DWORD PTR [rbx+0x13c],xmm1
+031471A1 f30f11a344010000 # movss  DWORD PTR [rbx+0x144],xmm4
+031471B8 0f85d1010000 # jne    0x314738f
+031471C4 0f843c010000 # je     0x3147306
+0314720B f30f118388000000 # movss  DWORD PTR [rbx+0x88],xmm0
+031472C3 f20f11833c010000 # movsd  QWORD PTR [rbx+0x13c],xmm0
+031472E7 f30f11834c010000 # movss  DWORD PTR [rbx+0x14c],xmm0
+031472FE f30f118b50010000 # movss  DWORD PTR [rbx+0x150],xmm1
+0314738A e94a110000 # jmp    0x31484d9
+03148442 f30f11834c010000 # movss  DWORD PTR [rbx+0x14c],xmm0
+03148452 f30f118b50010000 # movss  DWORD PTR [rbx+0x150],xmm1
