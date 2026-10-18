@@ -1,0 +1,29 @@
+# BSC R40 SHA-LOCKED TYPE MAP (static only; no executable patch)
+# New Warhammer3.exe SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496
+# File size 232531920, PE ImageBase 0x140000000; all addresses below RVA.
+# Pinned full opcode set 99, direct E8 6, vtable slots 6 (full offline audit in BSC_R40 zip).
+0305A800 -> 03085114 : member steering contact-record dispatch
+030803FC -> 03085114 : other contact dispatch caller
+0325438B -> 03085114 : other contact dispatch caller
+03265B81 -> 03085114 : other contact dispatch caller
+02D9A373 -> 02DA0800 : manager ctor, saved to owner+0xF0
+02DA09FE : manager+0x1D8 initialized with vtable 03AAF7F0
+02DA210E : manager+0x1D8 final vtable 03AB1B48
+03AAF7F0 + 0x10 -> 02DD06F0 : event broadcaster
+03AB1B48 + 0x10 -> 02DD06F0 : event broadcaster
+02DD0753 : call listener virtual+0x10, predicate
+02DD0763 : call listener virtual+0x08, callback only if predicate
+02DD0793 -> 02D8E774 : deferred event queue, stride 0x38
+02F9B170 : listener A = owner+0x1F8
+02F9B2FD : listener A vtable 03AD0678
+02F9B64A -> 01C3ADF0 : register listener A in manager+0x1D8
+03AD0678 + 0x10 -> 008D5490 : listener A predicate
+03AD0678 + 0x08 -> 02FF0520 : listener A queue forwarding
+02FF052E -> 02D8E774 : queue-forwarding tail JMP
+02F9CADC : listener B+0x40 vtable 03AD0328
+02F9D394 -> 01C3ADF0 : register listener B in manager+0x1D8
+03AD0328 + 0x10 -> 008D5490 : listener B predicate
+03AD0328 + 0x08 -> 02FF0680 : listener B queue forwarding
+02FF068B -> 02D8E774 : queue-forwarding tail JMP
+# NOT PROVEN: other listener effects, delayed queue consumption, per-soldier motion writes, Shift crowding root cause.
+# SAFE STATE: gameplay_patch_authorized=false; no main writes, no Lua replacement.
