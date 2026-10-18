@@ -1,6 +1,9 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-15
 
+**2026-10-18 R43／本对话第9轮（新 EXE 普通成员待处理目标→运动增量交接）：** [普通成员 `+0x8D8` 待处理门槛、`+0x8E8/+0x8DC` 输入、`+0x1E0/+0x1F0` 目标、`+0x13C/+0x140/+0x144` 增量和 bit0x02 的同类型直接桥梁](N1_R43_PENDING_MEMBER_GOAL_DELTA_CONSUMPTION_20261018.md)。固定用户新 EXE SHA `9bd58c63…f42be496`，实测 **101/101 机器码和 objdump 指令起点、6/6 E8、6/6 JCC/JMP、3/3 真实成员虚表槽**，全可执行节 direct E8 调用者查验，**22/22 新版真实 EXE 本地 unittest PASS**，无 EXE **21 PASS / 1 SKIP**。Tick 有条件读取 `member+0x8D8` 待处理标志，**先清标记**再消费成员内 `+0x8E8` 目标与 `+0x8DC` 向量；`0x03065DB8→0x03154974` 同时设置目标、重新生成增量、置 bit0x02、清 `+0x14C/+0x150`。因此对这条路径不能继续猜想“只切目标完全不重建运动输入”。生产者、玩家 Shift 实际命中和挤压因果**仍未证明**，没有 gameplay patch。[审计器](../../maintenance_tools/native_shift_re/audit_r43_member_pending_goal_delta_20261018.py) · [101条机器码](../../maintenance_tools/native_shift_re/r43_member_pending_goal_delta_pins_20261018.txt) · [测试](../../tests/test_native_shift_re_r43_member_pending_goal_delta_20261018.py) · [证据](../../maintenance_tools/native_shift_re/evidence/20261018_r43_member_pending_goal_delta_static.json)。
+
+
 **2026-10-18 R42 / 本对话第8轮（新版 EXE 的成员运动双标志门槛与条件恢复）：** [普通成员 `+0x108 bit2` 和 `+0x155 bit4` 联合决定直接位移、暂缓消费或复杂更新；成员 `virtual+0x130 → 0x03081D40 → virtual+0xF0` 可条件性清 bit2 并恢复 bit4，同时该调用的位置源/目标为同一成员当前位置](N1_R42_MEMBER_FLAG_DELTA_HANDOFF_20261018.md)。固定用户新版 SHA `9bd58c63…f42be496` 本地 **128/128 原码+objdump 起点、7/7 E8、7/7 JMP/JCC、6/6 typed vtable、20/20 本地新 EXE 回归**，无 EXE 时19 PASS/1 SKIP。积分器内后段会通过同类型 `virtual+0x130` 条件修改 bit2，但它不能倒改已执行的早期位标志门槛；扩展 wrapper 中的世界目标解析条件性发生在该次积分之后。**这不是 Shift 专属根因，也不是补丁**。[核心机器码子集](../../maintenance_tools/native_shift_re/r42_state_gate_core_sites_20261018.txt) · [脱敏摘要证据](../../maintenance_tools/native_shift_re/evidence/20261018_r42_member_state_gate_static.json)。完整版审计器/128 原码/20 项测试均保存在本轮交付 ZIP，未随此摘要提交；GitHub CI 不能据此宣称 20 项全 PASS。
 
 
