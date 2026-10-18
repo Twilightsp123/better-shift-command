@@ -1,0 +1,49 @@
+# R42 VERIFIED CORE SUBSET, newer WH3 exe, original FULL 128-pin manifest remains in offline R42 ZIP.
+# SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496
+# All addresses RVAs. This SUBSET is not a substitute for the 128-pin SHA-gated full auditor.
+# current member object tracked in RBX within 0x03146FF0.
+03052D20 488d0529fc8b00 # ordinary-member constructor installs vtable 03912950
+03052D34 488903
+03084B90 808b0801000006 # member virtual +128: OR flags108,06
+03084BAA 80a108010000fb # member virtual +138: clear bit4
+03084BB9 bf0a000000
+03084BBE 4008b908010000 # member virtual +138: OR 0A
+03084CC7 24fb # virtual +130: clear bit4
+03084CC9 0c02 # virtual +130: set bit2
+03084CCB 888108010000
+03084CE0 83bf0401000003 # member+104==3 conditional
+03084CE7 0f85bf000000
+03084D85 e8b6cfffff # calls 03081D40
+03081D5F 488bf9 # RDI=member
+03081DB0 e87f7cfdff # check this call's original bytes from full manifest before reuse
+03081EBB 488d9788000000 # RDX=&member+88
+03081ECA 488bcf # RCX=member
+03081ED6 e835280e00 # calls 03164710
+03081EDB 808f5501000004 # member+155 OR 04
+03164730 488bf2 # RSI=RDX
+03164733 488bf9 # RDI=RCX
+0316476B f20f118788000000 # position copy
+03164776 80a708010000f5 # clears flags108 bit2 and bit8
+03164789 898790000000
+03147019 488bd9 # member=RBX in integrator
+03147199 f30f118b3c010000 # maybe accumulate member delta
+031471A1 f30f11a344010000
+031471B5 f6c202 # test flags108 bit2
+031471B8 0f85d1010000 # bit2=1 -> 0314738F
+031471C1 f6c104 # test flags155 bit4
+031471C4 0f843c010000 # flag4=0 -> 03147306 no apply/reset in this direct tail
+0314720B f30f118388000000 # apply member world X
+03147223 f30f118b8c000000 # apply member world Y
+0314723B f30f118390000000 # apply member world Z
+031472C3 f20f11833c010000 # reset delta X/Y
+031472D1 898344010000 # reset delta Z
+0314738A e94a110000 # exit branch
+03147398 80e1fb # clear member+155 bit4 (complex route)
+0314739B 888b55010000
+03148182 488bcb # integrator RCX=member
+03148189 488b03 # integrator RAX=member vtable
+0314818C ff9030010000 # internal virtual+130 can update bit2 later
+0310014C e89f6e0400 # integrator call in extended wrapper
+03100233 488d8be0010000 # goal record read after integration
+03100247 e8081d0200 # call world goal resolver 03121F54
+031002A8 f30f118b3c020000 # writes member+23c projected scalar
