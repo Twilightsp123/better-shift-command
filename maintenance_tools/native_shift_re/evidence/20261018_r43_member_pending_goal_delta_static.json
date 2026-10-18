@@ -1,0 +1,37 @@
+{
+  "schema": "bsc.n1.r43_pending_member_goal_delta_handoff.v1",
+  "proof": "READ_ONLY_NEW_EXE_SHA_LOCKED_NATIVE_STATIC",
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "executable_size": 232531920,
+  "imagebase": "0x140000000",
+  "pinned_opcode_starts": 101,
+  "function_groups": 9,
+  "validated_direct_e8": 6,
+  "validated_jumps": 6,
+  "validated_vtable_slots": 3,
+  "validated_direct_callers": {
+    "0x3154974": [
+      "0x3065eb2"
+    ],
+    "0x315fb24": [
+      "0x3071cc9"
+    ],
+    "0x3146ff0": [
+      "0x30592f8",
+      "0x31000f6",
+      "0x310014c"
+    ]
+  },
+  "initial_constructor_pending_record": "member+0x8d8 -> 0x03051D98 initializes embedded record",
+  "pending_member_tick": "if member+0x8d8 nonzero: pending goal member+0x8e8 and vector member+0x8dc; clear gate then call 0x03065DB8",
+  "direct_goal_vector_handoff": "0x03065DB8 copies member+0x8e8 into member+0x1e0; passes member+0x8dc to 0x03154974",
+  "direct_delta_install": "0x03154974 scales provided vector into member+0x13c/+0x140/+0x144, sets bit2 and zeroes +0x14c/+0x150",
+  "alternate_path": "0x03071C84->0x0315FB24 replaces goal then clears delta; live Shift caller identity not proven",
+  "typed_reset_14c150": "scoped verified writers set +0x14c/+0x150 to image-initialized 0.0",
+  "all_possible_member_delta_writers_exhaustively_identified": false,
+  "new_shift_move_reaches_pending_path_proven": false,
+  "stale_goal_after_shift_turn_observed": false,
+  "runtime_unit_member_phase_order_proven": false,
+  "root_cause_proven": false,
+  "gameplay_patch_authorized": false
+}
