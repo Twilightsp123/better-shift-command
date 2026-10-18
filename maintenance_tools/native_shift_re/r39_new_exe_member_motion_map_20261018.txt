@@ -1,0 +1,31 @@
+# BSC R39 static-only object-typed RVA map; NOT injectable hook sites.
+# SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496
+# PE64 ImageBase 140000000; no gameplay patch; all values RVA.
+# Role / RVA / typed evidence
+ordinary_member_ctor 03052BA8 vtable_03912950_installed_at_03052D20_03052D34
+special_member_ctor 03051E5C vtable_03AD3360_installed_at_03051F02_03051F09
+ordinary_member_tick 03086F04 ordinary_virtual_0x18
+special_member_tick 03086224 specialized_virtual_0x18 calls_03086F04_at_0308626A
+member_steering 03059BC8 called_at_03087349
+neighbor_candidates 030679CC called_at_03059DF7
+world_goal_resolver 03121F54 called_at_0305A06D
+neighbor_pair_dispatch 03085114 called_at_0305A800
+neighbor_pair_unknown_virtual 030852A7 context_plus_0x1D8_virtual_plus_0x10
+post_steering_nonmember_rng 0308D830 called_at_03087351 store_0308D8F3_context_plus_0x90
+special_child_sync 03058D2C specialized_virtual_plus_0x20
+position_and_derived_vector_A 031612E8 stores_03161382_0316138A_031613C4_031613CF
+position_and_derived_vector_B 031614C0 stores_03161545_0316154D_03161557_03161562
+ordinary_member_position_virtual 03164710 base_virtual_plus_0xF0
+ordinary_member_packet_receiver 03070A48 base_virtual_plus_0x368
+special_member_packet_forwarder_leaf 03070A24 specialized_virtual_plus_0x368
+special_member_packet_forward_ref 00000D08 [member+0xD08]
+packet_forward_nonnull 03070A36 JMP_[associated_vtable+0x368]
+packet_forward_null 03070A40 JMP_03070A48
+special_ctor_null_ref 030520DE MOV_[special_member+0xD08],0
+spatial_bounds_constructor_not_member 03098670 installs_03AD4D28_at_03098751_0309875B
+# Restricted full .udata direct E8 caller inventories, indirect targets NOT excluded.
+callers_031612E8 02F89770 03058E78 0305904F 03065961 0306A8B5 0306F7BB 031006AD
+callers_031614C0 03058F1A
+callers_direct_E8_03058D2C NONE
+# Offline full-pin revalidation: 116 opcode starts, 9 E8, 10 member vtable slots, 2 leaf JCC/JMP.
+# Complete local sources, pin bytes, unittest, original-EXE evidence in BSC_R39_MEMBER_MOTION_TYPED_BOUNDARY_20261018.zip (NOT EXE).
