@@ -15,7 +15,7 @@
 03084CE7 0f85bf000000
 03084D85 e8b6cfffff # calls 03081D40
 03081D5F 488bf9 # RDI=member
-03081DB0 e87f7cfdff # check this call's original bytes from full manifest before reuse
+03081DB0 e87fd7fdff # verified E8 -> 0305F534
 03081EBB 488d9788000000 # RDX=&member+88
 03081ECA 488bcf # RCX=member
 03081ED6 e835280e00 # calls 03164710
