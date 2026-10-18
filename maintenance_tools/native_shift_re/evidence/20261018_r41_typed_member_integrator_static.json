@@ -1,0 +1,59 @@
+{
+  "schema": "bsc.n1.r41_typed_member_integrator.v1",
+  "proof": "EXACT_SHA_READONLY_STATIC_NEW_EXE",
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "exe_size": 232531920,
+  "image_base": "0x140000000",
+  "verified_groups": 14,
+  "verified_unwind_function_spans": 14,
+  "verified_instruction_starts": 134,
+  "verified_e8_targets": 14,
+  "verified_all_executable_section_direct_integrator_callers": 3,
+  "verified_branch_targets": 7,
+  "verified_vtable_slots": 7,
+  "typed_ordinary_member_vtable": "0x3912950",
+  "typed_special_member_vtable": "0x3ad3360",
+  "typed_movement_entry": "ordinary member vtable+0x20=0x030592BC; derived +0x20=0x03058D2C then E8 base",
+  "ordinary_member_tick_separate": "ordinary vtable+0x18=0x03086F04: direct steering 0x03059BC8",
+  "motion_route_gate": "member+0x108 bit0x10 OR (member+0xB20 nonnull AND member+0xB28==4) -> 0x0310006C; else 0x03146FF0",
+  "alternate_route_integrates": "0x0310006C has E8 to 0x03146FF0 at 0x031000F6 and 0x0310014C under different guards",
+  "alternate_route_world_goal": "same-member +0x1E0 -> 0x03121F54 at 0x03100247; exact temporal relation to integration varies by branch",
+  "typed_integrator": "0x03146FF0; member from RCX saved in RBX at 0x03147019",
+  "integrator_direct_xyz_sites": [
+    "0x314720b",
+    "0x3147223",
+    "0x314723b"
+  ],
+  "integrator_second_xyz_sites": [
+    "0x3147e85",
+    "0x3147e9d",
+    "0x3147eb5"
+  ],
+  "integrator_motion_vector_sites": [
+    "0x3147281",
+    "0x3147293",
+    "0x31483bd",
+    "0x31483cf"
+  ],
+  "integrator_scaling_data_initial": {
+    "numerator_float": 1000.0,
+    "denominator_uint": 100,
+    "runtime_mutability_unexcluded": true
+  },
+  "integrator_delta_fields": "member+0x13C/+0x140/+0x144 are displacement deltas, also written on different branches of the SAME typed integrator; a simple branch clears deltas after XYZ updates. Other upstream writers and Shift provenance not fully proved",
+  "packet_writers_flag_link": "both typed packet position writers clear bit0x08 and set bit0x02 at member+0x108; integrator tests bit0x02",
+  "member_bits_link_is_same_runtime_shift_instance_proven": false,
+  "unitroot_three_virtual_20_arrays": [
+    "+0x3274/+0x3278",
+    "+0x3294/+0x3298",
+    "+0x32B4/+0x32B8"
+  ],
+  "unitroot_object_array_member_types_all_verified": false,
+  "unitroot_arrays_guaranteed_to_schedule_this_member_under_shift": false,
+  "ordinary_shift_member_integrator_dynamic_hit_proven": false,
+  "same_integrator_has_delta_writers": true,
+  "individual_member_delta_producers_fully_identified": false,
+  "vanilla_shift_crowding_root_cause_proven": false,
+  "safe_native_patch_site_established": false,
+  "gameplay_patch_authorized": false
+}
