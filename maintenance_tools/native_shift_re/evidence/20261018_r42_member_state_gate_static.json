@@ -1,0 +1,33 @@
+{
+  "schema": "bsc.n1.r42_member_bit2_delta_gate.v1",
+  "proof": "READ_ONLY_EXACT_NEW_EXE_STATIC",
+  "sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "exe_size": 232531920,
+  "image_base": "0x140000000",
+  "verified_unwind_function_spans": 11,
+  "verified_full_opcode_pins": 128,
+  "verified_e8_targets": 7,
+  "verified_branch_targets": 7,
+  "verified_typed_vtable_slots": 6,
+  "typed_nonpacket_bit2_setters": {
+    "virtual+0x128": "0x03084B90 OR bit0x06",
+    "virtual+0x130": "0x03084CC7/C9/CB clear bit0x04 set bit0x02",
+    "virtual+0x138": "0x03084BAA/BB9/BBE clear bit0x04 set bit0x02 & bit0x08"
+  },
+  "typed_bit2_clear": "virtual+0xF0 => 0x03164776 AND 0xF5",
+  "integrator_can_indirectly_set_bit2_via_member_state130": true,
+  "integrator_state130_call_occurs_after_initial_bit2_gate": true,
+  "conditional_state_handoff": "vtable+0x130 -> 0x03081D40 -> conditional helper, self-position reset via +0xF0 then member+0x155 bit0x04 set",
+  "handoff_position_copy_source_aliases_current_member": true,
+  "handoff_runtime_shift_hit_proven": false,
+  "direct_input_to_integrator": "member+0x14C/+0x150 local motion and angular state, member+0x13C/+0x140/+0x144 accumulated displacement",
+  "bit2_zero_flag155_bit4_zero": "local skip to 0x03147306; no direct position or delta reset along that tail",
+  "bit2_zero_flag155_bit4_one": "local position integration and delta reset before 0x03147306",
+  "bit2_one": "0x0314738F complex motion path, clears member+0x155 bit0x04; further guarded geometry/motion update",
+  "world_goal": "extended motion wrapper conditionally reads +0x1E0 AFTER integrator call and projects onto +0x23C",
+  "current_integrator_direct_world_goal_read": false,
+  "bit2_is_shift_specific_proven": false,
+  "delta_carryover_during_real_shift_proven": false,
+  "root_cause_proven": false,
+  "gameplay_patch_authorized": false
+}
