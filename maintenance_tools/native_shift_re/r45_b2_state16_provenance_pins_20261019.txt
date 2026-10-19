@@ -1,0 +1,123 @@
+# BSC R45, WH3 newest provided Windows x64 SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496
+# All addresses are RVA. Static-only proof, not Shift runtime evidence.
+# Each line: RVA complete-encoding-hex # decoded assembly (non-normative)
+# b2_sender bounds=0326A994:0326AC04 count=5
+0326AAD9 e832470000 # call   0x326f210
+0326AB19 e88ecad0ff # call   0x2f775ac
+0326ABA2 498b06 # mov    rax,QWORD PTR [r14]
+0326ABA9 4533c0 # xor    r8d,r8d
+0326ABAF ff9068030000 # call   QWORD PTR [rax+0x368]
+# packet_dispatch_builder bounds=0326F210:0326F2F9 count=3
+0326F293 e84c56cfff # call   0x2f648e4
+0326F298 804e5008 # or     BYTE PTR [rsi+0x50],0x8
+0326F2D6 e80956cfff # call   0x2f648e4
+# packet_ctor_fixed_bit bounds=02F648E4:02F6496B count=6
+02F64926 2401 # and    al,0x1
+02F64931 80e101 # and    cl,0x1
+02F6493A c0e104 # shl    cl,0x4
+02F6493D 0ac8 # or     cl,al
+02F64948 80c906 # or     cl,0x6
+02F64966 41884a50 # mov    BYTE PTR [r10+0x50],cl
+# member_receiver bounds=03070A48:03070C4A count=33
+03070A7B e8b073d5ff # call   0x2dc7e30
+03070A83 84c0 # test   al,al
+03070A85 7536 # jne    0x3070abd
+03070A87 f6425020 # test   BYTE PTR [rdx+0x50],0x20
+03070A8B 7530 # jne    0x3070abd
+03070A8D 488d8f90040000 # lea    rcx,[rdi+0x490]
+03070A94 e82b50d4ff # call   0x2db5ac4
+03070A99 488d8fa8040000 # lea    rcx,[rdi+0x4a8]
+03070AA9 4c8bc3 # mov    r8,rbx
+03070AB3 e8183defff # call   0x2f647d0
+03070AB8 e975010000 # jmp    0x3070c32
+03070ABD f6425102 # test   BYTE PTR [rdx+0x51],0x2
+03070ACD e8463b0100 # call   0x3084618
+03070B2F 8b8704010000 # mov    eax,DWORD PTR [rdi+0x104]
+03070B3C 83f801 # cmp    eax,0x1
+03070B50 84c0 # test   al,al
+03070B66 41ff9300010000 # call   QWORD PTR [r11+0x100]
+03070B6D eb4a # jmp    0x3070bb9
+03070B9C 41ff93e8000000 # call   QWORD PTR [r11+0xe8]
+03070BB9 8b4334 # mov    eax,DWORD PTR [rbx+0x34]
+03070BC1 b900d60000 # mov    ecx,0xd600
+03070BC6 0fa3c1 # bt     ecx,eax
+03070BC9 7334 # jae    0x3070bff
+03070BCB 488d8f28030000 # lea    rcx,[rdi+0x328]
+03070BD2 e8494ed4ff # call   0x2db5a20
+03070BD7 488d8f30030000 # lea    rcx,[rdi+0x330]
+03070BF8 e8cbd61d00 # call   0x324e2c8
+03070BFD eb33 # jmp    0x3070c32
+03070BFF 488d8f28030000 # lea    rcx,[rdi+0x328]
+03070C06 e8154ed4ff # call   0x2db5a20
+03070C0B 488d8f30030000 # lea    rcx,[rdi+0x330]
+03070C2D e862cd1d00 # call   0x324d994
+03070C32 4c8d9c2480000000 # lea    r11,[rsp+0x80]
+# packet_special_action_ctor bounds=0324E2C8:0324E2F1 count=6
+0324E2CF e85c53e0ff # call   0x3053630
+0324E2D4 488d151db76c00 # lea    rdx,[rip+0x6cb71d]        # 0x39199f8
+0324E2DB 488911 # mov    QWORD PTR [rcx],rdx
+0324E2DE 498b01 # mov    rax,QWORD PTR [r9]
+0324E2E1 48894138 # mov    QWORD PTR [rcx+0x38],rax
+0324E2E8 c6414000 # mov    BYTE PTR [rcx+0x40],0x0
+# packet_generic_action_ctor bounds=0324D994:0324D9BD count=6
+0324D99B e8905ce0ff # call   0x3053630
+0324D9A0 488d1581c16c00 # lea    rdx,[rip+0x6cc181]        # 0x3919b28
+0324D9A7 488911 # mov    QWORD PTR [rcx],rdx
+0324D9AA 498b01 # mov    rax,QWORD PTR [r9]
+0324D9AD 48894138 # mov    QWORD PTR [rcx+0x38],rax
+0324D9B4 c6414000 # mov    BYTE PTR [rcx+0x40],0x0
+# member_state16_virtual bounds=0306F594:0306F83F count=11
+0306F5E0 8b8324030000 # mov    eax,DWORD PTR [rbx+0x324]
+0306F60A f6461801 # test   BYTE PTR [rsi+0x18],0x1
+0306F6EB 488d8b30030000 # lea    rcx,[rbx+0x330]
+0306F6F5 ff5070 # call   QWORD PTR [rax+0x70]
+0306F70B 488dab28030000 # lea    rbp,[rbx+0x328]
+0306F712 c7832403000010000000 # mov    DWORD PTR [rbx+0x324],0x10
+0306F71F e8fc62d4ff # call   0x2db5a20
+0306F724 488d4d08 # lea    rcx,[rbp+0x8]
+0306F72D 4c8bc6 # mov    r8,rsi
+0306F730 488bd5 # mov    rdx,rbp
+0306F733 e874e41d00 # call   0x324dbac
+# state16_vector_task_ctor bounds=0324DBAC:0324DCBD count=9
+0324DBB6 e8755ae0ff # call   0x3053630
+0324DBBB 488d0d0e478900 # lea    rcx,[rip+0x89470e]        # 0x3ae22d0
+0324DBC2 49890a # mov    QWORD PTR [r10],rcx
+0324DBC5 418b01 # mov    eax,DWORD PTR [r9]
+0324DBC8 41894238 # mov    DWORD PTR [r10+0x38],eax
+0324DBCC 418b4104 # mov    eax,DWORD PTR [r9+0x4]
+0324DBD0 4189423c # mov    DWORD PTR [r10+0x3c],eax
+0324DBD4 418b4108 # mov    eax,DWORD PTR [r9+0x8]
+0324DBD8 41894240 # mov    DWORD PTR [r10+0x40],eax
+# state16_task_virtual_08 bounds=0325E4B4:0325E67E count=4
+0325E50F 4c8d4738 # lea    r8,[rdi+0x38]
+0325E513 488b4f08 # mov    rcx,QWORD PTR [rdi+0x8]
+0325E530 488d91e0010000 # lea    rdx,[rcx+0x1e0]
+0325E544 e86f78e0ff # call   0x3065db8
+# generic_action_virtual_10 bounds=03261688:03261CD3 count=8
+03261A68 498bca # mov    rcx,r10
+03261A6B 4c8d45e0 # lea    r8,[rbp-0x20]
+03261A72 66448975e8 # mov    WORD PTR [rbp-0x18],r14w
+03261A77 e8c402e2ff # call   0x3081d40
+03261C65 488b5b08 # mov    rbx,QWORD PTR [rbx+0x8]
+03261C98 0fb710 # movzx  edx,WORD PTR [rax]
+03261C9B 488bcb # mov    rcx,rbx
+03261CAB e89000e2ff # call   0x3081d40
+# special_action_virtual_10 bounds=03263AF8:03263DB4 count=4
+03263D55 488b5b08 # mov    rbx,QWORD PTR [rbx+0x8]
+03263D8A 488bcb # mov    rcx,rbx
+03263D8D 0fb710 # movzx  edx,WORD PTR [rax]
+03263D9F e89cdfe1ff # call   0x3081d40
+# member_state_restorer bounds=03081D40:03081F15 count=5
+03081D54 41f6400a04 # test   BYTE PTR [r8+0xa],0x4
+03081D7C f6460a01 # test   BYTE PTR [rsi+0xa],0x1
+03081ED2 440fb700 # movzx  r8d,WORD PTR [rax]
+03081ED6 e835280e00 # call   0x3164710
+03081EDB 808f5501000004 # or     BYTE PTR [rdi+0x155],0x4
+# member_position_state_reset bounds=03164710:031647CE count=7
+03164767 f20f1006 # movsd  xmm0,QWORD PTR [rsi]
+0316476B f20f118788000000 # movsd  QWORD PTR [rdi+0x88],xmm0
+03164776 80a708010000f5 # and    BYTE PTR [rdi+0x108],0xf5
+0316477D 80a755010000df # and    BYTE PTR [rdi+0x155],0xdf
+03164789 898790000000 # mov    DWORD PTR [rdi+0x90],eax
+031647AA 488bcf # mov    rcx,rdi
+031647B2 808f5501000003 # or     BYTE PTR [rdi+0x155],0x3
