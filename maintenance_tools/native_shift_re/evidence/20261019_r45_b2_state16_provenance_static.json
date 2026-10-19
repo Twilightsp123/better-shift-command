@@ -1,0 +1,33 @@
+{
+  "schema": "bsc.n1.r45_b2_packet_vs_state16_task_provenance.v1",
+  "proof": "EXACT_NEW_EXE_READ_ONLY_STATIC",
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "exe_bytes": 232531920,
+  "imagebase": "0x140000000",
+  "verified_instruction_starts": 107,
+  "verified_function_spans": 12,
+  "verified_no_unwind_leaf_regions": 1,
+  "verified_direct_e8": 22,
+  "verified_jump_edges": 6,
+  "verified_typed_vtable_slots": 8,
+  "state16_buffer_task_constructor_direct_callers": [
+    "0x306f733"
+  ],
+  "state16_member_method_direct_e8_callers": [],
+  "B2_packet_mode0_path": "member+0x4a8 -> 0x02F647D0, jump out before member+0x330",
+  "B2_packet_other_mode_path": "virtual+0x100/+0xe8; cleanup member+0x328 then install member+0x330 packet action",
+  "packet_action_vtables": [
+    "0x039199F8",
+    "0x03919B28"
+  ],
+  "buffered_state16_task_vtable": "0x03AE22D0",
+  "packet_action_offset_38": "8-byte payload copied from action input, byte+0x40 then zeroed",
+  "state16_task_offset_38": "three individual floats to +0x38/+0x3c/+0x40",
+  "B2_action_state_reset": "packet action virtual+0x10 conditionally calls 0x03081D40; its own gated branch calls 0x03164710 clearing member+0x108 bit2/bit8 and restoring member+0x155 bit4",
+  "direct_B2_packet_installs_R44_vector_task": false,
+  "indirect_or_later_state16_install_excluded": false,
+  "same_Shift_MOVE_instance_observed": false,
+  "buffered_vector_live_goal_mismatch_observed": false,
+  "motion_crowding_root_cause_proven": false,
+  "gameplay_patch_authorized": false
+}
