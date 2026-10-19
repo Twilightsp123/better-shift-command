@@ -1,0 +1,124 @@
+# BSC R44 read-only opcode manifest; new EXE full SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496
+# RVA complete x64 instructions from GNU objdump on verified unwind start; no game executable bytes distributed beyond short instruction pins.
+# member_ctor bounds=03052BA8:0305362D count=6
+03052D20 488d0529fc8b00 # lea    rax,[rip+0x8bfc29]        # 0x3912950
+03052D34 488903 # mov    QWORD PTR [rbx],rax
+03052E7B 488db328030000 # lea    rsi,[rbx+0x328]
+03052EEE 48891e # mov    QWORD PTR [rsi],rbx
+0305306F 488d8bd8080000 # lea    rcx,[rbx+0x8d8]
+03053128 e86becffff # call   0x3051d98
+# embedded_record_init bounds=03051D98:03051DF1 count=6
+03051D9C 66832100 # and    WORD PTR [rcx],0x0
+03051DB2 f30f114104 # movss  DWORD PTR [rcx+0x4],xmm0
+03051DC2 f30f114908 # movss  DWORD PTR [rcx+0x8],xmm1
+03051DCF f30f11410c # movss  DWORD PTR [rcx+0xc],xmm0
+03051DE0 e8b3dbd4ff # call   0x2d9f998
+03051DE8 45884b28 # mov    BYTE PTR [r11+0x28],r9b
+# member_state16_method bounds=0306F594:0306F83F count=9
+0306F5E0 8b8324030000 # mov    eax,DWORD PTR [rbx+0x324]
+0306F70B 488dab28030000 # lea    rbp,[rbx+0x328]
+0306F712 c7832403000010000000 # mov    DWORD PTR [rbx+0x324],0x10
+0306F71C 488bcd # mov    rcx,rbp
+0306F71F e8fc62d4ff # call   0x2db5a20
+0306F724 488d4d08 # lea    rcx,[rbp+0x8]
+0306F72D 4c8bc6 # mov    r8,rsi
+0306F730 488bd5 # mov    rdx,rbp
+0306F733 e874e41d00 # call   0x324dbac
+# member_task_ctor bounds=0324DBAC:0324DCBD count=14
+0324DBB3 4c8bd1 # mov    r10,rcx
+0324DBB6 e8755ae0ff # call   0x3053630
+0324DBBB 488d0d0e478900 # lea    rcx,[rip+0x89470e]        # 0x3ae22d0
+0324DBC2 49890a # mov    QWORD PTR [r10],rcx
+0324DBC5 418b01 # mov    eax,DWORD PTR [r9]
+0324DBC8 41894238 # mov    DWORD PTR [r10+0x38],eax
+0324DBCC 418b4104 # mov    eax,DWORD PTR [r9+0x4]
+0324DBD0 4189423c # mov    DWORD PTR [r10+0x3c],eax
+0324DBD4 418b4108 # mov    eax,DWORD PTR [r9+0x8]
+0324DBD8 41894240 # mov    DWORD PTR [r10+0x40],eax
+0324DBDC 498b4110 # mov    rax,QWORD PTR [r9+0x10]
+0324DBE0 49894248 # mov    QWORD PTR [r10+0x48],rax
+0324DC21 8ac8 # mov    cl,al
+0324DC38 41c7425881000000 # mov    DWORD PTR [r10+0x58],0x81
+# member_task_base_leaf bounds=03053630:03053683 count=10
+03053630 4533c0 # xor    r8d,r8d
+0305363A 488901 # mov    QWORD PTR [rcx],rax
+0305363D 488b02 # mov    rax,QWORD PTR [rdx]
+03053640 48894108 # mov    QWORD PTR [rcx+0x8],rax
+03053644 44884110 # mov    BYTE PTR [rcx+0x10],r8b
+03053648 44894114 # mov    DWORD PTR [rcx+0x14],r8d
+0305364C 44884118 # mov    BYTE PTR [rcx+0x18],r8b
+03053650 c6825401000001 # mov    BYTE PTR [rdx+0x154],0x1
+03053671 488d05b8eb8b00 # lea    rax,[rip+0x8bebb8]        # 0x3912230
+03053678 488901 # mov    QWORD PTR [rcx],rax
+# member_tick bounds=03086F04:0308774C count=17
+03086F2C 488bf9 # mov    rdi,rcx
+03086FD2 4438b7d8080000 # cmp    BYTE PTR [rdi+0x8d8],r14b
+03086FE5 4c8d87dc080000 # lea    r8,[rdi+0x8dc]
+03086FF1 488d97e8080000 # lea    rdx,[rdi+0x8e8]
+0308700C 4488b7d8080000 # mov    BYTE PTR [rdi+0x8d8],r14b
+03087013 e8a0edfdff # call   0x3065db8
+030872CD a804 # test   al,0x4
+030872CF 7468 # je     0x3087339
+030872D1 8b8724030000 # mov    eax,DWORD PTR [rdi+0x324]
+030872DA 743f # je     0x308731b
+0308731B 488d8f28030000 # lea    rcx,[rdi+0x328]
+03087322 e875ecffff # call   0x3085f9c
+03087327 488bcf # mov    rcx,rdi
+0308733C 4c39b7200b0000 # cmp    QWORD PTR [rdi+0xb20],r14
+03087343 0f85a7000000 # jne    0x30873f0
+03087349 e87a28fdff # call   0x3059bc8
+03087351 e8da640000 # call   0x308d830
+# member_task_scheduler bounds=03085F9C:03085FE0 count=14
+03085FA2 80b95401000001 # cmp    BYTE PTR [rcx+0x154],0x1
+03085FA9 752f # jne    0x3085fda
+03085FAB 488d5908 # lea    rbx,[rcx+0x8]
+03085FAF 807b1000 # cmp    BYTE PTR [rbx+0x10],0x0
+03085FB3 7525 # jne    0x3085fda
+03085FB5 807b1800 # cmp    BYTE PTR [rbx+0x18],0x0
+03085FB9 7513 # jne    0x3085fce
+03085FBB 488b03 # mov    rax,QWORD PTR [rbx]
+03085FC1 ff5008 # call   QWORD PTR [rax+0x8]
+03085FC4 807b1000 # cmp    BYTE PTR [rbx+0x10],0x0
+03085FC8 c6431801 # mov    BYTE PTR [rbx+0x18],0x1
+03085FCE 488b03 # mov    rax,QWORD PTR [rbx]
+03085FD4 ff5010 # call   QWORD PTR [rax+0x10]
+03085FD7 ff4314 # inc    DWORD PTR [rbx+0x14]
+# member_task_virtual_08 bounds=0325E4B4:0325E67E count=10
+0325E4CD 488bf9 # mov    rdi,rcx
+0325E4D9 488b4708 # mov    rax,QWORD PTR [rdi+0x8]
+0325E502 488b4f08 # mov    rcx,QWORD PTR [rdi+0x8]
+0325E50F 4c8d4738 # lea    r8,[rdi+0x38]
+0325E513 488b4f08 # mov    rcx,QWORD PTR [rdi+0x8]
+0325E52C 488b4748 # mov    rax,QWORD PTR [rdi+0x48]
+0325E530 488d91e0010000 # lea    rdx,[rcx+0x1e0]
+0325E53C 44884c2420 # mov    BYTE PTR [rsp+0x20],r9b
+0325E541 41b101 # mov    r9b,0x1
+0325E544 e86f78e0ff # call   0x3065db8
+# goal_delta_install bounds=03065DB8:03065F43 count=7
+03065DD9 488bfa # mov    rdi,rdx
+03065DDC 488bd9 # mov    rbx,rcx
+03065E8A 0f1007 # movups xmm0,XMMWORD PTR [rdi]
+03065E9E 0f1183e0010000 # movups XMMWORD PTR [rbx+0x1e0],xmm0
+03065EA5 f20f104f10 # movsd  xmm1,QWORD PTR [rdi+0x10]
+03065EAA f20f118bf0010000 # movsd  QWORD PTR [rbx+0x1f0],xmm1
+03065EB2 e8bdea0e00 # call   0x3154974
+# member_conditional_tick bounds=0308D830:0308DA8F count=13
+0308D839 4883793000 # cmp    QWORD PTR [rcx+0x30],0x0
+0308D857 4883b9e802000000 # cmp    QWORD PTR [rcx+0x2e8],0x0
+0308D865 8b816c020000 # mov    eax,DWORD PTR [rcx+0x26c]
+0308D86B 83e878 # sub    eax,0x78
+0308D871 0f87ff010000 # ja     0x308da76
+0308D883 0f83ed010000 # jae    0x308da76
+0308D889 e8aa3a0000 # call   0x3091338
+0308D8D9 488b4358 # mov    rax,QWORD PTR [rbx+0x58]
+0308D912 0f835e010000 # jae    0x308da76
+0308DA23 488d93e0010000 # lea    rdx,[rbx+0x1e0]
+0308DA33 4c8d442440 # lea    r8,[rsp+0x40]
+0308DA4B 488bcb # mov    rcx,rbx
+0308DA71 e84283fdff # call   0x3065db8
+# member_virtual_470 bounds=03071DC8:030728FA count=5
+03071DE9 4c8bf1 # mov    r14,rcx
+03072893 498d96e0010000 # lea    rdx,[r14+0x1e0]
+0307289D 4c8d4587 # lea    r8,[rbp-0x79]
+030728A6 498bce # mov    rcx,r14
+030728C1 e8f234ffff # call   0x3065db8
