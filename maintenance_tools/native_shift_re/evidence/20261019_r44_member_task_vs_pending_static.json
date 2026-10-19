@@ -1,0 +1,60 @@
+{
+  "schema": "bsc.n1.r44_member_task_vs_pending_state.v1",
+  "proof": "EXACT_NEW_EXE_READ_ONLY_NATIVE_STATIC",
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "exe_bytes": 232531920,
+  "imagebase": "0x140000000",
+  "verified_full_opcodes": 111,
+  "verified_function_spans": 11,
+  "verified_direct_calls": 13,
+  "verified_conditional_edges": 9,
+  "verified_typed_vtable_slots": 7,
+  "all_direct_e8_to_goal_delta_handler": {
+    "0x3065db8": [
+      "0x30728c1",
+      "0x3087013",
+      "0x308da71",
+      "0x325e544"
+    ],
+    "0x324dbac": [
+      "0x306f733"
+    ],
+    "0x3051d98": [
+      "0x3053128"
+    ]
+  },
+  "member_pending_direct_references": [
+    {
+      "function": "member_ctor",
+      "rva": "0x305306f",
+      "opcode": "lea    rcx,[rbx+0x8d8]"
+    },
+    {
+      "function": "member_tick",
+      "rva": "0x3086fd2",
+      "opcode": "cmp    BYTE PTR [rdi+0x8d8],r14b"
+    },
+    {
+      "function": "member_tick",
+      "rva": "0x308700c",
+      "opcode": "mov    BYTE PTR [rdi+0x8d8],r14b"
+    },
+    {
+      "function": "member_tick",
+      "rva": "0x3087018",
+      "opcode": "mov    WORD PTR [rdi+0x8d8],r14w"
+    }
+  ],
+  "typed_member_task_path": "member+0x328 owner -> member+0x330 subtask; member +0x550 state 16 installs 0x03AE22D0; tick +0x08 -> 0x0325E4B4 -> 0x03065DB8 with member+0x1E0 and task+0x38",
+  "buffered_vector_live_goal_temporal_seam": "constructor copies input+0,+4,+8 to task+0x38/+0x3c/+0x40, but the task virtual+8 later passes &member+0x1e0 as goal and &task+0x38 as input vector",
+  "initial_task_dispatch_order": "if active/phase gate then virtual+0x08, mark task+0x18=1, and optionally virtual+0x10; per-member stages",
+  "alternate_goal_delta_caller": "member Tick 0x03087349 steering, 0x03087351 0x0308D830; guarded rare/conditional path can call 0x03065DB8 without +0x8D8",
+  "member_virtual_goal_caller": "member vtable+0x470=0x03071DC8 conditionally calls 0x03065DB8 without +0x8D8",
+  "pending_record_is_required_for_all_goal_updates": false,
+  "pending_record_producer_identified": false,
+  "group_or_route_epoch_mismatch_proven": false,
+  "Shift_move_reaches_this_specific_task_proven": false,
+  "root_cause_proven": false,
+  "per_member_physical_crowding_causality_proven": false,
+  "gameplay_patch_authorized": false
+}
