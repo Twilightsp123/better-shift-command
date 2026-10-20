@@ -2,8 +2,9 @@
 """Offline exact-SHA build guard + mathematically labelled synthetic policy tests."""
 import os, sys, tempfile, subprocess, unittest
 from pathlib import Path
-HERE=Path(__file__).parent
-sys.path.insert(0,str(HERE))
+HERE=Path(__file__).resolve().parent
+REPO_TOOLS=HERE.parent/'maintenance_tools'/'native_shift_re'
+sys.path.insert(0,str(REPO_TOOLS if REPO_TOOLS.is_dir() else HERE))
 import audit_r55_group_span_policy as a
 
 class PolicyContracts(unittest.TestCase):
