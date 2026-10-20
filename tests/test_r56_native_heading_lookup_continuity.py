@@ -1,4 +1,9 @@
 import unittest, math, pathlib, tempfile, sys, os
+# Support both standalone ZIP and checked-out repository test layouts.
+for module_dir in (pathlib.Path(__file__).resolve().parent,
+                   pathlib.Path(__file__).resolve().parents[1]/'maintenance_tools'/'native_shift_re'):
+    if (module_dir/'audit_r56_heading_projection_init.py').is_file():
+        sys.path.insert(0,str(module_dir));break
 from audit_r56_heading_projection_init import pins, projected_point, projected_jump, audit, CALLS
 class R56(unittest.TestCase):
  def test_pins(self):self.assertEqual(len(pins()),47)
