@@ -1,0 +1,21 @@
+# R58 Derpy source-guided read-only CA native action state pins.
+# WH3 SHA256: 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496
+# All addresses RVA, not absolute ASLR addresses.
+# Callee owned by CA walk_b object (virtual+0x10=0x03262850).
+# 0x032628D9 direct E8 call target = 0x0325AE78 (verified).
+# RVA exact opcode and typed interpretation:
+032628d9 e89a85ffff # call walk_b action state handler
+0325b05a 8b8198000000 # read action+0x98 DWORD
+0325b060 a802 # test action+0x98 bit1
+0325b068 a801 # test action+0x98 bit0
+0325b108 8b8398000000 # re-read action+0x98 flags
+0325b114 898398000000 # rewrite action+0x98
+0325b1ef 838b9800000001 # OR action+0x98 bit0
+0325b1f6 f6839800000001 # TEST action+0x98 bit0
+# Derpy native worker cave: clears member+0x3C0 (action at member+0x328 +0x98)
+# only when selected member's current virtual table == walk_b 0x03AE2400,
+# and fresh point/gait/speed/heading differs from previous.
+# Different action types: walk_a 0x03919350 +0x10=0x03264B70;
+# b2 ordinary packet 0x03919B28 +0x10=0x03261688.
+# DO NOT apply member+0x3C0 clear globally; typed semantics differ.
+# Runtime SHIFT incidence and causality not proven; no gameplay patch.
