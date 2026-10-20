@@ -1,6 +1,9 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-19
 
+**2026-10-20 本对话第18轮 / R52：** [memreader Plus 0.13.0 全栈静态审计与新版 WH3 原生 RMB 替换/Shift 队列追加差异](N1_R52_MEMREADER_PLUS_RMB_SHIFT_COMMAND_DIFFERENCE_20261020.md)。在用户实际新 EXE SHA `9bd58c63…f42be496` 上确认统一 MOVE 入口 `0x030374CC` 的 `R9B→R14B→DL→0x02F5540C` 清队列/追加门槛，条件性 `descriptor+0x5A OR 0x06`、构造新 slot、跳过即时 Group 构造；**R9B 表示 native append，并非物理键盘 Shift 身份**。memreader Plus 0.13.0 与 Derpy 两份真实 pack 对照确认物理键 0x10/0x02 可通过 GetAsyncKeyState 辅助读取，但不能从键态反推原生 order。新版 26/26 原始机器码及 objdump 起点、4/4 E8、2/2 branch，用户三个真实文件 10/10 离线回归 PASS。完整审计源码、测试与无 Hook Lua 校验器在本地 R52 资源包；本轮仅 GitHub 研究报告与索引落盘。**没有 gameplay patch、新实机线程观测或改 main**。
+
+
 **2026-10-20 R51／本对话第17轮（Battle Lua 回调 ≠ Native worker 同步窗口）：** [实际 Derpy 事件循环、R49/R50 时钟及 R51 battle-phase 约束审计](N1_R51_BATTLE_PHASE_CAPTURE_SAFETY_20261020.md)。Derpy `bm:repeat_real_callback(frame,1)` 是 UI 实时计时，不是全成员更新后的栅栏；`Deployment/Deployed/VictoryCountdown/Complete` 仅能界定观测许可与关闭，不证明 Native 工作线程静止。新增 [R51 research-only 生命周期守卫](../../maintenance_tools/native_shift_re/bsc_r51_battle_lifecycle_gate.lua) 与 [源码契约审计器](../../maintenance_tools/native_shift_re/audit_r51_battle_phase_research.py)：仅手动 opt-in 的 mock capture，可拒绝多人/replay、跨 phase/model-time 和无效采样，阶段回调自身不读取成员。真实 Lua 模拟 23/23 PASS、源码 Python 12/12 PASS（用户 Derpy 解包在场时）、R49/R50 各20/20与10/10 回归。**明确没有原生线程同步屏障、没有游戏运行、没有 gameplay patch；所有实验测试及 JSON 证据在本轮离线 ZIP 中，未全部推送 GitHub，绝不宣称 CI PASS。**
 
 
