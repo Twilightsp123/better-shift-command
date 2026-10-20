@@ -1,6 +1,9 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-19
 
+**2026-10-20 R46 / 本对话第13轮：** [用户提供的 Derpy Third-Person / memreader Plus 实际 .pack 全文件审计与相同新版 EXE 的原始字节核验](N1_R46_DERPY_MEMREADER_ACTUAL_PACK_AUDIT_20261020.md)。解析 15/27 个 PFH5 文件；memreader Plus 0.13.0 内嵌 x64 DLL 的静态 PE 与 SHA 已确认（未执行）。Derpy 目标 build `6acec6f4` 与游戏 EXE 完全匹配：普通 member Tick `0x03086F04` 入口 7/7 原始字节、queued-action gate `0x03087378` 18/18 字节、同类型成员虚表 `+0x18` 指针全部对齐。**新增关键结构：BattleUnit userdata → native unit+0xA4/+0xA8 → member 数组**；**新增跨线程证据：Derpy 通过 member Tick 中的 Native code cave + mailbox 让战斗线程处理单兵动作**。Derpy 初始化期间就可能安装 cave，故 BSC vanilla 基线不能与 Derpy 同启；Derpy 的单兵目标覆写不是 queued Shift 修复。本地静态测试 11/11 PASS、无私有文件 7 PASS/4 SKIP；无实机测试、无原生挤压根因或 gameplay patch。之前的公开资料评估已标注为被 R46 取代。
+
+
 **2026-10-20 本对话第12轮：** [memreader Plus / Derpy Third-Person Battles 对 Native BSC 观测与 Patch 架构的适用性评估](N1_MEMREADER_PLUS_DERPY_NATIVE_FEASIBILITY_20261020.md)。官方 memreader Plus 提供 `find_pattern`、`read_struct`、`hook_site`、`patcher:sites` 与可归属补丁管理，但**Lua Hook 回调只运行在脚本线程，工作线程调用直接绕过**；真正的逐兵积分覆盖需先核对 `other_thread_calls`。Derpy 第三人称单兵控制及 steering Patch 是值得审读的已存在案例，但**尚未取得/审计它的 .pack**，不能据此声称找到 Shift 根因。本轮仅公开资料调研，无 gameplay Patch、无新增实机测试、不修改 main。
 
 
