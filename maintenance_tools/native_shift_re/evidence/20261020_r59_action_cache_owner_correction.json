@@ -1,0 +1,55 @@
+{
+  "schema": "bsc.r59.typed_action_cache_ownership.v1",
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "proof": "STATIC_EXACT_SHA_PE_UNWIND_OBJDUMP",
+  "verified_opcode_starts": 59,
+  "verified_direct_edges": 8,
+  "verified_vtable_slots": 5,
+  "verified_unwind_function_owners": 6,
+  "walk_a": {
+    "vtable_rva": "0x03919350",
+    "plus10": "0x03264B70",
+    "unique_direct_cache_handler_call": "0x03264BF7",
+    "cache_handler_rva": "0x0325B008",
+    "cache_handler_end_exclusive": "0x0325B3D2",
+    "action_plus_0x98_instruction_sites": [
+      "0x0325B05A",
+      "0x0325B108",
+      "0x0325B114",
+      "0x0325B1EF",
+      "0x0325B1F6",
+      "0x0325B395"
+    ]
+  },
+  "walk_b": {
+    "vtable_rva": "0x03AE2400",
+    "plus10": "0x03262850",
+    "setup_call": "0x032628D9",
+    "setup_rva": "0x0325AE78",
+    "setup_end_exclusive": "0x0325B005",
+    "setup_last_ret": "0x0325B004",
+    "walk_b_direct_cache_reader_proven": false,
+    "walk_b_context_98": "0x0326295D action+0x28 -> 0x03262967 context+0x440 -> 0x0326296E context+0x98, not action+0x98"
+  },
+  "b2": {
+    "ordinary_constructor": "0x0324D994",
+    "special_constructor": "0x0324E2C8",
+    "constructor_reset_plus0x40": [
+      "0x0324D9B4",
+      "0x0324E2E8"
+    ],
+    "ordinary_method": "0x03261688",
+    "special_method": "0x03263AF8",
+    "direct_cleanup_before_both_new_constructors": true,
+    "shared_cache_98_with_walk_a_proven": false
+  },
+  "corrected_r58_claim": "The native action+0x98 reader at 0x0325B008 was attributed to walk_b despite being a separate unwind function called by walk_a only.",
+  "local_unittests": {
+    "with_exact_exe": "15 PASS",
+    "without_private_exe": "14 PASS 1 SKIP"
+  },
+  "shift_instance_cause_proven": false,
+  "gameplay_patch_authorized": false,
+  "in_game_tested": false,
+  "source_note": "Full reproducible audit code, 59 opcode pins, tests and instruction excerpts included in BSC_R59_DERPY_ACTION_CACHE_TYPE_CORRECTION_20261020.zip."
+}
