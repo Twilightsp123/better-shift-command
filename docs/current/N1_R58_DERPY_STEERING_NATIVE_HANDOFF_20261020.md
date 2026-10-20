@@ -1,5 +1,6 @@
 # BSC R58 / 本对话第24轮 — Derpy 第三人称单兵运动机制的实际源码审计
 
+> **R59 修订 / 2026-10-20（必须先读）：** 本文 B/G 小节把 `0x0325B05A/108/114/1EF/1F6/395` 的 `action+0x98` 读写归为 `walk_b → 0x0325AE78` **是错误的函数归属**。新版 EXE PE unwind 真边界证明 `0x0325AE78..0x0325B005` 于 `0x0325B004 RET` 结束；含 `action+0x98` 的是另一独立函数 `0x0325B008..0x0325B3D2`，唯一已核直接 E8 调用者为 **walk_a +0x10 `0x03264BF7`**，而 walk_b 调用 `0x032628D9→0x0325AE78`。Derpy code cave 自己清 `walk_b` 目标偏移的事实仍成立，但**不能用此前错归的读者证明 walk_b 直接消费此缓存**。B2 ordinary/special 构造时有自己的 `action+0x40` 状态初始化，不可跨动作类型套用。全文以 [R59 纠错报告](N1_R59_DERPY_WALK_A_B2_ACTION_CACHE_CORRECTION_20261020.md) 为准；原字节守卫通过并不保证类型推断正确。\n\n
 日期：2026-10-20。研究对象：用户上传的 `derpy_third_person.zip` → PFH5 `derpy_third_person.pack`；原始 9.X 新版 `Warhammer3.zip` → `Warhammer3.exe`。**全部静态/只读；没有运行第三方 MOD DLL、没有注入、没有修改游戏、没有 gameplay 修复。**
 
 新版 EXE SHA256：`9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496`，TimeDateStamp `0x6acec6f4`。Derpy ZIP SHA256 在 `static_report.json` 中记录，脚本从实际 PFH5 提取关键字段，不随报告打包第三方 Lua。
