@@ -1,3 +1,5 @@
+> **2026-10-20 实际文件审计更新：** 本文是仅依据公开资料进行的早期评估，其中“尚未取得/审计 Derpy .pack”及 `derpy_pack_reviewed=false` 是**当时的历史状态**，现已被 [R46：实际解包用户提供的 Derpy 与 memreader Plus，并严格核对同版 EXE](N1_R46_DERPY_MEMREADER_ACTUAL_PACK_AUDIT_20261020.md) 取代。不要再以旧描述指导下一轮。R46 证实 Derpy 具有同版 Native Tick code cave、BattleUnit 成员数组桥及 Battle worker-thread mailbox，未证明 Shift 挤压根因。
+
 # BSC — memreader Plus / Derpy Third-Person Battles 对原生 Shift 修复的价值评估（2026-10-20）
 
 > 调研报告而非游戏实测。**没有安装第三方 DLL、提取 Derpy .pack、运行新的 Hook、修补 gameplay，也没有触碰 main。** 这是对已有 BSC N1 原生逆向成果的观测/实施工具架构评估。
