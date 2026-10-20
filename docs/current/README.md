@@ -1,6 +1,9 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-19
 
+**2026-10-20 本对话第24轮 / R58：** [重新实审 Derpy 第三人称单兵转向、前方预瞄、原生 walk_b 动作缓存刷新及整队被动运动](N1_R58_DERPY_STEERING_NATIVE_HANDOFF_20261020.md)。对用户 Derpy PFH5 与新 EXE SHA `9bd58c63…f42be496` 只读复核；从 `move.lua` 得到第三方单兵默认 15m 前瞄、360°/s 转向、失路回退 1.5m，整队 `goto_location` 命令最小间隔 0.5s（**均非 CA Shift 参数**）。Derpy 战斗线程 cave 410 bytes、11 个关键机器码指纹核对通过，确认**仅针对所控 `walk_b` 类型**的目标输入改变才清 `member+0x3C0` 动作缓存。实际游戏虚表 `walk_a+0x10=0x03264B70`、`walk_b+0x10=0x03262850`、B2 packet action `+0x10=0x03261688` 各不相同；**禁止把 walk_b 字段直接按偏移套到原生 queued Shift**。Derpy 注释有“站立单兵受整队运动影响”的作者实验，尚非 BSC 运行证据。独立 13/13 离线测试 PASS，完整工具/test/无第三方字节的交付包独立封装；无本轮游戏内采样或 gameplay patch。
+
+
 **2026-10-20 R57 / 本对话第23轮（转弯侧向选取和参考框架连续性）：** [新版 EXE 中 0x0310E450 的原生条件性 ±0x4000（90°）朝向选侧、两个真实直接调用者、临时路线记录+0x44 与原始描述符+0x38 的类型区别](N1_R57_PERPENDICULAR_SIDE_SELECTION_AND_FRAME_20261020.md)。固定 SHA 新版 EXE **64/64 原码/真实指令起点、7/7 E8、6/6 JCC/JMP**；**23/23 本地测试（含 EXE）** 和无 EXE **22 PASS / 1 SKIP** 为准。新反例：选侧条件成立时参考角差值跨越0，垂直方向输出可能近似反向；但该函数有模式/对象/虚表门槛，**不是 Shift 专属也不是已证实的 180° 折返拆段机制**。更正 R56 的固定参考中心假设：`0x0312214C` 可用引用框架解析世界坐标 C，所以 heading 变动本身不证明投影跳变。**未完成 gameplay patch、游戏内同实例观测或 Hook 安全授权**。完整机器码、审计源码和离线模型随 R57 研究 ZIP 交付，仓库本次仅同步研究报告与索引。
 
 
