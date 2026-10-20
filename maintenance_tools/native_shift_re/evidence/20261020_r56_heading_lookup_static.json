@@ -1,0 +1,22 @@
+{
+  "schema": "bsc.r56.heading_lookup_projection.v1",
+  "exe_sha": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "static_only": true,
+  "verified_pins": 47,
+  "verified_direct_e8": 6,
+  "constructor_caller": "0x00186474 CALL 0x006042E8",
+  "lookup_init": "0x006042E8",
+  "lookuptable_rva": "0x3e8f360",
+  "lookup_producer": "0x00604322 call packed angle/math routine, stores 2 floats to [table+i*8] and [table+i*8+4]",
+  "lookuptable_disk_zero": true,
+  "iterations": 65536,
+  "angle_radians_per_step": 9.58738019107841e-05,
+  "zero_angle_small_branch": "0x0112092A through +0x42 yields packed 0 and 1 (xmm0:low two lanes)",
+  "converter_use": "0x03102BE6 references same table; +0x3C-+0x40 times one-half gives position offset",
+  "extent_is_formation_layout": true,
+  "route_commit_stage": "0x03017AA3 -> 0x0301E890 conditionally decrements [Root+0x1E8+0x18]+4 and clears [Root+0x1E8+0x80]; 0x03017ABB publishes Root+0x270 route",
+  "local_angular_interpolation_proven": false,
+  "runtime_shift_leg_discontinuity_measured": false,
+  "root_cause_proven": false,
+  "gameplay_patch_authorized": false
+}
