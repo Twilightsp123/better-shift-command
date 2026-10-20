@@ -1,6 +1,9 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-19
 
+**2026-10-20 本对话第15轮 R48（历史 V3 数据复用止损与真实旧格式分析器）：** [独立核对 V3 近距汇总、另一次 one-shot 的 234 条位置事件，并实现只处理真实 `GROUP_TICK_POSITION` JSONL 的离线几何复算器](N1_R48_LEGACY_TRACE_GEOMETRY_REUSE_20261020.md)。V3 原始成员位置 JSONL 不在可访问资料中，旧 one-shot JSONL 也未恢复；**不能由 85/194 或 0.6087m 汇总反算轨迹**，两个实机测试不能合并。R48 19/19 新离线合同测试 PASS；用户新版EXE+两份MOD静态证据下重跑 R47 19/19 PASS；合成距例明确不当实机。ZIP 含新增脚本、测试、来源清单和上一轮档案；本仓库仅同期报告落盘，无 gameplay patch，不改 main。
+
+
 **2026-10-20 R47 / 本对话第14轮：** [Derpy+memreader Plus 无 Hook 原生动作虚表判别与兵牌相对形变分析](N1_R47_PASSIVE_SPATIAL_ACTION_TRIAGE_20261020.md)。固定新版 EXE SHA `9bd58c63…f42be496`，从用户真实游戏 EXE `.rdata` 直接确认七类 `member+0x330` 动作对象的**14/14 `virtual+0x08/+0x10` 指针**和普通成员**2/2 Tick/积分槽**，并用实际第三方 `.pack` 交叉核验。新作业是**无 Hook 的 32 人上限顺序快照研究原型**（校验 Tick/Gate 的 live bytes、成员名单重复读取、只记录匿名成员 ID）及纯离线**相邻物理距离压缩 + 最佳刚体旋转/平移残差**比较器。原型并未在游戏执行，读取仍有并发风险；19/19 本地纯静态/合成测试 PASS（含用户真实 EXE 和两个 .pack），无私有素材 18 PASS / 1 SKIP。Derpy 作者“regiment walk 不追单独改写的目标”等注释仅为第三方观察，不能当作 BSC 实测。所有工具仅离线交付，不包含游戏 EXE、第三方 DLL 或 MOD，不授权 gameplay patch。
 
 
