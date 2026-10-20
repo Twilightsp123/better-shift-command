@@ -1,0 +1,22 @@
+{
+  "schema": "bsc.n1.r49_memreader_passive_contract_static.v1",
+  "evidence_type": "REAL_FILES_STATIC_AND_OFFLINE_LUA_API_MOCK",
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "derpy_pack_sha256": "a40d086d57f8d4857caff782680b62f490cf5e9d772723c9b50f69bee9e32176",
+  "memreader_pack_sha256": "9e63d8feacb92c0b35ec327884bda558fe453dbdba945ee9d9c848deec1f7878",
+  "pe_timestamp": "6acec6f4",
+  "exe_imagebase": "0x140000000",
+  "verified_external_action_vtable_slots": 14,
+  "verified_member_vtable_slots": 2,
+  "verified_queued_tick_original_bytes": 7,
+  "verified_queue_gate_original_bytes": 18,
+  "api_names_present_in_bundled_native_payload": 7,
+  "original_loader_release": "0_13_0",
+  "sampler_no_write_hook_patch_functions": true,
+  "runtime_hooks_not_installed": true,
+  "live_gameplay_capture_run": false,
+  "runtime_pointer_race_safe_proven": false,
+  "same_pointer_same_lifetime_proven": false,
+  "formation_crowding_root_cause_proven": false,
+  "native_gameplay_patch_authorized": false
+}
