@@ -1,6 +1,9 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-19
 
+**2026-10-20 R57 / 本对话第23轮（转弯侧向选取和参考框架连续性）：** [新版 EXE 中 0x0310E450 的原生条件性 ±0x4000（90°）朝向选侧、两个真实直接调用者、临时路线记录+0x44 与原始描述符+0x38 的类型区别](N1_R57_PERPENDICULAR_SIDE_SELECTION_AND_FRAME_20261020.md)。固定 SHA 新版 EXE **64/64 原码/真实指令起点、7/7 E8、6/6 JCC/JMP**；21? 不，以交付归档 **23/23 本地测试（含 EXE）** 和无 EXE **22 PASS / 1 SKIP** 为准。新反例：选侧条件成立时参考角差值跨越0，垂直方向输出可能近似反向；但该函数有模式/对象/虚表门槛，**不是 Shift 专属也不是已证实的 180° 折返拆段机制**。更正 R56 的固定参考中心假设：`0x0312214C` 可用引用框架解析世界坐标 C，所以 heading 变动本身不证明投影跳变。**未完成 gameplay patch、游戏内同实例观测或 Hook 安全授权**。完整机器码、审计源码和离线模型随 R57 研究 ZIP 交付，仓库本次仅同步研究报告与索引。
+
+
 **2026-10-20 R56／本对话第22轮：** [新版 EXE 朝向查表初始化、动态三角方向和连续换段投影模型](N1_R56_NATIVE_HEADING_LUT_PROJECTION_CONTINUITY_20261020.md)。固定新 EXE SHA `9bd58c63…f42be496`，找到 `0x00186474 → 0x006042E8` 初始化器生成 65536 项，每项两浮点；`0x03102BE6` 从同一 `0x03E8F360` 表中读取方向分量。新增 `0x0301E890` 类型化清理 `Root+0x1E8` 当前路线引用并将有效位清零，**不是清理成员运动**；`0x03017ABB` 条件发布 `Root+0x270` 新路线。真实 EXE 静态 **47/47 指令起点、6/6 E8，17/17 本地测试 PASS**，无 EXE **16 PASS/1 SKIP**；纯合成模型区分朝向变化与布局跨度变化。**未证明实机 Shift 投影异常或下游缺乏平滑，禁止 gameplay patch。** [审计器](../../maintenance_tools/native_shift_re/audit_r56_heading_projection_init.py) · [机器码](../../maintenance_tools/native_shift_re/r56_exact_pins.txt) · [测试](../../tests/test_r56_native_heading_lookup_continuity.py) · [证据](../../maintenance_tools/native_shift_re/evidence/20261020_r56_heading_lookup_static.json)。
 
 
