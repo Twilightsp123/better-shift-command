@@ -54,5 +54,16 @@ Derpy `platform.lua:537-558` 的注释是作者实机观察的直接记录：整
 - 原始包 `.pack` 提取代码，使用防路径穿越 PFH5 解析器；仅保存**新编写的分析工具**，不发布完整 Derpy 源码或原 DLL。
 - 通过实际 `Warhammer3.exe` 完整 SHA/PE 时间戳、普通成员 Tick 入口 7 字节、三组原生虚表各三个槽、walk_b +0x10 的实际状态/结束字段机器码守卫。
 - Derpy code cave 410 字节，11 个关键机器码指纹已经从 `platform.lua` 的源数组静态核对；包括特定成员识别、XCHG 事件标志、动作类型选择、目标字段变化和 `member+0x3C0` 条件性零写。
-- 独立离线 13 项 unittest 使用实际 Derpy ZIP + 当前游戏 EXE ZIP PASS；缺私有档案时 3 项不依赖文件的单测 PASS / 1 套私有档案测试 SKIP。包含恶意 PFH5 名称、错误 SHA、篡改目标缓存指令和预瞄常量漂移的负例。
+- 独立离线 14 项 unittest 使用实际 Derpy ZIP + 当前游戏 EXE ZIP PASS；缺私有档案时 3 项不依赖文件的单测 PASS / 1 套私有档案测试 SKIP。包含恶意 PFH5 名称、错误 SHA、篡改目标缓存指令和预瞄常量漂移的负例。
 - **没有本轮游戏内运行，没有证明 Shift root cause，gameplay_patch_authorized=false。**
+
+## G. 补充：原生引擎自己确实按目标／路径状态读取这个缓存字段
+
+二次专项只读审计已从 **真实新版 EXE** 验证：
+
+- `walk_b` 动作 `virtual+0x10=0x03262850` 在 `0x032628D9` 通过直接 E8 进入 `0x0325AE78`，且 RCX 是传入的 **walk_b 动作对象**，不是其它组件。
+- `0x0325B05A` 读取 `action+0x98`，`0x0325B060/+0x68` 测试 bit1/bit0。前置条件还包括动作 `+0x92` 标志及所属 member 的路径状态 `+0x710`。
+- `0x0325B108/+0x114` 修改并保存动作 `+0x98` 状态，`0x0325B1EF` 置 bit0，`0x0325B1F6` 再测试 bit0，沿条件路径继续运动/路线处理。
+- 这 7 个具体原生字节位置及 `0x032628D9→0x0325AE78` 直接调用已经在固定 SHA 上单独纳入审计器。它证明 `member+0x3C0 == action+0x98` 对 `walk_b` 来说是**真实的原生路径状态位字段**，比只依赖 Derpy 注释的“cached destination”更强。
+
+**仍不能**把这项成功归因于修复 Shift 队列：原生 queued MOVE 成员 action 可能是另一类型，其虚方法和缓存布局还要重新核对。更新后的完整本地独立验证为 **14/14 PASS**；不存在新版玩家 Shift 实际命中或 gameplay 补丁。
