@@ -1,6 +1,9 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-19
 
+**2026-10-20 R53 / 本对话第19轮：转弯平滑度优先。** [新版 EXE queued MOVE 预存 slot 角 vs 当前 Group 点到 frame-aware 世界目标点的重新求角、同一原生路线构造器及两次 90° 的曲率可行性](N1_R53_SMOOTHER_SHIFT_TURN_HEADING_CURVATURE_20261020.md)。真实 EXE SHA `9bd58c63…f42be496` 严格静态审计 **33/33 完整指令、9/9 E8、1/1 JCC、4个 unwind 函数**；21/21 私有 EXE 本地回归（无 EXE 为20 PASS/1 SKIP）。验证 `slot+0x9A bit2` 两个 heading 来源、`0x0312214C` 参考框架 world xyz 解析、angle float 系数 `10430.3779296875≈65536/(2π)` 与 `0x030179B0 → 0x030F1B3C` 路线构造传参。另建立**明确标为合成**的队形半宽/90°+90°转角间距模型；不能将 R≤半宽的运动学冲突模型宣称为 WH3 实机根因。没有 gameplay Patch，研究优先从命令键位差异转为 Native 角度连续性/可转弯半径/路段几何，`main` 不动。完整原码审计与测试见本轮离线 R53 交付包。
+
+
 **2026-10-20 本对话第18轮 / R52：** [memreader Plus 0.13.0 全栈静态审计与新版 WH3 原生 RMB 替换/Shift 队列追加差异](N1_R52_MEMREADER_PLUS_RMB_SHIFT_COMMAND_DIFFERENCE_20261020.md)。在用户实际新 EXE SHA `9bd58c63…f42be496` 上确认统一 MOVE 入口 `0x030374CC` 的 `R9B→R14B→DL→0x02F5540C` 清队列/追加门槛，条件性 `descriptor+0x5A OR 0x06`、构造新 slot、跳过即时 Group 构造；**R9B 表示 native append，并非物理键盘 Shift 身份**。memreader Plus 0.13.0 与 Derpy 两份真实 pack 对照确认物理键 0x10/0x02 可通过 GetAsyncKeyState 辅助读取，但不能从键态反推原生 order。新版 26/26 原始机器码及 objdump 起点、4/4 E8、2/2 branch，用户三个真实文件 10/10 离线回归 PASS。完整审计源码、测试与无 Hook Lua 校验器在本地 R52 资源包；本轮仅 GitHub 研究报告与索引落盘。**没有 gameplay patch、新实机线程观测或改 main**。
 
 
