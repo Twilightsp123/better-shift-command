@@ -1,6 +1,7 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-19
 
+**2026-10-20 / 本对话第17轮 / R50：** [为已有 R49 无 Hook 采样器增加可信跨样本单调时钟适配](N1_R50_MONOTONIC_CAPTURE_CLOCK_20261020.md)。R49 原先依赖调用者自填 `time_ms` 判定跨样本 250ms 时差；R50 使用 memreader Plus `mr.ticks/elapsed_us` 生成序号和时间，严格拒绝同毫秒伪增量与外来时间。10/10 Lua 5.3 mock PASS；没有运行 DLL、未入游戏、没有 Native gameplay patch。[包装器](../../maintenance_tools/native_shift_re/bsc_r50_monotonic_capture_adapter.lua) · [Lua 测试](../../tests/test_r50_clock_adapter.lua)。不覆盖现存更完整的 R49 原型。\n\n
 **2026-10-20 / 本对话第16轮（R49）：** [memreader Plus 0.13.0 真 API、Derpy 单兵地址链、无 Hook 采样器定时/整组数组校验](N1_R49_MEMREADER_PASSIVE_SAMPLER_CONTRACT_20261020.md)。真实新 EXE SHA `9bd58c63…f42be496`、Derpy 与 memreader Plus 两份用户原始资源参与只读静态核验：成员 Tick 7 原字节、队列分支 18 原字节、动作虚表 14 槽、成员虚表 2 槽；**20 项 Lua 真实解释器 mock PASS**，R49 20 项 Python PASS（无私有文件为19 PASS/1 SKIP），R47/R48 各19项回归 PASS。R49 通过 `mr.ticks()/elapsed_us()` 限定单次读跨度（≤5000us）、前后两次全成员 roster 字节校验、动作变化守卫、跨样本匿名代际和未知成员 position-only 方式降低误归因。**没有 Hook、没有游戏中运行采样、没有确定挤压根因或 gameplay patch；Lua mock 不等于进程内安全验证。** [无Hook Lua研究原型](../../maintenance_tools/native_shift_re/bsc_r49_guarded_passive_sampler_research.lua) · [安全离线分析](../../maintenance_tools/native_shift_re/r49_spatial_evidence_preflight.py) · [静态审计](../../maintenance_tools/native_shift_re/audit_r49_sampler_contract.py) · [Lua mock](../../tests/test_r49_sampler_mock.lua)。本轮完整源码测试/证据已同步，main 未修改。
 
 
