@@ -1,6 +1,9 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-19
 
+**2026-10-20 / 本对话第16轮（R49）：** [memreader Plus 0.13.0 真 API、Derpy 单兵地址链、无 Hook 采样器定时/整组数组校验](N1_R49_MEMREADER_PASSIVE_SAMPLER_CONTRACT_20261020.md)。真实新 EXE SHA `9bd58c63…f42be496`、Derpy 与 memreader Plus 两份用户原始资源参与只读静态核验：成员 Tick 7 原字节、队列分支 18 原字节、动作虚表 14 槽、成员虚表 2 槽；**20 项 Lua 真实解释器 mock PASS**，R49 20 项 Python PASS（无私有文件为19 PASS/1 SKIP），R47/R48 各19项回归 PASS。R49 通过 `mr.ticks()/elapsed_us()` 限定单次读跨度（≤5000us）、前后两次全成员 roster 字节校验、动作变化守卫、跨样本匿名代际和未知成员 position-only 方式降低误归因。**没有 Hook、没有游戏中运行采样、没有确定挤压根因或 gameplay patch；Lua mock 不等于进程内安全验证。** [无Hook Lua研究原型](../../maintenance_tools/native_shift_re/bsc_r49_guarded_passive_sampler_research.lua) · [安全离线分析](../../maintenance_tools/native_shift_re/r49_spatial_evidence_preflight.py) · [静态审计](../../maintenance_tools/native_shift_re/audit_r49_sampler_contract.py) · [Lua mock](../../tests/test_r49_sampler_mock.lua)。本轮完整源码测试/证据已同步，main 未修改。
+
+
 **2026-10-20 本对话第15轮 R48（历史 V3 数据复用止损与真实旧格式分析器）：** [独立核对 V3 近距汇总、另一次 one-shot 的 234 条位置事件，并实现只处理真实 `GROUP_TICK_POSITION` JSONL 的离线几何复算器](N1_R48_LEGACY_TRACE_GEOMETRY_REUSE_20261020.md)。V3 原始成员位置 JSONL 不在可访问资料中，旧 one-shot JSONL 也未恢复；**不能由 85/194 或 0.6087m 汇总反算轨迹**，两个实机测试不能合并。R48 19/19 新离线合同测试 PASS；用户新版EXE+两份MOD静态证据下重跑 R47 19/19 PASS；合成距例明确不当实机。ZIP 含新增脚本、测试、来源清单和上一轮档案；本仓库仅同期报告落盘，无 gameplay patch，不改 main。
 
 
