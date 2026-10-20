@@ -1,6 +1,9 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-19
 
+**2026-10-20 R47 / 本对话第14轮：** [Derpy+memreader Plus 无 Hook 原生动作虚表判别与兵牌相对形变分析](N1_R47_PASSIVE_SPATIAL_ACTION_TRIAGE_20261020.md)。固定新版 EXE SHA `9bd58c63…f42be496`，从用户真实游戏 EXE `.rdata` 直接确认七类 `member+0x330` 动作对象的**14/14 `virtual+0x08/+0x10` 指针**和普通成员**2/2 Tick/积分槽**，并用实际第三方 `.pack` 交叉核验。新作业是**无 Hook 的 32 人上限顺序快照研究原型**（校验 Tick/Gate 的 live bytes、成员名单重复读取、只记录匿名成员 ID）及纯离线**相邻物理距离压缩 + 最佳刚体旋转/平移残差**比较器。原型并未在游戏执行，读取仍有并发风险；19/19 本地纯静态/合成测试 PASS（含用户真实 EXE 和两个 .pack），无私有素材 18 PASS / 1 SKIP。Derpy 作者“regiment walk 不追单独改写的目标”等注释仅为第三方观察，不能当作 BSC 实测。所有工具仅离线交付，不包含游戏 EXE、第三方 DLL 或 MOD，不授权 gameplay patch。
+
+
 **2026-10-20 R46 / 本对话第13轮：** [用户提供的 Derpy Third-Person / memreader Plus 实际 .pack 全文件审计与相同新版 EXE 的原始字节核验](N1_R46_DERPY_MEMREADER_ACTUAL_PACK_AUDIT_20261020.md)。解析 15/27 个 PFH5 文件；memreader Plus 0.13.0 内嵌 x64 DLL 的静态 PE 与 SHA 已确认（未执行）。Derpy 目标 build `6acec6f4` 与游戏 EXE 完全匹配：普通 member Tick `0x03086F04` 入口 7/7 原始字节、queued-action gate `0x03087378` 18/18 字节、同类型成员虚表 `+0x18` 指针全部对齐。**新增关键结构：BattleUnit userdata → native unit+0xA4/+0xA8 → member 数组**；**新增跨线程证据：Derpy 通过 member Tick 中的 Native code cave + mailbox 让战斗线程处理单兵动作**。Derpy 初始化期间就可能安装 cave，故 BSC vanilla 基线不能与 Derpy 同启；Derpy 的单兵目标覆写不是 queued Shift 修复。本地静态测试 11/11 PASS、无私有文件 7 PASS/4 SKIP；无实机测试、无原生挤压根因或 gameplay patch。之前的公开资料评估已标注为被 R46 取代。
 
 
