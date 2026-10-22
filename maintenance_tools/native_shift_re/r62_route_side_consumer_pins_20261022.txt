@@ -1,0 +1,91 @@
+# BSC R62 fixed SHA 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496
+# Strict RVA, complete native instruction bytes, no game EXE distributed
+# producer_side
+0310E4A4 f6802401000002 # test   BYTE PTR [rax+0x124],0x2
+0310E4BF ff9080000000 # call   QWORD PTR [rax+0x80]
+0310E4D6 662b8c24b8000000 # sub    cx,WORD PTR [rsp+0xb8]
+0310E4E1 740f # je     0x310e4f2
+0310E4E6 7f0a # jg     0x310e4f2
+0310E4E8 b900400000 # mov    ecx,0x4000
+0310E4F7 662bc1 # sub    ax,cx
+0310E54C e827c4feff # call   0x30fa978
+# producer_record
+030FA984 488bd9 # mov    rbx,rcx
+030FA98D 488911 # mov    QWORD PTR [rcx],rdx
+030FA999 44894910 # mov    DWORD PTR [rcx+0x10],r9d
+030FA9BE 0fb7442470 # movzx  eax,WORD PTR [rsp+0x70]
+030FA9DE 66894144 # mov    WORD PTR [rcx+0x44],ax
+# parent_handoff
+03102CB3 6689542448 # mov    WORD PTR [rsp+0x48],dx
+03102CB8 488d5560 # lea    rdx,[rbp+0x60]
+03102CD8 e873b70000 # call   0x310e450
+03102CF8 84c0 # test   al,al
+03102CFA 0f846d020000 # je     0x3102f6d
+03102D27 84c0 # test   al,al
+03102D29 0f853e020000 # jne    0x3102f6d
+03102D64 498bd7 # mov    rdx,r15
+03102D67 4c8d4560 # lea    r8,[rbp+0x60]
+03102D75 e8f67dffff # call   0x30fab70
+03102E04 4c8d4560 # lea    r8,[rbp+0x60]
+03102E38 e8877c0200 # call   0x312aac4
+# solver_handoff
+0312AB04 498bf8 # mov    rdi,r8
+0312AB83 488bd7 # mov    rdx,rdi
+0312AB99 e856a0feff # call   0x3114bf4
+0312ABA3 3ac1 # cmp    al,cl
+0312ABA5 0f85bc0c0000 # jne    0x312b867
+# geometry_consumer
+03114C1D 498b08 # mov    rcx,QWORD PTR [r8]
+03114C2E 488bf2 # mov    rsi,rdx
+03114C31 4885c9 # test   rcx,rcx
+03114C34 0f841e020000 # je     0x3114e58
+03114C41 ff5010 # call   QWORD PTR [rax+0x10]
+03114C44 84c0 # test   al,al
+03114C46 0f840c020000 # je     0x3114e58
+03114C4F 4c8d7e18 # lea    r15,[rsi+0x18]
+03114C53 498bcf # mov    rcx,r15
+03114C6B e8dcd40000 # call   0x312214c
+03114C78 488d0de1a6d700 # lea    rcx,[rip+0xd7a6e1]        # 0x3e8f360
+03114C8E 4c8bc7 # mov    r8,rdi
+03114C95 f30f105808 # movss  xmm3,DWORD PTR [rax+0x8]
+03114C9A f30f119ba4010000 # movss  DWORD PTR [rbx+0x1a4],xmm3
+03114CAA 0fb74644 # movzx  eax,WORD PTR [rsi+0x44]
+03114CAE f30f104b18 # movss  xmm1,DWORD PTR [rbx+0x18]
+03114CB3 0f28c1 # movaps xmm0,xmm1
+03114CB6 f30f594cc104 # mulss  xmm1,DWORD PTR [rcx+rax*8+0x4]
+03114CBC f30f5904c1 # mulss  xmm0,DWORD PTR [rcx+rax*8]
+03114CC5 f30f5cd9 # subss  xmm3,xmm1
+03114CC9 f30f5cd0 # subss  xmm2,xmm0
+03114CCD f30f119bac010000 # movss  DWORD PTR [rbx+0x1ac],xmm3
+03114CD8 f30f1193a8010000 # movss  DWORD PTR [rbx+0x1a8],xmm2
+03114CE0 f30f5c9ba0010000 # subss  xmm3,DWORD PTR [rbx+0x1a0]
+03114CF0 f30f5c93a4010000 # subss  xmm2,DWORD PTR [rbx+0x1a4]
+03114D0D f30f51c9 # sqrtss xmm1,xmm1
+03114D1D f30f119bb0010000 # movss  DWORD PTR [rbx+0x1b0],xmm3
+03114D25 f30f1193b4010000 # movss  DWORD PTR [rbx+0x1b4],xmm2
+03114D2D 8b4638 # mov    eax,DWORD PTR [rsi+0x38]
+03114D37 8983b8010000 # mov    DWORD PTR [rbx+0x1b8],eax
+03114D44 e89badfdff # call   0x30efae4
+# projection_parent
+03102BE6 488d0d73c7d800 # lea    rcx,[rip+0xd8c773]        # 0x3e8f360
+03102BF7 f30f103cc1 # movss  xmm7,DWORD PTR [rcx+rax*8]
+03102BFC f3440f1044c104 # movss  xmm8,DWORD PTR [rcx+rax*8+0x4]
+# node_downstream
+03126B2F 3c01 # cmp    al,0x1
+03126B31 7406 # je     0x3126b39
+03126B33 807e4c01 # cmp    BYTE PTR [rsi+0x4c],0x1
+03126B37 7515 # jne    0x3126b4e
+03126B39 488d4f18 # lea    rcx,[rdi+0x18]
+03126B3D 488d5320 # lea    rdx,[rbx+0x20]
+03126B41 e8e2bffdff # call   0x3102b28
+03126B46 48894370 # mov    QWORD PTR [rbx+0x70],rax
+03126B4A c6430801 # mov    BYTE PTR [rbx+0x8],0x1
+02F545DA e879241d00 # call   0x3126a58
+02F545FF 488b5370 # mov    rdx,QWORD PTR [rbx+0x70]
+02F54613 e8bc473100 # call   0x3268dd4
+02F54628 e81fa73200 # call   0x327ed4c
+0327EDD5 e85a9ffeff # call   0x3268d34
+03268D7C 498b4328 # mov    rax,QWORD PTR [r11+0x28]
+03268D80 48894360 # mov    QWORD PTR [rbx+0x60],rax
+032769F2 e89d3fffff # call   0x326a994
+03286445 e84a45feff # call   0x326a994
