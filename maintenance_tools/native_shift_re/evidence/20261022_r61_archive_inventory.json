@@ -1,0 +1,514 @@
+{
+  "schema": "bsc.r61.research_archive_inventory.v1",
+  "kind": "ARCHIVE_CHECKSUM_AND_METADATA_NOT_GAMEPLAY",
+  "primary_archive_count": 26,
+  "archives": [
+    {
+      "archive_file": "BSC_R34_NEW_EXE_RVA_REBIND_20261017.zip",
+      "sha256": "d4e2e36d09096e3b82c23ecc5b3b2b08cdcf204013c4e01e8e64bfae0b790c22",
+      "member_count": 13,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [],
+      "nested_zips": [],
+      "total_expanded_bytes": 60925,
+      "nested_checks": {}
+    },
+    {
+      "archive_file": "BSC_R35_SHORTTASK_GROUP_PACKET_IDENTITY_20261017.zip",
+      "sha256": "aca5aef6f7b196d86e11d73cbcfe40720bde8a9c21856c6a139cf0c940ee1871",
+      "member_count": 21,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [],
+      "nested_zips": [
+        "BSC_R34_NEW_EXE_RVA_REBIND_20261017.zip"
+      ],
+      "total_expanded_bytes": 170156,
+      "nested_checks": {
+        "BSC_R34_NEW_EXE_RVA_REBIND_20261017.zip": {
+          "sha256": "d4e2e36d09096e3b82c23ecc5b3b2b08cdcf204013c4e01e8e64bfae0b790c22",
+          "file_manifest_status": "ABSENT",
+          "member_count": 13
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R36_NATIVE_B_SUBTYPE_AUDIT_20261017.zip",
+      "sha256": "dbd1d6a5dd2de92f567d90b06f30eed2a6e74a8e25e1779b52792bfc02156652",
+      "member_count": 47,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R36_B_SUBTYPE_SAME_GROUP_SLOT_20261017.md"
+      ],
+      "nested_zips": [
+        "prior/BSC_R35_SHORTTASK_GROUP_PACKET_IDENTITY_20261017.zip"
+      ],
+      "total_expanded_bytes": 235575,
+      "nested_checks": {
+        "prior/BSC_R35_SHORTTASK_GROUP_PACKET_IDENTITY_20261017.zip": {
+          "sha256": "aca5aef6f7b196d86e11d73cbcfe40720bde8a9c21856c6a139cf0c940ee1871",
+          "file_manifest_status": "ABSENT",
+          "member_count": 21
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R37_B2_ROUTE_PHASE_NATIVE_AUDIT_20261017.zip",
+      "sha256": "ccce25f8bbd6cfa5c3bdd80d1d06433dea4b66ab1e61b61c5ccf156d8a4d3cd2",
+      "member_count": 23,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R37_B2_ROUTE_PHASE_PROVENANCE_20261017.md"
+      ],
+      "nested_zips": [
+        "prior/BSC_R36_NATIVE_B_SUBTYPE_AUDIT_20261017.zip"
+      ],
+      "total_expanded_bytes": 209389,
+      "nested_checks": {
+        "prior/BSC_R36_NATIVE_B_SUBTYPE_AUDIT_20261017.zip": {
+          "sha256": "dbd1d6a5dd2de92f567d90b06f30eed2a6e74a8e25e1779b52792bfc02156652",
+          "file_manifest_status": "ABSENT",
+          "member_count": 47
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R38_PACKET_HEADING_MEMBER_MOTION_AUDIT_20261018.zip",
+      "sha256": "97af11b25084d7307595ea90d66e9b7418d3efde2d9ae267185620010f219cc2",
+      "member_count": 23,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R38_PACKET_HEADING_MEMBER_ACTION_GATES_20261018.md"
+      ],
+      "nested_zips": [
+        "prior/BSC_R37_B2_ROUTE_PHASE_NATIVE_AUDIT_20261017.zip"
+      ],
+      "total_expanded_bytes": 299164,
+      "nested_checks": {
+        "prior/BSC_R37_B2_ROUTE_PHASE_NATIVE_AUDIT_20261017.zip": {
+          "sha256": "ccce25f8bbd6cfa5c3bdd80d1d06433dea4b66ab1e61b61c5ccf156d8a4d3cd2",
+          "file_manifest_status": "ABSENT",
+          "member_count": 23
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R39_MEMBER_MOTION_TYPED_BOUNDARY_20261018.zip",
+      "sha256": "887dc2aa53c34d6b32c4f8af0ce73a1fb3a63470cb6b07363c37aaf3363c13aa",
+      "member_count": 19,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R39_MEMBER_MOTION_WRITE_TYPE_BOUNDARY_20261018.md"
+      ],
+      "nested_zips": [
+        "prior/BSC_R38_PACKET_HEADING_MEMBER_MOTION_AUDIT_20261018.zip"
+      ],
+      "total_expanded_bytes": 266531,
+      "nested_checks": {
+        "prior/BSC_R38_PACKET_HEADING_MEMBER_MOTION_AUDIT_20261018.zip": {
+          "sha256": "97af11b25084d7307595ea90d66e9b7418d3efde2d9ae267185620010f219cc2",
+          "file_manifest_status": "ABSENT",
+          "member_count": 23
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R40_PAIR_RESPONSE_EVENT_DISPATCH_20261018.zip",
+      "sha256": "4ac50cd3349c8e9db3f58f3da28ef740a6b722d6b002ffcccd9987acce5ae5f5",
+      "member_count": 12,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R40_MEMBER_PAIR_EVENT_DISPATCH_20261018.md"
+      ],
+      "nested_zips": [
+        "previous/BSC_R39_MEMBER_MOTION_TYPED_BOUNDARY_20261018.zip"
+      ],
+      "total_expanded_bytes": 282264,
+      "nested_checks": {
+        "previous/BSC_R39_MEMBER_MOTION_TYPED_BOUNDARY_20261018.zip": {
+          "sha256": "887dc2aa53c34d6b32c4f8af0ce73a1fb3a63470cb6b07363c37aaf3363c13aa",
+          "file_manifest_status": "ABSENT",
+          "member_count": 19
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R41_NATIVE_MEMBER_MOTION_INTEGRATOR_20261018.zip",
+      "sha256": "925138eee1dfa4f256247d40ee7a125dc8b489bb70814a960d0c74ddbac28b63",
+      "member_count": 17,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R41_TYPED_MEMBER_MOTION_INTEGRATOR_20261018.md"
+      ],
+      "nested_zips": [
+        "prior_rounds/BSC_R40_PAIR_RESPONSE_EVENT_DISPATCH_20261018.zip"
+      ],
+      "total_expanded_bytes": 384575,
+      "nested_checks": {
+        "prior_rounds/BSC_R40_PAIR_RESPONSE_EVENT_DISPATCH_20261018.zip": {
+          "sha256": "4ac50cd3349c8e9db3f58f3da28ef740a6b722d6b002ffcccd9987acce5ae5f5",
+          "file_manifest_status": "ABSENT",
+          "member_count": 12
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R42_MEMBER_STATE_DELTA_HANDOFF_20261018.zip",
+      "sha256": "d702b11f848e9d10c6e8b280565743aed82d728b03e77e2d5ab9d4a195ef8818",
+      "member_count": 14,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R42_MEMBER_FLAG_DELTA_HANDOFF_20261018.md"
+      ],
+      "nested_zips": [
+        "prior_rounds/BSC_R41_NATIVE_MEMBER_MOTION_INTEGRATOR_20261018.zip"
+      ],
+      "total_expanded_bytes": 367843,
+      "nested_checks": {
+        "prior_rounds/BSC_R41_NATIVE_MEMBER_MOTION_INTEGRATOR_20261018.zip": {
+          "sha256": "925138eee1dfa4f256247d40ee7a125dc8b489bb70814a960d0c74ddbac28b63",
+          "file_manifest_status": "ABSENT",
+          "member_count": 17
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R43_PENDING_MEMBER_GOAL_DELTA_NATIVE_AUDIT_20261018.zip",
+      "sha256": "1f0a389d552e9c8c3b28dd129bfb6b2492d16613ab7d18bab41a708ad2ed1479",
+      "member_count": 12,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R43_PENDING_MEMBER_GOAL_DELTA_CONSUMPTION_20261018.md"
+      ],
+      "nested_zips": [
+        "prior_rounds/BSC_R42_MEMBER_STATE_DELTA_HANDOFF_20261018.zip"
+      ],
+      "total_expanded_bytes": 390612,
+      "nested_checks": {
+        "prior_rounds/BSC_R42_MEMBER_STATE_DELTA_HANDOFF_20261018.zip": {
+          "sha256": "d702b11f848e9d10c6e8b280565743aed82d728b03e77e2d5ab9d4a195ef8818",
+          "file_manifest_status": "ABSENT",
+          "member_count": 14
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R44_MEMBER_TASK_VECTOR_LIVE_GOAL_20261019.zip",
+      "sha256": "dcb341ad287a17f0ec2aa621cb1467d67dbab89f6e718204382eeb0ecf9096d4",
+      "member_count": 13,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R44_MEMBER_TASK_VS_PENDING_VECTOR_GOAL_PHASE_20261019.md"
+      ],
+      "nested_zips": [
+        "prior_rounds/BSC_R43_PENDING_MEMBER_GOAL_DELTA_NATIVE_AUDIT_20261018.zip"
+      ],
+      "total_expanded_bytes": 416809,
+      "nested_checks": {
+        "prior_rounds/BSC_R43_PENDING_MEMBER_GOAL_DELTA_NATIVE_AUDIT_20261018.zip": {
+          "sha256": "1f0a389d552e9c8c3b28dd129bfb6b2492d16613ab7d18bab41a708ad2ed1479",
+          "file_manifest_status": "ABSENT",
+          "member_count": 12
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R45_B2_STATE16_PROVENANCE_20261019.zip",
+      "sha256": "024e03d20f020cf31675a51d8e0111fbcac078703f21a222caf64f967717c1ff",
+      "member_count": 22,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R44_MEMBER_TASK_VS_PENDING_VECTOR_GOAL_PHASE_20261019.md",
+        "docs/current/N1_R45_B2_STATE16_TASK_PROVENANCE_20261019.md"
+      ],
+      "nested_zips": [
+        "prior/BSC_R44_MEMBER_TASK_VECTOR_LIVE_GOAL_20261019.zip"
+      ],
+      "total_expanded_bytes": 490191,
+      "nested_checks": {
+        "prior/BSC_R44_MEMBER_TASK_VECTOR_LIVE_GOAL_20261019.zip": {
+          "sha256": "dcb341ad287a17f0ec2aa621cb1467d67dbab89f6e718204382eeb0ecf9096d4",
+          "file_manifest_status": "ABSENT",
+          "member_count": 13
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R46_DERPY_MEMREADER_ACTUAL_PACK_AUDIT_20261020.zip",
+      "sha256": "70a564f63bffb8e4f4f1c435d7ab2ce6b90304575c14b27868ae4ec39e01093c",
+      "member_count": 8,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R46_DERPY_MEMREADER_ACTUAL_PACK_AUDIT_20261020.md"
+      ],
+      "nested_zips": [
+        "past_reference/BSC_R45_B2_STATE16_PROVENANCE_20261019.zip"
+      ],
+      "total_expanded_bytes": 458759,
+      "nested_checks": {
+        "past_reference/BSC_R45_B2_STATE16_PROVENANCE_20261019.zip": {
+          "sha256": "024e03d20f020cf31675a51d8e0111fbcac078703f21a222caf64f967717c1ff",
+          "file_manifest_status": "ABSENT",
+          "member_count": 22
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R47_PASSIVE_SPATIAL_ACTION_TRIAGE_20261020.zip",
+      "sha256": "6d604aa2d7314632620b44bbe7688b105e5d987426e04abc7be4652558ae62db",
+      "member_count": 13,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R47_PASSIVE_SPATIAL_ACTION_TRIAGE_20261020.md"
+      ],
+      "nested_zips": [
+        "prior/BSC_R46_DERPY_MEMREADER_ACTUAL_PACK_AUDIT_20261020.zip"
+      ],
+      "total_expanded_bytes": 492938,
+      "nested_checks": {
+        "prior/BSC_R46_DERPY_MEMREADER_ACTUAL_PACK_AUDIT_20261020.zip": {
+          "sha256": "70a564f63bffb8e4f4f1c435d7ab2ce6b90304575c14b27868ae4ec39e01093c",
+          "file_manifest_status": "ABSENT",
+          "member_count": 8
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R48_LEGACY_TRACE_SPATIAL_REUSE_20261020.zip",
+      "sha256": "14cc1d1603780ab7a4f1c21b684f95edd859d53987682ae0cb38a24ff7aaa4a1",
+      "member_count": 10,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R48_LEGACY_TRACE_GEOMETRY_REUSE_20261020.md"
+      ],
+      "nested_zips": [
+        "prior/BSC_R47_PASSIVE_SPATIAL_ACTION_TRIAGE_20261020.zip"
+      ],
+      "total_expanded_bytes": 503778,
+      "nested_checks": {
+        "prior/BSC_R47_PASSIVE_SPATIAL_ACTION_TRIAGE_20261020.zip": {
+          "sha256": "6d604aa2d7314632620b44bbe7688b105e5d987426e04abc7be4652558ae62db",
+          "file_manifest_status": "ABSENT",
+          "member_count": 13
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R49_GUARDED_MEMREADER_PASSIVE_SAMPLER_20261020.zip",
+      "sha256": "0a2ba595b6ef2c691c6688827e54cfa89e245b92fca0a2cd4a8d699d532166fe",
+      "member_count": 20,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R49_MEMREADER_PASSIVE_SAMPLER_CONTRACT_20261020.md"
+      ],
+      "nested_zips": [
+        "prior/BSC_R48_LEGACY_TRACE_SPATIAL_REUSE_20261020.zip"
+      ],
+      "total_expanded_bytes": 565713,
+      "nested_checks": {
+        "prior/BSC_R48_LEGACY_TRACE_SPATIAL_REUSE_20261020.zip": {
+          "sha256": "14cc1d1603780ab7a4f1c21b684f95edd859d53987682ae0cb38a24ff7aaa4a1",
+          "file_manifest_status": "ABSENT",
+          "member_count": 10
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R51_BATTLE_PHASE_PASSIVE_SAFETY_20261020.zip",
+      "sha256": "59ad55578587723540eae49ae89db2596587950ba16b139ef3573ac9092e6bbf",
+      "member_count": 18,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R51_BATTLE_PHASE_CAPTURE_SAFETY_20261020.md"
+      ],
+      "nested_zips": [
+        "prior/BSC_R49_GUARDED_MEMREADER_PASSIVE_SAMPLER_20261020.zip",
+        "prior/BSC_R50_MONOTONIC_CAPTURE_CLOCK_20261020.zip"
+      ],
+      "total_expanded_bytes": 1106797,
+      "nested_checks": {
+        "prior/BSC_R49_GUARDED_MEMREADER_PASSIVE_SAMPLER_20261020.zip": {
+          "sha256": "0a2ba595b6ef2c691c6688827e54cfa89e245b92fca0a2cd4a8d699d532166fe",
+          "file_manifest_status": "ABSENT",
+          "member_count": 20
+        },
+        "prior/BSC_R50_MONOTONIC_CAPTURE_CLOCK_20261020.zip": {
+          "sha256": "bb0c6cab1315d972610ad224117a2e58d20bd59e1ba7d6f96da7c2fd6c07567e",
+          "file_manifest_status": "ABSENT",
+          "member_count": 7
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R52_MEMREADER_PLUS_RMB_SHIFT_NATIVE_20261020.zip",
+      "sha256": "69cf924230bbd75592bee8c68c628fd9d9d0c50362ab3edd3184521d9b2ace3e",
+      "member_count": 8,
+      "file_manifest_status": "ABSENT",
+      "manifest_entries": null,
+      "report_files": [
+        "docs/current/N1_R52_MEMREADER_PLUS_RMB_SHIFT_COMMAND_DIFFERENCE_20261020.md"
+      ],
+      "nested_zips": [],
+      "total_expanded_bytes": 29688,
+      "nested_checks": {}
+    },
+    {
+      "archive_file": "BSC_R53_SMOOTHER_SHIFT_TURN_NATIVE_RESEARCH_20261020.zip",
+      "sha256": "0c8528d4c5628321f452013836165b38a4eef1da82b90588214c785d68ac569d",
+      "member_count": 12,
+      "file_manifest_status": "PASS",
+      "manifest_entries": 11,
+      "report_files": [],
+      "nested_zips": [],
+      "total_expanded_bytes": 44858,
+      "nested_checks": {}
+    },
+    {
+      "archive_file": "BSC_R54_NATIVE_GEOMETRY_SCALAR_TURN_20261020.zip",
+      "sha256": "43c18fc43568369a8894377f25a7106d2887541e902e3de2113b9afb0a56e6b4",
+      "member_count": 14,
+      "file_manifest_status": "PASS_PREFIX_NORMALIZED",
+      "manifest_entries": 12,
+      "report_files": [
+        "R54/N1_R54_NATIVE_ROUTE_GEOMETRY_SCALAR_20261020.md"
+      ],
+      "nested_zips": [
+        "R53_ARCHIVE/BSC_R53_SMOOTHER_SHIFT_TURN_NATIVE_RESEARCH_20261020.zip"
+      ],
+      "total_expanded_bytes": 80338,
+      "nested_checks": {
+        "R53_ARCHIVE/BSC_R53_SMOOTHER_SHIFT_TURN_NATIVE_RESEARCH_20261020.zip": {
+          "sha256": "0c8528d4c5628321f452013836165b38a4eef1da82b90588214c785d68ac569d",
+          "file_manifest_status": "PASS",
+          "member_count": 12
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R55_GROUP_FORMATION_EXTENT_NATIVE_20261020.zip",
+      "sha256": "27a4a68edba656d3e28c97309512d01348337d21c71d1d2419b8fac7dcdb80cd",
+      "member_count": 10,
+      "file_manifest_status": "PASS",
+      "manifest_entries": 9,
+      "report_files": [
+        "N1_R55_GROUP_FORMATION_EXTENT_POLICY_20261020.md"
+      ],
+      "nested_zips": [],
+      "total_expanded_bytes": 33833,
+      "nested_checks": {}
+    },
+    {
+      "archive_file": "BSC_R56_NATIVE_HEADING_LOOKUP_CONTINUITY_20261020.zip",
+      "sha256": "9f3b05844c06a999f14853e7905055a040d4b502276b772fba1b1c070b531faa",
+      "member_count": 13,
+      "file_manifest_status": "PASS",
+      "manifest_entries": 12,
+      "report_files": [],
+      "nested_zips": [],
+      "total_expanded_bytes": 38989,
+      "nested_checks": {}
+    },
+    {
+      "archive_file": "BSC_R57_NATIVE_PERPENDICULAR_TURN_CONTINUITY_20261020.zip",
+      "sha256": "386ac546c16e655cf4d767187a55b1d5aa9f1c7fb34b91323b91aa0fbc83ae99",
+      "member_count": 14,
+      "file_manifest_status": "PASS",
+      "manifest_entries": 12,
+      "report_files": [
+        "N1_R57_NATIVE_PERPENDICULAR_TURN_SIDE_SELECTION_20261020.md"
+      ],
+      "nested_zips": [
+        "previous/BSC_R56_NATIVE_HEADING_LOOKUP_CONTINUITY_20261020.zip"
+      ],
+      "total_expanded_bytes": 67273,
+      "nested_checks": {
+        "previous/BSC_R56_NATIVE_HEADING_LOOKUP_CONTINUITY_20261020.zip": {
+          "sha256": "9f3b05844c06a999f14853e7905055a040d4b502276b772fba1b1c070b531faa",
+          "file_manifest_status": "PASS",
+          "member_count": 13
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R58_DERPY_STEERING_RESEARCH_20261020.zip",
+      "sha256": "8e68f170a0faf19c501f1f4359c0d9a8d66e91e8c91ccc9bce9df042a790a8b7",
+      "member_count": 9,
+      "file_manifest_status": "PASS",
+      "manifest_entries": 8,
+      "report_files": [
+        "N1_R58_DERPY_STEERING_NATIVE_HANDOFF_20261020.md"
+      ],
+      "nested_zips": [
+        "previous/BSC_R57_NATIVE_PERPENDICULAR_TURN_CONTINUITY_20261020.zip"
+      ],
+      "total_expanded_bytes": 71148,
+      "nested_checks": {
+        "previous/BSC_R57_NATIVE_PERPENDICULAR_TURN_CONTINUITY_20261020.zip": {
+          "sha256": "386ac546c16e655cf4d767187a55b1d5aa9f1c7fb34b91323b91aa0fbc83ae99",
+          "file_manifest_status": "PASS",
+          "member_count": 14
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R59_DERPY_ACTION_CACHE_TYPE_CORRECTION_20261020.zip",
+      "sha256": "d38b52105bc82274cbd0b019e18e5c0f1d8c66b979906e65526375955f4e61c7",
+      "member_count": 12,
+      "file_manifest_status": "PASS",
+      "manifest_entries": 11,
+      "report_files": [],
+      "nested_zips": [
+        "prior/BSC_R58_DERPY_STEERING_RESEARCH_20261020.zip"
+      ],
+      "total_expanded_bytes": 95798,
+      "nested_checks": {
+        "prior/BSC_R58_DERPY_STEERING_RESEARCH_20261020.zip": {
+          "sha256": "8e68f170a0faf19c501f1f4359c0d9a8d66e91e8c91ccc9bce9df042a790a8b7",
+          "file_manifest_status": "PASS",
+          "member_count": 9
+        }
+      }
+    },
+    {
+      "archive_file": "BSC_R60_DEFERRED_PACKET_ACTION_HANDOFF_20261020.zip",
+      "sha256": "0717c7666d66a1720fc33042df81ae614fb4a1a48461858d9fc8a07b3c7ecb99",
+      "member_count": 12,
+      "file_manifest_status": "PASS",
+      "manifest_entries": 11,
+      "report_files": [
+        "N1_R60_DEFERRED_PACKET_ACTION_HANDOFF_20261020.md"
+      ],
+      "nested_zips": [
+        "R59_prior_research.zip"
+      ],
+      "total_expanded_bytes": 110534,
+      "nested_checks": {
+        "R59_prior_research.zip": {
+          "sha256": "d38b52105bc82274cbd0b019e18e5c0f1d8c66b979906e65526375955f4e61c7",
+          "file_manifest_status": "PASS",
+          "member_count": 12
+        }
+      }
+    }
+  ],
+  "all_archives_crc_read": true,
+  "all_present_sha_manifests_pass": true,
+  "historical_V3_raw_jsonl_recovered": false,
+  "private_game_binary_included_in_delivery": false
+}
