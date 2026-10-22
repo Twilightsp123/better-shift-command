@@ -1,0 +1,65 @@
+{
+  "schema": "bsc.r61.same_build_mode_deferred_cleanup.v1",
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "PE_imagebase": "0x140000000",
+  "fixed_machine_code_pins": 71,
+  "verified_e8": 17,
+  "verified_branches": 8,
+  "typed_member_vtable_slots": 6,
+  "mode_helper": "0x02DC7E30",
+  "mode_helper_returns_true_for": [
+    0,
+    3,
+    5
+  ],
+  "mode_helper_preserves_rdx_by_whole_leaf_inspection": true,
+  "receiver_mode_helper_call": "0x03070A7B",
+  "group_route_mode_helper_call": "0x0327ECC6",
+  "modes_with_transitive_immediate_e8_cleanup": [
+    6,
+    7,
+    8,
+    9
+  ],
+  "transitive_cleanup_direct_edges": [
+    {
+      "site": "0x030782B0",
+      "target": "0x0307AE84"
+    },
+    {
+      "site": "0x03078985",
+      "target": "0x0307AE84"
+    },
+    {
+      "site": "0x0307AE9B",
+      "target": "0x02DB5AC4"
+    },
+    {
+      "site": "0x0307AEA7",
+      "target": "0x02DB5A20"
+    }
+  ],
+  "delayed_cleanup_direct_callers_in_udata": 81,
+  "delayed_cleanup_direct_callers_contains": [
+    "0x03070A94",
+    "0x0307AE9B"
+  ],
+  "typed_cleanup_wrapper_all_direct_callers": [
+    "0x030782B0",
+    "0x03078985"
+  ],
+  "b2_member_sender_direct_callers": [
+    "0x032769F2",
+    "0x0328034E",
+    "0x03282768",
+    "0x03286445"
+  ],
+  "packet_B2_constructor_bit20_must_be_zero": true,
+  "B2_two_packets_with_stable_mode_cannot_split_deferred_immediate_in_same_receiver": true,
+  "immediate_path_may_cancel_deferred_through_virtual_method": true,
+  "all_immediate_paths_cancel_deferred_proven": false,
+  "group_mode_is_stable_during_actual_Shift_proven": false,
+  "player_input_to_group_mode_identity_proven": false,
+  "queued_Shift_crowding_causality_proven": false,
+  "gameplay_patch_authorized": false
+}
