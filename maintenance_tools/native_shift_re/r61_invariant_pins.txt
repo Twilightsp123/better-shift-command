@@ -1,0 +1,72 @@
+# SHA-guarded new EXE 9bd58c63...R61; RVA full opcode; rationale is advisory only.
+02DC7E30 8b4128 # mode helper leaf return mode in {0,3,5} | mov    eax,DWORD PTR [rcx+0x28]
+02DC7E33 83f805 # mode compare <=5 | cmp    eax,0x5
+02DC7E38 b929000000 # mode bitmask 0x29 | mov    ecx,0x29
+02DC7E3D 0fa3c1 # bt bitmask | bt     ecx,eax
+02DC7E42 b001 # helper true | mov    al,0x1
+02DC7E45 32c0 # helper false | xor    al,al
+02F648E4 8b02 # B2 constructor leaf | mov    eax,DWORD PTR [rdx]
+02F64926 2401 # mask bit0 input | and    al,0x1
+02F6492C 0fb64c2440 # mask bit0 to bit4 | movzx  ecx,BYTE PTR [rsp+0x40]
+02F6493A c0e104 # shift to bit4 | shl    cl,0x4
+02F64948 80c906 # OR 0x06 | or     cl,0x6
+02F64966 41884a50 # write packet+0x50 | mov    BYTE PTR [r10+0x50],cl
+03070A60 488b4158 # receiver member owner | mov    rax,QWORD PTR [rcx+0x58]
+03070A6A 488bda # packet stored in rbx | mov    rbx,rdx
+03070A7B e8b073d5ff # mode helper | call   0x2dc7e30
+03070A83 84c0 # mode test | test   al,al
+03070A85 7536 # branch immediate | jne    0x3070abd
+03070A87 f6425020 # packet flag bit 0x20 | test   BYTE PTR [rdx+0x50],0x20
+03070A8B 7530 # branch immediate if flag | jne    0x3070abd
+03070A94 e82b50d4ff # deferred replacement cleanup | call   0x2db5ac4
+03070AB3 e8183defff # deferred packet ctor | call   0x2f647d0
+03070AB8 e975010000 # deferred skip | jmp    0x3070c32
+03070ABD f6425102 # immediate start | test   BYTE PTR [rdx+0x51],0x2
+03070B2F 8b8704010000 # per member state104 | mov    eax,DWORD PTR [rdi+0x104]
+03070B52 741b # per member branch | je     0x3070b6f
+03070B66 41ff9300010000 # virtual +100 | call   QWORD PTR [r11+0x100]
+03070B74 c644242801 # out stack arg 6 =1 | mov    BYTE PTR [rsp+0x28],0x1
+03070B81 4488742420 # out stack arg 5 =R14B | mov    BYTE PTR [rsp+0x20],r14b
+03070B9C 41ff93e8000000 # virtual +E8 | call   QWORD PTR [r11+0xe8]
+03070BD2 e8494ed4ff # action cleaner special | call   0x2db5a20
+03070C06 e8154ed4ff # action cleaner ordinary | call   0x2db5a20
+03077F26 e83d030000 # special +E8 calls ordinary | call   0x3078268
+03078268 48895c2408 # ordinary +E8 method | mov    QWORD PTR [rsp+0x8],rbx
+03078277 57 # E8 push rdi | push   rdi
+03078278 4883ec30 # E8 rsp adjust | sub    rsp,0x30
+0307827C 807c246800 # check 6th arg at new rsp+0x68 | cmp    BYTE PTR [rsp+0x68],0x0
+0307828E 7425 # skip clear if sixth zero | je     0x30782b5
+03078290 488b4158 # member owner ref | mov    rax,QWORD PTR [rcx+0x58]
+030782A2 448b4028 # mode +0x28 read | mov    r8d,DWORD PTR [rax+0x28]
+030782A6 4183e806 # mode subtract6 | sub    r8d,0x6
+030782AA 4183f803 # mode <=3 | cmp    r8d,0x3
+030782AE 7705 # skip mode invalid | ja     0x30782b5
+030782B0 e8cf2b0000 # call cleanup wrapper | call   0x307ae84
+030782CF e8f0ba0e00 # member position setter | call   0x3163dc4
+030785AC 4053 # regular +100 method | rex push rbx
+030785B5 e852c00e00 # simple member write | call   0x316460c
+0307860D e832030000 # special +478 caller of ordinary | call   0x3078944
+03078944 48895c2408 # regular +478 state method | mov    QWORD PTR [rsp+0x8],rbx
+03078958 488b4158 # owner read | mov    rax,QWORD PTR [rcx+0x58]
+03078977 448b4028 # mode int read | mov    r8d,DWORD PTR [rax+0x28]
+0307897B 4183e806 # mode subtract6 | sub    r8d,0x6
+0307897F 4183f803 # mode <=3 | cmp    r8d,0x3
+03078983 7705 # skip invalid mode | ja     0x307898a
+03078985 e8fa240000 # call cleanup wrapper | call   0x307ae84
+030789A6 e865bd0e00 # other setter | call   0x3164710
+0307AE84 4053 # cleanup wrapper | rex push rbx
+0307AE8A 83a12403000000 # clear member+0x324 state | and    DWORD PTR [rcx+0x324],0x0
+0307AE94 4881c190040000 # parent member+0x490 | add    rcx,0x490
+0307AE9B e824acd3ff # call delayed clearer | call   0x2db5ac4
+0307AEA0 488d8b28030000 # action member+0x328 | lea    rcx,[rbx+0x328]
+0307AEA7 e874abd3ff # call action cleaner | call   0x2db5a20
+0307AED1 e8be2a1d00 # action ctor | call   0x324d994
+0326AAD9 e832470000 # B2 packet constructor call | call   0x326f210
+0326AB2D 32c1 # packet flag bit6 only | xor    al,cl
+0326ABAF ff9068030000 # member +368 virtual call | call   QWORD PTR [rax+0x368]
+0326F2D6 e80956cfff # B2 packet constructor | call   0x2f648e4
+0327ECA4 48895c2408 # Group A/B dispatcher entry | mov    QWORD PTR [rsp+0x8],rbx
+0327ECC6 e86591b4ff # dispatcher mode helper | call   0x2dc7e30
+0327ECCD 744f # B branch if false | je     0x327ed1e
+0327ED17 e8bcb8e5ff # A | call   0x30da5d8
+0327ED3C e8df9bfeff # B | call   0x3268920
