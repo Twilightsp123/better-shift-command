@@ -1,4 +1,7 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
+
+**2026-10-23 R66（单次只读观测止损）：** [固定原生候选容器的记录清理及安全门槛](N1_R66_TEMP_CONTAINER_SAMPLING_BLOCKED_20261023.md)。当前 EXE SHA `9bd58c63…f42be496` 上原码 21/21、E8 6/6、RIP 全局引用 5/5；真实 EXE 参与的离线测试 22/22 PASS。原生 `0x03102F49→0x03107B34` 会按 0xD0 遍历清理并在 `0x03107B6E` 把候选数清零。故不可用 Lua 定时读取临时候选容器后将它冒充实际选中路线；无工作线程同步/对象生命周期保证，live probe BLOCKED。完整验证脚本与历史 ZIP 仍只在离线资源包内，此提交为 docs-only，未改 main、无 gameplay patch。
+
 Current documentation authority — updated 2026-10-22
 
 **2026-10-23 R63 后新会话 AI 交接：** [完整工作指令与止损标准](N1_AI_HANDOFF_AFTER_R63_20261023.md)。目前最新实证为 R63 候选几何 → 0xD0 记录容器 → 有门槛的路线对象分配。**尚未证明 R57 ±90° 派生侧角生成的 work 点会作为选中候选进入成员最终目标；没有 gameplay patch。** 下一轮先闭合 `0x03114BF4 work+0x1A8/+0x1AC → 0x030C72F0 record → 0x030EE9BC` 的数据边，限定轮数，静态无法完成则转受限只读采样。详细交接含用户目标、版本 SHA、Derpy/memreader 原码、R34–R63 历史和 GitHub 纪律。
