@@ -1,6 +1,9 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 Current documentation authority — updated 2026-10-22
 
+**2026-10-23 R63 后新会话 AI 交接：** [完整工作指令与止损标准](N1_AI_HANDOFF_AFTER_R63_20261023.md)。目前最新实证为 R63 候选几何 → 0xD0 记录容器 → 有门槛的路线对象分配。**尚未证明 R57 ±90° 派生侧角生成的 work 点会作为选中候选进入成员最终目标；没有 gameplay patch。** 下一轮先闭合 `0x03114BF4 work+0x1A8/+0x1AC → 0x030C72F0 record → 0x030EE9BC` 的数据边，限定轮数，静态无法完成则转受限只读采样。详细交接含用户目标、版本 SHA、Derpy/memreader 原码、R34–R63 历史和 GitHub 纪律。
+
+
 **2026-10-23 本对话第29轮 / R63（候选记录到路线对象）：** [R62 侧角工作几何 → 真实 0xD0 字节候选容器 → 条件性路线分配，补齐同一容器的 Win64 第六参数身份](N1_R63_CANDIDATE_TO_ROUTE_OBJECT_BOUNDARY_20261023.md)。固定用户新版 EXE SHA `9bd58c63…f42be496`，90/90 精确指令与 objdump 起点、13/13 E8、6/6 分支、31/31 类型化操作数、真实 EXE 本地/ZIP 独立解压回归 21/21 PASS。`0x0312B6CE` 真正追加候选；`0x03102E38 → 0x03102E48/4E` 分别核对返回码与候选数；非空时以 `0x03121498 → 0x030C7058 → 0x030CC8E4` 尝试构造路线对象。**尚未证明 ±90° 特定工作点进入被选中记录或最终成员目标，不能发布 Native gameplay patch。** 完整审计器/测试在 R63 离线 ZIP，`main` 未改。
 
 **2026-10-22 本对话第28轮 / R62（路线侧角实际几何消费者）：** [条件性 ±90° 选侧角度通过同一栈临时记录+0x44 进入 `0x03114BF4` 真实候选点计算，且经 `0x03126B41` 转换器路线 node 可与 B2 成员发包形成有门槛的静态数据链](N1_R62_SIDE_HEADING_TO_B2_ROUTE_CANDIDATE_20261022.md)。新版用户 EXE SHA `9bd58c63…f42be496` 本地**82/82 原码及指令起点、14/14 E8、9/9 JCC、14/14 离线测试（含原始 EXE）PASS**；无 EXE 时13 PASS/1 SKIP，独立 ZIP 解压14/14。真正新证据：`0x03114CAA` 从 route record+0x44 取派生角，查 `0x03E8F360` 的 sin/cos 分量，并写工作对象 `+0x1A8/+0x1AC` 候选位置，**不是直接写入 soldier**；该工作对象是否在实际 Shift 折返最终进入成员 world goal 未证明。**不得立即全局锁转向侧、改±0x4000 或下发 gameplay patch。** [82条原码](../../maintenance_tools/native_shift_re/r62_route_side_consumer_pins_20261022.txt)；完整可执行审计器、单测、JSON 及 R61 全历史资源在独立 ZIP 中，后续补同步源码和测试。\n\n
