@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-24 R70（清零→投影门槛假说有界止损）：** [真实 EXE 同一成员状态处理器→门槛的条件性顺序与重要参数反证](N1_R70_MEMBER_PROJECTION_CAUSAL_STOP_20261024.md)。原 EXE 72 条完整指令/起点、14 E8、6 UNWIND、本地22测试（含 EXE）PASS。`0x03072EB8` 里两个调用共享 RBX 成员，但 `0x03072F00` 是直接调用 handler `0x0307DB60`，**不是**负责清 `member+0x23C/+0x1C8` 的模式 setter，且第五实参不同。`SHIFT_CAUSAL_LINK_BLOCKED`；不许据此改 0.01f 或 NOP 清零。GitHub 上传 32 个最重要 opcode 的公开复核器/测试，完整 R70+R69 离线 ZIP 另存；main 未改。
+
+
 **2026-10-24 R69（模式清零→投影重建/0.01f 门槛）：** [当前 EXE 4个函数的精确静态调用/字段关系](N1_R69_PROJECTION_MODE_GATE_20261024.md)。原 EXE 76/76 整条原码和指令起点、12/12 E8、4/4 UNWIND、20/20 本地离线测试（含 EXE）。模式旧1/2→新0清 `member+0x23C/+0x1C8`；运动包装器保存旧 `+0x23C`，一条条件路径先积分、后解析世界目标，再重建投影；单独成员状态函数按 0.01f 跳过部分处理。**三个函数之间同一 Shift 实例的因果时序未证实**，没有 patch；R70 一轮有界审计后止损。原始 EXE、Hook、`main` 均不修改。
 
 
