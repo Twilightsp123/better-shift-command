@@ -11,7 +11,7 @@ def check(data,m):
         raise AuditError('FAIL_CLOSED_SHA')
     if data[:2]!=b'MZ':raise AuditError('NOT_MZ')
     pe=struct.unpack_from('<I',data,0x3c)[0]
-    if pe>0x1000 or data[pe:pe+4]!=b'PE\\0\\0':raise AuditError('NOT_PE')
+    if pe>0x1000 or data[pe:pe+4]!=b'PE\0\0':raise AuditError('NOT_PE')
     if struct.unpack_from('<H',data,pe+4)[0]!=0x8664 or struct.unpack_from('<H',data,pe+24)[0]!=0x20b:
         raise AuditError('NOT_AMD64')
     if struct.unpack_from('<Q',data,pe+48)[0]!=0x140000000:raise AuditError('IMAGEBASE')
