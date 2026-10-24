@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-24 R73（短任务—B2 成员 roster 身份链）：** [R73 现版 EXE 的 late-bound Group、B2 条件发包及逐次成员名单读取](N1_R73_TASK_B2_ROSTER_IDENTITY_20261024.md)。真实 EXE 40 条原码/指令起点与 7 个 E8、本地17项测试（含真实 EXE）通过。B2 sender `0x0326AA44` 每次循环重新读取 Group+0x28 指针，`0x0326ABBD` 再读 Group+0x24 成员数量，**不能把固定 Group 裸指针等同冻结 roster**。无实际并发修改证据、无 Shift root cause，Hook/补丁不授权；下一轮 R74 仅追同对象 roster 写者与同步边界。
+
+
 **2026-10-24 R72（独立 Native ABI/事件发布实验）：** [固定容量 MPSC、成员 Epoch 事件协议与 Win64 MASM/SEH 受控测试](N1_R72_STANDALONE_NATIVE_CAPTURE_MICROTEST_20261024.md)。Linux C++ Release 和 UBSan Debug CTest 各 2/2 PASS（含 Python 13 个协议反例）；新增单独 Windows-2022 MASM/SEH 编译/CTest workflow，状态以对应 Actions 为准。只是自有测试进程，**未证明 WH3 成员 Tick Hook 安全、对象寿命或游戏根因**。全部原创源码及 CI 已同步研究分支；main 不改。 **Windows 真实 CI 最终 3/3 PASS（Linux 2/2）**，详见 [R72 Win64 验证结果](N1_R72_STANDALONE_NATIVE_CAPTURE_MICROTEST_20261024.md) 与 [Actions 40062382966](https://github.com/Twilightsp123/better-shift-command/actions/runs/40062382966)。
 
 
