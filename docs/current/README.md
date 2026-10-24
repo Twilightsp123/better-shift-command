@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-24 R74（Group roster 写者与旧组脱离）：** [真实 EXE 旧组解绑、Group 向量扩容与 B2 sender 重新读取的完整静态链](N1_R74_GROUP_ROSTER_WRITER_PROVENANCE_20261024.md)。本地 88/88 指令及 objdump 起点、12/12 E8、9/9 PE unwind、4 VTable 与 24/24 unittest（含原 EXE）PASS。新 Group 在 Root+0x32F8 发布前完成成员添加，但过程中可能先修改旧 Group 的 roster；**尚无与 B2 sender 真实线程重叠或 Shift 根因证明**。R75 唯一重点是引擎任务调度/排他边界，不能现在安装 Hook 或改 Group。
+
+
 **2026-10-24 R73（短任务—B2 成员 roster 身份链）：** [R73 现版 EXE 的 late-bound Group、B2 条件发包及逐次成员名单读取](N1_R73_TASK_B2_ROSTER_IDENTITY_20261024.md)。真实 EXE 40 条原码/指令起点与 7 个 E8、本地17项测试（含真实 EXE）通过。B2 sender `0x0326AA44` 每次循环重新读取 Group+0x28 指针，`0x0326ABBD` 再读 Group+0x24 成员数量，**不能把固定 Group 裸指针等同冻结 roster**。无实际并发修改证据、无 Shift root cause，Hook/补丁不授权；下一轮 R74 仅追同对象 roster 写者与同步边界。
 
 

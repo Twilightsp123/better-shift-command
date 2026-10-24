@@ -33,3 +33,8 @@
 Observe and record soldier-level relative position, headings, assigned slot deviation and crowding in one card before/at/after queued guidepoint turns. Distinguish mixed soldier headings from legitimate temporary differential turning caused by obstacle avoidance. Aggregate unit velocity alone is insufficient. Test no extra pause/reissued commands in MOVE→ATTACK with legacy Lua Controller absent, then REPLACE and unit combat/cancel. Report STATIC/OFFLINE/WINDOWS/WH3 status separately, plus source, DLL/PACK and SHA manifest only after they actually exist.
 
 **Current status:** N1 model/formation execution path unknown; no patch-ready exact RVA/ABI, no Windows or WH3 behavior pass. No repeated user gameplay testing during research, no premature Steam publication.
+
+
+## 2026-10-24 — R74 Group roster writer verification
+
+STATIC ORIGINAL EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: 88/88 instruction/opcode starts with GNU objdump, 12/12 direct E8, 9/9 PE UNWIND, 4 typed VTable entries. OFFLINE: 24/24 local tests including exact EXE and adversarial synthetic interleave. PUBLIC CI only focused 45 pins and 12 E8; private original EXE skipped. WINDOWS IN-GAME / WH3 GAMEPLAY: NOT RUN. Overlap, member identity generation and causal repair: NOT PROVEN. No Hook authorization. Complete R74 ZIP kept outside GitHub without licensed binary.

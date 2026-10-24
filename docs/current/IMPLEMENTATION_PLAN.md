@@ -78,3 +78,8 @@ Deliver complete source, build recipe, DLL, normal+DEBUG PACK, hash manifest and
 ## Immediate action
 
 **Stop treating native terminal-braking/desired-speed or 0x0311F8CB geometry early exit as the primary suspected defect.** Start at per-soldier destination/formation-slot producer/consumer xrefs and prove how a single Shift MOVE leg is assigned to individual models. Use past native state/queue work only to bridge from a unit's original command to soldier-level movement. Distinguish H8 Lua ATTACK pause and leave native attack code alone unless new evidence requires it.
+
+
+## 2026-10-24 R74 bounded decision
+
+Type-checked old Group membership detach, Group vector mutation, late publish of new Group, and B2 sender rereads are STATIC. Next R75: determine whether native task scheduling can actually overlap one old B2 sender with a Group rebuild; otherwise mark roster race causal theory BLOCKED/DEPRIORITIZED and return to world-goal/Steering/integrator continuity. Never force synchronization or introduce a new scheduler based only on synthetic interleaving.
