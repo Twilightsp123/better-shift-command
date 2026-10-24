@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-24 R71（原生成员 Tick 观测安全 Gate）：** [精准当前 EXE Tick 入口、PE prologue/unwind、Derpy 共享占位、memreader 0.15.1 STAYS 会话不卸载](N1_R71_TICK_OBSERVATION_SAFETY_GATE_20261024.md)。本地 32/32 原指令及 objdump 起点、4/4 E8、10/10 第三方源码约束、20/20 测试（含原始 EXE 和两 pack）通过；**HOOK_NOT_AUTHORIZED**，无工作线程/成员生命周期、Windows unwind、撤销安全证明。发布轻量静态校验器/测试；完整本地工具、证据和 R70 历史在 R71 ZIP；main 未改。
+
+
 **2026-10-24 R70（清零→投影门槛假说有界止损）：** [真实 EXE 同一成员状态处理器→门槛的条件性顺序与重要参数反证](N1_R70_MEMBER_PROJECTION_CAUSAL_STOP_20261024.md)。原 EXE 72 条完整指令/起点、14 E8、6 UNWIND、本地22测试（含 EXE）PASS。`0x03072EB8` 里两个调用共享 RBX 成员，但 `0x03072F00` 是直接调用 handler `0x0307DB60`，**不是**负责清 `member+0x23C/+0x1C8` 的模式 setter，且第五实参不同。`SHIFT_CAUSAL_LINK_BLOCKED`；不许据此改 0.01f 或 NOP 清零。GitHub 上传 32 个最重要 opcode 的公开复核器/测试，完整 R70+R69 离线 ZIP 另存；main 未改。
 
 
