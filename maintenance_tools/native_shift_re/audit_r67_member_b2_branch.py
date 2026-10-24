@@ -24,7 +24,7 @@ VIRTUAL={0x03070b66:0x100,0x03070b9c:0xe8}
 def sections(data):
  if data[:2]!=b"MZ":raise ValueError("NOT_MZ")
  p=struct.unpack_from("<I",data,0x3c)[0]
- if data[p:p+4]!=b"PE\\0\\0":raise ValueError("NOT_PE")
+ if data[p:p+4]!=b"PE\0\0":raise ValueError("NOT_PE")
  if struct.unpack_from("<H",data,p+4)[0]!=0x8664 or struct.unpack_from("<H",data,p+24)[0]!=0x20b:raise ValueError("NOT_AMD64_PE32PLUS")
  if struct.unpack_from("<Q",data,p+48)[0]!=IMAGE_BASE:raise ValueError("BAD_IMAGEBASE")
  n=struct.unpack_from("<H",data,p+6)[0]; opt=struct.unpack_from("<H",data,p+20)[0]
