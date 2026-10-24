@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-24 / R67（B2 接收器与成员运动分流）：** [普通成员根据 `member+0x104` 分走 vtable +0x100 的直接 XYZ 同步或 +0xE8 的另一路动作更新；Steering/积分/目标读时序核对](N1_R67_MEMBER_B2_BRANCH_MOTION_SEQUENCE_20261024.md)。当前 EXE 严格原码 64/64、E8 11/11、虚调用 2/2、虚表 8/8；本地含真实 EXE 15/15 PASS，GitHub 公开 CI 无 EXE 会跳过实际文件测试。此路径**尚未证明 Shift 实际命中**；R68 仅追 member+0x104 写者及 queued MOVE 分支可达性。新增只读 pin 审计器和合成回归，未发布 Hook/gameplay patch，main 不改。
+
+
 **2026-10-23 R66（单次只读观测止损）：** [固定原生候选容器的记录清理及安全门槛](N1_R66_TEMP_CONTAINER_SAMPLING_BLOCKED_20261023.md)。当前 EXE SHA `9bd58c63…f42be496` 上原码 21/21、E8 6/6、RIP 全局引用 5/5；真实 EXE 参与的离线测试 22/22 PASS。原生 `0x03102F49→0x03107B34` 会按 0xD0 遍历清理并在 `0x03107B6E` 把候选数清零。故不可用 Lua 定时读取临时候选容器后将它冒充实际选中路线；无工作线程同步/对象生命周期保证，live probe BLOCKED。完整验证脚本与历史 ZIP 仍只在离线资源包内，此提交为 docs-only，未改 main、无 gameplay patch。
 
 Current documentation authority — updated 2026-10-22
