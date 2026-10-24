@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-24 / R68（当前 EXE 成员模式 setter 的精确重绑定）：** [R68 原生动作模式写者、分流来源和状态清零条件](N1_R68_MEMBER_MODE_WRITER_BRANCH_20261024.md)。普通/派生成员虚表 +0xE0 均指向 0x0307D9C0，旧模式 1/2→新模式 0 时清 `member+0x23C/+0x1C8`；4 个受门槛控制的虚调用可请求模式 0/1/2/3。完整原 EXE 静态 56 pins + 8 VTable + 1 E8，本地 17/17（含 EXE），CI 仅合成/契约；**不是已确认 Shift 异常或修复**。R69 限定分析模式 setter 后继状态处理、运动投影消费者；禁止按模式强制全队同步。
+
+
 **2026-10-24 / R67（B2 接收器与成员运动分流）：** [普通成员根据 `member+0x104` 分走 vtable +0x100 的直接 XYZ 同步或 +0xE8 的另一路动作更新；Steering/积分/目标读时序核对](N1_R67_MEMBER_B2_BRANCH_MOTION_SEQUENCE_20261024.md)。当前 EXE 严格原码 64/64、E8 11/11、虚调用 2/2、虚表 8/8；本地含真实 EXE 15/15 PASS，GitHub 公开 CI 无 EXE 会跳过实际文件测试。此路径**尚未证明 Shift 实际命中**；R68 仅追 member+0x104 写者及 queued MOVE 分支可达性。新增只读 pin 审计器和合成回归，未发布 Hook/gameplay patch，main 不改。
 
 
