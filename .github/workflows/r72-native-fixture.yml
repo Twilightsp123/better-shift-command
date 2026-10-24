@@ -1,0 +1,33 @@
+name: R72 Standalone Native Observation Contracts (NO GAME HOOK)
+on:
+  push:
+    branches: ['research/n1-*']
+    paths:
+      - 'maintenance_tools/native_shift_re/r72_native/**'
+      - '.github/workflows/r72-native-fixture.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  linux-atomic-queue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build standalone synthetic C++ ring
+        run: |
+          cmake -S maintenance_tools/native_shift_re/r72_native -B build/r72-linux -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/r72-linux --parallel 2
+          ctest --test-dir build/r72-linux -C Release --output-on-failure
+  windows-msvc-x64:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Configure isolated Win64 MASM + C++ test process
+        run: cmake -S maintenance_tools/native_shift_re/r72_native -B build/r72-win -G "Visual Studio 17 2022" -A x64
+      - name: Build standalone test executable (no game integration)
+        run: cmake --build build/r72-win --config Release --parallel 2
+      - name: Run queue and Win64 ABI/SEH fixture tests
+        run: ctest --test-dir build/r72-win -C Release --output-on-failure

@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-24 R72（独立 Native ABI/事件发布实验）：** [固定容量 MPSC、成员 Epoch 事件协议与 Win64 MASM/SEH 受控测试](N1_R72_STANDALONE_NATIVE_CAPTURE_MICROTEST_20261024.md)。Linux C++ Release 和 UBSan Debug CTest 各 2/2 PASS（含 Python 13 个协议反例）；新增单独 Windows-2022 MASM/SEH 编译/CTest workflow，状态以对应 Actions 为准。只是自有测试进程，**未证明 WH3 成员 Tick Hook 安全、对象寿命或游戏根因**。全部原创源码及 CI 已同步研究分支；main 不改。
+
+
 **2026-10-24 R71（原生成员 Tick 观测安全 Gate）：** [精准当前 EXE Tick 入口、PE prologue/unwind、Derpy 共享占位、memreader 0.15.1 STAYS 会话不卸载](N1_R71_TICK_OBSERVATION_SAFETY_GATE_20261024.md)。本地 32/32 原指令及 objdump 起点、4/4 E8、10/10 第三方源码约束、20/20 测试（含原始 EXE 和两 pack）通过；**HOOK_NOT_AUTHORIZED**，无工作线程/成员生命周期、Windows unwind、撤销安全证明。发布轻量静态校验器/测试；完整本地工具、证据和 R70 历史在 R71 ZIP；main 未改。
 
 
