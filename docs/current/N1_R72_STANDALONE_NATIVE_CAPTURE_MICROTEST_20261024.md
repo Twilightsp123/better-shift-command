@@ -1,5 +1,8 @@
 # BSC R72 — 独立 Native 观测微实验（2026-10-24）
 
+**Windows 实际 CI 补充（2026-10-24）：** 首次 Windows 编译因为全局 C++ /WX /W4 /EHsc 泄漏进 MASM 且对有意 alignas(64) 的 MSVC C4324 警告视为错误而失败（Actions 40062212819）。修正 CMake 为仅对 C++ 生效的 /W4 /WX /EHsc /wd4324 后，研究分支 cdea5efcc7935acbd2ad666075472f93c0542684 上的 Actions [40062382966](https://github.com/Twilightsp123/better-shift-command/actions/runs/40062382966) **Linux 2/2 PASS，Windows-2022 MSVC x64 3/3 PASS**，其中独立 Win64 MASM ABI/SEH fixture PASS。N1 静态工作流 [40062383076](https://github.com/Twilightsp123/better-shift-command/actions/runs/40062383076) 另行监测。该结果依旧不能授权游戏 Tick Hook、跨线程生命期或玩法补丁。
+
+
 **阶段：离线独立进程实验，不修改 WH3，不安装 Hook，不是游戏补丁。**
 
 ## 已完成的实际施工
