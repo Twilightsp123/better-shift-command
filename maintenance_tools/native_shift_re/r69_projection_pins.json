@@ -1,0 +1,347 @@
+{
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "exe_size": 232531920,
+  "image_base": "0x140000000",
+  "grade": "EXACT_EXE_STATIC_ONLY",
+  "unwind_functions": {
+    "mode_setter": [
+      "0307d9c0",
+      "0307da02"
+    ],
+    "setter_immediate_handler": [
+      "0307db60",
+      "0307e19e"
+    ],
+    "separate_projection_gate": [
+      "0307e1a0",
+      "0307e7ab"
+    ],
+    "motion_wrapper": [
+      "0310006c",
+      "03100531"
+    ]
+  },
+  "pins": {
+    "0307d9c0": {
+      "hex": "4883ec38",
+      "fn": "mode_setter"
+    },
+    "0307d9c4": {
+      "hex": "8b8104010000",
+      "fn": "mode_setter"
+    },
+    "0307d9ca": {
+      "hex": "3bc2",
+      "fn": "mode_setter"
+    },
+    "0307d9cc": {
+      "hex": "742f",
+      "fn": "mode_setter"
+    },
+    "0307d9ce": {
+      "hex": "ffc8",
+      "fn": "mode_setter"
+    },
+    "0307d9d0": {
+      "hex": "83f801",
+      "fn": "mode_setter"
+    },
+    "0307d9d3": {
+      "hex": "7710",
+      "fn": "mode_setter"
+    },
+    "0307d9d5": {
+      "hex": "85d2",
+      "fn": "mode_setter"
+    },
+    "0307d9d7": {
+      "hex": "750c",
+      "fn": "mode_setter"
+    },
+    "0307d9d9": {
+      "hex": "21913c020000",
+      "fn": "mode_setter"
+    },
+    "0307d9df": {
+      "hex": "2191c8010000",
+      "fn": "mode_setter"
+    },
+    "0307d9e5": {
+      "hex": "899104010000",
+      "fn": "mode_setter"
+    },
+    "0307d9eb": {
+      "hex": "4533c9",
+      "fn": "mode_setter"
+    },
+    "0307d9ee": {
+      "hex": "33d2",
+      "fn": "mode_setter"
+    },
+    "0307d9f0": {
+      "hex": "c644242001",
+      "fn": "mode_setter"
+    },
+    "0307d9f5": {
+      "hex": "4533c0",
+      "fn": "mode_setter"
+    },
+    "0307d9f8": {
+      "hex": "e863010000",
+      "fn": "mode_setter"
+    },
+    "0307d9fd": {
+      "hex": "4883c438",
+      "fn": "mode_setter"
+    },
+    "0307db60": {
+      "hex": "488bc4",
+      "fn": "setter_immediate_handler"
+    },
+    "0307db8b": {
+      "hex": "488bf9",
+      "fn": "setter_immediate_handler"
+    },
+    "0307db8e": {
+      "hex": "e87d8bffff",
+      "fn": "setter_immediate_handler"
+    },
+    "0307dba2": {
+      "hex": "e8b9180000",
+      "fn": "setter_immediate_handler"
+    },
+    "0307dbcf": {
+      "hex": "84c0",
+      "fn": "setter_immediate_handler"
+    },
+    "0307dc6f": {
+      "hex": "83fe0e",
+      "fn": "setter_immediate_handler"
+    },
+    "0307dca0": {
+      "hex": "e8bbfeffff",
+      "fn": "setter_immediate_handler"
+    },
+    "0307dcc7": {
+      "hex": "488bcf",
+      "fn": "setter_immediate_handler"
+    },
+    "0307dcca": {
+      "hex": "e819150000",
+      "fn": "setter_immediate_handler"
+    },
+    "0307dd36": {
+      "hex": "8b8704010000",
+      "fn": "setter_immediate_handler"
+    },
+    "0307df51": {
+      "hex": "ff90c8010000",
+      "fn": "setter_immediate_handler"
+    },
+    "0307df62": {
+      "hex": "ff90c8010000",
+      "fn": "setter_immediate_handler"
+    },
+    "0307e065": {
+      "hex": "8b9718030000",
+      "fn": "setter_immediate_handler"
+    },
+    "0307e073": {
+      "hex": "89b718030000",
+      "fn": "setter_immediate_handler"
+    },
+    "0307e083": {
+      "hex": "f6870801000010",
+      "fn": "setter_immediate_handler"
+    },
+    "0307e08c": {
+      "hex": "83bf0401000003",
+      "fn": "setter_immediate_handler"
+    },
+    "0307e1a0": {
+      "hex": "488bc4",
+      "fn": "separate_projection_gate"
+    },
+    "0307e1b4": {
+      "hex": "488bf9",
+      "fn": "separate_projection_gate"
+    },
+    "0307e1bb": {
+      "hex": "e8d002ffff",
+      "fn": "separate_projection_gate"
+    },
+    "0307e1c5": {
+      "hex": "403ac6",
+      "fn": "separate_projection_gate"
+    },
+    "0307e1c8": {
+      "hex": "0f84c3050000",
+      "fn": "separate_projection_gate"
+    },
+    "0307e1ce": {
+      "hex": "f30f1005363f8a00",
+      "fn": "separate_projection_gate"
+    },
+    "0307e1d6": {
+      "hex": "0f2f873c020000",
+      "fn": "separate_projection_gate"
+    },
+    "0307e1dd": {
+      "hex": "0f87ae050000",
+      "fn": "separate_projection_gate"
+    },
+    "0307e1e3": {
+      "hex": "8b8704010000",
+      "fn": "separate_projection_gate"
+    },
+    "0307e1f4": {
+      "hex": "0f96c0",
+      "fn": "separate_projection_gate"
+    },
+    "0307e1fa": {
+      "hex": "7545",
+      "fn": "separate_projection_gate"
+    },
+    "0307e203": {
+      "hex": "4183fa02",
+      "fn": "separate_projection_gate"
+    },
+    "0307e236": {
+      "hex": "89876c020000",
+      "fn": "separate_projection_gate"
+    },
+    "0307e267": {
+      "hex": "8b8718030000",
+      "fn": "separate_projection_gate"
+    },
+    "0307e306": {
+      "hex": "f30f108f3c020000",
+      "fn": "separate_projection_gate"
+    },
+    "0307e31d": {
+      "hex": "0f2fc8",
+      "fn": "separate_projection_gate"
+    },
+    "0307e326": {
+      "hex": "21870c070000",
+      "fn": "separate_projection_gate"
+    },
+    "0307e33c": {
+      "hex": "0f2f973c020000",
+      "fn": "separate_projection_gate"
+    },
+    "0310006c": {
+      "hex": "488bc4",
+      "fn": "motion_wrapper"
+    },
+    "03100085": {
+      "hex": "488bd9",
+      "fn": "motion_wrapper"
+    },
+    "0310009f": {
+      "hex": "8b813c020000",
+      "fn": "motion_wrapper"
+    },
+    "031000a5": {
+      "hex": "898138020000",
+      "fn": "motion_wrapper"
+    },
+    "031000c3": {
+      "hex": "4038b12a020000",
+      "fn": "motion_wrapper"
+    },
+    "031000ca": {
+      "hex": "746c",
+      "fn": "motion_wrapper"
+    },
+    "031000f6": {
+      "hex": "e8f56e0400",
+      "fn": "motion_wrapper"
+    },
+    "03100138": {
+      "hex": "488b01",
+      "fn": "motion_wrapper"
+    },
+    "0310014c": {
+      "hex": "e89f6e0400",
+      "fn": "motion_wrapper"
+    },
+    "031001a6": {
+      "hex": "f30f59c8",
+      "fn": "motion_wrapper"
+    },
+    "03100217": {
+      "hex": "488d8b58010000",
+      "fn": "motion_wrapper"
+    },
+    "0310021e": {
+      "hex": "e8b5a40200",
+      "fn": "motion_wrapper"
+    },
+    "03100223": {
+      "hex": "3c01",
+      "fn": "motion_wrapper"
+    },
+    "03100233": {
+      "hex": "488d8be0010000",
+      "fn": "motion_wrapper"
+    },
+    "03100247": {
+      "hex": "e8081d0200",
+      "fn": "motion_wrapper"
+    },
+    "03100272": {
+      "hex": "f30f58da",
+      "fn": "motion_wrapper"
+    },
+    "03100276": {
+      "hex": "410f2fd9",
+      "fn": "motion_wrapper"
+    },
+    "0310027a": {
+      "hex": "7636",
+      "fn": "motion_wrapper"
+    },
+    "0310027c": {
+      "hex": "e80b3808fe",
+      "fn": "motion_wrapper"
+    },
+    "03100289": {
+      "hex": "e8c2d73efd",
+      "fn": "motion_wrapper"
+    },
+    "03100299": {
+      "hex": "f30f594ccf04",
+      "fn": "motion_wrapper"
+    },
+    "031002a8": {
+      "hex": "f30f118b3c020000",
+      "fn": "motion_wrapper"
+    },
+    "031002cf": {
+      "hex": "f30f11833c020000",
+      "fn": "motion_wrapper"
+    },
+    "031002d7": {
+      "hex": "488b03",
+      "fn": "motion_wrapper"
+    }
+  },
+  "e8_edges": {
+    "0307d9f8": "0307db60",
+    "0307db8e": "03076710",
+    "0307dba2": "0307f460",
+    "0307dca0": "0307db60",
+    "0307dcca": "0307f1e8",
+    "0307e1bb": "0306e490",
+    "031000f6": "03146ff0",
+    "0310014c": "03146ff0",
+    "0310021e": "0312a6d8",
+    "03100247": "03121f54",
+    "0310027c": "01183a8c",
+    "03100289": "004eda50"
+  },
+  "threshold_rva": "0392210c",
+  "root_cause_proven": false,
+  "runtime_patch_authorized": false
+}
