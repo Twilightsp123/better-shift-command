@@ -83,3 +83,8 @@ Deliver complete source, build recipe, DLL, normal+DEBUG PACK, hash manifest and
 ## 2026-10-24 R74 bounded decision
 
 Type-checked old Group membership detach, Group vector mutation, late publish of new Group, and B2 sender rereads are STATIC. Next R75: determine whether native task scheduling can actually overlap one old B2 sender with a Group rebuild; otherwise mark roster race causal theory BLOCKED/DEPRIORITIZED and return to world-goal/Steering/integrator continuity. Never force synchronization or introduce a new scheduler based only on synthetic interleaving.
+
+
+## 2026-10-26 R75 bounded conclusion / R76 next
+
+Do not continue same Group roster pointer/count scans without new task scheduling evidence. R75 confirms independent original E8 parent ownership but cannot connect sender and rebuild to same Group generation or overlapping worker-thread windows. Roster race theory is BLOCKED/DEPRIORITIZED. R76 priority shifts to same member's reference-aware world goal/Steering vs integrator and near-neighbor response: seek a falsifiable original decision discriminating normal curved-turn speed differences from erroneous opposite member motion. Still no live Hook authorization, alternative Lua queue, gameplay patch or main changes.

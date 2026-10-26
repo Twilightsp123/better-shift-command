@@ -1,0 +1,92 @@
+{
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "exe_size": 232531920,
+  "image_base": "0x140000000",
+  "section": ".udata",
+  "direct_e8_census": {
+    "030209ec": [
+      [
+        "0301f38c",
+        "0301f274"
+      ],
+      [
+        "030251f3",
+        "030251e4"
+      ],
+      [
+        "03032c92",
+        "03032c48"
+      ],
+      [
+        "03042e03",
+        "03042670"
+      ]
+    ],
+    "0326a994": [
+      [
+        "032769f2",
+        "03276970"
+      ],
+      [
+        "0328034e",
+        "032802b0"
+      ],
+      [
+        "03282768",
+        "032826b4"
+      ],
+      [
+        "03286445",
+        "032863a0"
+      ]
+    ],
+    "03032c48": [
+      [
+        "02d8aaa7",
+        "02d8a7c4"
+      ],
+      [
+        "02d8ab6c",
+        "02d8a7c4"
+      ],
+      [
+        "02db9f86",
+        "02db9de4"
+      ],
+      [
+        "03014613",
+        "030144e4"
+      ],
+      [
+        "03035f2c",
+        "03035de0"
+      ],
+      [
+        "030366f3",
+        "030365c0"
+      ],
+      [
+        "03037167",
+        "03037034"
+      ],
+      [
+        "03037a69",
+        "030374cc"
+      ],
+      [
+        "0303d094",
+        "0303d02c"
+      ]
+    ]
+  },
+  "known_B2_owners": {
+    "03276970": "B2+0x08 direct",
+    "032863a0": "B2+0x10 deferred"
+  },
+  "evidence_grade": "EXACT_EXE_STATIC_ONLY",
+  "interleaving_observed": false,
+  "thread_affinity_proven": false,
+  "external_serialization_proven": false,
+  "roster_race_caused_shift": false,
+  "native_patch_authorized": false
+}

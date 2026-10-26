@@ -140,3 +140,8 @@ Do not call any proposal 'implemented' until committed code and the correspondin
 ## 2026-10-24 — R74 Group roster mutation / B2 sender race boundary
 
 Original EXE static positive: Group rebuild 0x030209EC transfers each member via 0x030E54EC, which can remove the member from its *old* Group before the new Group is published. R73 B2 sender rereads array and count from a retained Group pointer. This is a possible conditional alias hazard, NOT evidence that two native jobs run concurrently or that ordinary Shift crowding was caused by it. Decision: no Group lock/vector mutation patch; R75 bounded overlap/serialization audit or deprioritize this hypothesis. Full report: N1_R74_GROUP_ROSTER_WRITER_PROVENANCE_20261024.md.
+
+
+## 2026-10-26 R75 — Group roster race de-prioritization
+
+Exact current game EXE bounded E8/UNWIND/objdump census finds 4 callers of builder 0x030209EC, 4 callers of shared sender 0x0326A994 (only two typed to B2), and 9 callers of related entry 0x03032C48. R74 old-group roster writes and R73 repeated reads remain real, but no verified same-instance same-generation actual overlapping execution, task thread assignment or missing outer serialization exists. **Decision: ROSTER_RACE_CAUSAL_LINK = BLOCKED/DEPRIORITIZED, NOT IMPOSSIBLE**. Do not patch Group+0x24/+0x28 or invent locks. Reopen only with genuine scheduling/identity evidence. See N1_R75_ROSTER_RACE_SCHEDULER_DECISION_20261026.md.

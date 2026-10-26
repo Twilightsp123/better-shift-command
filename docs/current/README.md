@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-26 R75（Group roster 竞争假说止损）：** [原始 EXE 17 条直接调用者与 PE/objdump 归属；ROSTER_RACE_CAUSAL_LINK=BLOCKED/DEPRIORITIZED](N1_R75_ROSTER_RACE_SCHEDULER_DECISION_20261026.md)。4 个 Group 重建调用者、4 个共同成员 sender 调用者和 9 个相关配置入口调用者均经原 EXE 严格核对。sender 有另外两条尚未类型化的非已证 B2 路径，不能把所有 sender 命中都归成 Shift。**没有实际同代 B2 与 rebuild 线程重叠或外部序列化证据**；R76 转回 world goal/Steering/积分因果，不安装 Hook。
+
+
 **2026-10-24 R74（Group roster 写者与旧组脱离）：** [真实 EXE 旧组解绑、Group 向量扩容与 B2 sender 重新读取的完整静态链](N1_R74_GROUP_ROSTER_WRITER_PROVENANCE_20261024.md)。本地 88/88 指令及 objdump 起点、12/12 E8、9/9 PE unwind、4 VTable 与 24/24 unittest（含原 EXE）PASS。新 Group 在 Root+0x32F8 发布前完成成员添加，但过程中可能先修改旧 Group 的 roster；**尚无与 B2 sender 真实线程重叠或 Shift 根因证明**。R75 唯一重点是引擎任务调度/排他边界，不能现在安装 Hook 或改 Group。
 
 

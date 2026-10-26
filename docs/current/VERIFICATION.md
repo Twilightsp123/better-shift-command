@@ -38,3 +38,8 @@ Observe and record soldier-level relative position, headings, assigned slot devi
 ## 2026-10-24 — R74 Group roster writer verification
 
 STATIC ORIGINAL EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: 88/88 instruction/opcode starts with GNU objdump, 12/12 direct E8, 9/9 PE UNWIND, 4 typed VTable entries. OFFLINE: 24/24 local tests including exact EXE and adversarial synthetic interleave. PUBLIC CI only focused 45 pins and 12 E8; private original EXE skipped. WINDOWS IN-GAME / WH3 GAMEPLAY: NOT RUN. Overlap, member identity generation and causal repair: NOT PROVEN. No Hook authorization. Complete R74 ZIP kept outside GitHub without licensed binary.
+
+
+## 2026-10-26 R75 evidence grade and stopping gate
+
+CURRENT EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: **17/17 decoded direct E8 call sites**, matched raw bytes, exact call destination, PE exception/unwind owner, GNU objdump instruction start. Local Python 21/21 including two full matching-EXE tests; synthetic schedule has no runtime evidentiary grade. GitHub public CI checks manifest and negative fixtures and SKIPs original game EXE. No Windows WH3 Hook or gameplay validation. The R75 ZIP contains complete local source/disassembly/evidence and R74 history. Neither no-race nor race is proved from these observations.
