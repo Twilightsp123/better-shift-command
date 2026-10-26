@@ -43,3 +43,8 @@ STATIC ORIGINAL EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c
 ## 2026-10-26 R75 evidence grade and stopping gate
 
 CURRENT EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: **17/17 decoded direct E8 call sites**, matched raw bytes, exact call destination, PE exception/unwind owner, GNU objdump instruction start. Local Python 21/21 including two full matching-EXE tests; synthetic schedule has no runtime evidentiary grade. GitHub public CI checks manifest and negative fixtures and SKIPs original game EXE. No Windows WH3 Hook or gameplay validation. The R75 ZIP contains complete local source/disassembly/evidence and R74 history. Neither no-race nor race is proved from these observations.
+
+
+## 2026-10-26 R76 evidence / phase gate
+
+EXACT PRIVATE EXE (9bd58c63...f42be496): 112 whole instructions + GNU objdump starts, 9 E8, 7 Jcc, 6 PE UNWIND owners, 2 typed member VTable slots. 27/27 local unittest including actual EXE+objdump; no EXE 25 PASS / 2 SKIP. PUBLIC GitHub subset: 44 pins, 8 E8, 5 conditional branches, 2 typed slots. Real game WH3 instance / Windows Hook / gameplay repair: NOT TESTED / NOT AUTHORIZED. Local full offline ZIP contains disassembly and full test logs, excluding the EXE.

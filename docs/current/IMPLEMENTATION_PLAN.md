@@ -88,3 +88,8 @@ Type-checked old Group membership detach, Group vector mutation, late publish of
 ## 2026-10-26 R75 bounded conclusion / R76 next
 
 Do not continue same Group roster pointer/count scans without new task scheduling evidence. R75 confirms independent original E8 parent ownership but cannot connect sender and rebuild to same Group generation or overlapping worker-thread windows. Roster race theory is BLOCKED/DEPRIORITIZED. R76 priority shifts to same member's reference-aware world goal/Steering vs integrator and near-neighbor response: seek a falsifiable original decision discriminating normal curved-turn speed differences from erroneous opposite member motion. Still no live Hook authorization, alternative Lua queue, gameplay patch or main changes.
+
+
+## 2026-10-26 R76 to R77 decision
+
+Next priority is NOT Group roster or a guessed speed threshold. Verify exact same-member Steering postprocessing 0x0308D830 / original goal direction into the pending displacement accumulator member+0x13C/+0x144, with typed producer/consumer conditions. Separate legitimate per-member movement phase differences from actually erroneous target discontinuity. If static chain fails to connect, record a bounded NO-GO; do not install game Hook or replace Shift queue.

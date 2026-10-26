@@ -145,3 +145,8 @@ Original EXE static positive: Group rebuild 0x030209EC transfers each member via
 ## 2026-10-26 R75 — Group roster race de-prioritization
 
 Exact current game EXE bounded E8/UNWIND/objdump census finds 4 callers of builder 0x030209EC, 4 callers of shared sender 0x0326A994 (only two typed to B2), and 9 callers of related entry 0x03032C48. R74 old-group roster writes and R73 repeated reads remain real, but no verified same-instance same-generation actual overlapping execution, task thread assignment or missing outer serialization exists. **Decision: ROSTER_RACE_CAUSAL_LINK = BLOCKED/DEPRIORITIZED, NOT IMPOSSIBLE**. Do not patch Group+0x24/+0x28 or invent locks. Reopen only with genuine scheduling/identity evidence. See N1_R75_ROSTER_RACE_SCHEDULER_DECISION_20261026.md.
+
+
+## 2026-10-26 R76 — Goal/motion branch discriminator
+
+On current original EXE, Steering 0x03059BC8 can bypass world-goal resolution behind a candidate/velocity-dependent gate; when it does resolve, 0x03121F54 and 0x02F3D668 write temporary caller stack output, NOT direct persistent member+0x1E0. Typed member's independent +0x20 dispatch reaches actual XYZ integrator under flags. These are original code facts, **not** proof of the player's Shift crowding root cause. Decision: do not NOP goal branch or force flags; R77 bounded search for verified post-Steering to delta provenance. No live Hook.

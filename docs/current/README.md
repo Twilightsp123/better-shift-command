@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-26 R76（Steering 世界目标与积分条件分流）：** [当前 EXE 目标解析器临时缓冲与邻近/速度门槛，独立真实位移状态](N1_R76_GOAL_STEERING_INTEGRATOR_BOUNDARY_20261026.md)。本地 112/112 原指令和 objdump 起点、9/9 E8、7/7 Jcc、6/6 PE unwind、2/2 VTable、27/27 测试（含真实 EXE）；公开上传44高价值 pin 与 14 项合成/契约回归（EXE用例SKIP）。同类成员 Steering 可能跳过世界目标解析，不能将源目标相同等价当次运动相同；**没有 Shift 实例级异常及 Hook 修复授权**。R77 严格限定 Steering 后继与运动增量写者的真实数据边。
+
+
 **2026-10-26 R75（Group roster 竞争假说止损）：** [原始 EXE 17 条直接调用者与 PE/objdump 归属；ROSTER_RACE_CAUSAL_LINK=BLOCKED/DEPRIORITIZED](N1_R75_ROSTER_RACE_SCHEDULER_DECISION_20261026.md)。4 个 Group 重建调用者、4 个共同成员 sender 调用者和 9 个相关配置入口调用者均经原 EXE 严格核对。sender 有另外两条尚未类型化的非已证 B2 路径，不能把所有 sender 命中都归成 Shift。**没有实际同代 B2 与 rebuild 线程重叠或外部序列化证据**；R76 转回 world goal/Steering/积分因果，不安装 Hook。
 
 
