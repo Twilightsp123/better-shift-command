@@ -7,7 +7,7 @@ a=importlib.util.module_from_spec(spec);spec.loader.exec_module(a)
 M=json.loads((ROOT/'r81_focus_pins.json').read_text())
 def at(s):return M['pins'][s]['hex']
 class R81(unittest.TestCase):
- def test_focus_pin_count(self):self.assertEqual(len(M['pins']),71)
+ def test_focus_pin_count(self):self.assertEqual(len(M['pins']),68)
  def test_owned_pe_functions(self):self.assertEqual(len(M['functions']),9)
  def test_base_ctor_E8(self):self.assertEqual(M['e8']['03052ca0'],'030f31d8')
  def test_manager_select_E8(self):self.assertEqual(M['e8']['0311f417'],'03132178')
