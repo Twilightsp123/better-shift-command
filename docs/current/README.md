@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-27 R83（Root / 成员上下文保持性有界止损）：** [R83 精确 EXE 49-pin/5-E8 审计与两处异对象假写者](N1_R83_ROOT_MEMBER_CONTEXT_CONTINUITY_STOP_20261027.md)。原 Root MOVE/构造和成员控制器的指定函数范围未确认 Root+0x38 或 member+0x720 的运行期直接重绑定；0x0300B23A 写的是另一辅助对象的 +0x38，0x0300BAD6 写该辅助对象的 +0x720 **BYTE**。**不能据此声称全局上下文不变，也不能把共享 context 当成同一 Shift route generation。** 本地 49/49真实指令+objdump、9 PE+1 leaf、22/22测试含原 EXE；R84 限定 member+0x738 的有类型运行期赋值来源，禁止 Hook/补丁。
+
+
 **2026-10-27 R82（Root/member/Group 构造时上下文同源）：** [当前原版 EXE 8 E8、43 opcode 的类型化 Root+0x38 源字段链](N1_R82_ROOT_MEMBER_GROUP_CONTEXT_CONSTRUCTOR_20261027.md)。成员 Root 创建两条分支在 ctor 将 `[Root+0x38]` 复制到 `member+0x58/+0x720`；独立 Group ctor 将同一个 Root 来源写到 `Group+0x10`。**不同构造时刻的值相等、实际 Shift MOVE 任务代际一致仍未证**，不授权 Hook 或 gameplay patch。完整原 EXE 22/22 本地测试、公开 Actions 1420项/107跳过；R83 限定 Root+0x38 的替换及成员上下文保持性。
 
 
