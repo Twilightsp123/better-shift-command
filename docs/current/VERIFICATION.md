@@ -53,3 +53,8 @@ EXACT PRIVATE EXE (9bd58c63...f42be496): 112 whole instructions + GNU objdump st
 ## 2026-10-27 R77 — current build formation index + geometry test grades
 
 **Original EXE static:** exact SHA 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496; 66 exact whole decoded opcode starts, 9 E8 destinations, 3 PE unwind boundaries, 1 ordinary member vtable slot. **Offline synthetic:** 3×3 grid negative controls for linear 180, 90+90, rigid 180, per-member phase offsets and kinematic R/H; 32/32 local tests including 2 private original EXE tests; public CI skips both without EXE. **Not achieved:** queued Shift hit in this A branch, specific strategy mode, final world goal same as record, actual member motion traces, game repair. ZIP kept out of GitHub (without game EXE). No in-game Hook authorized.
+
+
+## 2026-10-27 R78 typed A Packet physical position chain
+
+Private EXE SHA 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: 118 whole opcodes and llvm-objdump starts, 16 relative E8, 11 PE unwind functions, 3 constructor-linked member vtable slots, 36/36 local unittest including original EXE. Public CI includes 39 focus pins, 12 E8, 10 PE funcs and 3 virtual methods; original EXE case SKIP. Grade EXACT_EXE_STATIC_ONLY, NOT actual queued Shift trace, no safe Hook or gameplay patch. Full ZIP delivered separately without EXE.

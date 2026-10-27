@@ -155,3 +155,8 @@ On current original EXE, Steering 0x03059BC8 can bypass world-goal resolution be
 ## 2026-10-27 — R77: do not equate fixed slot indices with intrinsic crowding
 
 User-corrected product definition: **squeezing/crowding is an emergent multi-member spatial condition, not an engine action/state/Hook name.** Current exact EXE has conditional Group A fanout `0x030DA51C` pairing member[i] with 48-byte record[i] after strategy virtual+0x48. Synthetic controls decisively refute 'fixed indices must crowd': continuous rigid turning preserves 3.0 spacing while 180° straight interpolation reaches zero; phased 90+90 retains >0 spacing; staggered member phase changes spacing. These are not WH3 measured trajectories. Therefore no automatic record reassignment, fixed speed tweak, global collision flags or Hungarian patch. R78 only trace actual strategy/path to final world goal; avoid extending unrelated call trees.
+
+
+## 2026-10-27 R78 — A record is not proven navigation waypoint
+
+Current SHA exact-EXE static dataflow: A fanout fifth argument 1 activates member-specific Packet modifier; Packet bit0x50=0x26; +0x51 bit0x02 is first cleared, then re-set by 0x02F775AC. Member receiver transforms reference-aware position and reaches member virtual+0x100 or +0xE8 with **physical XYZ stores +0x88/+0x90**. Do not treat A record[i] as persistent member navigation goal +0x1E0/+0x1F0. Reject unproven indexed goal remap/Hungarian/velocity patch. Queued Shift A/B identity and actual crowding causality UNKNOWN. R79 bounded audit genuine goal setter 0x0311E5DC. R78 report linked in README.

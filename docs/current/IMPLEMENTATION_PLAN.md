@@ -98,3 +98,8 @@ Next priority is NOT Group roster or a guessed speed threshold. Verify exact sam
 ## 2026-10-27 R77 / R78 formation-motion causal revision
 
 The task is not to find a native 'crowding action'; it is to explain multi-member spatial interference while CA owns the original Shift queue/pathfinding. R77 on current EXE proves conditional A fanout member[i] → 48-byte record[i] but disproves treating fixed slot identity as sufficient explanation (rigid continuous turning preserves clearance). R78 must trace record→packet→member final world goal, and establish actual queued Shift strategy/branch before considering one-time turn-continuity changes. Analyze simultaneous nearest-neighbor distances and turn-phase lag rather than mere segment intersections; no blind per-tick target remap, Lua reissue or global steering threshold patches.
+
+
+## 2026-10-27 R78 correction / R79 next
+
+Do not equate Group A record[i] with a final persistent motor navigation target. R78 shows reference-aware A Packet member-local adjustment and mode-based direct member XYZ position writes. Next bounded R79 target: type-bind callers of actual navigation goal setter 0x0311E5DC writing member+0x1E0/+0x1F0, and connect to original queued Shift MOVE instance. Then evaluate group-level turn-phase mismatch and neighbor clearance, not a blind one-shot slot remap. No live Hook, no Lua scheduler or main modification.

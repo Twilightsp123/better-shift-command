@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-27 R78（A 阵型 record 与持久导航目标的关键纠错）：** [当前 EXE 的 A Packet 第五实参、成员修正、参考坐标解析与物理 XYZ 直接写入](N1_R78_A_PACKET_POSITION_VS_NAV_GOAL_20261027.md)。本地 118/118 原码+objdump，16/16 E8、11/11 unwind、3/3 VTable、36/36 tests 含真实 EXE；GitHub 精简 39 pin、12 E8 + CI。R77 索引配对仍成立，**但 A record[i] 未证等于普通 Shift 最终导航 goal**。R79 查真正 member+0x1E0/+0x1F0 writer 0x0311E5DC 的任务来源；无 Hook/PATCH。
+
+
 **2026-10-27 R77（阵型槽位配对 + 挤压现象运动学正反例）：** [当前 EXE 已确认 A 类 Group fanout `0x030DA51C` 同索引 member[i]→record[i]（旧 0x030D5490 不可用）](N1_R77_FORMATION_SLOT_CURVATURE_20261027.md)。66/66 原指令+objdump 起点、9/9 E8、3/3 PE unwind、1/1 普通成员虚表，32/32 本地测试（含真实 EXE）；三种反例证明固定索引不必然挤压，比较180°直线、90+90、连续刚性及不同步转向。此项**不证明普通 Shift 走 A、mode3 或物理根因**。R78 限定原生策略到最终 world goal 的数据边，不改 main/不装 Hook。
 
 
