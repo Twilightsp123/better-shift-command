@@ -1,0 +1,284 @@
+{
+  "sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "size": 232531920,
+  "image_base": "0x140000000",
+  "function_ranges": {
+    "parent_member_gate": [
+      "03072eb8",
+      "03073255"
+    ],
+    "member_local_worker": [
+      "03076f64",
+      "0307786b"
+    ],
+    "goal_candidate_builder": [
+      "0311f34c",
+      "0312096b"
+    ],
+    "candidate_manager_selector": [
+      "03132178",
+      "031321c6"
+    ],
+    "persistent_goal_writer": [
+      "0311e5dc",
+      "0311e727"
+    ]
+  },
+  "pins": {
+    "03072ebe": {
+      "hex": "488bd9",
+      "owner": "parent_member_gate"
+    },
+    "03072f1a": {
+      "hex": "e845400000",
+      "owner": "parent_member_gate"
+    },
+    "03076f7e": {
+      "hex": "488db918070000",
+      "owner": "member_local_worker"
+    },
+    "03076f89": {
+      "hex": "488bd9",
+      "owner": "member_local_worker"
+    },
+    "030771ec": {
+      "hex": "4c8d8b10090000",
+      "owner": "member_local_worker"
+    },
+    "03077212": {
+      "hex": "4c8d842470010000",
+      "owner": "member_local_worker"
+    },
+    "03077221": {
+      "hex": "488d542440",
+      "owner": "member_local_worker"
+    },
+    "0307722b": {
+      "hex": "e81c810a00",
+      "owner": "member_local_worker"
+    },
+    "03077243": {
+      "hex": "0f1101",
+      "owner": "member_local_worker"
+    },
+    "0307724b": {
+      "hex": "f20f114910",
+      "owner": "member_local_worker"
+    },
+    "0311f37f": {
+      "hex": "498bd9",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f387": {
+      "hex": "488bf2",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f38f": {
+      "hex": "488bf9",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f3c2": {
+      "hex": "4d8928",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f3d3": {
+      "hex": "488bcb",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f3d6": {
+      "hex": "e8712d0000",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f3db": {
+      "hex": "4c8b4310",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f3ee": {
+      "hex": "488b4708",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f3fe": {
+      "hex": "488b8840040000",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f405": {
+      "hex": "488b4720",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f409": {
+      "hex": "488b8960010000",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f410": {
+      "hex": "448b88a0000000",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f417": {
+      "hex": "e85c2d0100",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f41c": {
+      "hex": "488b5728",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f427": {
+      "hex": "4c8bf0",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f436": {
+      "hex": "488b4a10",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f43a": {
+      "hex": "488b4128",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f43e": {
+      "hex": "4c3bf0",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f441": {
+      "hex": "0f84f8000000",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f447": {
+      "hex": "488b5208",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f4c2": {
+      "hex": "410f2ffa",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f4c6": {
+      "hex": "777f",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f4ce": {
+      "hex": "488b4728",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f4d7": {
+      "hex": "488b4810",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f4db": {
+      "hex": "e8007effff",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f51e": {
+      "hex": "f30f58fe",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f522": {
+      "hex": "410f2ffa",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f526": {
+      "hex": "771f",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f528": {
+      "hex": "488b4728",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f52c": {
+      "hex": "4c8b4008",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f530": {
+      "hex": "4c894728",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f534": {
+      "hex": "4d85c0",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f53f": {
+      "hex": "48895728",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f547": {
+      "hex": "4c8b6728",
+      "owner": "goal_candidate_builder"
+    },
+    "0311f54f": {
+      "hex": "4c896730",
+      "owner": "goal_candidate_builder"
+    },
+    "0312091d": {
+      "hex": "488bc6",
+      "owner": "goal_candidate_builder"
+    },
+    "0313217c": {
+      "hex": "4183f903",
+      "owner": "candidate_manager_selector"
+    },
+    "03132182": {
+      "hex": "488b4110",
+      "owner": "candidate_manager_selector"
+    },
+    "0313218b": {
+      "hex": "488b8008010000",
+      "owner": "candidate_manager_selector"
+    },
+    "03132197": {
+      "hex": "4d85c0",
+      "owner": "candidate_manager_selector"
+    },
+    "0313219c": {
+      "hex": "498b8080000000",
+      "owner": "candidate_manager_selector"
+    },
+    "031321a3": {
+      "hex": "4885c0",
+      "owner": "candidate_manager_selector"
+    },
+    "031321a8": {
+      "hex": "488b01",
+      "owner": "candidate_manager_selector"
+    },
+    "031321ae": {
+      "hex": "488b8840040000",
+      "owner": "candidate_manager_selector"
+    },
+    "031321b5": {
+      "hex": "488b8968010000",
+      "owner": "candidate_manager_selector"
+    },
+    "031321bc": {
+      "hex": "e817dae5ff",
+      "owner": "candidate_manager_selector"
+    },
+    "0311e6ca": {
+      "hex": "0f1187e0010000",
+      "owner": "persistent_goal_writer"
+    },
+    "0311e6e8": {
+      "hex": "f20f118ff0010000",
+      "owner": "persistent_goal_writer"
+    }
+  },
+  "e8": {
+    "03072f1a": "03076f64",
+    "0307722b": "0311f34c",
+    "0311f3d6": "0312214c",
+    "0311f417": "03132178",
+    "0311f4db": "031172e0",
+    "031321bc": "02f8fbd8"
+  },
+  "branches": {
+    "0311f441": "0311f53f",
+    "0311f4c6": "0311f547",
+    "0311f526": "0311f547"
+  },
+  "source": "FOCUSED_PUBLIC_SUBSET_OF_98_ORIGINAL_BYTE_PINS",
+  "local_complete": {
+    "pins": 98,
+    "e8": 8,
+    "jcc": 10,
+    "pe_functions": 5,
+    "tests": 37
+  },
+  "same_queued_shift_task_instance_proven": false,
+  "gameplay_patch_authorized": false
+}
