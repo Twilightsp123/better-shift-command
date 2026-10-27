@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-27 R81（成员本地候选控制器上下文来源与跨类型假写者纠错）：** [当前 EXE member 构造器直接复制 `member+0x58` 到内嵌控制器 `+0x718/+0x720`，初始化 `+0x738=NULL`、`+0x910` XYZ 与 `+0x920=NULL`；排除另两类对象的 `+0x910` 假写入](N1_R81_MEMBER_CONTROLLER_CONTEXT_OWNER_20261027.md)。本地 85/85 完整原码与 llvm-objdump 起点、5/5 E8、9/9 PE unwind、33/33 测试（含原 EXE）；GitHub 焦点68pin和契约。**`member+0x720` 构造初值与 Root+0x38 的同一 queued MOVE 身份仍未证**；R82 有界追基础成员上下文所有者，不授权 Hook/游戏补丁。
+
+
 **2026-10-27 R80（成员本地导航候选选择，非 Shift 路点编号）：** [当前原生 EXE `member+0x718/+0x910 → 0x0311F34C → 0x03132178` 三路候选与成员 +0x740 链表指针选择](N1_R80_MEMBER_LOCAL_ROUTE_CANDIDATE_20261027.md)。真实 EXE 98/98 指令/llvm 起点、8/8 E8、10/10 Jcc、5/5 unwind；37/37本地测试（含EXE）。公开精简58pin/6E8/3Jcc。**selector 的整数3不是已证阵型Mode3/Shift路段；与 queued MOVE 同实例身份仍未证明**。R81只追成员候选输入赋值及高层所有者，不发行补丁。
 
 

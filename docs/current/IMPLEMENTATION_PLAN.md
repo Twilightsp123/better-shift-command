@@ -113,3 +113,8 @@ The persistent member goal has genuine typed producer: member-local state handle
 ## 2026-10-27 R80 → R81 precise causal boundary
 
 R80 types 0x0311F34C as a per-member controller+0x718 goal candidate builder, using a per-member reference input+0x910 and controller option+0x20→+0xA0 to select among manager special, candidate reference+0x80, or fallback query. Its link-cursor+0x28/+0x30 can advance conditionally after identity/direction tests. **Cannot attach candidate ID to original queued Shift generation**; member context+0x720 and UnitRoot+0x38 alias are unproven. R81 only seeks concrete writers/constructors for these candidate source fields, then either closes original MOVE task provenance or records UNKNOWN. No game Hook or blind member synchronization.
+
+
+## 2026-10-27 R81 to R82 context owner stop gate
+
+Member original constructor copies `[member+0x58]` into controller header member+0x718 and +0x720, with +0x738 initially NULL. Its candidate input member+0x910 is initialized with XYZ and a NULL reference +0x920. R80 per-member selector dereferences controller+0x20/+0xA0 only under relevant status gates. Other apparent +0x910 writers originate via *different context manager type*, not a member update. **R82 sole priority:** type-bind `member+0x58` provenance to actual UnitRoot+0x38 queued MOVE task identity; otherwise record UNKNOWN rather than keep scanning same offsets. No new playable patch or Lua scheduler.

@@ -170,3 +170,8 @@ Exact current EXE proves 8 E8 callers across 7 PE functions of navigation setter
 ## 2026-10-27 R80 — Member-local route selector, not a Shift waypoint number
 
 Typed same-member local controller +0x718 and input+0x910 feed candidate builder 0x0311F34C. It calls 0x03132178 with three conditional candidate sources: selector-value-3 manager special field, input reference+0x80, fallback query. It checks returned handle against a member-local linked list and may advance its cursor. **Do not equate selector value 3 to formation Mode3, or cursor to queued Shift leg; no same-UnitRoot generation proof exists.** Current decision: no forced cursor sync, mode flags, target remap or Hook. R81 bound to ownership/writer proof; root cause still unknown. R80 report is indexed in README.
+
+
+## 2026-10-27 R81 — member controller constructor context is not automatically UnitRoot MOVE identity
+
+Exact original EXE constructor 0x03052BA8 sets `member+0x718/+0x720` to the value read from **same member+0x58**, and initializes `member+0x738`, `member+0x740`, and input reference `member+0x920` to NULL. Candidate resolver consumes `&member+0x910`, may read that reference and member-local controller option. Other functions 0x03054AD0 and 0x03086170 WRITE the same numeric +0x910 offset on a separate context-manager object, not the ordinary member. **Decision:** reject same-offset cross-type caller inference; no proof of live member reference writer or UnitRoot+0x38 pointer/task-generation equality. No forced cursor/flag fix. R82 strictly type-bind base member context to UnitRoot or mark alias UNKNOWN.

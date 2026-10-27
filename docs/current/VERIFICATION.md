@@ -68,3 +68,8 @@ Private matching EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53
 ## 2026-10-27 R80 original EXE goal selector provenance
 
 EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496, ImageBase 0x140000000: 98/98 original machine instructions and llvm-objdump instruction starts, 8/8 E8, 10/10 Jcc, 5/5 PE unwind ranges; 37/37 local tests including original licensed EXE and re-disassembly. Public CI covers focus 58 sites / 6 calls / 3 Jcc / 5 PE functions; private EXE skipped. No WH3 runtime, safe Hook or gameplay patch. Complete archive R80 ZIP includes local audit and R79 history without game binary.
+
+
+## 2026-10-27 R81 exact original EXE context provenance and negative aliases
+
+Original Win64 EXE sha256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: **85/85** whole instruction bytes and llvm-objdump start sites, **5/5** direct E8, **9/9** PE unwind functions, **33/33** local unittest including original EXE and re-disassembly. Public GitHub evidence contains 68 focus pins/5 calls/9 owner intervals; licensed game EXE case SKIP. No actual Shift same-generation instance or game Hook proof. Full R81 ZIP and nested R80 history delivered separately; never distribute licensed EXE.
