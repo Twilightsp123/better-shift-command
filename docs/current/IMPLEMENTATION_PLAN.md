@@ -128,3 +128,8 @@ Root context field provenance has been closed only at constructor time. Member s
 ## 2026-10-27 R83 / R84 motion causality redirection
 
 Root+0x38 context copied during member/Group construction is not a MOVE slot or route generation ID. R83 bounded typed writer searches in known command, rebuild and local member paths found no proven *direct* runtime Root-context or member controller+0x720 replacement; separate-object same-offset writers were excluded. Do not endlessly expand root field scans and do not force equality across soldiers: this cannot repair emergent spatial crowding without actual goal/phase/trajectory causal linkage. **R84 sole native direction:** member-local controller pointer at member+0x738 (controller+0x20), its specifically typed runtime assignment and selector+0xA0 use. If task epoch bridge remains unproved, maintain STOP/UNKNOWN and prioritize multi-member geometry rather than speculative engine flag edits.
+
+
+## 2026-10-27 R84/R85 stop gate
+
+The R80–R84 typed member candidate controller pointer `member+0x738` is readable, consumed by the candidate selector, and passed into an associated-object state routine. The bounded selector 0x0311F34C does not directly assign controller+0x20 (7 reads, 0 writes). Same-numbered stores in other object types were excluded. **R85 only seek a typed actual same-member pointer writer / owner function; if not established in one bounded audit, freeze the pointer-generation hypothesis rather than resume offset census.** Actual SHIFT crowding remains an emergent multi-model motion issue: next fallback priority is simultaneous world-goal trajectories, phase lag and nearest-neighbor clearance, not guessed flags/Hungarian patches. No Hook or new Lua scheduler.

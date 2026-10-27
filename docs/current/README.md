@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-27 R84（成员本地候选引用真实类型及运行期赋值止损）：** [当前版普通成员 vtable+0x4A0→0x030751E4，读 `member+0x738` 再调用 `0x03126964` 状态处理；候选生成器 7 次读 controller+0x20、零处直接写](N1_R84_MEMBER_CANDIDATE_REF_LIFECYCLE_20261027.md)。本地匹配 EXE 55/55 真指令与字节、4/4 E8、7 PE 函数、1 VTable，25/25 tests。两处看似 +0x738 的 DWORD 写者属于其它对象，不能推断 Shift 路点。**运行期 member 指针写者、同一 Shift task、挤压根因仍 UNKNOWN**。R85 限定寻一个 typed setter，否则回到群体轨迹诊断。
+
+
 **2026-10-27 R83（Root / 成员上下文保持性有界止损）：** [R83 精确 EXE 49-pin/5-E8 审计与两处异对象假写者](N1_R83_ROOT_MEMBER_CONTEXT_CONTINUITY_STOP_20261027.md)。原 Root MOVE/构造和成员控制器的指定函数范围未确认 Root+0x38 或 member+0x720 的运行期直接重绑定；0x0300B23A 写的是另一辅助对象的 +0x38，0x0300BAD6 写该辅助对象的 +0x720 **BYTE**。**不能据此声称全局上下文不变，也不能把共享 context 当成同一 Shift route generation。** 本地 49/49真实指令+objdump、9 PE+1 leaf、22/22测试含原 EXE；R84 限定 member+0x738 的有类型运行期赋值来源，禁止 Hook/补丁。
 
 

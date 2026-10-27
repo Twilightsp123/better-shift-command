@@ -83,3 +83,8 @@ Private original EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53
 ## 2026-10-27 R83 exact original EXE and scoped negative evidence
 
 Private Win64 WH3 EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496, 232531920 bytes: **49/49 actual original instruction bytes plus llvm-objdump starts**, 5/5 E8 edges, 9 PE UNWIND intervals and 1 bound leaf, 22/22 private local tests including EXE and actual disassembly; public CI exercises 49 focus pins/5 calls and skips original EXE. The full PE section scan was TIME-BOUNDED and INCOMPLETE: it was **not** used for any assertion of no global writers. Valid negative scope limited to ten typed function intervals, with distinct-object and single-byte alias disqualifiers. No WH3 runtime/Shift identity/gameplay patch proof. ZIP: BSC_R83_ROOT_MEMBER_CONTEXT_CONTINUITY_STOP_20261027.zip, excluding game EXE.
+
+
+## 2026-10-27 R84 typed candidate reference evidence
+
+Exact private EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: 55 exact original whole instruction starts + byte guards, 4 E8 call targets, 7 PE unwind owners, ordinary member vtable slot +0x4A0; builder has 7 typed reads of `controller+0x20` and 0 direct writes in bounded disassembly. 25/25 actual local tests (2 original EXE/llvm-objdump), public CI skips private EXE test. Full R84 ZIP includes ASM, exact-file result, SHA manifest and R83 history without redistributing game executable. No runtime causality proof.
