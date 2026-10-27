@@ -78,3 +78,8 @@ Original Win64 EXE sha256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3
 ## 2026-10-27 R82 original EXE Root/member/Group provenance evidence
 
 Private original EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: 43/43 original machine opcode + LLVM llvm-objdump instruction starts, 8/8 E8 edges, eight PE UNWIND owner ranges and one leaf without unwind; 22/22 local tests including two original-EXE checks. Public CI uses 43 pins, exact SHA/PE checker and synthetic negative tests, skips its private-EXE test. Game runtime Shift same-epoch context and crowding causality unproven. Complete R82 ZIP contains nine ASM excerpts, strict private evidence and R81 archive without game EXE.
+
+
+## 2026-10-27 R83 exact original EXE and scoped negative evidence
+
+Private Win64 WH3 EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496, 232531920 bytes: **49/49 actual original instruction bytes plus llvm-objdump starts**, 5/5 E8 edges, 9 PE UNWIND intervals and 1 bound leaf, 22/22 private local tests including EXE and actual disassembly; public CI exercises 49 focus pins/5 calls and skips original EXE. The full PE section scan was TIME-BOUNDED and INCOMPLETE: it was **not** used for any assertion of no global writers. Valid negative scope limited to ten typed function intervals, with distinct-object and single-byte alias disqualifiers. No WH3 runtime/Shift identity/gameplay patch proof. ZIP: BSC_R83_ROOT_MEMBER_CONTEXT_CONTINUITY_STOP_20261027.zip, excluding game EXE.

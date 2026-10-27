@@ -123,3 +123,8 @@ Member original constructor copies `[member+0x58]` into controller header member
 ## R82 to R83 typed constructor continuity test (2026-10-27)
 
 Root context field provenance has been closed only at constructor time. Member spawned via 0x03012F44 receives `[Root+0x38]` at +0x58, +0x718 and +0x720; Group created via 0x030209EC records `[Root+0x38]` at +0x10 and back-reference Root at +0xA10. R83 must check specific write/rebind sites and whether a live member's context survives changes of Root's shared context without outdated alias. Original queued Shift slot/shortTask and route generation remain unbound; no Hook or movement patch permitted.
+
+
+## 2026-10-27 R83 / R84 motion causality redirection
+
+Root+0x38 context copied during member/Group construction is not a MOVE slot or route generation ID. R83 bounded typed writer searches in known command, rebuild and local member paths found no proven *direct* runtime Root-context or member controller+0x720 replacement; separate-object same-offset writers were excluded. Do not endlessly expand root field scans and do not force equality across soldiers: this cannot repair emergent spatial crowding without actual goal/phase/trajectory causal linkage. **R84 sole native direction:** member-local controller pointer at member+0x738 (controller+0x20), its specifically typed runtime assignment and selector+0xA0 use. If task epoch bridge remains unproved, maintain STOP/UNKNOWN and prioritize multi-member geometry rather than speculative engine flag edits.

@@ -180,3 +180,8 @@ Exact original EXE constructor 0x03052BA8 sets `member+0x718/+0x720` to the valu
 ## 2026-10-27 R82 — typed constructor Root context equality, not Shift epoch identity
 
 Exact EXE Root/member construction 0x03012F44 -> 0x03052BA8 -> 0x030F31D8 -> 0x031417F4 copies `[Root+0x38]` into member+0x58 and local controller +0x718/+0x720. Independent Root Group construction 0x030209EC -> 0x0302093C -> 0x030C7CB8 -> 0x030C7DBC copies `[Root+0x38]` into Group+0x10 and retains Group+0xA10=Root. This proves **shared typed source field** on specified call paths; NOT equal values across construction times, all member types, or one queued Shift task generation. Do not force cursor, roots or contexts to synchronize; R83 only audit explicit Root+0x38 writers / member context retention. Root-cause and safe patch still unknown.
+
+
+## 2026-10-27 R83 — bounded Root-context and member-controller rebind hypothesis STOP
+
+Typed PE object tracing demonstrates that 0x0300B178 keeps the Root-like object in RBX from incoming RDX, while RCX/RDI denote a separate auxiliary object. Its write 0x0300B23A [RCX+0x38] and BYTE store 0x0300BAD6 [RDI+0x720] are NOT Root-context and ordinary-member controller QWORD rebinds. In bounded, fully disassembled Root/MOVE/Group and ordinary member ctor/goal-worker functions, no correctly typed *direct* runtime rebind was established. This does NOT prove global constness, lack of alias writes, or same Shift route epoch. Context pointer is not a verified waypoint generation. Decision: STOP repeated offset-only writer discovery, do not patch Root context/member+0x720. R84 only a typed member+0x738 candidate-source assignment. See N1_R83_ROOT_MEMBER_CONTEXT_CONTINUITY_STOP_20261027.md.
