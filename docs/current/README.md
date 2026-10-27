@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-27 R77（阵型槽位配对 + 挤压现象运动学正反例）：** [当前 EXE 已确认 A 类 Group fanout `0x030DA51C` 同索引 member[i]→record[i]（旧 0x030D5490 不可用）](N1_R77_FORMATION_SLOT_CURVATURE_20261027.md)。66/66 原指令+objdump 起点、9/9 E8、3/3 PE unwind、1/1 普通成员虚表，32/32 本地测试（含真实 EXE）；三种反例证明固定索引不必然挤压，比较180°直线、90+90、连续刚性及不同步转向。此项**不证明普通 Shift 走 A、mode3 或物理根因**。R78 限定原生策略到最终 world goal 的数据边，不改 main/不装 Hook。
+
+
 **2026-10-26 R76（Steering 世界目标与积分条件分流）：** [当前 EXE 目标解析器临时缓冲与邻近/速度门槛，独立真实位移状态](N1_R76_GOAL_STEERING_INTEGRATOR_BOUNDARY_20261026.md)。本地 112/112 原指令和 objdump 起点、9/9 E8、7/7 Jcc、6/6 PE unwind、2/2 VTable、27/27 测试（含真实 EXE）；公开上传44高价值 pin 与 14 项合成/契约回归（EXE用例SKIP）。同类成员 Steering 可能跳过世界目标解析，不能将源目标相同等价当次运动相同；**没有 Shift 实例级异常及 Hook 修复授权**。R77 严格限定 Steering 后继与运动增量写者的真实数据边。
 
 

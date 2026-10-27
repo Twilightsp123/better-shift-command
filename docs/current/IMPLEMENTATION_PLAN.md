@@ -93,3 +93,8 @@ Do not continue same Group roster pointer/count scans without new task schedulin
 ## 2026-10-26 R76 to R77 decision
 
 Next priority is NOT Group roster or a guessed speed threshold. Verify exact same-member Steering postprocessing 0x0308D830 / original goal direction into the pending displacement accumulator member+0x13C/+0x144, with typed producer/consumer conditions. Separate legitimate per-member movement phase differences from actually erroneous target discontinuity. If static chain fails to connect, record a bounded NO-GO; do not install game Hook or replace Shift queue.
+
+
+## 2026-10-27 R77 / R78 formation-motion causal revision
+
+The task is not to find a native 'crowding action'; it is to explain multi-member spatial interference while CA owns the original Shift queue/pathfinding. R77 on current EXE proves conditional A fanout member[i] → 48-byte record[i] but disproves treating fixed slot identity as sufficient explanation (rigid continuous turning preserves clearance). R78 must trace record→packet→member final world goal, and establish actual queued Shift strategy/branch before considering one-time turn-continuity changes. Analyze simultaneous nearest-neighbor distances and turn-phase lag rather than mere segment intersections; no blind per-tick target remap, Lua reissue or global steering threshold patches.

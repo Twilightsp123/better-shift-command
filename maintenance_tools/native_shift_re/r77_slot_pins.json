@@ -1,0 +1,299 @@
+{
+  "sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "size": 232531920,
+  "image_base": "0x140000000",
+  "function_ranges": {
+    "fanout": [
+      "030da51c",
+      "030da5d5"
+    ],
+    "wrapper": [
+      "030da5d8",
+      "030da6b3"
+    ],
+    "dispatcher": [
+      "0327eca4",
+      "0327ed4c"
+    ]
+  },
+  "pins": {
+    "030da51c": {
+      "hex": "48895c2408",
+      "owner": "fanout"
+    },
+    "030da52e": {
+      "hex": "4c8b99300b0000",
+      "owner": "fanout"
+    },
+    "030da535": {
+      "hex": "488bda",
+      "owner": "fanout"
+    },
+    "030da53b": {
+      "hex": "e878c5ffff",
+      "owner": "fanout"
+    },
+    "030da540": {
+      "hex": "4d8b13",
+      "owner": "fanout"
+    },
+    "030da548": {
+      "hex": "448b4f24",
+      "owner": "fanout"
+    },
+    "030da552": {
+      "hex": "89442420",
+      "owner": "fanout"
+    },
+    "030da556": {
+      "hex": "41ff5248",
+      "owner": "fanout"
+    },
+    "030da55a": {
+      "hex": "33f6",
+      "owner": "fanout"
+    },
+    "030da55c": {
+      "hex": "397724",
+      "owner": "fanout"
+    },
+    "030da561": {
+      "hex": "488b4728",
+      "owner": "fanout"
+    },
+    "030da565": {
+      "hex": "4c8d0476",
+      "owner": "fanout"
+    },
+    "030da569": {
+      "hex": "49c1e004",
+      "owner": "fanout"
+    },
+    "030da56d": {
+      "hex": "488d4c2450",
+      "owner": "fanout"
+    },
+    "030da572": {
+      "hex": "4c03442440",
+      "owner": "fanout"
+    },
+    "030da577": {
+      "hex": "c644242001",
+      "owner": "fanout"
+    },
+    "030da57c": {
+      "hex": "488b1cf0",
+      "owner": "fanout"
+    },
+    "030da580": {
+      "hex": "488bd3",
+      "owner": "fanout"
+    },
+    "030da583": {
+      "hex": "450fb74822",
+      "owner": "fanout"
+    },
+    "030da588": {
+      "hex": "e8e3a2e8ff",
+      "owner": "fanout"
+    },
+    "030da58d": {
+      "hex": "488b03",
+      "owner": "fanout"
+    },
+    "030da590": {
+      "hex": "488d542450",
+      "owner": "fanout"
+    },
+    "030da595": {
+      "hex": "41b001",
+      "owner": "fanout"
+    },
+    "030da598": {
+      "hex": "488bcb",
+      "owner": "fanout"
+    },
+    "030da59b": {
+      "hex": "ff9068030000",
+      "owner": "fanout"
+    },
+    "030da5a1": {
+      "hex": "ffc6",
+      "owner": "fanout"
+    },
+    "030da5a3": {
+      "hex": "3b7724",
+      "owner": "fanout"
+    },
+    "030da5a6": {
+      "hex": "72b9",
+      "owner": "fanout"
+    },
+    "030da5a8": {
+      "hex": "488b07",
+      "owner": "fanout"
+    },
+    "030da5ae": {
+      "hex": "ff5020",
+      "owner": "fanout"
+    },
+    "030da5b1": {
+      "hex": "488b4c2440",
+      "owner": "fanout"
+    },
+    "030da5b9": {
+      "hex": "7405",
+      "owner": "fanout"
+    },
+    "030da5bb": {
+      "hex": "e8b04d4cfd",
+      "owner": "fanout"
+    },
+    "030da5d4": {
+      "hex": "c3",
+      "owner": "fanout"
+    },
+    "030da5d8": {
+      "hex": "48895c2408",
+      "owner": "wrapper"
+    },
+    "030da5ed": {
+      "hex": "8b4924",
+      "owner": "wrapper"
+    },
+    "030da5f0": {
+      "hex": "85c9",
+      "owner": "wrapper"
+    },
+    "030da5f2": {
+      "hex": "0f84a9000000",
+      "owner": "wrapper"
+    },
+    "030da601": {
+      "hex": "488b83300b0000",
+      "owner": "wrapper"
+    },
+    "030da608": {
+      "hex": "4c8b8b100a0000",
+      "owner": "wrapper"
+    },
+    "030da653": {
+      "hex": "488b8840040000",
+      "owner": "wrapper"
+    },
+    "030da669": {
+      "hex": "488b8960010000",
+      "owner": "wrapper"
+    },
+    "030da678": {
+      "hex": "66448945e8",
+      "owner": "wrapper"
+    },
+    "030da681": {
+      "hex": "e8a2840200",
+      "owner": "wrapper"
+    },
+    "030da686": {
+      "hex": "488bd0",
+      "owner": "wrapper"
+    },
+    "030da689": {
+      "hex": "488bcb",
+      "owner": "wrapper"
+    },
+    "030da68c": {
+      "hex": "488bf8",
+      "owner": "wrapper"
+    },
+    "030da68f": {
+      "hex": "e888feffff",
+      "owner": "wrapper"
+    },
+    "030da694": {
+      "hex": "4885ff",
+      "owner": "wrapper"
+    },
+    "030da699": {
+      "hex": "488bcf",
+      "owner": "wrapper"
+    },
+    "030da69c": {
+      "hex": "e85f5bd4ff",
+      "owner": "wrapper"
+    },
+    "030da6b2": {
+      "hex": "c3",
+      "owner": "wrapper"
+    },
+    "0327eca4": {
+      "hex": "48895c2408",
+      "owner": "dispatcher"
+    },
+    "0327ecc6": {
+      "hex": "e86591b4ff",
+      "owner": "dispatcher"
+    },
+    "0327eccb": {
+      "hex": "84c0",
+      "owner": "dispatcher"
+    },
+    "0327eccd": {
+      "hex": "744f",
+      "owner": "dispatcher"
+    },
+    "0327ecdc": {
+      "hex": "498b81100a0000",
+      "owner": "dispatcher"
+    },
+    "0327ece3": {
+      "hex": "488b8870020000",
+      "owner": "dispatcher"
+    },
+    "0327ecea": {
+      "hex": "440fb74144",
+      "owner": "dispatcher"
+    },
+    "0327ecef": {
+      "hex": "f30f105a34",
+      "owner": "dispatcher"
+    },
+    "0327ed10": {
+      "hex": "4883c210",
+      "owner": "dispatcher"
+    },
+    "0327ed14": {
+      "hex": "498bc9",
+      "owner": "dispatcher"
+    },
+    "0327ed17": {
+      "hex": "e8bcb8e5ff",
+      "owner": "dispatcher"
+    },
+    "0327ed1c": {
+      "hex": "eb23",
+      "owner": "dispatcher"
+    },
+    "0327ed1e": {
+      "hex": "498db9f0080000",
+      "owner": "dispatcher"
+    },
+    "0327ed3c": {
+      "hex": "e8df9bfeff",
+      "owner": "dispatcher"
+    }
+  },
+  "e8": {
+    "030da53b": "030d6ab8",
+    "030da588": "02f64870",
+    "030da5bb": "0059f370",
+    "030da681": "03102b28",
+    "030da68f": "030da51c",
+    "030da69c": "02e20200",
+    "0327ecc6": "02dc7e30",
+    "0327ed17": "030da5d8",
+    "0327ed3c": "03268920"
+  },
+  "member_vtable": "03912950",
+  "member_receiver": "03070a48",
+  "status": "current-EXE conditional A-fanout, not confirmed queued Shift root cause"
+}

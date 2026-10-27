@@ -150,3 +150,8 @@ Exact current game EXE bounded E8/UNWIND/objdump census finds 4 callers of build
 ## 2026-10-26 R76 — Goal/motion branch discriminator
 
 On current original EXE, Steering 0x03059BC8 can bypass world-goal resolution behind a candidate/velocity-dependent gate; when it does resolve, 0x03121F54 and 0x02F3D668 write temporary caller stack output, NOT direct persistent member+0x1E0. Typed member's independent +0x20 dispatch reaches actual XYZ integrator under flags. These are original code facts, **not** proof of the player's Shift crowding root cause. Decision: do not NOP goal branch or force flags; R77 bounded search for verified post-Steering to delta provenance. No live Hook.
+
+
+## 2026-10-27 — R77: do not equate fixed slot indices with intrinsic crowding
+
+User-corrected product definition: **squeezing/crowding is an emergent multi-member spatial condition, not an engine action/state/Hook name.** Current exact EXE has conditional Group A fanout `0x030DA51C` pairing member[i] with 48-byte record[i] after strategy virtual+0x48. Synthetic controls decisively refute 'fixed indices must crowd': continuous rigid turning preserves 3.0 spacing while 180° straight interpolation reaches zero; phased 90+90 retains >0 spacing; staggered member phase changes spacing. These are not WH3 measured trajectories. Therefore no automatic record reassignment, fixed speed tweak, global collision flags or Hungarian patch. R78 only trace actual strategy/path to final world goal; avoid extending unrelated call trees.
