@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-27 R80（成员本地导航候选选择，非 Shift 路点编号）：** [当前原生 EXE `member+0x718/+0x910 → 0x0311F34C → 0x03132178` 三路候选与成员 +0x740 链表指针选择](N1_R80_MEMBER_LOCAL_ROUTE_CANDIDATE_20261027.md)。真实 EXE 98/98 指令/llvm 起点、8/8 E8、10/10 Jcc、5/5 unwind；37/37本地测试（含EXE）。公开精简58pin/6E8/3Jcc。**selector 的整数3不是已证阵型Mode3/Shift路段；与 queued MOVE 同实例身份仍未证明**。R81只追成员候选输入赋值及高层所有者，不发行补丁。
+
+
 **2026-10-27 R79（成员真正导航目标的提交者）：** [当前 EXE 8 个 goal setter E8/7 个函数所有者、`member+0x838/+0x850` 暂存到 `+0x1E0/+0x1F0`、有条件的约0.01f辅助状态清零](N1_R79_MEMBER_NAV_GOAL_PROVENANCE_20261027.md)。本地98/98原码+LLVM起点、11/11 PE unwind、8/8 E8、34/34测试含真实EXE；公开上传31pin与契约测试。目标轻微变化仍复制记录；旧暂存与新暂存提交属于不同条件分支，**没有 queued Shift 同实例或挤压因果证据**。R80限于 `0x0311F34C` 的原生目标来源。
 
 

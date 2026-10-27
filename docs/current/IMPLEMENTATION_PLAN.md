@@ -108,3 +108,8 @@ Do not equate Group A record[i] with a final persistent motor navigation target.
 ## 2026-10-27 R79 / R80 causal boundary
 
 The persistent member goal has genuine typed producer: member-local state handler 0x03072EB8 -> 0x03076F64 -> staged target +0x838/+0x850 -> setter 0x0311E5DC -> +0x1E0/+0x1F0. The latter setter can conditionally skip or clear auxiliary state but always copies data on its normal path even under small xyz differences. This path has NO established original queued Shift task generation identity or abnormal spatial group trajectory. R80 should trace 0x0311F34C to specific route/controller owner and original MOVE task before any group motion remediation; no blind A slot mapping or fixed angle changes.
+
+
+## 2026-10-27 R80 → R81 precise causal boundary
+
+R80 types 0x0311F34C as a per-member controller+0x718 goal candidate builder, using a per-member reference input+0x910 and controller option+0x20→+0xA0 to select among manager special, candidate reference+0x80, or fallback query. Its link-cursor+0x28/+0x30 can advance conditionally after identity/direction tests. **Cannot attach candidate ID to original queued Shift generation**; member context+0x720 and UnitRoot+0x38 alias are unproven. R81 only seeks concrete writers/constructors for these candidate source fields, then either closes original MOVE task provenance or records UNKNOWN. No game Hook or blind member synchronization.

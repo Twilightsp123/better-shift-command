@@ -165,3 +165,8 @@ Current SHA exact-EXE static dataflow: A fanout fifth argument 1 activates membe
 ## 2026-10-27 R79 — Nav-goal setter control-flow proof, no premature patch
 
 Exact current EXE proves 8 E8 callers across 7 PE functions of navigation setter 0x0311E5DC. Member-local 0x03076F64 has conditional pre-staged member+0x838 goal submission and conditional new staged record creation via 0x0311F34C followed by further submission. Setter normally copies member+0x1E0/+0x1F0 even when same-frame xyz differences are below 0.01f; epsilon only participates in conditional clearing of member+0x1B0/+0x24C. Additional state/bit15 branches may bypass copy. This is NOT a queued Shift task attribution or abnormal movement proof. Decision: don't modify epsilon/state flags or force same goal across all models. R80 bounded owner/route provenance of builder 0x0311F34C.
+
+
+## 2026-10-27 R80 — Member-local route selector, not a Shift waypoint number
+
+Typed same-member local controller +0x718 and input+0x910 feed candidate builder 0x0311F34C. It calls 0x03132178 with three conditional candidate sources: selector-value-3 manager special field, input reference+0x80, fallback query. It checks returned handle against a member-local linked list and may advance its cursor. **Do not equate selector value 3 to formation Mode3, or cursor to queued Shift leg; no same-UnitRoot generation proof exists.** Current decision: no forced cursor sync, mode flags, target remap or Hook. R81 bound to ownership/writer proof; root cause still unknown. R80 report is indexed in README.
