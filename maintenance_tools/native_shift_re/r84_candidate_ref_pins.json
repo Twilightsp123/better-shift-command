@@ -1,0 +1,279 @@
+{
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "exe_size": 232531920,
+  "image_base": "0x140000000",
+  "function_owners": {
+    "member_ctor": [
+      "03052ba8",
+      "0305362d"
+    ],
+    "member_worker": [
+      "03076f64",
+      "0307786b"
+    ],
+    "member_virtual_4a0": [
+      "030751e4",
+      "03075233"
+    ],
+    "candidate_builder": [
+      "0311f34c",
+      "0312096b"
+    ],
+    "candidate_state": [
+      "03126964",
+      "031269cc"
+    ],
+    "foreign_aux": [
+      "0300b178",
+      "0300bdd6"
+    ],
+    "foreign_3a": [
+      "03039da4",
+      "0303a91d"
+    ]
+  },
+  "pins": {
+    "03052f62": {
+      "hex": "488b4358",
+      "owner": "member_ctor"
+    },
+    "03052f66": {
+      "hex": "48898318070000",
+      "owner": "member_ctor"
+    },
+    "03052f6d": {
+      "hex": "48898320070000",
+      "owner": "member_ctor"
+    },
+    "03052f82": {
+      "hex": "4c89a338070000",
+      "owner": "member_ctor"
+    },
+    "03052f89": {
+      "hex": "4c89a340070000",
+      "owner": "member_ctor"
+    },
+    "03076f7e": {
+      "hex": "488db918070000",
+      "owner": "member_worker"
+    },
+    "030770cd": {
+      "hex": "488b8338070000",
+      "owner": "member_worker"
+    },
+    "030770d4": {
+      "hex": "4885c0",
+      "owner": "member_worker"
+    },
+    "030770d7": {
+      "hex": "740c",
+      "owner": "member_worker"
+    },
+    "03077147": {
+      "hex": "488b8338070000",
+      "owner": "member_worker"
+    },
+    "030771ec": {
+      "hex": "4c8d8b10090000",
+      "owner": "member_worker"
+    },
+    "0307722b": {
+      "hex": "e81c810a00",
+      "owner": "member_worker"
+    },
+    "030751e4": {
+      "hex": "4053",
+      "owner": "member_virtual_4a0"
+    },
+    "030751ea": {
+      "hex": "488bd9",
+      "owner": "member_virtual_4a0"
+    },
+    "030751ed": {
+      "hex": "488b89200b0000",
+      "owner": "member_virtual_4a0"
+    },
+    "030751f4": {
+      "hex": "4885c9",
+      "owner": "member_virtual_4a0"
+    },
+    "030751ff": {
+      "hex": "ff5018",
+      "owner": "member_virtual_4a0"
+    },
+    "03075202": {
+      "hex": "488b8b38070000",
+      "owner": "member_virtual_4a0"
+    },
+    "03075209": {
+      "hex": "4885c9",
+      "owner": "member_virtual_4a0"
+    },
+    "0307520c": {
+      "hex": "7405",
+      "owner": "member_virtual_4a0"
+    },
+    "0307520e": {
+      "hex": "e851170b00",
+      "owner": "member_virtual_4a0"
+    },
+    "03075213": {
+      "hex": "83bb2403000013",
+      "owner": "member_virtual_4a0"
+    },
+    "0311f37f": {
+      "hex": "498bd9",
+      "owner": "candidate_builder"
+    },
+    "0311f38f": {
+      "hex": "488bf9",
+      "owner": "candidate_builder"
+    },
+    "0311f405": {
+      "hex": "488b4720",
+      "owner": "candidate_builder"
+    },
+    "0311f409": {
+      "hex": "488b8960010000",
+      "owner": "candidate_builder"
+    },
+    "0311f410": {
+      "hex": "448b88a0000000",
+      "owner": "candidate_builder"
+    },
+    "0311f417": {
+      "hex": "e85c2d0100",
+      "owner": "candidate_builder"
+    },
+    "0311f41c": {
+      "hex": "488b5728",
+      "owner": "candidate_builder"
+    },
+    "0311f575": {
+      "hex": "488b4720",
+      "owner": "candidate_builder"
+    },
+    "0311f860": {
+      "hex": "4c8b5f20",
+      "owner": "candidate_builder"
+    },
+    "031204aa": {
+      "hex": "488b4f20",
+      "owner": "candidate_builder"
+    },
+    "03120582": {
+      "hex": "488b4720",
+      "owner": "candidate_builder"
+    },
+    "0312077a": {
+      "hex": "488b4720",
+      "owner": "candidate_builder"
+    },
+    "031208d5": {
+      "hex": "488b4f20",
+      "owner": "candidate_builder"
+    },
+    "03126964": {
+      "hex": "4883ec28",
+      "owner": "candidate_state"
+    },
+    "03126968": {
+      "hex": "488b4108",
+      "owner": "candidate_state"
+    },
+    "0312696f": {
+      "hex": "488b9040040000",
+      "owner": "candidate_state"
+    },
+    "03126976": {
+      "hex": "80ba9400000000",
+      "owner": "candidate_state"
+    },
+    "0312697f": {
+      "hex": "80b9d100000000",
+      "owner": "candidate_state"
+    },
+    "03126986": {
+      "hex": "753f",
+      "owner": "candidate_state"
+    },
+    "03126988": {
+      "hex": "80b9d000000001",
+      "owner": "candidate_state"
+    },
+    "0312698f": {
+      "hex": "752e",
+      "owner": "candidate_state"
+    },
+    "03126991": {
+      "hex": "4c8b89c0000000",
+      "owner": "candidate_state"
+    },
+    "0312699e": {
+      "hex": "488b4820",
+      "owner": "candidate_state"
+    },
+    "031269a2": {
+      "hex": "4885c9",
+      "owner": "candidate_state"
+    },
+    "031269a7": {
+      "hex": "e8bca3f9ff",
+      "owner": "candidate_state"
+    },
+    "031269b0": {
+      "hex": "ff89bc000000",
+      "owner": "candidate_state"
+    },
+    "031269ba": {
+      "hex": "4d85c9",
+      "owner": "candidate_state"
+    },
+    "031269bf": {
+      "hex": "41c680d100000001",
+      "owner": "candidate_state"
+    },
+    "031269c7": {
+      "hex": "4883c428",
+      "owner": "candidate_state"
+    },
+    "0300b19f": {
+      "hex": "488bda",
+      "owner": "foreign_aux"
+    },
+    "0300b1a9": {
+      "hex": "488bf9",
+      "owner": "foreign_aux"
+    },
+    "0300bb6a": {
+      "hex": "898738070000",
+      "owner": "foreign_aux"
+    },
+    "0303a16a": {
+      "hex": "898638070000",
+      "owner": "foreign_3a"
+    }
+  },
+  "e8_edges": {
+    "0307722b": "0311f34c",
+    "0307520e": "03126964",
+    "0311f417": "03132178",
+    "031269a7": "030c0d68"
+  },
+  "ordinary_member_vtable": "03912950",
+  "member_method_4a0": "030751e4",
+  "builder_direct_read_sites": [
+    "0311f405",
+    "0311f575",
+    "0311f860",
+    "031204aa",
+    "03120582",
+    "0312077a",
+    "031208d5"
+  ],
+  "builder_direct_writes_in_bounded_function": [],
+  "scan_scope": "Only seven typed current-EXE function ranges; indirect or other-object writers not exhausted",
+  "lifecycle_write_to_member_738_proven": false,
+  "shift_generation_proven": false,
+  "gameplay_patch_authorized": false
+}
