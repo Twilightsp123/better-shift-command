@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-27 R79（成员真正导航目标的提交者）：** [当前 EXE 8 个 goal setter E8/7 个函数所有者、`member+0x838/+0x850` 暂存到 `+0x1E0/+0x1F0`、有条件的约0.01f辅助状态清零](N1_R79_MEMBER_NAV_GOAL_PROVENANCE_20261027.md)。本地98/98原码+LLVM起点、11/11 PE unwind、8/8 E8、34/34测试含真实EXE；公开上传31pin与契约测试。目标轻微变化仍复制记录；旧暂存与新暂存提交属于不同条件分支，**没有 queued Shift 同实例或挤压因果证据**。R80限于 `0x0311F34C` 的原生目标来源。
+
+
 **2026-10-27 R78（A 阵型 record 与持久导航目标的关键纠错）：** [当前 EXE 的 A Packet 第五实参、成员修正、参考坐标解析与物理 XYZ 直接写入](N1_R78_A_PACKET_POSITION_VS_NAV_GOAL_20261027.md)。本地 118/118 原码+objdump，16/16 E8、11/11 unwind、3/3 VTable、36/36 tests 含真实 EXE；GitHub 精简 39 pin、12 E8 + CI。R77 索引配对仍成立，**但 A record[i] 未证等于普通 Shift 最终导航 goal**。R79 查真正 member+0x1E0/+0x1F0 writer 0x0311E5DC 的任务来源；无 Hook/PATCH。
 
 

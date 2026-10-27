@@ -160,3 +160,8 @@ User-corrected product definition: **squeezing/crowding is an emergent multi-mem
 ## 2026-10-27 R78 — A record is not proven navigation waypoint
 
 Current SHA exact-EXE static dataflow: A fanout fifth argument 1 activates member-specific Packet modifier; Packet bit0x50=0x26; +0x51 bit0x02 is first cleared, then re-set by 0x02F775AC. Member receiver transforms reference-aware position and reaches member virtual+0x100 or +0xE8 with **physical XYZ stores +0x88/+0x90**. Do not treat A record[i] as persistent member navigation goal +0x1E0/+0x1F0. Reject unproven indexed goal remap/Hungarian/velocity patch. Queued Shift A/B identity and actual crowding causality UNKNOWN. R79 bounded audit genuine goal setter 0x0311E5DC. R78 report linked in README.
+
+
+## 2026-10-27 R79 — Nav-goal setter control-flow proof, no premature patch
+
+Exact current EXE proves 8 E8 callers across 7 PE functions of navigation setter 0x0311E5DC. Member-local 0x03076F64 has conditional pre-staged member+0x838 goal submission and conditional new staged record creation via 0x0311F34C followed by further submission. Setter normally copies member+0x1E0/+0x1F0 even when same-frame xyz differences are below 0.01f; epsilon only participates in conditional clearing of member+0x1B0/+0x24C. Additional state/bit15 branches may bypass copy. This is NOT a queued Shift task attribution or abnormal movement proof. Decision: don't modify epsilon/state flags or force same goal across all models. R80 bounded owner/route provenance of builder 0x0311F34C.

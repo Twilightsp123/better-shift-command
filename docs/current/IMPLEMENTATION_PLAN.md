@@ -103,3 +103,8 @@ The task is not to find a native 'crowding action'; it is to explain multi-membe
 ## 2026-10-27 R78 correction / R79 next
 
 Do not equate Group A record[i] with a final persistent motor navigation target. R78 shows reference-aware A Packet member-local adjustment and mode-based direct member XYZ position writes. Next bounded R79 target: type-bind callers of actual navigation goal setter 0x0311E5DC writing member+0x1E0/+0x1F0, and connect to original queued Shift MOVE instance. Then evaluate group-level turn-phase mismatch and neighbor clearance, not a blind one-shot slot remap. No live Hook, no Lua scheduler or main modification.
+
+
+## 2026-10-27 R79 / R80 causal boundary
+
+The persistent member goal has genuine typed producer: member-local state handler 0x03072EB8 -> 0x03076F64 -> staged target +0x838/+0x850 -> setter 0x0311E5DC -> +0x1E0/+0x1F0. The latter setter can conditionally skip or clear auxiliary state but always copies data on its normal path even under small xyz differences. This path has NO established original queued Shift task generation identity or abnormal spatial group trajectory. R80 should trace 0x0311F34C to specific route/controller owner and original MOVE task before any group motion remediation; no blind A slot mapping or fixed angle changes.

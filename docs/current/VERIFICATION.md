@@ -58,3 +58,8 @@ EXACT PRIVATE EXE (9bd58c63...f42be496): 112 whole instructions + GNU objdump st
 ## 2026-10-27 R78 typed A Packet physical position chain
 
 Private EXE SHA 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: 118 whole opcodes and llvm-objdump starts, 16 relative E8, 11 PE unwind functions, 3 constructor-linked member vtable slots, 36/36 local unittest including original EXE. Public CI includes 39 focus pins, 12 E8, 10 PE funcs and 3 virtual methods; original EXE case SKIP. Grade EXACT_EXE_STATIC_ONLY, NOT actual queued Shift trace, no safe Hook or gameplay patch. Full ZIP delivered separately without EXE.
+
+
+## 2026-10-27 R79 nav goal provenance verification
+
+Private matching EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: 98 original whole opcodes AND llvm-objdump true instruction starts; 11 PE UNWIND function bounds; all 8 direct E8 call sites to setter 0x0311E5DC (7 owners), PE float 0.01f. Local 34/34 tests including exact binary. Public GitHub subset: 31 pins, 8 E8, 11 function bounds; original licensed EXE SKIP. Synthetic dedup protocol cannot claim gameplay. Full offline ZIP holds remaining pins/disassemblies plus previous R78. No Hook or gameplay patch authorized.
