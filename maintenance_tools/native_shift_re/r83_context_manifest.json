@@ -1,0 +1,264 @@
+{
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "exe_size": 232531920,
+  "image_base": "0x140000000",
+  "ranges": {
+    "aux": [
+      "0300b178",
+      "0300bdd6"
+    ],
+    "spawn": [
+      "03012f44",
+      "0301374e"
+    ],
+    "dispatch": [
+      "03020534",
+      "03020750"
+    ],
+    "rebuild": [
+      "030209ec",
+      "03020a8f"
+    ],
+    "order": [
+      "030374cc",
+      "03037a9a"
+    ],
+    "worker": [
+      "0302ae74",
+      "0302b1e6"
+    ],
+    "callback": [
+      "02f5b1e4",
+      "02f5b5e3"
+    ],
+    "member_ctor": [
+      "03052ba8",
+      "0305362d"
+    ],
+    "member_goal": [
+      "03076f64",
+      "0307786b"
+    ],
+    "group_leaf": [
+      "030c7dbc",
+      "030c7e42"
+    ]
+  },
+  "leaf_names": [
+    "group_leaf"
+  ],
+  "pins": {
+    "0300b198": {
+      "hex": "4c8da9a0000000",
+      "owner": "aux"
+    },
+    "0300b19f": {
+      "hex": "488bda",
+      "owner": "aux"
+    },
+    "0300b1a2": {
+      "hex": "488d9118010000",
+      "owner": "aux"
+    },
+    "0300b1a9": {
+      "hex": "488bf9",
+      "owner": "aux"
+    },
+    "0300b1b3": {
+      "hex": "498bf1",
+      "owner": "aux"
+    },
+    "0300b1b6": {
+      "hex": "4533c9",
+      "owner": "aux"
+    },
+    "0300b23a": {
+      "hex": "4c894938",
+      "owner": "aux"
+    },
+    "0300b423": {
+      "hex": "488b8bf8320000",
+      "owner": "aux"
+    },
+    "0300b4ab": {
+      "hex": "488b8bf8320000",
+      "owner": "aux"
+    },
+    "0300b8a3": {
+      "hex": "488b93f8320000",
+      "owner": "aux"
+    },
+    "0300bad6": {
+      "hex": "888720070000",
+      "owner": "aux"
+    },
+    "03012f6c": {
+      "hex": "488bf1",
+      "owner": "spawn"
+    },
+    "03012fe7": {
+      "hex": "488b4638",
+      "owner": "spawn"
+    },
+    "03013235": {
+      "hex": "488d5630",
+      "owner": "spawn"
+    },
+    "03013273": {
+      "hex": "e830f90300",
+      "owner": "spawn"
+    },
+    "03013578": {
+      "hex": "488d5630",
+      "owner": "spawn"
+    },
+    "030135b6": {
+      "hex": "e8edf50300",
+      "owner": "spawn"
+    },
+    "03020553": {
+      "hex": "488bd9",
+      "owner": "dispatch"
+    },
+    "03020619": {
+      "hex": "488bcb",
+      "owner": "dispatch"
+    },
+    "03020621": {
+      "hex": "e81e29ffff",
+      "owner": "dispatch"
+    },
+    "03020a02": {
+      "hex": "488bf1",
+      "owner": "rebuild"
+    },
+    "03020a17": {
+      "hex": "4c8bc6",
+      "owner": "rebuild"
+    },
+    "03020a27": {
+      "hex": "e810ffffff",
+      "owner": "rebuild"
+    },
+    "03020a75": {
+      "hex": "48899ef8320000",
+      "owner": "rebuild"
+    },
+    "0303753d": {
+      "hex": "488b4338",
+      "owner": "order"
+    },
+    "03037572": {
+      "hex": "488b4338",
+      "owner": "order"
+    },
+    "030375d1": {
+      "hex": "488b83f8320000",
+      "owner": "order"
+    },
+    "03037658": {
+      "hex": "488b4b38",
+      "owner": "order"
+    },
+    "03037681": {
+      "hex": "488b83f8320000",
+      "owner": "order"
+    },
+    "030376ad": {
+      "hex": "488b83f8320000",
+      "owner": "order"
+    },
+    "03037750": {
+      "hex": "488b5338",
+      "owner": "order"
+    },
+    "0302b0bc": {
+      "hex": "488b89f8320000",
+      "owner": "worker"
+    },
+    "0302b143": {
+      "hex": "4889442458",
+      "owner": "worker"
+    },
+    "0302b1d1": {
+      "hex": "498b7b38",
+      "owner": "worker"
+    },
+    "02f5b385": {
+      "hex": "498b4338",
+      "owner": "callback"
+    },
+    "02f5b3f9": {
+      "hex": "488b89f8320000",
+      "owner": "callback"
+    },
+    "02f5b49a": {
+      "hex": "488b89f8320000",
+      "owner": "callback"
+    },
+    "02f5b529": {
+      "hex": "493988f8320000",
+      "owner": "callback"
+    },
+    "02f5b577": {
+      "hex": "493988f8320000",
+      "owner": "callback"
+    },
+    "03052ca0": {
+      "hex": "e833050a00",
+      "owner": "member_ctor"
+    },
+    "03052ca5": {
+      "hex": "488b4358",
+      "owner": "member_ctor"
+    },
+    "03052f62": {
+      "hex": "488b4358",
+      "owner": "member_ctor"
+    },
+    "03052f66": {
+      "hex": "48898318070000",
+      "owner": "member_ctor"
+    },
+    "03052f6d": {
+      "hex": "48898320070000",
+      "owner": "member_ctor"
+    },
+    "03076f7e": {
+      "hex": "488db918070000",
+      "owner": "member_goal"
+    },
+    "030771ec": {
+      "hex": "4c8d8b10090000",
+      "owner": "member_goal"
+    },
+    "030c7dbc": {
+      "hex": "488b4208",
+      "owner": "group_leaf"
+    },
+    "030c7dc4": {
+      "hex": "488b4208",
+      "owner": "group_leaf"
+    },
+    "030c7dca": {
+      "hex": "48894110",
+      "owner": "group_leaf"
+    }
+  },
+  "e8_edges": {
+    "03013273": "03052ba8",
+    "030135b6": "03052ba8",
+    "03020621": "03012f44",
+    "03020a27": "0302093c",
+    "03052ca0": "030f31d8"
+  },
+  "scope": "Ten typed function intervals only; absence of in-scope direct writes does NOT prove global immutability",
+  "alias_false_positive": {
+    "0300b23a": "auxiliary RCX+0x38 QWORD is not Root RBX+0x38",
+    "0300bad6": "auxiliary RDI+0x720 BYTE is not member controller QWORD"
+  },
+  "root_context_rebind_proven": false,
+  "member_controller_runtime_rebind_proven": false,
+  "same_queued_shift_generation_proven": false,
+  "gameplay_patch_authorized": false
+}
