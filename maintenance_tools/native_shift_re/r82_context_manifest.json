@@ -1,0 +1,240 @@
+{
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "exe_size": 232531920,
+  "image_base": "0x140000000",
+  "function_ranges": {
+    "root_member_dispatch": [
+      "03020534",
+      "03020750"
+    ],
+    "root_member_builder": [
+      "03012f44",
+      "0301374e"
+    ],
+    "member_ctor": [
+      "03052ba8",
+      "0305362d"
+    ],
+    "member_base_ctor": [
+      "030f31d8",
+      "030f337d"
+    ],
+    "member_core_ctor": [
+      "031417f4",
+      "03141a71"
+    ],
+    "root_group_builder": [
+      "030209ec",
+      "03020a8f"
+    ],
+    "group_factory": [
+      "0302093c",
+      "030209ea"
+    ],
+    "group_ctor": [
+      "030c7cb8",
+      "030c7db9"
+    ],
+    "group_context_copy": [
+      "030c7dbc",
+      "030c7e42"
+    ]
+  },
+  "no_unwind_leaf": [
+    "group_context_copy"
+  ],
+  "pins": {
+    "03020553": {
+      "hex": "488bd9",
+      "owner": "root_member_dispatch"
+    },
+    "03020619": {
+      "hex": "488bcb",
+      "owner": "root_member_dispatch"
+    },
+    "03020621": {
+      "hex": "e81e29ffff",
+      "owner": "root_member_dispatch"
+    },
+    "03020727": {
+      "hex": "8b8384010000",
+      "owner": "root_member_dispatch"
+    },
+    "03012f6c": {
+      "hex": "488bf1",
+      "owner": "root_member_builder"
+    },
+    "03012fe7": {
+      "hex": "488b4638",
+      "owner": "root_member_builder"
+    },
+    "03013235": {
+      "hex": "488d5630",
+      "owner": "root_member_builder"
+    },
+    "03013273": {
+      "hex": "e830f90300",
+      "owner": "root_member_builder"
+    },
+    "03013578": {
+      "hex": "488d5630",
+      "owner": "root_member_builder"
+    },
+    "030135b6": {
+      "hex": "e8edf50300",
+      "owner": "root_member_builder"
+    },
+    "03052bd5": {
+      "hex": "4c8bfa",
+      "owner": "member_ctor"
+    },
+    "03052c57": {
+      "hex": "498bd7",
+      "owner": "member_ctor"
+    },
+    "03052ca0": {
+      "hex": "e833050a00",
+      "owner": "member_ctor"
+    },
+    "03052ca5": {
+      "hex": "488b4358",
+      "owner": "member_ctor"
+    },
+    "03052f62": {
+      "hex": "488b4358",
+      "owner": "member_ctor"
+    },
+    "03052f66": {
+      "hex": "48898318070000",
+      "owner": "member_ctor"
+    },
+    "03052f6d": {
+      "hex": "48898320070000",
+      "owner": "member_ctor"
+    },
+    "030f31fa": {
+      "hex": "488bf9",
+      "owner": "member_base_ctor"
+    },
+    "030f3242": {
+      "hex": "e8ade50400",
+      "owner": "member_base_ctor"
+    },
+    "03141803": {
+      "hex": "488b4208",
+      "owner": "member_core_ctor"
+    },
+    "03141809": {
+      "hex": "48894150",
+      "owner": "member_core_ctor"
+    },
+    "03141810": {
+      "hex": "488b4208",
+      "owner": "member_core_ctor"
+    },
+    "03141814": {
+      "hex": "48894158",
+      "owner": "member_core_ctor"
+    },
+    "03020a02": {
+      "hex": "488bf1",
+      "owner": "root_group_builder"
+    },
+    "03020a17": {
+      "hex": "4c8bc6",
+      "owner": "root_group_builder"
+    },
+    "03020a27": {
+      "hex": "e810ffffff",
+      "owner": "root_group_builder"
+    },
+    "03020a2c": {
+      "hex": "488bbe88010000",
+      "owner": "root_group_builder"
+    },
+    "03020a36": {
+      "hex": "8b8e84010000",
+      "owner": "root_group_builder"
+    },
+    "03020a75": {
+      "hex": "48899ef8320000",
+      "owner": "root_group_builder"
+    },
+    "0302094f": {
+      "hex": "488bf1",
+      "owner": "group_factory"
+    },
+    "03020952": {
+      "hex": "4c8940e0",
+      "owner": "group_factory"
+    },
+    "030209b3": {
+      "hex": "488d542420",
+      "owner": "group_factory"
+    },
+    "030209bf": {
+      "hex": "e8f4720a00",
+      "owner": "group_factory"
+    },
+    "030c7ccc": {
+      "hex": "488bfa",
+      "owner": "group_ctor"
+    },
+    "030c7cd2": {
+      "hex": "488b5208",
+      "owner": "group_ctor"
+    },
+    "030c7cd6": {
+      "hex": "4883c230",
+      "owner": "group_ctor"
+    },
+    "030c7cdd": {
+      "hex": "e8da000000",
+      "owner": "group_ctor"
+    },
+    "030c7cf5": {
+      "hex": "488b4708",
+      "owner": "group_ctor"
+    },
+    "030c7cf9": {
+      "hex": "488983100a0000",
+      "owner": "group_ctor"
+    },
+    "030c7dbc": {
+      "hex": "488b4208",
+      "owner": "group_context_copy"
+    },
+    "030c7dc0": {
+      "hex": "48894108",
+      "owner": "group_context_copy"
+    },
+    "030c7dc4": {
+      "hex": "488b4208",
+      "owner": "group_context_copy"
+    },
+    "030c7dca": {
+      "hex": "48894110",
+      "owner": "group_context_copy"
+    }
+  },
+  "e8_edges": {
+    "03020621": "03012f44",
+    "03013273": "03052ba8",
+    "030135b6": "03052ba8",
+    "03052ca0": "030f31d8",
+    "030f3242": "031417f4",
+    "03020a27": "0302093c",
+    "030209bf": "030c7cb8",
+    "030c7cdd": "030c7dbc"
+  },
+  "local_verified": {
+    "decoded_instruction_starts": 43,
+    "e8_edges": 8,
+    "PE_unwind_functions": 8,
+    "leaf_functions": 1,
+    "tests_with_EXE": 22
+  },
+  "constructor_source_link": "TYPED_CONDITIONAL_POSITIVE",
+  "runtime_shared_context_or_shift_generation_proven": false,
+  "gameplay_patch_authorized": false
+}
