@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-27 R82（Root/member/Group 构造时上下文同源）：** [当前原版 EXE 8 E8、43 opcode 的类型化 Root+0x38 源字段链](N1_R82_ROOT_MEMBER_GROUP_CONTEXT_CONSTRUCTOR_20261027.md)。成员 Root 创建两条分支在 ctor 将 `[Root+0x38]` 复制到 `member+0x58/+0x720`；独立 Group ctor 将同一个 Root 来源写到 `Group+0x10`。**不同构造时刻的值相等、实际 Shift MOVE 任务代际一致仍未证**，不授权 Hook 或 gameplay patch。完整原 EXE 22/22 本地测试、公开 Actions 1420项/107跳过；R83 限定 Root+0x38 的替换及成员上下文保持性。
+
+
 **2026-10-27 R81（成员本地候选控制器上下文来源与跨类型假写者纠错）：** [当前 EXE member 构造器直接复制 `member+0x58` 到内嵌控制器 `+0x718/+0x720`，初始化 `+0x738=NULL`、`+0x910` XYZ 与 `+0x920=NULL`；排除另两类对象的 `+0x910` 假写入](N1_R81_MEMBER_CONTROLLER_CONTEXT_OWNER_20261027.md)。本地 85/85 完整原码与 llvm-objdump 起点、5/5 E8、9/9 PE unwind、33/33 测试（含原 EXE）；GitHub 焦点68pin和契约。**`member+0x720` 构造初值与 Root+0x38 的同一 queued MOVE 身份仍未证**；R82 有界追基础成员上下文所有者，不授权 Hook/游戏补丁。
 
 
