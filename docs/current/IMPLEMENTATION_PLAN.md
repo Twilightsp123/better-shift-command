@@ -118,3 +118,8 @@ R80 types 0x0311F34C as a per-member controller+0x718 goal candidate builder, us
 ## 2026-10-27 R81 to R82 context owner stop gate
 
 Member original constructor copies `[member+0x58]` into controller header member+0x718 and +0x720, with +0x738 initially NULL. Its candidate input member+0x910 is initialized with XYZ and a NULL reference +0x920. R80 per-member selector dereferences controller+0x20/+0xA0 only under relevant status gates. Other apparent +0x910 writers originate via *different context manager type*, not a member update. **R82 sole priority:** type-bind `member+0x58` provenance to actual UnitRoot+0x38 queued MOVE task identity; otherwise record UNKNOWN rather than keep scanning same offsets. No new playable patch or Lua scheduler.
+
+
+## R82 to R83 typed constructor continuity test (2026-10-27)
+
+Root context field provenance has been closed only at constructor time. Member spawned via 0x03012F44 receives `[Root+0x38]` at +0x58, +0x718 and +0x720; Group created via 0x030209EC records `[Root+0x38]` at +0x10 and back-reference Root at +0xA10. R83 must check specific write/rebind sites and whether a live member's context survives changes of Root's shared context without outdated alias. Original queued Shift slot/shortTask and route generation remain unbound; no Hook or movement patch permitted.

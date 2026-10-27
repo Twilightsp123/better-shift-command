@@ -73,3 +73,8 @@ EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496, Ima
 ## 2026-10-27 R81 exact original EXE context provenance and negative aliases
 
 Original Win64 EXE sha256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: **85/85** whole instruction bytes and llvm-objdump start sites, **5/5** direct E8, **9/9** PE unwind functions, **33/33** local unittest including original EXE and re-disassembly. Public GitHub evidence contains 68 focus pins/5 calls/9 owner intervals; licensed game EXE case SKIP. No actual Shift same-generation instance or game Hook proof. Full R81 ZIP and nested R80 history delivered separately; never distribute licensed EXE.
+
+
+## 2026-10-27 R82 original EXE Root/member/Group provenance evidence
+
+Private original EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: 43/43 original machine opcode + LLVM llvm-objdump instruction starts, 8/8 E8 edges, eight PE UNWIND owner ranges and one leaf without unwind; 22/22 local tests including two original-EXE checks. Public CI uses 43 pins, exact SHA/PE checker and synthetic negative tests, skips its private-EXE test. Game runtime Shift same-epoch context and crowding causality unproven. Complete R82 ZIP contains nine ASM excerpts, strict private evidence and R81 archive without game EXE.

@@ -175,3 +175,8 @@ Typed same-member local controller +0x718 and input+0x910 feed candidate builder
 ## 2026-10-27 R81 — member controller constructor context is not automatically UnitRoot MOVE identity
 
 Exact original EXE constructor 0x03052BA8 sets `member+0x718/+0x720` to the value read from **same member+0x58**, and initializes `member+0x738`, `member+0x740`, and input reference `member+0x920` to NULL. Candidate resolver consumes `&member+0x910`, may read that reference and member-local controller option. Other functions 0x03054AD0 and 0x03086170 WRITE the same numeric +0x910 offset on a separate context-manager object, not the ordinary member. **Decision:** reject same-offset cross-type caller inference; no proof of live member reference writer or UnitRoot+0x38 pointer/task-generation equality. No forced cursor/flag fix. R82 strictly type-bind base member context to UnitRoot or mark alias UNKNOWN.
+
+
+## 2026-10-27 R82 — typed constructor Root context equality, not Shift epoch identity
+
+Exact EXE Root/member construction 0x03012F44 -> 0x03052BA8 -> 0x030F31D8 -> 0x031417F4 copies `[Root+0x38]` into member+0x58 and local controller +0x718/+0x720. Independent Root Group construction 0x030209EC -> 0x0302093C -> 0x030C7CB8 -> 0x030C7DBC copies `[Root+0x38]` into Group+0x10 and retains Group+0xA10=Root. This proves **shared typed source field** on specified call paths; NOT equal values across construction times, all member types, or one queued Shift task generation. Do not force cursor, roots or contexts to synchronize; R83 only audit explicit Root+0x38 writers / member context retention. Root-cause and safe patch still unknown.
