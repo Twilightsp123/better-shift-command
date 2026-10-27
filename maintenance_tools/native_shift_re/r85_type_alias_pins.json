@@ -1,0 +1,258 @@
+{
+  "exe_sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "exe_size": 232531920,
+  "base": "0x140000000",
+  "bounds": {
+    "nonmember_ctor": [
+      "02f9c9c4",
+      "02f9df9b"
+    ],
+    "nonmember_vector_user": [
+      "02fa6054",
+      "02fa7f53"
+    ],
+    "vector_append": [
+      "02f93abc",
+      "02f93bcf"
+    ],
+    "member_ctor": [
+      "03052ba8",
+      "0305362d"
+    ],
+    "member_worker": [
+      "03076f64",
+      "0307786b"
+    ],
+    "member_candidate": [
+      "0311f34c",
+      "0312096b"
+    ],
+    "member_cleanup": [
+      "030751e4",
+      "03075233"
+    ],
+    "stack_record_builder": [
+      "0329404c",
+      "0329f04c"
+    ],
+    "foreign_dword_1": [
+      "0300b178",
+      "0300bdd6"
+    ],
+    "foreign_dword_2": [
+      "03039da4",
+      "0303a91d"
+    ]
+  },
+  "pins": {
+    "02f9c9f3": {
+      "hex": "488d05f637b300",
+      "owner": "nonmember_ctor"
+    },
+    "02f9c9fa": {
+      "hex": "48894120",
+      "owner": "nonmember_ctor"
+    },
+    "02f9c9fe": {
+      "hex": "4c8bf1",
+      "owner": "nonmember_ctor"
+    },
+    "02f9d123": {
+      "hex": "49898600070000",
+      "owner": "nonmember_ctor"
+    },
+    "02f9d140": {
+      "hex": "410f118618070000",
+      "owner": "nonmember_ctor"
+    },
+    "02f9d14f": {
+      "hex": "49898620070000",
+      "owner": "nonmember_ctor"
+    },
+    "02f9d165": {
+      "hex": "49898630070000",
+      "owner": "nonmember_ctor"
+    },
+    "02f9d16c": {
+      "hex": "49898638070000",
+      "owner": "nonmember_ctor"
+    },
+    "02f9d173": {
+      "hex": "49898640070000",
+      "owner": "nonmember_ctor"
+    },
+    "02fa6088": {
+      "hex": "4c8bf2",
+      "owner": "nonmember_vector_user"
+    },
+    "02fa60ca": {
+      "hex": "498907",
+      "owner": "nonmember_vector_user"
+    },
+    "02fa66f8": {
+      "hex": "498d8e38070000",
+      "owner": "nonmember_vector_user"
+    },
+    "02fa6734": {
+      "hex": "e883d3feff",
+      "owner": "nonmember_vector_user"
+    },
+    "02f93acb": {
+      "hex": "8b01",
+      "owner": "vector_append"
+    },
+    "02f93ad3": {
+      "hex": "488b7908",
+      "owner": "vector_append"
+    },
+    "02f93ad7": {
+      "hex": "394104",
+      "owner": "vector_append"
+    },
+    "02f93aef": {
+      "hex": "448901",
+      "owner": "vector_append"
+    },
+    "02f93aff": {
+      "hex": "8b4b04",
+      "owner": "vector_append"
+    },
+    "02f93b02": {
+      "hex": "48894308",
+      "owner": "vector_append"
+    },
+    "02f93b96": {
+      "hex": "488944cf08",
+      "owner": "vector_append"
+    },
+    "03052f62": {
+      "hex": "488b4358",
+      "owner": "member_ctor"
+    },
+    "03052f66": {
+      "hex": "48898318070000",
+      "owner": "member_ctor"
+    },
+    "03052f6d": {
+      "hex": "48898320070000",
+      "owner": "member_ctor"
+    },
+    "03052f82": {
+      "hex": "4c89a338070000",
+      "owner": "member_ctor"
+    },
+    "03052f89": {
+      "hex": "4c89a340070000",
+      "owner": "member_ctor"
+    },
+    "0307722b": {
+      "hex": "e81c810a00",
+      "owner": "member_worker"
+    },
+    "0311f38f": {
+      "hex": "488bf9",
+      "owner": "member_candidate"
+    },
+    "0311f405": {
+      "hex": "488b4720",
+      "owner": "member_candidate"
+    },
+    "0311f410": {
+      "hex": "448b88a0000000",
+      "owner": "member_candidate"
+    },
+    "0311f417": {
+      "hex": "e85c2d0100",
+      "owner": "member_candidate"
+    },
+    "0311f41c": {
+      "hex": "488b5728",
+      "owner": "member_candidate"
+    },
+    "0311f575": {
+      "hex": "488b4720",
+      "owner": "member_candidate"
+    },
+    "0311f860": {
+      "hex": "4c8b5f20",
+      "owner": "member_candidate"
+    },
+    "031204aa": {
+      "hex": "488b4f20",
+      "owner": "member_candidate"
+    },
+    "03120582": {
+      "hex": "488b4720",
+      "owner": "member_candidate"
+    },
+    "0312077a": {
+      "hex": "488b4720",
+      "owner": "member_candidate"
+    },
+    "031208d5": {
+      "hex": "488b4f20",
+      "owner": "member_candidate"
+    },
+    "030751ea": {
+      "hex": "488bd9",
+      "owner": "member_cleanup"
+    },
+    "03075202": {
+      "hex": "488b8b38070000",
+      "owner": "member_cleanup"
+    },
+    "0307520e": {
+      "hex": "e851170b00",
+      "owner": "member_cleanup"
+    },
+    "0329b276": {
+      "hex": "48898538070000",
+      "owner": "stack_record_builder"
+    },
+    "0329b282": {
+      "hex": "488b8538070000",
+      "owner": "stack_record_builder"
+    },
+    "0329b314": {
+      "hex": "488b8538070000",
+      "owner": "stack_record_builder"
+    },
+    "0329b31f": {
+      "hex": "48898d38070000",
+      "owner": "stack_record_builder"
+    },
+    "0329b33b": {
+      "hex": "488d8d38070000",
+      "owner": "stack_record_builder"
+    },
+    "0300b19f": {
+      "hex": "488bda",
+      "owner": "foreign_dword_1"
+    },
+    "0300b1a9": {
+      "hex": "488bf9",
+      "owner": "foreign_dword_1"
+    },
+    "0300bb6a": {
+      "hex": "898738070000",
+      "owner": "foreign_dword_1"
+    },
+    "0303a16a": {
+      "hex": "898638070000",
+      "owner": "foreign_dword_2"
+    }
+  },
+  "calls": {
+    "02fa6734": "02f93abc",
+    "0307722b": "0311f34c",
+    "0311f417": "03132178",
+    "0307520e": "03126964"
+  },
+  "ordinary_member_vtable": "03912950",
+  "ordinary_member_method_4a0": "030751e4",
+  "typed_negative": "other object +0x738 is a 24-byte vector header at 02fa66f8 -> 02f93abc",
+  "private_full_tests_passed": 26,
+  "member_runtime_pointer_writer_proven": false,
+  "shift_crowding_cause_proven": false,
+  "gameplay_patch_authorized": false
+}
