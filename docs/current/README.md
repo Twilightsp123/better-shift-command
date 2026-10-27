@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-27 R85（member+0x738 类型化 setter 假阳性与止损）：** [R85 49条原始机器码/10函数/4E8：证明另一对象+0x738 是24字节向量头，`0x02FA66F8→0x02F93ABC` 为记录追加，非普通士兵候选指针 setter](N1_R85_TYPED_CANDIDATE_WRITER_STOP_20261027.md)。匹配原 EXE本地26/26测试含 LLVM 指令起点；真实成员仍只证构造清空/局部读取，运行期赋值来源未找到，Shift代际/挤压因果未知。**停止继续无新增类型证据的同偏移搜索；R86转入群体同时刻转向轨迹与间距。** 不改main/不装Hook。
+
+
 **2026-10-27 R84（成员本地候选引用真实类型及运行期赋值止损）：** [当前版普通成员 vtable+0x4A0→0x030751E4，读 `member+0x738` 再调用 `0x03126964` 状态处理；候选生成器 7 次读 controller+0x20、零处直接写](N1_R84_MEMBER_CANDIDATE_REF_LIFECYCLE_20261027.md)。本地匹配 EXE 55/55 真指令与字节、4/4 E8、7 PE 函数、1 VTable，25/25 tests。两处看似 +0x738 的 DWORD 写者属于其它对象，不能推断 Shift 路点。**运行期 member 指针写者、同一 Shift task、挤压根因仍 UNKNOWN**。R85 限定寻一个 typed setter，否则回到群体轨迹诊断。
 
 

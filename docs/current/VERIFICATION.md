@@ -88,3 +88,8 @@ Private Win64 WH3 EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e5
 ## 2026-10-27 R84 typed candidate reference evidence
 
 Exact private EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: 55 exact original whole instruction starts + byte guards, 4 E8 call targets, 7 PE unwind owners, ordinary member vtable slot +0x4A0; builder has 7 typed reads of `controller+0x20` and 0 direct writes in bounded disassembly. 25/25 actual local tests (2 original EXE/llvm-objdump), public CI skips private EXE test. Full R84 ZIP includes ASM, exact-file result, SHA manifest and R83 history without redistributing game executable. No runtime causality proof.
+
+
+## 2026-10-27 R85 explicit negative type distinction
+
+Matching private WH3 EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: 49 original whole machine instructions and true LLVM instruction starts; 4/4 E8; 10/10 PE unwind function ranges; ordinary member vtable +0x4A0; local 26/26 unittest PASS including original EXE tests. Public CI validates 49 pins/4 E8/10 PE bounds and skips the licensed EXE test. Evidence distinguishes ordinary member pointer from an unrelated 24-byte vector header at the same numeric offset; no claim of exhaustive indirect-writer census or queued Shift causality. Full R85 offline ZIP excludes commercial EXE and nests R84 history.

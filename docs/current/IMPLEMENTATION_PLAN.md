@@ -133,3 +133,8 @@ Root+0x38 context copied during member/Group construction is not a MOVE slot or 
 ## 2026-10-27 R84/R85 stop gate
 
 The R80–R84 typed member candidate controller pointer `member+0x738` is readable, consumed by the candidate selector, and passed into an associated-object state routine. The bounded selector 0x0311F34C does not directly assign controller+0x20 (7 reads, 0 writes). Same-numbered stores in other object types were excluded. **R85 only seek a typed actual same-member pointer writer / owner function; if not established in one bounded audit, freeze the pointer-generation hypothesis rather than resume offset census.** Actual SHIFT crowding remains an emergent multi-model motion issue: next fallback priority is simultaneous world-goal trajectories, phase lag and nearest-neighbor clearance, not guessed flags/Hungarian patches. No Hook or new Lua scheduler.
+
+
+## 2026-10-27 R85 stop / R86 crowding-causality focus
+
+R85 bounded type review disconfirms a tempting indirect +0x738 write as member candidate setter: the RDX-owned different object field is a capacity/count/array header of 24-byte records. No ordinary-member runtime pointer assignment is proved, despite typed reads in candidate builder and ordinary member virtual+0x4A0. STOP the repeated member+0x738 same-offset census unless concrete same-object provenance emerges. **R86 must instead analyze emergent multi-model spatial interference**: simultaneous min neighbor clearance, turn phase lag, world-frame resolved navigation goals and formation inner/outer curvature. Compare gradual arcs with synthetic negatives; do not turn a geometry fixture into a playable patch or remove original Shift queue/avoidance.

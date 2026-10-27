@@ -190,3 +190,8 @@ Typed PE object tracing demonstrates that 0x0300B178 keeps the Root-like object 
 ## 2026-10-27 R84 — bounded member+0x738 candidate-reference writer STOP
 
 On matching original game EXE, ordinary member vtable+0x4A0 points to 0x030751E4, whose same-member `member+0x738` QWORD read conditionally calls 0x03126964 on the referent; that callee checks/modifies the referent's own flags and associated objects, NOT the member pointer. Typed target builder 0x0311F34C reads inline controller+0x20 seven times, with no direct writes in the full bounded function. Apparent +0x738 DWORD writes at 0x0300BB6A and 0x0303A16A concern different object types and are not member pointer setters. **No actual member runtime setter or queued Shift epoch link proven**; no forced pointer/cursor edit, no Hook, no gameplay patch. R85 one typed setter/owner lead only, otherwise return to spatial crowding diagnostics.
+
+
+## 2026-10-27 R85 — stop typed +0x738 false setter chase
+
+Exact WH3 original code identifies a real indirect writer to a **different type's** +0x738 vector header: 0x02FA66F8 passes &other_object+0x738 to 0x02F93ABC, a 24-byte-record vector append (capacity,count,buffer). Ordinary member+0x738 is typed only as constructor-null and later read, including member virtual +0x4A0. No proven runtime setter with ordinary member object identity; offset-only analogues, stack locals and DWORD writes must not be promoted. **R80-R85 pointer-writer hypothesis DEPRIORITIZED, not globally disproven.** Preserve vanilla Shift, RMB and attack; no Hook or patch. R86 pivot to actual multi-member goal/phase/distance geometry.
