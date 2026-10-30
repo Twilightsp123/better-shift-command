@@ -93,3 +93,8 @@ Exact private EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e
 ## 2026-10-27 R85 explicit negative type distinction
 
 Matching private WH3 EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496: 49 original whole machine instructions and true LLVM instruction starts; 4/4 E8; 10/10 PE unwind function ranges; ordinary member vtable +0x4A0; local 26/26 unittest PASS including original EXE tests. Public CI validates 49 pins/4 E8/10 PE bounds and skips the licensed EXE test. Evidence distinguishes ordinary member pointer from an unrelated 24-byte vector header at the same numeric offset; no claim of exhaustive indirect-writer census or queued Shift causality. Full R85 offline ZIP excludes commercial EXE and nests R84 history.
+
+
+## 2026-10-30 R86 — exact original EXE fields and independent spatiotemporal geometry
+
+Private user EXE SHA256 9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496 (232531920B): **51/51 whole instruction opcodes plus original llvm-objdump real starts**, 4/4 direct E8, 4/4 conditional Jcc, 5/5 PE unwind functions, **47/47 original-EXE local unittest**. Without EXE: 46 PASS / 1 SKIP. Public GitHub subset: 28 native pins, 4 E8, 4 Jcc and 5 owner bounds, plus executed synthetic geometry tests. GitHub Actions run 41048454110: **1506 tests total, 1395 PASS, 111 SKIP**, original licensed EXE absent. Full offline ZIP BSC_R86_SPATIOTEMPORAL_CROWDING_DIAGNOSTICS_20261030.zip includes 51 full native pins, five bounded disassemblies, exact SHA fail-closed reader, 47 tests, 7 simulated cases, CSV input CLI and nested R85 ZIP, and has SHA verified contents; no copyrighted game EXE. Neither synthetic traces nor PE bytes constitute real-game causality.
