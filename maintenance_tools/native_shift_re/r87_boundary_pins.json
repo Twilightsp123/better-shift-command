@@ -1,0 +1,363 @@
+{
+  "sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "size": 232531920,
+  "image_base": "0x140000000",
+  "functions": {
+    "steering": [
+      "03059bc8",
+      "0305a8b4"
+    ],
+    "contact_packet": [
+      "03085114",
+      "030852c8"
+    ],
+    "post_steering": [
+      "0308d830",
+      "0308da8f"
+    ],
+    "integrator": [
+      "03146ff0",
+      "03148523"
+    ],
+    "member_tick": [
+      "03086f04",
+      "0308774c"
+    ]
+  },
+  "pins": {
+    "03059bed": {
+      "hex": "488bf9",
+      "owner": "steering"
+    },
+    "03059e5b": {
+      "hex": "48398b80000000",
+      "owner": "steering"
+    },
+    "03059e7b": {
+      "hex": "48398e80000000",
+      "owner": "steering"
+    },
+    "03059e93": {
+      "hex": "f30f109be0000000",
+      "owner": "steering"
+    },
+    "03059ed7": {
+      "hex": "f30f5c8b90000000",
+      "owner": "steering"
+    },
+    "03059ee7": {
+      "hex": "f30f5c9388000000",
+      "owner": "steering"
+    },
+    "03059f13": {
+      "hex": "410f2fcc",
+      "owner": "steering"
+    },
+    "03059f47": {
+      "hex": "488b8780000000",
+      "owner": "steering"
+    },
+    "03059f4e": {
+      "hex": "48398380000000",
+      "owner": "steering"
+    },
+    "03059f5f": {
+      "hex": "4885f6",
+      "owner": "steering"
+    },
+    "03059f64": {
+      "hex": "410f2ffd",
+      "owner": "steering"
+    },
+    "03059f6a": {
+      "hex": "488bf3",
+      "owner": "steering"
+    },
+    "03059f6d": {
+      "hex": "440f28ef",
+      "owner": "steering"
+    },
+    "0305a05b": {
+      "hex": "0f8644010000",
+      "owner": "steering"
+    },
+    "0305a061": {
+      "hex": "488d8fe0010000",
+      "owner": "steering"
+    },
+    "0305a06d": {
+      "hex": "e8e27e0c00",
+      "owner": "steering"
+    },
+    "0305a6ea": {
+      "hex": "488bce",
+      "owner": "steering"
+    },
+    "0305a6f7": {
+      "hex": "0f840b010000",
+      "owner": "steering"
+    },
+    "0305a7c1": {
+      "hex": "4c8bc6",
+      "owner": "steering"
+    },
+    "0305a7c4": {
+      "hex": "f3410f59c4",
+      "owner": "steering"
+    },
+    "0305a7c9": {
+      "hex": "488bcf",
+      "owner": "steering"
+    },
+    "0305a7ef": {
+      "hex": "488d442460",
+      "owner": "steering"
+    },
+    "0305a7f4": {
+      "hex": "488b92f0000000",
+      "owner": "steering"
+    },
+    "0305a800": {
+      "hex": "e80fa90200",
+      "owner": "steering"
+    },
+    "03085133": {
+      "hex": "418b7874",
+      "owner": "contact_packet"
+    },
+    "03085140": {
+      "hex": "4d8bf0",
+      "owner": "contact_packet"
+    },
+    "03085143": {
+      "hex": "488b7558",
+      "owner": "contact_packet"
+    },
+    "03085147": {
+      "hex": "4c8bea",
+      "owner": "contact_packet"
+    },
+    "0308514a": {
+      "hex": "488bd9",
+      "owner": "contact_packet"
+    },
+    "03085222": {
+      "hex": "488b4540",
+      "owner": "contact_packet"
+    },
+    "03085230": {
+      "hex": "48895dc0",
+      "owner": "contact_packet"
+    },
+    "03085253": {
+      "hex": "f30f1145d8",
+      "owner": "contact_packet"
+    },
+    "03085283": {
+      "hex": "f30f114de4",
+      "owner": "contact_packet"
+    },
+    "03085293": {
+      "hex": "44897de8",
+      "owner": "contact_packet"
+    },
+    "0308529a": {
+      "hex": "884df0",
+      "owner": "contact_packet"
+    },
+    "0308529d": {
+      "hex": "498d8dd8010000",
+      "owner": "contact_packet"
+    },
+    "030852a4": {
+      "hex": "488b01",
+      "owner": "contact_packet"
+    },
+    "030852a7": {
+      "hex": "ff5010",
+      "owner": "contact_packet"
+    },
+    "0308d839": {
+      "hex": "4883793000",
+      "owner": "post_steering"
+    },
+    "0308d851": {
+      "hex": "0f841f020000",
+      "owner": "post_steering"
+    },
+    "0308d857": {
+      "hex": "4883b9e802000000",
+      "owner": "post_steering"
+    },
+    "0308d85f": {
+      "hex": "0f8411020000",
+      "owner": "post_steering"
+    },
+    "0308d865": {
+      "hex": "8b816c020000",
+      "owner": "post_steering"
+    },
+    "0308d86e": {
+      "hex": "83f801",
+      "owner": "post_steering"
+    },
+    "0308d871": {
+      "hex": "0f87ff010000",
+      "owner": "post_steering"
+    },
+    "0308d889": {
+      "hex": "e8aa3a0000",
+      "owner": "post_steering"
+    },
+    "0308d890": {
+      "hex": "0f85e0010000",
+      "owner": "post_steering"
+    },
+    "0308d90b": {
+      "hex": "0f2f05fa478900",
+      "owner": "post_steering"
+    },
+    "0308d912": {
+      "hex": "0f835e010000",
+      "owner": "post_steering"
+    },
+    "0308da23": {
+      "hex": "488d93e0010000",
+      "owner": "post_steering"
+    },
+    "0308da71": {
+      "hex": "e84283fdff",
+      "owner": "post_steering"
+    },
+    "03147019": {
+      "hex": "488bd9",
+      "owner": "integrator"
+    },
+    "0314708c": {
+      "hex": "0fb78148010000",
+      "owner": "integrator"
+    },
+    "03147189": {
+      "hex": "f30f588b3c010000",
+      "owner": "integrator"
+    },
+    "03147191": {
+      "hex": "f30f58a344010000",
+      "owner": "integrator"
+    },
+    "03147199": {
+      "hex": "f30f118b3c010000",
+      "owner": "integrator"
+    },
+    "031471a1": {
+      "hex": "f30f11a344010000",
+      "owner": "integrator"
+    },
+    "031471b5": {
+      "hex": "f6c202",
+      "owner": "integrator"
+    },
+    "031471b8": {
+      "hex": "0f85d1010000",
+      "owner": "integrator"
+    },
+    "031471c1": {
+      "hex": "f6c104",
+      "owner": "integrator"
+    },
+    "031471c4": {
+      "hex": "0f843c010000",
+      "owner": "integrator"
+    },
+    "0314720b": {
+      "hex": "f30f118388000000",
+      "owner": "integrator"
+    },
+    "03147223": {
+      "hex": "f30f118b8c000000",
+      "owner": "integrator"
+    },
+    "0314723b": {
+      "hex": "f30f118390000000",
+      "owner": "integrator"
+    },
+    "031473a7": {
+      "hex": "f6c204",
+      "owner": "integrator"
+    },
+    "031473aa": {
+      "hex": "0f84ca000000",
+      "owner": "integrator"
+    },
+    "031473b0": {
+      "hex": "8b8304010000",
+      "owner": "integrator"
+    },
+    "031473bc": {
+      "hex": "0f86b8000000",
+      "owner": "integrator"
+    },
+    "03147440": {
+      "hex": "f30f588340010000",
+      "owner": "integrator"
+    },
+    "0314744d": {
+      "hex": "f30f58933c010000",
+      "owner": "integrator"
+    },
+    "03147455": {
+      "hex": "f30f589b44010000",
+      "owner": "integrator"
+    },
+    "0314745d": {
+      "hex": "f30f118340010000",
+      "owner": "integrator"
+    },
+    "03147465": {
+      "hex": "f30f11933c010000",
+      "owner": "integrator"
+    },
+    "0314746d": {
+      "hex": "f30f119b44010000",
+      "owner": "integrator"
+    },
+    "03087349": {
+      "hex": "e87a28fdff",
+      "owner": "member_tick"
+    },
+    "03087351": {
+      "hex": "e8da640000",
+      "owner": "member_tick"
+    }
+  },
+  "e8": {
+    "0305a06d": "03121f54",
+    "0305a800": "03085114",
+    "0308d889": "03091338",
+    "0308da71": "03065db8",
+    "03087349": "03059bc8",
+    "03087351": "0308d830"
+  },
+  "jcc": {
+    "0305a05b": "0305a1a5",
+    "0305a6f7": "0305a808",
+    "0308d851": "0308da76",
+    "0308d85f": "0308da76",
+    "0308d871": "0308da76",
+    "0308d890": "0308da76",
+    "0308d912": "0308da76",
+    "031471b8": "0314738f",
+    "031471c4": "03147306",
+    "031473aa": "0314747a",
+    "031473bc": "0314747a"
+  },
+  "local_original_exe_result": {
+    "instruction_starts": 128,
+    "E8": 8,
+    "Jcc": 15,
+    "unwind": 5,
+    "tests": 43
+  },
+  "actual_same_shift_member_causality": false,
+  "gameplay_patch_authorized": false
+}
