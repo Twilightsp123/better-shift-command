@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-10-30 R87（邻兵接触回调≠已证的物理位移写入；积分器本身生成 pending）：** [R87 当前 SHA 原 EXE 同时定型 Steering 的邻兵条件选择、`0x0305A800→0x03085114` 成对记录经 vtable+0x10 交付、`0x03146FF0` 成员自身朝向/局部速度修正 pending，再由受门槛控制的积分分支更新实际XYZ；Steering 后的 `0x0308D830` 特定状态/随机门槛](N1_R87_STEERING_CONTACT_MOTOR_BOUNDARY_20261030.md)。本地128/128原指令与LLVM起点、8E8、15Jcc、5PE、43/43测试含原EXE，公共76pin/6E8/11Jcc。**虚接收器可能有间接副作用；同 Shift 实例因果仍 UNKNOWN，不授权Hook/游戏补丁。** R88仅查一个有类型接收器到具体运动写者。
+
+
 **2026-10-30 R86（群体挤压=同一时刻的空间接近，而非 CA 动作）：** [R86 当前 SHA 的成员位置/目标参考解析/Steering 条件分支/有门槛的物理积分链，以及同时刻解析最近距离的反例](N1_R86_SPATIOTEMPORAL_CROWDING_DIAGNOSTICS_20261030.md)。私有原 EXE 51/51 真指令及 llvm 起点、4/4 E8、4/4 Jcc、5/5 PE unwind；47/47 本地测试。**路径交叉不等于同一时刻碰撞；路径不交叉也不等于安全**。两次90°与刚性180°均反驳固定槽位必挤压；人为成员相位差展示距离可缩小。所有阈值仅是合成数学单位，真实 Shift 归因未证。完整 ZIP 含 R85 历史；R87 仅寻合法同成员身份/时间观测，禁止盲改原生移动。
 
 
