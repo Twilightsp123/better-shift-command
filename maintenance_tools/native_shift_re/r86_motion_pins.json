@@ -1,0 +1,163 @@
+{
+  "sha256": "9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496",
+  "size": 232531920,
+  "image_base": "0x140000000",
+  "functions": {
+    "steering": [
+      "03059bc8",
+      "0305a8b4"
+    ],
+    "world_resolver": [
+      "03121f54",
+      "03121f8a"
+    ],
+    "goal_writer": [
+      "0311e5dc",
+      "0311e727"
+    ],
+    "member_integrator": [
+      "03146ff0",
+      "03148523"
+    ],
+    "member_tick": [
+      "03086f04",
+      "0308774c"
+    ]
+  },
+  "pins": {
+    "0305a05b": {
+      "hex": "0f8644010000",
+      "owner": "steering"
+    },
+    "0305a061": {
+      "hex": "488d8fe0010000",
+      "owner": "steering"
+    },
+    "0305a06d": {
+      "hex": "e8e27e0c00",
+      "owner": "steering"
+    },
+    "0305a07a": {
+      "hex": "f30f5c9f88000000",
+      "owner": "steering"
+    },
+    "0305a093": {
+      "hex": "f30f5c878c000000",
+      "owner": "steering"
+    },
+    "0305a0a4": {
+      "hex": "f30f5ca790000000",
+      "owner": "steering"
+    },
+    "03121f5b": {
+      "hex": "488b4910",
+      "owner": "world_resolver"
+    },
+    "03121f62": {
+      "hex": "740b",
+      "owner": "world_resolver"
+    },
+    "03121f68": {
+      "hex": "e8fbb6e1ff",
+      "owner": "world_resolver"
+    },
+    "03121f6f": {
+      "hex": "418b00",
+      "owner": "world_resolver"
+    },
+    "03121f72": {
+      "hex": "8902",
+      "owner": "world_resolver"
+    },
+    "03121f78": {
+      "hex": "894204",
+      "owner": "world_resolver"
+    },
+    "03121f7f": {
+      "hex": "894208",
+      "owner": "world_resolver"
+    },
+    "0311e6ca": {
+      "hex": "0f1187e0010000",
+      "owner": "goal_writer"
+    },
+    "0311e6e8": {
+      "hex": "f20f118ff0010000",
+      "owner": "goal_writer"
+    },
+    "03147019": {
+      "hex": "488bd9",
+      "owner": "member_integrator"
+    },
+    "031471a9": {
+      "hex": "8a9308010000",
+      "owner": "member_integrator"
+    },
+    "031471b5": {
+      "hex": "f6c202",
+      "owner": "member_integrator"
+    },
+    "031471b8": {
+      "hex": "0f85d1010000",
+      "owner": "member_integrator"
+    },
+    "031471c1": {
+      "hex": "f6c104",
+      "owner": "member_integrator"
+    },
+    "031471c4": {
+      "hex": "0f843c010000",
+      "owner": "member_integrator"
+    },
+    "0314720b": {
+      "hex": "f30f118388000000",
+      "owner": "member_integrator"
+    },
+    "03147223": {
+      "hex": "f30f118b8c000000",
+      "owner": "member_integrator"
+    },
+    "0314723b": {
+      "hex": "f30f118390000000",
+      "owner": "member_integrator"
+    },
+    "03147281": {
+      "hex": "f20f118be0000000",
+      "owner": "member_integrator"
+    },
+    "03147293": {
+      "hex": "8983e8000000",
+      "owner": "member_integrator"
+    },
+    "03087349": {
+      "hex": "e87a28fdff",
+      "owner": "member_tick"
+    },
+    "03087351": {
+      "hex": "e8da640000",
+      "owner": "member_tick"
+    }
+  },
+  "e8": {
+    "0305a06d": "03121f54",
+    "03121f68": "02f3d668",
+    "03087349": "03059bc8",
+    "03087351": "0308d830"
+  },
+  "jcc": {
+    "0305a05b": "0305a1a5",
+    "03121f62": "03121f6f",
+    "031471b8": "0314738f",
+    "031471c4": "03147306"
+  },
+  "full_local_evidence": {
+    "whole_opcode_instruction_starts": 51,
+    "E8": 4,
+    "JCC": 4,
+    "PE_unwind_functions": 5,
+    "tests_including_private_exe": 47
+  },
+  "real_member_track_observed": false,
+  "confirmed_shift_cause": false,
+  "native_hook_authorized": false
+}
