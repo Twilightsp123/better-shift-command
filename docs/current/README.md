@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-11-01 R88（接触接收器的真实上下文来源限定）:** [当前原 EXE 19 条字节验证证明接触虚接收器来自原始 member+0x58 → context+0x440 → gateway+0xF0 → owner+0x1D8/vtable+0x10；接触参与者 RDI 可能在 Steering 中改变，不能认作接收器本体。具体接收器类型、到物理成员的因果写入仍未证明；不装 Hook/不发补丁。](N1_R88_CONTACT_RECEIVER_CONTEXT_PROVENANCE_20261101.md) 公开静态契约见 [R88 tests](../../tests/test_n1_r88_contact_receiver_contract.py)。
+
+
 **2026-10-30 R87（邻兵接触回调≠已证的物理位移写入；积分器本身生成 pending）：** [R87 当前 SHA 原 EXE 同时定型 Steering 的邻兵条件选择、`0x0305A800→0x03085114` 成对记录经 vtable+0x10 交付、`0x03146FF0` 成员自身朝向/局部速度修正 pending，再由受门槛控制的积分分支更新实际XYZ；Steering 后的 `0x0308D830` 特定状态/随机门槛](N1_R87_STEERING_CONTACT_MOTOR_BOUNDARY_20261030.md)。本地128/128原指令与LLVM起点、8E8、15Jcc、5PE、43/43测试含原EXE，公共76pin/6E8/11Jcc。**虚接收器可能有间接副作用；同 Shift 实例因果仍 UNKNOWN，不授权Hook/游戏补丁。** R88仅查一个有类型接收器到具体运动写者。
 
 
