@@ -1,5 +1,7 @@
 # BSC Native Shift Behavior Patch — corrected implementation plan (9.0.3)
 
+**2026-11-01 R89 N1 状态追加：** P 宿主候选的 `C+0x440→G+0xF0→P+0x1D8` 构造链和 `vtable+0x10→0x02DD06F0` 订阅者分发已静态验证。接下来只允许有界补齐 `member+0x58` 的 C 类型身份，再审计一个具体订阅者到同成员运动字段的因果边；不能证明则止损接触事件路线，回归原生阵型转向相位/世界目标协调。尚无可安全安装的原生修复点。见 [R89](N1_R89_TYPED_CONTACT_RECEIVER_CONSTRUCTOR_CHAIN_20261101.md)。
+
 **2026-10-10 product correction is binding:** [PRODUCT_CAUSE_CORRECTION_20261010.md](PRODUCT_CAUSE_CORRECTION_20261010.md). The vanilla Shift MOVE defect is **within-unit model arrival/turn desynchronization and mutual crowding at route corners**, *not* a proven whole-unit stop at intermediate MOVE waypoints. The MOVE→ATTACK stop in prior BSC runs is attributed to the **legacy Lua Controller**, not a demonstrated vanilla engine flaw.
 
 **Exact research EXE:** user-provided 9.0.3-labelled `Warhammer3.exe` SHA256 `518c4f292f275142df13b96b9db704a3db7b4870b2c519df83d850596ecc822a`; version resource not independently authenticated. 9.0.2 RVAs are historical; current 9.0.3 addresses are research evidence, not patch-authorized ABI.
