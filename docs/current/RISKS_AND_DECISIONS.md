@@ -1,5 +1,7 @@
 # Open Issues, Evidence Grades and Decision Log
 
+**R91 新增事件分发事实与止损（2026-11-01）：** P+0x1D8 vtable 0x03AB1B48 的+0x00 为 `0x02DC9564` 暂存记录回放、+0x08 为 adjustor thunk `0x01196574→0x02DAD91C`、+0x10 为 `0x02DD06F0` 新记录接收。R91 从原字节证明 subscriber->vtable+0x10 AL!=0 时即时 `+0x08`；AL=0 时向 receiver+0x30 追加 0x38字节记录；回放 `0x02DC9564` 在 AL=0 时通知并清零 +0x34。**不能推出跨Tick、帧延迟或成员运动写入。** 有界研究未取得注册后有类型的订阅者实例，`CONTACT_TO_MEMBER_MOTOR_CAUSAL_EDGE=NOT_PROVEN`，不应继续无限遍历事件系统。转入原生阵型运动阶段/世界目标。见 [R91](N1_R91_IMMEDIATE_PENDING_CONTACT_DISPATCH_20261101.md)。
+
 **R90 新增身份边（2026-11-01）：** C 构造函数 `0x02D98420` 在 `0x02D98D8E/92` 将当前 self 指针写入相邻栈槽，`0x02D99069/70` 把描述符传给 G；`0x02D9A046/4A` 将描述符+8 的同一个 C 写入 G+8；`0x02D9A7F7/80E` 传递给 K，之后经 child+8、config+0x138 与 `0x0300C9D1 Root+0x38` writer 到 member+0x58。**决定：C 类型身份在所述构造路径为 STATIC_PROVEN_CONDITIONAL，但不能从原始构造推出所有运行期上下文未改动、同一次玩家 Shift task/route generation 或接触订阅者的运动副作用。** `CONTACT_TO_MEMBER_MOTOR = NOT_PROVEN`；禁止盲改状态/积分器。见 [R90](N1_R90_CONSTRUCTOR_CONTEXT_PROVENANCE_20261101.md)。
 
 **R89 新增限定（2026-11-01）：** 已在当前原始 EXE 中追通一条 C→G→P *构造/发布* 路径：`0x02D99070→0x02D9A004` / `0x02D990A6 [C+0x440]=G`；`0x02D9A373→0x02DA0800` / `0x02D9A381 [G+0xF0]=P`；`0x02DA210E [P+0x1D8]=vtable(0x03AB1B48)`；`vtable+0x10→0x02DD06F0`，后者经订阅者虚调用分发接触记录。**未证明** Steering 的 `member+0x58` 在当前实例中就是该构造器建立的 C，订阅者是否修改同一成员实际运动也未证明。不得改原生积分器、安装 Hook 或将此事件分发器当作挤压根因。详见 [R89](N1_R89_TYPED_CONTACT_RECEIVER_CONSTRUCTOR_CHAIN_20261101.md)。
