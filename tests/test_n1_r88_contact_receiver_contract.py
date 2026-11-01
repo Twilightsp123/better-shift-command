@@ -27,7 +27,7 @@ PINS = {
 
 def raw_offset(b,rva):
     pe=struct.unpack_from("<I",b,0x3c)[0]
-    if b[pe:pe+4]!=b"PE\\x00\\x00": raise ValueError("invalid PE")
+    if b[pe:pe+4]!=bytes((80,69,0,0)): raise ValueError("invalid PE")
     n=struct.unpack_from("<H",b,pe+6)[0]
     opt=struct.unpack_from("<H",b,pe+20)[0]
     for i in range(n):
