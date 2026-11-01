@@ -1,5 +1,7 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-11-01 R89（构造器到事件接收器新证据）:** [当前 EXE 原始 E8 与对象赋值：C+0x440→G（0x02D99070/0x02D990A6），G+0xF0→P（0x02D9A373/0x02D9A381），P+0x1D8 最终安装 vtable 0x03AB1B48，+0x10→0x02DD06F0 订阅者分发](N1_R89_TYPED_CONTACT_RECEIVER_CONSTRUCTOR_CHAIN_20261101.md)。26条机器码与LLVM边界、3 E8、8 unwind、14本地测试通过。**member+0x58 所指 C 的具体实例类型、订阅者到士兵运动因果仍未证明；不授权游戏补丁。** [公共契约测试](../../tests/test_n1_r89_typed_receiver_contract.py)。
+
 **2026-11-01 R88（接触接收器的真实上下文来源限定）:** [当前原 EXE 19 条字节验证证明接触虚接收器来自原始 member+0x58 → context+0x440 → gateway+0xF0 → owner+0x1D8/vtable+0x10；接触参与者 RDI 可能在 Steering 中改变，不能认作接收器本体。具体接收器类型、到物理成员的因果写入仍未证明；不装 Hook/不发补丁。](N1_R88_CONTACT_RECEIVER_CONTEXT_PROVENANCE_20261101.md) 公开静态契约见 [R88 tests](../../tests/test_n1_r88_contact_receiver_contract.py)。
 
 
