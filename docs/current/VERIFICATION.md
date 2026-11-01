@@ -1,5 +1,7 @@
 # BSC — corrected verification and evidence gates
 
+**2026-11-01 R90 验证边界：** 精确匹配 EXE SHA `9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496`。本地 67/67 原始机器码与 LLVM 真指令起点、12/12 E8 RVA 目标、67/67 unwind 归属（14 个不同函数范围）、27/27 unittest（含2项真实 EXE）。公共无 EXE 环境 25 PASS/2 SKIP。公开 [R90 浓缩契约测试](../../tests/test_n1_r90_constructor_context_contract.py) 只有27个聚焦原码 pin，不可与本地67项混记。**尚无 Windows gameplay 跟踪、Hook 或修复验证。** [报告](N1_R90_CONSTRUCTOR_CONTEXT_PROVENANCE_20261101.md)。
+
 **R89 精确原 EXE 静态验证（2026-11-01）：** 当前 SHA `9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496` 上 26/26 完整 opcode + LLVM 起点、3/3 E8 目标、8/8 unwind、1/1 vtable +0x10 函数指针 PASS；14/14 本地单测（含 2 项真实 EXE）；公共离线 12 PASS /2 SKIP。**不是实机 gameplay 通过**。完整事实边界见 [R89 报告](N1_R89_TYPED_CONTACT_RECEIVER_CONSTRUCTOR_CHAIN_20261101.md)。
 
 **First read [PRODUCT_CAUSE_CORRECTION_20261010.md](PRODUCT_CAUSE_CORRECTION_20261010.md).** The vanilla Shift MOVE issue is **asynchronous individual soldiers within a unit arriving/turning into one another**; native full-stop at intermediate waypoints is **not** an established defect. MOVE→ATTACK pausing was a legacy **Lua Controller** regression.
