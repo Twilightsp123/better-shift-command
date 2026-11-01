@@ -1,5 +1,7 @@
 # BSC Native Shift Behavior Patch — corrected implementation plan (9.0.3)
 
+**2026-11-01 R91 N1 路线修正：** 从 P+0x1D8 接收器证明了条件即时/暂存 0x38 字节记录与独立回放；订阅者 +0x10 判别在两个路径的调用门槛不同。未得到有类型实际订阅者注册、跨Tick 排队时序或同成员运动字段写入，故 **终止没有类型依据的事件广播扫描**。下一研究优先同一 UnitRoot/Shift 路段下不同成员的 world goal/steering 阶段/转向曲率与物理积分关联，避免用 Lua MOVE 替代原生 Shift；严禁全局修改速度/目标或未经 ABI 认证的 Hook。见 [R91](N1_R91_IMMEDIATE_PENDING_CONTACT_DISPATCH_20261101.md)。
+
 **2026-11-01 R90 N1 实施门槛：** 已找到 `0x02D98420` C 构造 self→栈描述符→G/K→child/config+0x138→Root+0x38→member+0x58 的有条件数据流与具体 Root setter `0x0300C9D1`。这是**静态原生构造来源证明**，不是实际 Shift 当帧的成员 motion 机制。下一阶段只跟一条有明确注册/对象类型的 `0x02DD0763` 订阅者；缺少同一 member 实例的 pending/XYZ/目标字段写入时止损事件分发路线，转到原生阵型阶段同步、转向速度/半径与世界目标分发。不要 Hook 或 gameplay patch。见 [R90](N1_R90_CONSTRUCTOR_CONTEXT_PROVENANCE_20261101.md)。
 
 **2026-11-01 R89 N1 状态追加：** P 宿主候选的 `C+0x440→G+0xF0→P+0x1D8` 构造链和 `vtable+0x10→0x02DD06F0` 订阅者分发已静态验证。接下来只允许有界补齐 `member+0x58` 的 C 类型身份，再审计一个具体订阅者到同成员运动字段的因果边；不能证明则止损接触事件路线，回归原生阵型转向相位/世界目标协调。尚无可安全安装的原生修复点。见 [R89](N1_R89_TYPED_CONTACT_RECEIVER_CONSTRUCTOR_CHAIN_20261101.md)。
