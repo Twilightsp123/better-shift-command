@@ -1,5 +1,7 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-11-01 R91（接触事件双路径分发）:** [当前匹配 EXE 的 P+0x1D8 接收器虚表 +0x10→0x02DD06F0、+0x00→0x02DC9564；前者按订阅者+0x10返回值选择即时 vtable+0x08 或把 0x38 字节记录追加到 +0x30 暂存容器，后者按相反门槛回放并清零+0x34。](N1_R91_IMMEDIATE_PENDING_CONTACT_DISPATCH_20261101.md) 原 EXE 66/66 字节+LLVM起点、3E8、5Jcc、1调整跳转、6虚表项；18/18本地测试，公共16PASS/2SKIP。[公共聚焦测试](../../tests/test_n1_r91_pending_contact_event.py)。**未证明跨帧延迟、订阅者类型、同成员 motor 因果或挤压根因**；按界限止损事件路线，回到阵型转向同步。无 Hook 或 gameplay patch。
+
 **2026-11-01 R90（C 上下文从构造器到 Root/Member 的静态身份链）：** [当前精确 EXE 核查 C ctor 保存 self 到栈描述符 +0x08，经 G/K/child/config+0x138 到 Root+0x38，再经 member 基础构造器到 member+0x58；同时 Root ctor/成员处理器读取相同 C+0x440 结构。](N1_R90_CONSTRUCTOR_CONTEXT_PROVENANCE_20261101.md) **在指定构造路径内 C 类型来源已闭合；运行期所有实例与 Shift 代际、接触订阅者到实际位移因果仍未证。** 原 EXE 67/67 LLVM 指令与原码、12/12 E8、14 个不同 PE 函数、27/27 本地测试；公共25 PASS /2 SKIP（商业 EXE）。[R90 公共契约测试](../../tests/test_n1_r90_constructor_context_contract.py)。不改 main、不装 Hook、不发游戏补丁。
 
 **2026-11-01 R89（构造器到事件接收器新证据）:** [当前 EXE 原始 E8 与对象赋值：C+0x440→G（0x02D99070/0x02D990A6），G+0xF0→P（0x02D9A373/0x02D9A381），P+0x1D8 最终安装 vtable 0x03AB1B48，+0x10→0x02DD06F0 订阅者分发](N1_R89_TYPED_CONTACT_RECEIVER_CONSTRUCTOR_CHAIN_20261101.md)。26条机器码与LLVM边界、3 E8、8 unwind、14本地测试通过。**member+0x58 所指 C 的具体实例类型、订阅者到士兵运动因果仍未证明；不授权游戏补丁。** [公共契约测试](../../tests/test_n1_r89_typed_receiver_contract.py)。
