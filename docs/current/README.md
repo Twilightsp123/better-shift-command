@@ -1,5 +1,7 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-11-01 R90（C 上下文从构造器到 Root/Member 的静态身份链）：** [当前精确 EXE 核查 C ctor 保存 self 到栈描述符 +0x08，经 G/K/child/config+0x138 到 Root+0x38，再经 member 基础构造器到 member+0x58；同时 Root ctor/成员处理器读取相同 C+0x440 结构。](N1_R90_CONSTRUCTOR_CONTEXT_PROVENANCE_20261101.md) **在指定构造路径内 C 类型来源已闭合；运行期所有实例与 Shift 代际、接触订阅者到实际位移因果仍未证。** 原 EXE 67/67 LLVM 指令与原码、12/12 E8、14 个不同 PE 函数、27/27 本地测试；公共25 PASS /2 SKIP（商业 EXE）。[R90 公共契约测试](../../tests/test_n1_r90_constructor_context_contract.py)。不改 main、不装 Hook、不发游戏补丁。
+
 **2026-11-01 R89（构造器到事件接收器新证据）:** [当前 EXE 原始 E8 与对象赋值：C+0x440→G（0x02D99070/0x02D990A6），G+0xF0→P（0x02D9A373/0x02D9A381），P+0x1D8 最终安装 vtable 0x03AB1B48，+0x10→0x02DD06F0 订阅者分发](N1_R89_TYPED_CONTACT_RECEIVER_CONSTRUCTOR_CHAIN_20261101.md)。26条机器码与LLVM边界、3 E8、8 unwind、14本地测试通过。**member+0x58 所指 C 的具体实例类型、订阅者到士兵运动因果仍未证明；不授权游戏补丁。** [公共契约测试](../../tests/test_n1_r89_typed_receiver_contract.py)。
 
 **2026-11-01 R88（接触接收器的真实上下文来源限定）:** [当前原 EXE 19 条字节验证证明接触虚接收器来自原始 member+0x58 → context+0x440 → gateway+0xF0 → owner+0x1D8/vtable+0x10；接触参与者 RDI 可能在 Steering 中改变，不能认作接收器本体。具体接收器类型、到物理成员的因果写入仍未证明；不装 Hook/不发补丁。](N1_R88_CONTACT_RECEIVER_CONTEXT_PROVENANCE_20261101.md) 公开静态契约见 [R88 tests](../../tests/test_n1_r88_contact_receiver_contract.py)。
