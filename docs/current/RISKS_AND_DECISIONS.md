@@ -1,5 +1,7 @@
 # Open Issues, Evidence Grades and Decision Log
 
+**2026-11-05 R92 DECISION — 因果分歧定位取代事件树遍历：** 旧研究 R78 A Packet 可条件性写 `member+0x88/+0x90`（`0x03164658/6A`；另有 `0x0316443D/53/6B`）；R87 的积分器单独可写 `member+0x88/+0x8C/+0x90`（`0x0314720B/23/3B`）。二者是各自有原码支持的物理写者，**未证明在实际同一次 Shift 转向中同 Tick 共同命中，更未证明竞争造成挤压**。须先验证 A/B 是否命中、是否出现目标/运动首个分歧，才能选择有界 patch。新规范及两次测试上限见 [R92](N1_R92_CAUSAL_TRIAGE_PIVOT_20261105.md)。
+
 **R91 新增事件分发事实与止损（2026-11-01）：** P+0x1D8 vtable 0x03AB1B48 的+0x00 为 `0x02DC9564` 暂存记录回放、+0x08 为 adjustor thunk `0x01196574→0x02DAD91C`、+0x10 为 `0x02DD06F0` 新记录接收。R91 从原字节证明 subscriber->vtable+0x10 AL!=0 时即时 `+0x08`；AL=0 时向 receiver+0x30 追加 0x38字节记录；回放 `0x02DC9564` 在 AL=0 时通知并清零 +0x34。**不能推出跨Tick、帧延迟或成员运动写入。** 有界研究未取得注册后有类型的订阅者实例，`CONTACT_TO_MEMBER_MOTOR_CAUSAL_EDGE=NOT_PROVEN`，不应继续无限遍历事件系统。转入原生阵型运动阶段/世界目标。见 [R91](N1_R91_IMMEDIATE_PENDING_CONTACT_DISPATCH_20261101.md)。
 
 **R90 新增身份边（2026-11-01）：** C 构造函数 `0x02D98420` 在 `0x02D98D8E/92` 将当前 self 指针写入相邻栈槽，`0x02D99069/70` 把描述符传给 G；`0x02D9A046/4A` 将描述符+8 的同一个 C 写入 G+8；`0x02D9A7F7/80E` 传递给 K，之后经 child+8、config+0x138 与 `0x0300C9D1 Root+0x38` writer 到 member+0x58。**决定：C 类型身份在所述构造路径为 STATIC_PROVEN_CONDITIONAL，但不能从原始构造推出所有运行期上下文未改动、同一次玩家 Shift task/route generation 或接触订阅者的运动副作用。** `CONTACT_TO_MEMBER_MOTOR = NOT_PROVEN`；禁止盲改状态/积分器。见 [R90](N1_R90_CONSTRUCTOR_CONTEXT_PROVENANCE_20261101.md)。
