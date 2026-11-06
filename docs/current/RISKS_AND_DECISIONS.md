@@ -1,5 +1,8 @@
 # Open Issues, Evidence Grades and Decision Log
 
+**2026-11-06 R93 条件性反证 / 方向收敛：** `0x02DC7E30` 精确 A/B selector 读取 +0x28 DWORD，0/3/5→true；Group `0x0327ECC6` 和成员 Packet `0x03070A7B` 均调用此函数，但不证 Shift 实际激活。R78 两 Packet XYZ 写入后分别于 `0x03164482`、`0x03164681` 设置 member+0x108 bit0x02；R87 积分器 `0x031471B5/B8` 在 bit 置位时跳过正常 XYZ 增量 `0x0314720B/23/3B`。**因此 H3 中“位保持不变仍必然无条件重复写”的版本已被原生条件否定；`member vtable+0xF0→0x03164710` 的 `0x03164776` 可清位，实际跨调用竞争仍 UNKNOWN。禁止关掉积分器/强制置位。** S3 静态 gate 已找到，下一步 S1/S2 和同一次真实 Shift 身份；无补丁授权。见 [R93](N1_R93_GROUP_MODE_AND_PACKET_MOTOR_GATE_20261106.md)。
+
+
 **2026-11-05 R92 DECISION — 因果分歧定位取代事件树遍历：** 旧研究 R78 A Packet 可条件性写 `member+0x88/+0x90`（`0x03164658/6A`；另有 `0x0316443D/53/6B`）；R87 的积分器单独可写 `member+0x88/+0x8C/+0x90`（`0x0314720B/23/3B`）。二者是各自有原码支持的物理写者，**未证明在实际同一次 Shift 转向中同 Tick 共同命中，更未证明竞争造成挤压**。须先验证 A/B 是否命中、是否出现目标/运动首个分歧，才能选择有界 patch。新规范及两次测试上限见 [R92](N1_R92_CAUSAL_TRIAGE_PIVOT_20261105.md)。
 
 **R91 新增事件分发事实与止损（2026-11-01）：** P+0x1D8 vtable 0x03AB1B48 的+0x00 为 `0x02DC9564` 暂存记录回放、+0x08 为 adjustor thunk `0x01196574→0x02DAD91C`、+0x10 为 `0x02DD06F0` 新记录接收。R91 从原字节证明 subscriber->vtable+0x10 AL!=0 时即时 `+0x08`；AL=0 时向 receiver+0x30 追加 0x38字节记录；回放 `0x02DC9564` 在 AL=0 时通知并清零 +0x34。**不能推出跨Tick、帧延迟或成员运动写入。** 有界研究未取得注册后有类型的订阅者实例，`CONTACT_TO_MEMBER_MOTOR_CAUSAL_EDGE=NOT_PROVEN`，不应继续无限遍历事件系统。转入原生阵型运动阶段/世界目标。见 [R91](N1_R91_IMMEDIATE_PENDING_CONTACT_DISPATCH_20261101.md)。
