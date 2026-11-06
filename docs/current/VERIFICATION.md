@@ -1,5 +1,8 @@
 # BSC — corrected verification and evidence gates
 
+**2026-11-06 R93 S3 原生分支核验：** 实际原 EXE SHA `9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496` 上 64/64 完整机器码与 LLVM 起点 PASS；4/4 E8、5/5 Jcc、3/3 member vtable；6 PE unwind 函数范围 + 8 无 unwind pin；22/22 本地 unittest（2 直接 EXE）与 20 PASS/2 SKIP 公开模式。额外 256 个合成标志输入仅是逻辑门槛契约，不是 WH3 游戏进程测试。S3 字段与阶段条件来源经本地审计器验证，实际 Shift 命中/群体空间挤压根因仍未证明。见 [R93](N1_R93_GROUP_MODE_AND_PACKET_MOTOR_GATE_20261106.md) 及 [公开测试](../../tests/test_n1_r93_group_mode_physics_gate.py)。
+
+
 **2026-11-01 R91 原 EXE 验证（当前 SHA `9bd58c63...`）：** 66/66 完整字节及 LLVM 指令起点，3/3 直接 E8，5/5 Jcc，1/1 adjustor thunk 跳转，接收器早/晚虚表 6/6，PE unwind 64/64 引脚归属于4个函数，2个无 unwind thunk 原码及 LLVM 通过。`0x02DD06F0` 的精确绝对指针匹配 2 处。18/18 本地 unittest（含两项原 EXE）；公共 16 PASS / 2 SKIP。**非游戏内修复验证，跨Tick 时序与 motor 因果未知。** [R91 原码报告](N1_R91_IMMEDIATE_PENDING_CONTACT_DISPATCH_20261101.md)。
 
 **2026-11-01 R90 验证边界：** 精确匹配 EXE SHA `9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496`。本地 67/67 原始机器码与 LLVM 真指令起点、12/12 E8 RVA 目标、67/67 unwind 归属（14 个不同函数范围）、27/27 unittest（含2项真实 EXE）。公共无 EXE 环境 25 PASS/2 SKIP。公开 [R90 浓缩契约测试](../../tests/test_n1_r90_constructor_context_contract.py) 只有27个聚焦原码 pin，不可与本地67项混记。**尚无 Windows gameplay 跟踪、Hook 或修复验证。** [报告](N1_R90_CONSTRUCTOR_CONTEXT_PROVENANCE_20261101.md)。
