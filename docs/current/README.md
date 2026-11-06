@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-11-06 R93（S3 静态门槛验收通过，根因未定位）：** [原 EXE 恢复 Group A/B 纯整数谓词：`Q=[[[Group+0x10]+0x440]+0x150]`，`Q+0x28` DWORD 仅 {0,3,5} 走 A，其它走 B；member Packet 接收器使用同一谓词。两条 Packet XYZ 写者置 member+0x108 bit0x02，积分器测试该位会绕过正常 XYZ 累加；另有普通成员+0xF0 方法清除此位，因此不宣称持续互斥。](N1_R93_GROUP_MODE_AND_PACKET_MOTOR_GATE_20261106.md) 原 EXE 64/64 精确机器码及 LLVM 指令起点、4 E8、5 Jcc、3 member vtable 项；22/22 本地测试（公共20PASS/2SKIP）。**S3_STATIC=PASS，但实际 Shift 同实例/跨调用时序未证，SEARCH_CANDIDATE=false、ROOT_CAUSE_PROVEN=false、GAMEPLAY_FIX_PROVEN=false。** [公开契约测试](../../tests/test_n1_r93_group_mode_physics_gate.py)。
+
+
 **2026-11-05 BSC 成功判据（强制验收门槛）：** [SEARCH_CANDIDATE / ROOT_CAUSE_PROVEN / GAMEPLAY_FIX_PROVEN 三等级、同一 Shift 实例数据链、首次异常分歧、反事实证明、可逆补丁与最多两次实机会话的停止条件](N1_SUCCESS_CRITERIA_AND_STOP_RULES_20261105.md)。**RVA 数量、静态命中、合成模型与 CI 成功都不等于找到了根因，更不等于 gameplay 修复。**
 
 **2026-11-05 R92 研究路线重置（停止无界地址考古）:** [按首个成员运动分歧定位：阵型目标生成/世界 frame 转换 → Steering/相位 → 物理 XYZ 两类原生写者；针对 H1–H4 制定明确证据门槛、最多2次实机机会与同一通用只读观测器](N1_R92_CAUSAL_TRIAGE_PIVOT_20261105.md)。静态再次复核同 SHA EXE 的 Group-A +0x24成员数/+0x28列表、member goal +0x1E0/+0x1F0、A packet XYZ 与 integrator XYZ 两个写者：18 个真实机器码和 LLVM 起点通过。**Shift 同次/同帧激活、具体因果尚未证明；R92 为策略与静态验收，不是 gameplay patch。**
