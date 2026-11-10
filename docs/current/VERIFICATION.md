@@ -1,5 +1,8 @@
 # BSC — corrected verification and evidence gates
 
+**2026-11-10 R94 只读静态验收：** 用户原始 EXE SHA `9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496` 匹配；85/85 PE 原始机器码和 LLVM 指令起点；9/9 E8、2/2 E9、2/2 Group 虚表入口、15 个不同 unwind 函数范围、6 条无 unwind 指令；本地 15 PASS（含匹配原始 EXE），公共 14 PASS/1 SKIP。生命周期模型包含 ABA 双重自洽负对照、不合法 root/group/member 反向指针、错误 EXE、被篡改 manifest 的 fail-closed 检验。**不含 live 进程验证、实际 Shift 命中、world goal 或游戏修复；S1 静态 PASS、运行期安全 BLOCKED。** [R94](N1_R94_ROOT_GROUP_MEMBER_IDENTITY_ABA_20261110.md) · [公共合同](../../tests/test_n1_r94_group_identity_aba_contract.py)。
+
+
 **2026-11-06 R93 S3 原生分支核验：** 实际原 EXE SHA `9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496` 上 64/64 完整机器码与 LLVM 起点 PASS；4/4 E8、5/5 Jcc、3/3 member vtable；6 PE unwind 函数范围 + 8 无 unwind pin；22/22 本地 unittest（2 直接 EXE）与 20 PASS/2 SKIP 公开模式。额外 256 个合成标志输入仅是逻辑门槛契约，不是 WH3 游戏进程测试。S3 字段与阶段条件来源经本地审计器验证，实际 Shift 命中/群体空间挤压根因仍未证明。见 [R93](N1_R93_GROUP_MODE_AND_PACKET_MOTOR_GATE_20261106.md) 及 [公开测试](../../tests/test_n1_r93_group_mode_physics_gate.py)。
 
 
