@@ -1,5 +1,8 @@
 # Open Issues, Evidence Grades and Decision Log
 
+**2026-11-10 R94 S1 生命周期阻断（决定）：** Group 由 Root `0x030209EC` 的对象池路径产生：先 `0x03020A0A→0x0301E8B0→0x030313D8` 回收旧列表，再 `0x03020A27→0x0302093C` 从上下文 `+0x440/+0x150/+0x58` 的回收链取节点构造；初始化、成员 `0x030E54EC→0x030CC4AC→vtable+0x00=0x030CC50C` 写 member+0x300、`0x030D7130` 处理后才 `0x03020A75` 发布 Root+0x32F8。虚表+0x10 销毁链 `0x030CB250→0x030C97C4→0x030C9820` 清 member+0x300 受 `C+0x440` 对象 `+0x94==0` 保护。**双读地址一致可被 pool ABA 欺骗，静态字段身份不能赋予安全异步读取/生命周期所有权。** 仅在未来有实证的 engine-owned 同步阶段/代际记录时开放快照，未满足则禁止实际 Hook/轮询；仍无 Shift 同实例。详见 [R94](N1_R94_ROOT_GROUP_MEMBER_IDENTITY_ABA_20261110.md)。
+
+
 **2026-11-06 R93 条件性反证 / 方向收敛：** `0x02DC7E30` 精确 A/B selector 读取 +0x28 DWORD，0/3/5→true；Group `0x0327ECC6` 和成员 Packet `0x03070A7B` 均调用此函数，但不证 Shift 实际激活。R78 两 Packet XYZ 写入后分别于 `0x03164482`、`0x03164681` 设置 member+0x108 bit0x02；R87 积分器 `0x031471B5/B8` 在 bit 置位时跳过正常 XYZ 增量 `0x0314720B/23/3B`。**因此 H3 中“位保持不变仍必然无条件重复写”的版本已被原生条件否定；`member vtable+0xF0→0x03164710` 的 `0x03164776` 可清位，实际跨调用竞争仍 UNKNOWN。禁止关掉积分器/强制置位。** S3 静态 gate 已找到，下一步 S1/S2 和同一次真实 Shift 身份；无补丁授权。见 [R93](N1_R93_GROUP_MODE_AND_PACKET_MOTOR_GATE_20261106.md)。
 
 
