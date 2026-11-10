@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-11-10 R94 — S1 结构关系闭合、运行期读取因 ABA 暂不授权：** [原 EXE 首次静态闭合 Root+0x32F8 ↔ Group+0xA10、Group+0x24/+0x28 成员向量及 member+0x300 反向指针；重建时旧 Group 先回收到对象池，新 Group 后发布，析构清理 member+0x300 还受上下文+0x94 门槛控制。](N1_R94_ROOT_GROUP_MEMBER_IDENTITY_ABA_20261110.md) 85/85 LLVM+原码、9 E8、2 E9、2 vtable，15/15 本地测试；公共14 PASS/1 SKIP。**不能仅用两次指针相等证明同一代 Group，也不允许未经生命周期证明的异步观测器。** [R94 公共契约](../../tests/test_n1_r94_group_identity_aba_contract.py)。`SEARCH_CANDIDATE=false`、`ROOT_CAUSE_PROVEN=false`、`GAMEPLAY_FIX_PROVEN=false`。
+
+
 **2026-11-06 R93（S3 静态门槛验收通过，根因未定位）：** [原 EXE 恢复 Group A/B 纯整数谓词：`Q=[[[Group+0x10]+0x440]+0x150]`，`Q+0x28` DWORD 仅 {0,3,5} 走 A，其它走 B；member Packet 接收器使用同一谓词。两条 Packet XYZ 写者置 member+0x108 bit0x02，积分器测试该位会绕过正常 XYZ 累加；另有普通成员+0xF0 方法清除此位，因此不宣称持续互斥。](N1_R93_GROUP_MODE_AND_PACKET_MOTOR_GATE_20261106.md) 原 EXE 64/64 精确机器码及 LLVM 指令起点、4 E8、5 Jcc、3 member vtable 项；22/22 本地测试（公共20PASS/2SKIP）。**S3_STATIC=PASS，但实际 Shift 同实例/跨调用时序未证，SEARCH_CANDIDATE=false、ROOT_CAUSE_PROVEN=false、GAMEPLAY_FIX_PROVEN=false。** [公开契约测试](../../tests/test_n1_r93_group_mode_physics_gate.py)。
 
 
