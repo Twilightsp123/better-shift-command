@@ -1,5 +1,8 @@
 # BSC Native Shift Behavior Patch — corrected implementation plan (9.0.3)
 
+**2026-11-10 R94 S1 结构判据明确但上线门槛阻断：** 可在稳定构造路径检查 Root+0x32F8↔Group+0xA10 与 Group+0x24/0x28↔member+0x300，Root+0x184/0x188 成员列表；Group 先回收旧节点再从同池复用、最后发布，并存在有门槛的 member+0x300 清理，所以绝不允许仅靠后台双读指针实现无锁观测。**R95 前置工作：找具备真实线程所有权/安全生命周期的原生发布后同步采样窗口，可靠绑定原生 Shift task/route generation；否则继续离线 S2 reference-aware world goal 静态解析，不让用户测试。** 继续遵守总计2次实机测试上限和 no Lua re-MOVE/no unsafe Hook。见 [R94](N1_R94_ROOT_GROUP_MEMBER_IDENTITY_ABA_20261110.md)。
+
+
 **2026-11-06 R93 实施先决条件更新：** R92 的 S3 静态任务已找到可只读判别的精确 A/B 模式字段 `Group+0x10→C+0x440→G+0x150→Q+0x28`，谓词为 {0,3,5}，成员 Packet 侧读取同类路径；两类 packet-XYZ writer 设置 `member+0x108 & 0x02`，积分器相应跳过正常 XYZ，另有可清位的 virtual+0xF0。**下一步不可直接发 gameplay patch**。先完成 S1 稳定 Root/Group/member 身份和生存期、S2 reference-aware 世界目标。可信时序下比较 Group C/mode 与 member C/mode，并检查 flag 是否在同一任务中变化，不能靠静态字节臆断竞争。最多两次用户实机机会制度不变。详见 [R93](N1_R93_GROUP_MODE_AND_PACKET_MOTOR_GATE_20261106.md)。
 
 
