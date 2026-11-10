@@ -85,7 +85,7 @@ Group 对象具体虚表 `0x03914450` 的 `+0x10 → 0x030CB250 → 0x030C97C4 �
 
 - 精确 SHA/PE/ImageBase、**85/85** 完整指令原始字节及 LLVM 指令起点；**9/9** E8、**2/2** E9、**2/2** 精确 Group vtable 项；**15** 个不同 PE unwind 函数范围，6 个无 unwind 机器码 pin。
 - 公共无 EXE：**14 PASS、1 SKIP**；匹配原始 EXE：**15 PASS**。测试包括八类错误成员/Group 组合、A/B 地址复用反例、错误 EXE/hash/manifest fail-closed。
-- 本地研究包包含：中文报告、完整 85 pin manifest、16 段原始反汇编、审计器、离线结构校验器、测试结果、SHA256 清单、完整 R93 历史 ZIP；不含商业游戏 EXE。
+- 本地研究包包含：中文报告、完整 85 pin manifest、19 段原始反汇编、审计器、离线结构校验器、测试结果、SHA256 清单、完整 R93 历史 ZIP；不含商业游戏 EXE。
 - GitHub 研究分支文档与公共契约测试另行记录；`main` 禁止变更。
 
 ## 5. 下一轮只做一项关键事情
