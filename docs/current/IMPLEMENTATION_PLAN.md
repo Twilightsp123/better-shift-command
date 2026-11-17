@@ -1,5 +1,8 @@
 # BSC Native Shift Behavior Patch — corrected implementation plan (9.0.3)
 
+**2026-11-17 R96 下一有限任务与测试门槛：** 真实 queued MOVE slot 创建分支跳过 `0x03032C48` 即时 Group 操作；本地 Root 的集团重建/路线配置/A发包不能替代 queued shortTask。将静态观测候选优先定位到 **`0x02F5B1E4` 的有类型任务所有者/上游调度**：必须证明 callback 期间 task/Group/member 的生存期、工作线程排他以及可从原生字段/事件序列确定的 slot/route generation。无一项时 `S1_SAFE_LIVE_SNAPSHOT=BLOCKED`，不得发实机测试或挂 Hook；不得把自定义 epoch 填进 JSON 当作引擎证据。再以 R95 world goal 和 R86同时刻间距定位首个成员分歧；未满足 SEARCH_CANDIDATE 不发 gameplay patch。两次实机机会总上限不变。详见 [R96](N1_R96_QUEUED_OWNER_SAMPLING_BOUNDARY_20261117.md)。
+
+
 **2026-11-17 R95 验收更新：** S2 两种空间记录的世界目标公式已通过原始 EXE 静态核验：导航 ref record+0x10 / Packet ref record+0x18；实际矩阵 T 在 ref+0x18/1C/20，3×3 basis 在 ref+0x38..58。未来同单位世界目标对比必须先正确按类型转换并对齐 reference epoch；R95 离线解析器只接收既有记录，不读取游戏进程。**下一唯一路线 R96：证明一个持有合法 Root/Group/member 生命周期且可绑定 queued Shift route generation 的原生所有者阶段**；没有它就不能安全取得同 Tick 数据，也不能宣称根因。R94 对象池 ABA 阻断仍在，两次实机机会制度不变。禁止 Lua 重发 MOVE、异步后台遍历成员或盲 Hook。详见 [R95](N1_R95_S2_REFERENCE_AFFINE_WORLD_GOAL_20261117.md)。
 
 
