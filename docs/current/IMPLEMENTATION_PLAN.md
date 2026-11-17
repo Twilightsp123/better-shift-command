@@ -1,5 +1,8 @@
 # BSC Native Shift Behavior Patch — corrected implementation plan (9.0.3)
 
+**2026-11-17 R95 验收更新：** S2 两种空间记录的世界目标公式已通过原始 EXE 静态核验：导航 ref record+0x10 / Packet ref record+0x18；实际矩阵 T 在 ref+0x18/1C/20，3×3 basis 在 ref+0x38..58。未来同单位世界目标对比必须先正确按类型转换并对齐 reference epoch；R95 离线解析器只接收既有记录，不读取游戏进程。**下一唯一路线 R96：证明一个持有合法 Root/Group/member 生命周期且可绑定 queued Shift route generation 的原生所有者阶段**；没有它就不能安全取得同 Tick 数据，也不能宣称根因。R94 对象池 ABA 阻断仍在，两次实机机会制度不变。禁止 Lua 重发 MOVE、异步后台遍历成员或盲 Hook。详见 [R95](N1_R95_S2_REFERENCE_AFFINE_WORLD_GOAL_20261117.md)。
+
+
 **2026-11-10 R94 S1 结构判据明确但上线门槛阻断：** 可在稳定构造路径检查 Root+0x32F8↔Group+0xA10 与 Group+0x24/0x28↔member+0x300，Root+0x184/0x188 成员列表；Group 先回收旧节点再从同池复用、最后发布，并存在有门槛的 member+0x300 清理，所以绝不允许仅靠后台双读指针实现无锁观测。**R95 前置工作：找具备真实线程所有权/安全生命周期的原生发布后同步采样窗口，可靠绑定原生 Shift task/route generation；否则继续离线 S2 reference-aware world goal 静态解析，不让用户测试。** 继续遵守总计2次实机测试上限和 no Lua re-MOVE/no unsafe Hook。见 [R94](N1_R94_ROOT_GROUP_MEMBER_IDENTITY_ABA_20261110.md)。
 
 
