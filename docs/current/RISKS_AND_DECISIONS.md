@@ -1,5 +1,8 @@
 # Open Issues, Evidence Grades and Decision Log
 
+**2026-11-17 R96 S1 观测入口选择决策：** `0x030374CC` queued slot 创建分支 `0x030377ED` 跳过同函数中 `0x03037A69→0x03032C48` 的即时 Group 操作，故 **不能把后者作为唯一 queued Shift 入队观测入口**。MOVE slot vtable +0x08→0x0302AE74 条件生成 shortTask（Root 保存 task+8），该任务虚表 +0x10→0x02F5B1E4，在 `0x02F5B3F9` 直接读取当时 Root+0x32F8 Group 再 A/B 分派（R35已有晚绑定事实）。`0x03032C48` 则在自己的调用栈中重建 Group、配置路线、调用 A fanout，但不证明等于 queued Shift 回调。**仍没有 Group incarnation/route generation、线程所有权、锁和完整快照生存期证据；禁止部署异步成员轮询或未经授权的 Hook。** [R96](N1_R96_QUEUED_OWNER_SAMPLING_BOUNDARY_20261117.md)。
+
+
 **2026-11-17 R95 参考框架真实性约束（新 DECISION）：** 成员持久 goal `member+0x1E0/+0x1F0` 经 `0x03121F54` 读取 `record+0x10` reference，Packet 经 `0x0312214C` 读取另一个 record+0x18 reference；二者若非 NULL，向 `0x02F3D668` 传 `reference+0x18` 的 3x3 与平移矩阵，故不同 local 可能同 world，相同 local 可能不同 world。**禁止只比较 local goal 判定成员目标分歧**；必须同时采样 reference *内容* 与其时间代际，指针相等并不确保矩阵未变化。R94 已证池化 Group ABA，脱离 engine-owned 生命周期窗口的读内存不授权；本轮没有实机 Shift 因果或补丁证据。见 [R95](N1_R95_S2_REFERENCE_AFFINE_WORLD_GOAL_20261117.md)。
 
 
