@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-11-17 R96（入队/执行所有者入口的条件性闭合与安全止损）:** [原 EXE 将 queued MOVE slot 创建的 `0x030377ED JMP→0x03037A6E` 与即时 `0x03037A69 CALL→0x03032C48` 明确分开；MOVE slot vtable+8→0x0302AE74→shortTask 0x02F31778，callback vtable+0x10→0x02F5B1E4 在发包前从当前 Root+0x32F8 晚绑定 Group。](N1_R96_QUEUED_OWNER_SAMPLING_BOUNDARY_20261117.md) 这些是静态可达的条件链，不是玩家 Shift 实机命中；R35/R52/R75 已含部分相同证据，本轮统一作采样入口审查。完整本地 131/131 LLVM 与原码、10 E8、1 E9、2 vtable、17语义锚点、23/23 单测（公开21PASS/2SKIP），公开 [精简原码契约测试](../../tests/test_n1_r96_queued_owner_contract.py)。**S1_SAFE_LIVE_SNAPSHOT=BLOCKED，SEARCH_CANDIDATE=false，ROOT_CAUSE_PROVEN=false，GAMEPLAY_FIX_PROVEN=false**。不改 main、无 Hook/补丁。
+
+
 **2026-11-17 R95（S2 世界目标变换静态证明，仍非 Shift 根因）：** [当前 SHA 原 EXE 确认两个不同空间记录：导航 goal 的 reference 在 +0x10、阵型 Packet 的 reference 在 +0x18；均在引用非空时经 ref+0x18 → 0x02F3D668 进行 3×3+平移世界变换。](N1_R95_S2_REFERENCE_AFFINE_WORLD_GOAL_20261117.md) Steering 从 member+0x1E0 解析，Packet 双分支另调解析器；两类记录不可混用。**S2_STATIC=PROVEN，S1 仍受 Group 对象池 ABA 阻断，实际同 Shift/同 Tick 未证**。本地 EXE 120/120完整指令+LLVM起点、5 E8、4 Jcc、18语义锚点、6 unwind；27/27 本地测试，公共25 PASS/2 SKIP。[公开离线解析器](../../maintenance_tools/native_shift_re/r95_world_goal.py) · [源指令契约](../../tests/test_n1_r95_native_source_contract.py)。`SEARCH_CANDIDATE=false; ROOT_CAUSE_PROVEN=false; GAMEPLAY_FIX_PROVEN=false`。
 
 
