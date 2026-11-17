@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-11-17 R95（S2 世界目标变换静态证明，仍非 Shift 根因）：** [当前 SHA 原 EXE 确认两个不同空间记录：导航 goal 的 reference 在 +0x10、阵型 Packet 的 reference 在 +0x18；均在引用非空时经 ref+0x18 → 0x02F3D668 进行 3×3+平移世界变换。](N1_R95_S2_REFERENCE_AFFINE_WORLD_GOAL_20261117.md) Steering 从 member+0x1E0 解析，Packet 双分支另调解析器；两类记录不可混用。**S2_STATIC=PROVEN，S1 仍受 Group 对象池 ABA 阻断，实际同 Shift/同 Tick 未证**。本地 EXE 120/120完整指令+LLVM起点、5 E8、4 Jcc、18语义锚点、6 unwind；27/27 本地测试，公共25 PASS/2 SKIP。[公开离线解析器](../../maintenance_tools/native_shift_re/r95_world_goal.py) · [源指令契约](../../tests/test_n1_r95_native_source_contract.py)。`SEARCH_CANDIDATE=false; ROOT_CAUSE_PROVEN=false; GAMEPLAY_FIX_PROVEN=false`。
+
+
 **2026-11-10 R94 — S1 结构关系闭合、运行期读取因 ABA 暂不授权：** [原 EXE 首次静态闭合 Root+0x32F8 ↔ Group+0xA10、Group+0x24/+0x28 成员向量及 member+0x300 反向指针；重建时旧 Group 先回收到对象池，新 Group 后发布，析构清理 member+0x300 还受上下文+0x94 门槛控制。](N1_R94_ROOT_GROUP_MEMBER_IDENTITY_ABA_20261110.md) 85/85 LLVM+原码、9 E8、2 E9、2 vtable，15/15 本地测试；公共14 PASS/1 SKIP。**不能仅用两次指针相等证明同一代 Group，也不允许未经生命周期证明的异步观测器。** [R94 公共契约](../../tests/test_n1_r94_group_identity_aba_contract.py)。`SEARCH_CANDIDATE=false`、`ROOT_CAUSE_PROVEN=false`、`GAMEPLAY_FIX_PROVEN=false`。
 
 
