@@ -1,5 +1,8 @@
 # BSC — corrected verification and evidence gates
 
+**2026-11-17 R95 S2 只读原 EXE 证据：** 版本 SHA `9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496`；局部离线严格审计六段包含 nav/packet 两种解析器、reference 3×3+translation、Packet 两路调用、Steering 使用和 setter：**120/120 真实机器码、120/120 LLVM 起点、5/5 E8、4/4 Jcc、18/18 语义锚点、6/6 PE unwind 归属 PASS**。本地 27/27 unittest（1 原EXE、1 错EXE拒绝），公共 25 PASS/2 SKIP；合成测试包括平移、旋转、非单位矩阵、相同 local 不同 world、不同 local 相同 world、混 epoch fail-closed。**无实机、无 gameplay patch**。本地完整清单在 R95 ZIP；GitHub [焦点原码测试](../../tests/test_n1_r95_native_source_contract.py) 和 [纯离线世界解析测试](../../tests/test_n1_r95_world_goal.py)。详见 [R95](N1_R95_S2_REFERENCE_AFFINE_WORLD_GOAL_20261117.md)。
+
+
 **2026-11-10 R94 只读静态验收：** 用户原始 EXE SHA `9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496` 匹配；85/85 PE 原始机器码和 LLVM 指令起点；9/9 E8、2/2 E9、2/2 Group 虚表入口、15 个不同 unwind 函数范围、6 条无 unwind 指令；本地 15 PASS（含匹配原始 EXE），公共 14 PASS/1 SKIP。生命周期模型包含 ABA 双重自洽负对照、不合法 root/group/member 反向指针、错误 EXE、被篡改 manifest 的 fail-closed 检验。**不含 live 进程验证、实际 Shift 命中、world goal 或游戏修复；S1 静态 PASS、运行期安全 BLOCKED。** [R94](N1_R94_ROOT_GROUP_MEMBER_IDENTITY_ABA_20261110.md) · [公共合同](../../tests/test_n1_r94_group_identity_aba_contract.py)。
 
 
