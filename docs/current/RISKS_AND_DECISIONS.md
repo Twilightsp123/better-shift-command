@@ -1,5 +1,8 @@
 # Open Issues, Evidence Grades and Decision Log
 
+**2026-11-17 R95 参考框架真实性约束（新 DECISION）：** 成员持久 goal `member+0x1E0/+0x1F0` 经 `0x03121F54` 读取 `record+0x10` reference，Packet 经 `0x0312214C` 读取另一个 record+0x18 reference；二者若非 NULL，向 `0x02F3D668` 传 `reference+0x18` 的 3x3 与平移矩阵，故不同 local 可能同 world，相同 local 可能不同 world。**禁止只比较 local goal 判定成员目标分歧**；必须同时采样 reference *内容* 与其时间代际，指针相等并不确保矩阵未变化。R94 已证池化 Group ABA，脱离 engine-owned 生命周期窗口的读内存不授权；本轮没有实机 Shift 因果或补丁证据。见 [R95](N1_R95_S2_REFERENCE_AFFINE_WORLD_GOAL_20261117.md)。
+
+
 **2026-11-10 R94 S1 生命周期阻断（决定）：** Group 由 Root `0x030209EC` 的对象池路径产生：先 `0x03020A0A→0x0301E8B0→0x030313D8` 回收旧列表，再 `0x03020A27→0x0302093C` 从上下文 `+0x440/+0x150/+0x58` 的回收链取节点构造；初始化、成员 `0x030E54EC→0x030CC4AC→vtable+0x00=0x030CC50C` 写 member+0x300、`0x030D7130` 处理后才 `0x03020A75` 发布 Root+0x32F8。虚表+0x10 销毁链 `0x030CB250→0x030C97C4→0x030C9820` 清 member+0x300 受 `C+0x440` 对象 `+0x94==0` 保护。**双读地址一致可被 pool ABA 欺骗，静态字段身份不能赋予安全异步读取/生命周期所有权。** 仅在未来有实证的 engine-owned 同步阶段/代际记录时开放快照，未满足则禁止实际 Hook/轮询；仍无 Shift 同实例。详见 [R94](N1_R94_ROOT_GROUP_MEMBER_IDENTITY_ABA_20261110.md)。
 
 
