@@ -1,5 +1,8 @@
 # BSC Native Shift Behavior Patch — corrected implementation plan (9.0.3)
 
+**2026-11-20 R97 最新执行前置条件：** shortTask 构造后 vtable+0x08 是 no-op，不能当任务执行线程挂点；真正 vtable+0x10 callback `0x02F5B1E4` 的有类型调度调用者未知。构造期 `task+0x7D==0` 条件下可直接从当时的 Root+0x32F8 读 Group 并启动 B 分发，回调时又晚绑定 Group；task+0x80 可变 slot+0xA0 字段必须有真实 route/slot incarnation 证据才可用于同实例。**R98 唯一范围：从具体 shortTask vtable+0x10 反追一个确切的 scheduler/容器及其线程/对象寿命，证明来源和 generation；只有 `FF 50 10` 字节绝不够**。失败即按停止规则止损，不增加实机测试机会、不装 Hook、不改原生队列或物理积分器。见 [R97](N1_R97_SHORTTASK_DISPATCH_GENERATION_BOUNDARY_20261120.md)。
+
+
 **2026-11-17 R96 下一有限任务与测试门槛：** 真实 queued MOVE slot 创建分支跳过 `0x03032C48` 即时 Group 操作；本地 Root 的集团重建/路线配置/A发包不能替代 queued shortTask。将静态观测候选优先定位到 **`0x02F5B1E4` 的有类型任务所有者/上游调度**：必须证明 callback 期间 task/Group/member 的生存期、工作线程排他以及可从原生字段/事件序列确定的 slot/route generation。无一项时 `S1_SAFE_LIVE_SNAPSHOT=BLOCKED`，不得发实机测试或挂 Hook；不得把自定义 epoch 填进 JSON 当作引擎证据。再以 R95 world goal 和 R86同时刻间距定位首个成员分歧；未满足 SEARCH_CANDIDATE 不发 gameplay patch。两次实机机会总上限不变。详见 [R96](N1_R96_QUEUED_OWNER_SAMPLING_BOUNDARY_20261117.md)。
 
 
