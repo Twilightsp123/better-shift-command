@@ -81,8 +81,12 @@ class TestR97TaskSeam(unittest.TestCase):
         self.assertNotEqual(E8[0x02f3185f],E8[0x02f31866])
     def test_arena_count_not_a_route_generation(self):
         self.assertEqual(PINS[0x02f35007],"898240020000")
-    def test_no_proof_of_runtime_lifetime(self):
-        self.assertFalse(False or False) # no engine-owned epoch or mutex observed
+    def test_group_can_change_under_same_root_in_synthetic_counterexample(self):
+        # Counterexample to pointer-only identity, NOT an observation of WH3.
+        before={"root":7,"group_generation":1}
+        after={"root":7,"group_generation":2}
+        self.assertEqual(before["root"],after["root"])
+        self.assertNotEqual(before["group_generation"],after["group_generation"])
     @unittest.skipUnless(os.environ.get("BSC_R97_GAME_EXE"),"commercial EXE unavailable in public CI")
     def test_original_exe_exact_bytes(self):
         data=Path(os.environ["BSC_R97_GAME_EXE"]).read_bytes()
