@@ -1,5 +1,8 @@
 # BSC Native Shift Behavior Patch — corrected implementation plan (9.0.3)
 
+**2026-11-20 R98 S1 调度所有者更新：** 之前缺少的具体短任务执行者已在原版 EXE 中静态闭合：`Root+0x2FA0` arena/queue slot→task 16B记录→`0x03048624`→shortTask vtable+0x10；任务结束的条件性回收已确认。**停止重复寻找 `0x02F5B1E4` 的 E8 / 其它裸 `FF 50 10`。** 下个有限审计只对 `0x0304874C` 的一个原生外层更新路径验证线程/对象排他及可供同一 MOVE slot 与 task 的真实 route generation；仍缺则停止 Hook 设计，不消耗用户实机机会，转向已知 world-goal/成员阶段首个分歧的离线证伪。至少 Group/member 存活保护与安全 Win64 ABI 验证前不安装 Hook，不破坏 CA Shift/RMB/ATTACK。见 [R98](N1_R98_TYPED_SHORTTASK_ARENA_DISPATCH_20261120.md)。
+
+
 **2026-11-20 R97 最新执行前置条件：** shortTask 构造后 vtable+0x08 是 no-op，不能当任务执行线程挂点；真正 vtable+0x10 callback `0x02F5B1E4` 的有类型调度调用者未知。构造期 `task+0x7D==0` 条件下可直接从当时的 Root+0x32F8 读 Group 并启动 B 分发，回调时又晚绑定 Group；task+0x80 可变 slot+0xA0 字段必须有真实 route/slot incarnation 证据才可用于同实例。**R98 唯一范围：从具体 shortTask vtable+0x10 反追一个确切的 scheduler/容器及其线程/对象寿命，证明来源和 generation；只有 `FF 50 10` 字节绝不够**。失败即按停止规则止损，不增加实机测试机会、不装 Hook、不改原生队列或物理积分器。见 [R97](N1_R97_SHORTTASK_DISPATCH_GENERATION_BOUNDARY_20261120.md)。
 
 
