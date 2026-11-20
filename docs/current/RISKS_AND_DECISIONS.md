@@ -1,5 +1,8 @@
 # Open Issues, Evidence Grades and Decision Log
 
+**2026-11-20 R98 原生调度器真正类型化（决策）：** R97 对 `0x02F5B1E4` 的 E8 直接扫描为0是正常的：当前确切执行者 `0x03048624` 通过 `CALL [task_vptr+0x10]` 间接调用。构造时 `Root+0x280=&Root+0x2FA0`，QueueEntry+0x10、MOVE_slot+0x18、0xA8 shortTask 分配与 `Root update 0x03048880` 都指向同一 arena。`arena+0x200+0x10*i` 是 16B 分配记录，`arena+0x240` 是记录数；栈尾任务走+0x10，其余走+0x18，具体 shortTask +0x18 是 no-op。task+0x18 完成后可由 0x03048692→0x02F54D58 清退。**`arena+0x250/+0x251/+0x254` 只是本局部代码的状态字节，不能凭此认定多线程锁、Group pin、Shift route generation 或安全 Hook**；R94 池化 Group ABA/ R97 task+0x80 可变别名风险不变。见 [R98](N1_R98_TYPED_SHORTTASK_ARENA_DISPATCH_20261120.md)。
+
+
 **R97 新增所有权边界（2026-11-20）：** 任务构造末 `0x0302B1E2 JMP [vptr+0x08]` 只跳到具体短任务 vtable+0x08=`0x008D3C60 RET`，绝不是可安全观察 callback 的 scheduler；vtable+0x10=`0x02F5B1E4` 真执行阶段仍缺调用者身份和线程所有权。`task+0x80` 只持有 `&MOVE_slot+0xA0`，`0x02F53FDC` 延迟解引用，且仅当字段地址为 NULL 才用 task+0x98 fallback（字段内容 NULL 不 fallback）。`task+0x7D==0` 的构造分支已可能读取当前 Root+0x32F8 并发 B 路线，回调再次读取同 Group 字段；两个时间点没有证明同代。**决策：不能把 task+0x80 或 arena+0x240 当 route generation，也不能通过自填 epoch、双读地址或 Derpy Tick Hook 获得生存期授权。** 见 [R97](N1_R97_SHORTTASK_DISPATCH_GENERATION_BOUNDARY_20261120.md)。
 
 
