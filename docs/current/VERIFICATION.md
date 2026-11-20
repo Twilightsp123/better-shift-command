@@ -1,5 +1,8 @@
 # BSC — corrected verification and evidence gates
 
+**2026-11-20 R98 匹配原 EXE 的有类型调度静态验证：** SHA `9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496`，AMD64/ImageBase `0x140000000`。15 个受限函数/代码范围 **326/326 完整原始字节与 LLVM 真实起点；9/9 E8、5/5具体 shortTask vtable 指针、27/27原生语义锚点、12个有 PE unwind 的不同函数范围**。真实 EXE **32/32 unittest**，公共模式 **28 PASS/4 SKIP**。负对照包含同一 arena 不同 route、同一 Group 地址不同 incarnation、错误 EXE 和篡改 manifest fail-closed。**只证原生静态调用，未证实际 Shift 时序、工作线程、寿命锁、群体挤压根因，也未进行 gameplay 修复测试**。 [R98 报告](N1_R98_TYPED_SHORTTASK_ARENA_DISPATCH_20261120.md) · [公共契约测试](../../tests/test_n1_r98_root_arena_scheduler_contract.py)。
+
+
 **2026-11-20 R97 原 EXE/任务所有者验收：** Win64 SHA `9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496`。在 11 个有界代码范围复核 **522/522 完整机器码+LLVM 真指令起点、16/16 E8、5/5 具体短任务虚表槽位、25/25 语义锚点**。无 unwind leaf (如 `0x02F53FDC` 和 `0x008D3C60`) 明确排除函数 unwind 计数；其余按 PE 真实 owner 范围校验。匹配原 EXE **21/21 本地 unittest PASS**，公共模式 **19 PASS/2 SKIP**。全可执行节 E8-rel32 原始编码到 callback `0x02F5B1E4` 为零，只排除直接 E8。逻辑反例（槽位别名变化、Group ABA）为合成，不是游戏实测。**无 Shift 同实例、live Hook 或 gameplay patch**。见 [R97](N1_R97_SHORTTASK_DISPATCH_GENERATION_BOUNDARY_20261120.md) 和 [公共聚焦测试](../../tests/test_n1_r97_shorttask_dispatch_contract.py)。
 
 
