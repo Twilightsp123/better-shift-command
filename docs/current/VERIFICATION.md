@@ -1,5 +1,8 @@
 # BSC — corrected verification and evidence gates
 
+**2026-11-20 R97 原 EXE/任务所有者验收：** Win64 SHA `9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496`。在 11 个有界代码范围复核 **522/522 完整机器码+LLVM 真指令起点、16/16 E8、5/5 具体短任务虚表槽位、25/25 语义锚点**。无 unwind leaf (如 `0x02F53FDC` 和 `0x008D3C60`) 明确排除函数 unwind 计数；其余按 PE 真实 owner 范围校验。匹配原 EXE **21/21 本地 unittest PASS**，公共模式 **19 PASS/2 SKIP**。全可执行节 E8-rel32 原始编码到 callback `0x02F5B1E4` 为零，只排除直接 E8。逻辑反例（槽位别名变化、Group ABA）为合成，不是游戏实测。**无 Shift 同实例、live Hook 或 gameplay patch**。见 [R97](N1_R97_SHORTTASK_DISPATCH_GENERATION_BOUNDARY_20261120.md) 和 [公共聚焦测试](../../tests/test_n1_r97_shorttask_dispatch_contract.py)。
+
+
 **2026-11-17 R96 原始 EXE 静态复核：** 精确 SHA `9bd58c63bd7fc5c9909b3d3d9b6b7a6ae4eac784369bf91a9e53c3e9f42be496`；九个受限原生函数区间 **131/131 完整原码、131/131 LLVM 真实指令起点、10/10 E8、1/1 E9、2/2 具体虚表入口、17/17语义锚点、9/9 PE unwind 归属核对通过**。本地 23/23 unittest（含匹配原始 EXE、错误 EXE fail-closed），公开无 EXE 21 PASS/2 SKIP。离线证据包括即刻/队列错误观测点及对象池 ABA 的停止规则，不含实机。完整 manifest /审计器/9段反汇编在本地 R96 ZIP，GitHub 同步 [公开聚焦契约](../../tests/test_n1_r96_queued_owner_contract.py) 与 [R96 报告](N1_R96_QUEUED_OWNER_SAMPLING_BOUNDARY_20261117.md)。
 
 
