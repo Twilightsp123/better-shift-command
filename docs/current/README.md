@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-11-20 R98（首次静态闭合有类型 shortTask 调度器）：** [原版 EXE 证明 Root ctor `Root+0x280=&Root+0x2FA0` → QueueEntry+0x10 → MOVE_slot+0x18 → arena 的 16B shortTask 登记记录；Root 更新 `0x03048880→0x03048624` 从同一 arena 读取任务，记录栈尾通过具体任务 vtable+0x10 调 `0x02F5B1E4`，非栈尾同类任务 vtable+0x18 是 RET。](N1_R98_TYPED_SHORTTASK_ARENA_DISPATCH_20261120.md) callback+完成位 `task+0x18`→有门槛的尾部清退同样闭合。**R97 调度器未知已解决（仅静态），但线程排他、Group/member 寿命、queued Shift route generation 仍未知，不装 Hook/不发补丁。** 本地 15范围/326 opcode+LLVM起点、9 E8、5 vtable、27锚点/12 PE unwind，32/32测试；公共28PASS/4SKIP。[公开原生契约](../../tests/test_n1_r98_root_arena_scheduler_contract.py)。`SEARCH_CANDIDATE=false/ROOT_CAUSE_PROVEN=false/GAMEPLAY_FIX_PROVEN=false`。
+
+
 **2026-11-20 R97（shortTask 两阶段 Group 绑定与可变槽位别名）:** [精确当前 EXE 的 MOVE task 以 arena+0x240/+0x244 记账分配 0xA8 字节对象；构造函数尾部任务 vtable+0x08 指向 RET 空操作，真正 callback 是 vtable+0x10→0x02F5B1E4。构造路径中 task+0x7D 条件性经 0x02F54510 读取当前 Group，callback 再读一次当前 Root+0x32F8；task+0x80 指向 slot+0xA0 字段地址而非冻结值，只有地址为空才用 task+0x98 fallback。](N1_R97_SHORTTASK_DISPATCH_GENERATION_BOUNDARY_20261120.md) 本地匹配 EXE 522/522 原码及 LLVM 起点、16 E8、5 vtable、25 语义锚点、21/21 测试；公共19 PASS/2 SKIP（完整清单在本地研究 ZIP）。原 EXE 可执行区直接 E8 到 callback 为 0 处，不排除虚调用。[公开焦点契约测试](../../tests/test_n1_r97_shorttask_dispatch_contract.py)。**无有类型调度器/排他/Group pin，SEARCH_CANDIDATE=false、ROOT_CAUSE_PROVEN=false、GAMEPLAY_FIX_PROVEN=false，禁止 Hook。**
 
 
