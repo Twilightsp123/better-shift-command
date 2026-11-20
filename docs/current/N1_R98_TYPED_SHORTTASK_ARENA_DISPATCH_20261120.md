@@ -26,7 +26,7 @@
 
 ## 4. 本轮验收及止损
 
-本地原始 EXE 静态复核：15 个有界代码范围，**326/326 完整 opcode 与 LLVM 真指令起点，9/9 E8，5/5 具体任务虚表槽，27/27 语义锚点，12 个不同 PE unwind 所属函数范围**。真实 EXE 20/20 unittest PASS，公共无 EXE 17 PASS/3 SKIP。合成负对照覆盖任务栈尾调用、清退与下一任务进展、同地址跨代和 Group ABA；它们都不是游戏内捕获。完整原码与测试在 R98 ZIP，含 R97 完整历史 ZIP；不包含商业游戏 EXE。
+本地原始 EXE 静态复核：15 个有界代码范围，**326/326 完整 opcode 与 LLVM 真指令起点，9/9 E8，5/5 具体任务虚表槽，27/27 语义锚点，12 个不同 PE unwind 所属函数范围**。真实 EXE 32/32 unittest PASS（含完整静态审计与公共聚焦回归），公共无 EXE 28 PASS/4 SKIP。合成负对照覆盖任务栈尾调用、清退与下一任务进展、同地址跨代和 Group ABA；它们都不是游戏内捕获。完整原码与测试在 R98 ZIP，含 R97 完整历史 ZIP；不包含商业游戏 EXE。
 
 `R98_TYPED_SCHEDULER_STATIC=PASS`、`R98_ARENA_IDENTITY_STATIC=PASS`、`R98_CALLBACK_CLEANUP_ORDER_STATIC=PASS`；**`THREAD_EXCLUSIVITY=NOT_PROVEN`、`GROUP_LIFETIME_PIN=NOT_PROVEN`、`ACTUAL_SHIFT_ROUTE_GENERATION=NOT_PROVEN`**。依照先前 BSC 强制成功标准，`SEARCH_CANDIDATE=false`、`ROOT_CAUSE_PROVEN=false`、`GAMEPLAY_FIX_PROVEN=false`。
 
