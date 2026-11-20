@@ -1,5 +1,8 @@
 # Open Issues, Evidence Grades and Decision Log
 
+**R97 新增所有权边界（2026-11-20）：** 任务构造末 `0x0302B1E2 JMP [vptr+0x08]` 只跳到具体短任务 vtable+0x08=`0x008D3C60 RET`，绝不是可安全观察 callback 的 scheduler；vtable+0x10=`0x02F5B1E4` 真执行阶段仍缺调用者身份和线程所有权。`task+0x80` 只持有 `&MOVE_slot+0xA0`，`0x02F53FDC` 延迟解引用，且仅当字段地址为 NULL 才用 task+0x98 fallback（字段内容 NULL 不 fallback）。`task+0x7D==0` 的构造分支已可能读取当前 Root+0x32F8 并发 B 路线，回调再次读取同 Group 字段；两个时间点没有证明同代。**决策：不能把 task+0x80 或 arena+0x240 当 route generation，也不能通过自填 epoch、双读地址或 Derpy Tick Hook 获得生存期授权。** 见 [R97](N1_R97_SHORTTASK_DISPATCH_GENERATION_BOUNDARY_20261120.md)。
+
+
 **2026-11-17 R96 S1 观测入口选择决策：** `0x030374CC` queued slot 创建分支 `0x030377ED` 跳过同函数中 `0x03037A69→0x03032C48` 的即时 Group 操作，故 **不能把后者作为唯一 queued Shift 入队观测入口**。MOVE slot vtable +0x08→0x0302AE74 条件生成 shortTask（Root 保存 task+8），该任务虚表 +0x10→0x02F5B1E4，在 `0x02F5B3F9` 直接读取当时 Root+0x32F8 Group 再 A/B 分派（R35已有晚绑定事实）。`0x03032C48` 则在自己的调用栈中重建 Group、配置路线、调用 A fanout，但不证明等于 queued Shift 回调。**仍没有 Group incarnation/route generation、线程所有权、锁和完整快照生存期证据；禁止部署异步成员轮询或未经授权的 Hook。** [R96](N1_R96_QUEUED_OWNER_SAMPLING_BOUNDARY_20261117.md)。
 
 
