@@ -1,5 +1,8 @@
 # BSC — Original WH3 Shift formation-coherence research (9.0.3)
 
+**2026-11-20 R97（shortTask 两阶段 Group 绑定与可变槽位别名）:** [精确当前 EXE 的 MOVE task 以 arena+0x240/+0x244 记账分配 0xA8 字节对象；构造函数尾部任务 vtable+0x08 指向 RET 空操作，真正 callback 是 vtable+0x10→0x02F5B1E4。构造路径中 task+0x7D 条件性经 0x02F54510 读取当前 Group，callback 再读一次当前 Root+0x32F8；task+0x80 指向 slot+0xA0 字段地址而非冻结值，只有地址为空才用 task+0x98 fallback。](N1_R97_SHORTTASK_DISPATCH_GENERATION_BOUNDARY_20261120.md) 本地匹配 EXE 522/522 原码及 LLVM 起点、16 E8、5 vtable、25 语义锚点、21/21 测试；公共19 PASS/2 SKIP（完整清单在本地研究 ZIP）。原 EXE 可执行区直接 E8 到 callback 为 0 处，不排除虚调用。[公开焦点契约测试](../../tests/test_n1_r97_shorttask_dispatch_contract.py)。**无有类型调度器/排他/Group pin，SEARCH_CANDIDATE=false、ROOT_CAUSE_PROVEN=false、GAMEPLAY_FIX_PROVEN=false，禁止 Hook。**
+
+
 **2026-11-17 R96（入队/执行所有者入口的条件性闭合与安全止损）:** [原 EXE 将 queued MOVE slot 创建的 `0x030377ED JMP→0x03037A6E` 与即时 `0x03037A69 CALL→0x03032C48` 明确分开；MOVE slot vtable+8→0x0302AE74→shortTask 0x02F31778，callback vtable+0x10→0x02F5B1E4 在发包前从当前 Root+0x32F8 晚绑定 Group。](N1_R96_QUEUED_OWNER_SAMPLING_BOUNDARY_20261117.md) 这些是静态可达的条件链，不是玩家 Shift 实机命中；R35/R52/R75 已含部分相同证据，本轮统一作采样入口审查。完整本地 131/131 LLVM 与原码、10 E8、1 E9、2 vtable、17语义锚点、23/23 单测（公开21PASS/2SKIP），公开 [精简原码契约测试](../../tests/test_n1_r96_queued_owner_contract.py)。**S1_SAFE_LIVE_SNAPSHOT=BLOCKED，SEARCH_CANDIDATE=false，ROOT_CAUSE_PROVEN=false，GAMEPLAY_FIX_PROVEN=false**。不改 main、无 Hook/补丁。
 
 
